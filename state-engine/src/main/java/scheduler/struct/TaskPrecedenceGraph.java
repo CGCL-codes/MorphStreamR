@@ -8,7 +8,9 @@ import scheduler.context.AbstractGSTPGContext;
 import scheduler.context.GSTPGContext;
 import scheduler.context.LayeredTPGContext;
 import scheduler.context.OCSchedulerContext;
+import scheduler.oplevel.context.OPLayeredContext;
 import scheduler.oplevel.struct.MetaTypes;
+import scheduler.oplevel.struct.Operation;
 import scheduler.struct.gs.AbstractGSOperationChain;
 import transaction.impl.ordered.MyList;
 import utils.AppConfig;
@@ -16,6 +18,7 @@ import utils.SOURCE_CONTROL;
 import utils.lib.ConcurrentHashMap;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.CyclicBarrier;
 
 import static common.CONTROL.enable_log;
@@ -47,6 +50,8 @@ public class TaskPrecedenceGraph<Context extends OCSchedulerContext<SchedulingUn
     CyclicBarrier barrier;
     private int maxLevel = 0; // just for layered scheduling
     private final int app;
+    public ConcurrentHashMap<Integer, ConcurrentLinkedDeque<SchedulingUnit>> layeredOCBucket = new ConcurrentHashMap<>();
+
 
     public void reset(Context context) {
         //reset holder.
@@ -173,18 +178,43 @@ public class TaskPrecedenceGraph<Context extends OCSchedulerContext<SchedulingUn
 //        }
 //        LOG.info("id: " + context.thisThreadId + " fd: " + context.fd);
         if (context instanceof LayeredTPGContext) {
-            ((LayeredTPGContext) context).buildBucketPerThread(ocs, resolvedOC);
+            ((LayeredTPGContext) context).buildBucketPerThread(ocs, resolvedOC, layeredOCBucket);
+            SOURCE_CONTROL.getInstance().waitForOtherThreads();
             if (AppConfig.isCyclic) { // if the constructed OCs are not cyclic, skip this.
-                SOURCE_CONTROL.getInstance().waitForOtherThreads();
-                if (context.thisThreadId == 0) {
-                    for (Context curContext : threadToContextMap.values()) {
-                        if (((LayeredTPGContext) curContext).maxLevel > maxLevel) {
-                            maxLevel = ((LayeredTPGContext) curContext).maxLevel;
-                        }
-                    }
+//                SOURCE_CONTROL.getInstance().waitForOtherThreads();
+//                if (context.thisThreadId == 0) {
+//                    for (Context curContext : threadToContextMap.values()) {
+//                        if (((LayeredTPGContext) curContext).maxLevel > maxLevel) {
+//                            maxLevel = ((LayeredTPGContext) curContext).maxLevel;
+//                        }
+//                    }
+//                }
+
+//                SOURCE_CONTROL.getInstance().waitForOtherThreads();
+                for (int level : layeredOCBucket.keySet()) {
+                    if (maxLevel < level)
+                        maxLevel = level;
                 }
+                ((LayeredTPGContext<?, ?>) context).maxLevel = maxLevel;
+                ((LayeredTPGContext) context).putBusyWaitOCs(resolvedOC, maxLevel, layeredOCBucket);
                 SOURCE_CONTROL.getInstance().waitForOtherThreads();
-                ((LayeredTPGContext) context).putBusyWaitOCs(resolvedOC, maxLevel);
+            }
+            // assign layerOPBucket to all threads
+            for (int level : layeredOCBucket.keySet()) {
+                ConcurrentLinkedDeque<SchedulingUnit> queue = layeredOCBucket.get(level);
+                int counter = 0;
+                for (SchedulingUnit oc : queue) {
+                    if (counter % totalThreads == context.thisThreadId) {
+//                        if (localMaxDLevel < level)
+//                            localMaxDLevel = level;
+                        ((LayeredTPGContext) threadToContextMap.get(context.thisThreadId))
+                                .allocatedLayeredOCBucket.computeIfAbsent(level, s -> new ArrayList<>());
+                        ((ArrayList<SchedulingUnit>)((LayeredTPGContext<?, ?>) threadToContextMap.get(context.thisThreadId))
+                                .allocatedLayeredOCBucket.get(level)).add(oc);
+                        context.totalOsToSchedule += oc.getOperations().size();
+                    }
+                    counter++;
+                }
             }
             if (enable_log) LOG.info("MaxLevel:" + (((LayeredTPGContext) context).maxLevel));
         } else if (context instanceof AbstractGSTPGContext) {

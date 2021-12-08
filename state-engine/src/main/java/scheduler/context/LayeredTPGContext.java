@@ -3,8 +3,10 @@ package scheduler.context;
 import scheduler.struct.AbstractOperation;
 import scheduler.struct.OperationChain;
 import scheduler.struct.layered.LayeredOperationChain;
+import utils.lib.ConcurrentHashMap;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 public abstract class LayeredTPGContext<ExecutionUnit extends AbstractOperation, SchedulingUnit extends LayeredOperationChain<ExecutionUnit>> extends OCSchedulerContext<SchedulingUnit> {
 
@@ -67,7 +69,8 @@ public abstract class LayeredTPGContext<ExecutionUnit extends AbstractOperation,
      *
      * @param ocs
      */
-    public void buildBucketPerThread(Collection<SchedulingUnit> ocs, HashSet<OperationChain<ExecutionUnit>> resolvedOC) {
+    public void buildBucketPerThread(Collection<SchedulingUnit> ocs, HashSet<OperationChain<ExecutionUnit>> resolvedOC,
+                                     ConcurrentHashMap<Integer, ConcurrentLinkedDeque<SchedulingUnit>> layeredOCBucket) {
         // TODO: update this logic to the latest logic that we proposed in operation level
         int localMaxDLevel = 0;
         int dependencyLevel;
@@ -75,7 +78,7 @@ public abstract class LayeredTPGContext<ExecutionUnit extends AbstractOperation,
             if (oc.getOperations().isEmpty()) {
                 continue;
             }
-            this.totalOsToSchedule += oc.getOperations().size();
+//            this.totalOsToSchedule += oc.getOperations().size();
             oc.updateDependencyLevel();
             if (resolvedOC.contains(oc)) {
                 continue;
@@ -83,20 +86,27 @@ public abstract class LayeredTPGContext<ExecutionUnit extends AbstractOperation,
             dependencyLevel = oc.getDependencyLevel();
             if (localMaxDLevel < dependencyLevel)
                 localMaxDLevel = dependencyLevel;
-            if (!allocatedLayeredOCBucket.containsKey(dependencyLevel))
-                allocatedLayeredOCBucket.put(dependencyLevel, new ArrayList<>());
-            allocatedLayeredOCBucket.get(dependencyLevel).add(oc);
+//            if (!allocatedLayeredOCBucket.containsKey(dependencyLevel))
+//                allocatedLayeredOCBucket.put(dependencyLevel, new ArrayList<>());
+//            allocatedLayeredOCBucket.get(dependencyLevel).add(oc);
+            layeredOCBucket.computeIfAbsent(dependencyLevel, s -> new ConcurrentLinkedDeque<>());
+            layeredOCBucket.get(dependencyLevel).add(oc);
         }
 //        if (enable_log) LOG.debug("localMaxDLevel" + localMaxDLevel);
         this.maxLevel = localMaxDLevel;
     }
 
-    public void putBusyWaitOCs(HashSet<SchedulingUnit> resolvedOC, int maxLevel) {
+    public void putBusyWaitOCs(HashSet<SchedulingUnit> resolvedOC, int maxLevel,
+                               ConcurrentHashMap<Integer, ConcurrentLinkedDeque<SchedulingUnit>> layeredOCBucket) {
+//        for (SchedulingUnit oc : resolvedOC) {
+//            if (!allocatedLayeredOCBucket.containsKey(maxLevel))
+//                allocatedLayeredOCBucket.put(maxLevel, new ArrayList<>());
+//            allocatedLayeredOCBucket.get(maxLevel).add(oc);
+//        }
+//        this.maxLevel = maxLevel;
         for (SchedulingUnit oc : resolvedOC) {
-            if (!allocatedLayeredOCBucket.containsKey(maxLevel))
-                allocatedLayeredOCBucket.put(maxLevel, new ArrayList<>());
-            allocatedLayeredOCBucket.get(maxLevel).add(oc);
+            layeredOCBucket.computeIfAbsent(maxLevel, s -> new ConcurrentLinkedDeque<>());
+            layeredOCBucket.get(maxLevel).add(oc);
         }
-        this.maxLevel = maxLevel;
     }
-};
+}

@@ -10,10 +10,8 @@ import scheduler.oplevel.context.OPSchedulerContext;
 import utils.SOURCE_CONTROL;
 import utils.lib.ConcurrentHashMap;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.CyclicBarrier;
 
 import static common.CONTROL.enable_log;
@@ -44,6 +42,8 @@ public class TaskPrecedenceGraph<Context extends OPSchedulerContext> {
     public final Map<Integer, Context> threadToContextMap;
     private final ConcurrentHashMap<String, TableOCs> operationChains;//shared data structure.
     public final ConcurrentHashMap<Integer, Deque<OperationChain>> threadToOCs;
+    public ConcurrentHashMap<Integer, ConcurrentLinkedDeque<Operation>> layeredOPBucket = new ConcurrentHashMap<>();
+
 
     public void reset(Context context) {
         if (app == 0) {
@@ -158,12 +158,35 @@ public class TaskPrecedenceGraph<Context extends OPSchedulerContext> {
                     if (head.isRoot()) {
                         roots.add(head);
                     }
-                    context.operations.addAll(oc.getOperations());
-                    context.totalOsToSchedule += oc.getOperations().size();
+                }
+                context.operations.addAll(oc.getOperations());
+//                context.totalOsToSchedule += oc.getOperations().size();
+            }
+            ((OPLayeredContext) context).buildBucketPerThread(context.operations, roots, layeredOPBucket);
+            context.operations.clear();
+            SOURCE_CONTROL.getInstance().waitForOtherThreads();
+
+//            ((OPLayeredContext) context).buildBucketPerThread(threadToOCs.get(context.thisThreadId));
+            // assign layerOPBucket to all threads
+            int localMaxDLevel = 0;
+            for (int level : layeredOPBucket.keySet()) {
+                ConcurrentLinkedDeque<Operation> queue = layeredOPBucket.get(level);
+                int counter = 0;
+                for (Operation operation : queue) {
+                    if (counter % totalThreads == context.thisThreadId) {
+                        if (localMaxDLevel < level)
+                            localMaxDLevel = level;
+                        ((OPLayeredContext) threadToContextMap.get(context.thisThreadId))
+                                .allocatedLayeredOPBucket.computeIfAbsent(level, s -> new ArrayList<>());
+                        ((OPLayeredContext) threadToContextMap.get(context.thisThreadId))
+                                .allocatedLayeredOPBucket.get(level).add(operation);
+                        context.operations.add(operation);
+                        context.totalOsToSchedule ++;
+                    }
+                    counter++;
                 }
             }
-            ((OPLayeredContext) context).buildBucketPerThread(context.operations, roots);
-//            ((OPLayeredContext) context).buildBucketPerThread(threadToOCs.get(context.thisThreadId));
+            ((OPLayeredContext) context).maxLevel = localMaxDLevel;
             if (enable_log) log.info("MaxLevel:" + (((OPLayeredContext) context).maxLevel));
         } else if (context instanceof OPGSTPGContext) {
             for (OperationChain oc : threadToOCs.get(context.thisThreadId)) {
@@ -184,8 +207,8 @@ public class TaskPrecedenceGraph<Context extends OPSchedulerContext> {
         } else {
             throw new UnsupportedOperationException();
         }
-
         MeasureTools.END_FIRST_EXPLORE_TIME_MEASURE(context.thisThreadId);
+
     }
 
 //    /**

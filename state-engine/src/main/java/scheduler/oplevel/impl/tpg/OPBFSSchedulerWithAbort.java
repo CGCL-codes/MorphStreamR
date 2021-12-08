@@ -43,7 +43,7 @@ public class OPBFSSchedulerWithAbort<Context extends OPLayeredContextWithAbort> 
             while (next == null) {
                 SOURCE_CONTROL.getInstance().waitForOtherThreads();
                 //all threads come to the current level.
-                if (needAbortHandling.get()) {
+                if (needAbortHandling.get() && context.thisThreadId == 0) {
                     if (enable_log) LOG.debug("check abort: " + context.thisThreadId + " | " + needAbortHandling.get());
                     abortHandling(context);
                 }
@@ -98,12 +98,12 @@ public class OPBFSSchedulerWithAbort<Context extends OPLayeredContextWithAbort> 
 
     protected void abortHandling(Context context) {
         MarkOperationsToAbort(context);
+//        MarkOperationsToAbort();
 
-        SOURCE_CONTROL.getInstance().waitForOtherThreads();
+        SOURCE_CONTROL.getInstance().waitForOtherThreadsAbort();
         IdentifyRollbackLevel(context);
         SOURCE_CONTROL.getInstance().waitForOtherThreads();
         SetRollbackLevel(context);
-
         RollbackToCorrectLayerForRedo(context);
         ResumeExecution(context);
         SOURCE_CONTROL.getInstance().waitForOtherThreads();
@@ -112,9 +112,9 @@ public class OPBFSSchedulerWithAbort<Context extends OPLayeredContextWithAbort> 
     //TODO: mark operations of aborted transaction to be aborted.
     protected void MarkOperationsToAbort(Context context) {
         boolean markAny = false;
-        ArrayList<Operation> operations;
         int curLevel;
-        for (Map.Entry<Integer, ArrayList<Operation>> operationsEntry: context.allocatedLayeredOCBucket.entrySet()) {
+        ArrayList<Operation> operations;
+        for (Map.Entry<Integer, ArrayList<Operation>> operationsEntry : context.allocatedLayeredOPBucket.entrySet()) {
             operations = operationsEntry.getValue();
             curLevel = operationsEntry.getKey();
             for (Operation operation : operations) {
@@ -128,7 +128,8 @@ public class OPBFSSchedulerWithAbort<Context extends OPLayeredContextWithAbort> 
             context.rollbackLevel = context.currentLevel;
         }
         context.isRollbacked = true;
-        if (enable_log) LOG.debug("++++++ rollback at level: " + context.thisThreadId + " | " + context.rollbackLevel);
+        if (enable_log)
+            LOG.debug("++++++ rollback at level: " + context.thisThreadId + " | " + context.rollbackLevel);
     }
 
     /**
@@ -152,11 +153,16 @@ public class OPBFSSchedulerWithAbort<Context extends OPLayeredContextWithAbort> 
     }
 
     protected void IdentifyRollbackLevel(Context context) {
+        // TODO: we have already recorded the level of each operation!!!!, no need to traverse the data structure!!!
         if (context.thisThreadId == 0) {
             targetRollbackLevel = Integer.MAX_VALUE;
             for (int i = 0; i < tpg.totalThreads; i++) { // find the first level that contains aborted operations
                 targetRollbackLevel = min(targetRollbackLevel, tpg.threadToContextMap.get(i).rollbackLevel);
             }
+            if (targetRollbackLevel < 0) {
+                System.out.println("= =");
+            }
+            assert targetRollbackLevel >= 0;
         }
     }
 
@@ -177,18 +183,24 @@ public class OPBFSSchedulerWithAbort<Context extends OPLayeredContextWithAbort> 
 
     protected void RollbackToCorrectLayerForRedo(Context context) {
         int level;
+        if (context.rollbackLevel > context.currentLevel) {
+            System.out.println("= =");
+        }
+        assert context.rollbackLevel <= context.currentLevel;
         for (level = context.rollbackLevel; level <= context.currentLevel; level++) {
             context.scheduledOPs -= getNumOPsByLevel(context, level);
+            assert context.scheduledOPs >= 0;
         }
         context.currentLevelIndex = 0;
         // it needs to rollback to the level -1, because aborthandling has immediately followed up with ProcessedToNextLevel
         context.currentLevel = context.rollbackLevel - 1;
+        LOG.info("rollback at: " + context.currentLevel);
     }
 
     protected int getNumOPsByLevel(Context context, int level) {
         int ops = 0;
-        if (context.allocatedLayeredOCBucket.containsKey(level)) { // oc level may not be sequential
-            ops += context.allocatedLayeredOCBucket.get(level).size();
+        if (context.allocatedLayeredOPBucket.containsKey(level)) { // oc level may not be sequential
+            ops += context.allocatedLayeredOPBucket.get(level).size();
         }
         return ops;
     }

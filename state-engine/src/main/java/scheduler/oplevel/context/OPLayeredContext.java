@@ -4,12 +4,14 @@ package scheduler.oplevel.context;
 import scheduler.oplevel.signal.op.OnParentUpdatedSignal;
 import scheduler.oplevel.struct.Operation;
 import scheduler.oplevel.struct.OperationChain;
+import utils.lib.ConcurrentHashMap;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class OPLayeredContext extends OPSchedulerContext {
-    public HashMap<Integer, ArrayList<Operation>> allocatedLayeredOCBucket;// <LevelID, ArrayDeque<OperationChain>
+    public HashMap<Integer, ArrayList<Operation>> allocatedLayeredOPBucket;// <LevelID, ArrayDeque<OperationChain>
     public int currentLevel;
     public int currentLevelIndex;
     public int totalThreads;
@@ -20,13 +22,13 @@ public class OPLayeredContext extends OPSchedulerContext {
     public OPLayeredContext(int thisThreadId) {
         super(thisThreadId);
         this.totalThreads = totalThreads;
-        this.allocatedLayeredOCBucket = new HashMap<>();
+        this.allocatedLayeredOPBucket = new HashMap<>();
     }
 
     @Override
     public void reset() {
         super.reset();
-        this.allocatedLayeredOCBucket.clear();
+        this.allocatedLayeredOPBucket.clear();
         currentLevel = 0;
         currentLevelIndex = 0;
         maxLevel = 0;
@@ -45,7 +47,7 @@ public class OPLayeredContext extends OPSchedulerContext {
     }
 
     public ArrayList<Operation> OPSCurrentLayer() {
-        return allocatedLayeredOCBucket.get(currentLevel);
+        return allocatedLayeredOPBucket.get(currentLevel);
     }
 
     /**
@@ -67,9 +69,9 @@ public class OPLayeredContext extends OPSchedulerContext {
             dependencyLevel = oc.getDependencyLevel();
             if (localMaxDLevel < dependencyLevel)
                 localMaxDLevel = dependencyLevel;
-            if (!allocatedLayeredOCBucket.containsKey(dependencyLevel))
-                allocatedLayeredOCBucket.put(dependencyLevel, new ArrayList<>());
-            allocatedLayeredOCBucket.get(dependencyLevel).addAll(oc.getOperations());
+            if (!allocatedLayeredOPBucket.containsKey(dependencyLevel))
+                allocatedLayeredOPBucket.put(dependencyLevel, new ArrayList<>());
+            allocatedLayeredOPBucket.get(dependencyLevel).addAll(oc.getOperations());
         }
 //        if (enable_log) LOG.debug("localMaxDLevel" + localMaxDLevel);
         this.maxLevel = localMaxDLevel;
@@ -80,9 +82,11 @@ public class OPLayeredContext extends OPSchedulerContext {
      * Return the local maximal dependency level.
      *
      * @param ops
+     * @param layeredOPBucket
      */
-    public void buildBucketPerThread(Collection<Operation> ops, Collection<Operation> roots) {
-        int localMaxDLevel = 0;
+    public void buildBucketPerThread(Collection<Operation> ops, Collection<Operation> roots,
+                                     ConcurrentHashMap<Integer, ConcurrentLinkedDeque<Operation>> layeredOPBucket) {
+//        int localMaxDLevel = 0;
         int dependencyLevel;
 
         ArrayDeque<Operation> processedOps = new ArrayDeque<>();
@@ -109,13 +113,14 @@ public class OPLayeredContext extends OPSchedulerContext {
         for (Operation op : ops) {
             assert op.hasValidDependencyLevel();
             dependencyLevel = op.getDependencyLevel();
-            if (localMaxDLevel < dependencyLevel)
-                localMaxDLevel = dependencyLevel;
-            if (!allocatedLayeredOCBucket.containsKey(dependencyLevel))
-                allocatedLayeredOCBucket.put(dependencyLevel, new ArrayList<>());
-            allocatedLayeredOCBucket.get(dependencyLevel).add(op);
+//            if (localMaxDLevel < dependencyLevel)
+//                localMaxDLevel = dependencyLevel;
+            layeredOPBucket.computeIfAbsent(dependencyLevel, s -> new ConcurrentLinkedDeque<>());
+            layeredOPBucket.get(dependencyLevel).add(op);
+//            allocatedLayeredOPBucket.computeIfAbsent(dependencyLevel, s -> new ArrayList<>());
+//            allocatedLayeredOPBucket.get(dependencyLevel).add(op);
         }
-        this.maxLevel = localMaxDLevel;
+//        this.maxLevel = localMaxDLevel;
     }
 
     private void updateDependencyLevel(ArrayDeque<Operation> processedOps, Operation operation) {

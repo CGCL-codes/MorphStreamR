@@ -116,7 +116,7 @@ public class OPDFSSchedulerWithAbort<Context extends OPLayeredContextWithAbort> 
         boolean markAny = false;
         ArrayList<Operation> operations;
         int curLevel;
-        for (Map.Entry<Integer, ArrayList<Operation>> operationsEntry: context.allocatedLayeredOCBucket.entrySet()) {
+        for (Map.Entry<Integer, ArrayList<Operation>> operationsEntry: context.allocatedLayeredOPBucket.entrySet()) {
             operations = operationsEntry.getValue();
             curLevel = operationsEntry.getKey();
             for (Operation operation : operations) {
@@ -177,8 +177,8 @@ public class OPDFSSchedulerWithAbort<Context extends OPLayeredContextWithAbort> 
 
     protected int getNumOPsByLevel(Context context, int level) {
         int ops = 0;
-        if (context.allocatedLayeredOCBucket.containsKey(level)) { // oc level may not be sequential
-            Collection<Operation> curLayer = context.allocatedLayeredOCBucket.get(level);
+        if (context.allocatedLayeredOPBucket.containsKey(level)) { // oc level may not be sequential
+            Collection<Operation> curLayer = context.allocatedLayeredOPBucket.get(level);
             ops += curLayer.size();
             for (Operation operation : curLayer) {
                 if (operation.getOperationState().equals(MetaTypes.OperationStateType.EXECUTED)) {
