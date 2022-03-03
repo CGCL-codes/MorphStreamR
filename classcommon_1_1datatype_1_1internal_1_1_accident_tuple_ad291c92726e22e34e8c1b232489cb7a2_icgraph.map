@@ -1,0 +1,4 @@
+<map id="common.datatype.internal.AccidentTuple.getTime" name="common.datatype.internal.AccidentTuple.getTime">
+<area shape="rect" id="node1" title="Returns the timestamp (in LRB seconds) of this AccidentTuple." alt="" coords="288,5,487,47"/>
+<area shape="rect" id="node2" href="$classcommon_1_1datatype_1_1internal_1_1_accident_tuple.html#a8db8bcc783c1d9fb95dc8b8c0f0f6837" title="Returns the &#39;minute number&#39; of this AccidentTuple." alt="" coords="5,5,240,47"/>
+</map>

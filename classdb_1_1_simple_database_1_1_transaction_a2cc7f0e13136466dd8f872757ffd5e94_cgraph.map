@@ -1,0 +1,5 @@
+<map id="db.SimpleDatabase.Transaction.deleteRecord" name="db.SimpleDatabase.Transaction.deleteRecord">
+<area shape="rect" id="node1" title="Delete a row form the table." alt="" coords="5,5,277,47"/>
+<area shape="rect" id="node2" href="$classstorage_1_1table_1_1_simple_table.html#afe5f63a2a4c61165ff4932148f0dbd24" title="Deletes the d_record specified by rid from the table." alt="" coords="325,5,561,47"/>
+<area shape="rect" id="node3" href="$classstorage_1_1table_1_1stats_1_1_table_stats.html#a98937a417fce60b5a4c0151c77afc73c" title="Remove the stats for an existing d_record." alt="" coords="609,5,792,47"/>
+</map>

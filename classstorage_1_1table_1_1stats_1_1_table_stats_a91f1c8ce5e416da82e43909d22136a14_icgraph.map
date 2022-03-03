@@ -1,0 +1,4 @@
+<map id="storage.table.stats.TableStats.copyWithJoin" name="storage.table.stats.TableStats.copyWithJoin">
+<area shape="rect" id="node1" title="Creates a new TableStats which is the statistics for the table that results from this TableStats join..." alt="" coords="276,5,459,47"/>
+<area shape="rect" id="node2" href="$classoperator_1_1_join_operator.html#ad332a47e07f87770cd04ce6c77043755" title="Estimates the table statistics for the result of executing this query operator." alt="" coords="5,5,228,47"/>
+</map>

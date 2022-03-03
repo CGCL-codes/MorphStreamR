@@ -1,0 +1,6 @@
+<map id="storage.datatype.StringDataBox" name="storage.datatype.StringDataBox">
+<area shape="rect" id="node1" title="Fixed&#45;length String data type which serializes to UTF&#45;8 bytes." alt="" coords="5,155,236,181"/>
+<area shape="rect" id="node2" href="$classstorage_1_1datatype_1_1_data_box.html" title="Abstract DataBox for all database primitives Currently supported: integers, booleans,..." alt="" coords="24,80,217,107"/>
+<area shape="rect" id="node3" title=" " alt="" coords="11,5,113,32"/>
+<area shape="rect" id="node4" title=" " alt="" coords="137,5,224,32"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="storage.table.stats.TableStats.removeRecord" name="storage.table.stats.TableStats.removeRecord">
+<area shape="rect" id="node1" title="Remove the stats for an existing d_record." alt="" coords="617,39,800,80"/>
+<area shape="rect" id="node2" href="$classstorage_1_1table_1_1_simple_table.html#afe5f63a2a4c61165ff4932148f0dbd24" title="Deletes the d_record specified by rid from the table." alt="" coords="331,5,567,47"/>
+<area shape="rect" id="node4" href="$classstorage_1_1table_1_1_simple_table.html#a48c208c7067296f8f90529e546bd9c52" title="Updates an existing d_record with new values and returns the old version of the d_record." alt="" coords="329,71,569,112"/>
+<area shape="rect" id="node3" href="$classdb_1_1_simple_database_1_1_transaction.html#a2cc7f0e13136466dd8f872757ffd5e94" title="Delete a row form the table." alt="" coords="7,5,279,47"/>
+<area shape="rect" id="node5" href="$classdb_1_1_simple_database_1_1_transaction.html#af81c64d73e7f63110f690dc32f3d2541" title=" " alt="" coords="5,71,281,112"/>
+</map>

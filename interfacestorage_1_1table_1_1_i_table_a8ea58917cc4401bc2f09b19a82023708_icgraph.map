@@ -1,0 +1,6 @@
+<map id="storage.table.ITable.SelectKeyRecord" name="storage.table.ITable.SelectKeyRecord">
+<area shape="rect" id="node1" title=" " alt="" coords="284,71,479,112"/>
+<area shape="rect" id="node2" href="$classtransaction_1_1impl_1_1_txn_manager_dedicated_asy.html#a9b7c8ff387ad4248e738f972b1833c66" title="Read&#45;only This API pushes a place&#45;holder to the shared&#45;store." alt="" coords="9,5,232,47"/>
+<area shape="rect" id="node3" href="$classtransaction_1_1impl_1_1_txn_manager_dedicated_asy.html#a770616e858465124dbbbe278ffec8980" title="Read&#45;only This API pushes a place&#45;holder to the shared&#45;store." alt="" coords="5,71,236,112"/>
+<area shape="rect" id="node4" href="$classtransaction_1_1impl_1_1_txn_manager_dedicated_asy.html#a19c4ca8a4473ee035a5df125a51f53b6" title="Write&#45;only." alt="" coords="8,136,233,177"/>
+</map>

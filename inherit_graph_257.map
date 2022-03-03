@@ -1,0 +1,10 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$interfacescheduler_1_1statemanager_1_1_operation_chain_state_listener.html" title=" " alt="" coords="18,5,265,61"/>
+<area shape="rect" id="node2" href="$classscheduler_1_1statemanager_1_1_partition_state_manager.html" title="Local to every TPGScheduler context." alt="" coords="325,21,561,62"/>
+<area shape="rect" id="node3" href="$interfacescheduler_1_1statemanager_1_1_operation_chain_state_listener.html" title=" " alt="" coords="5,85,277,141"/>
+<area shape="rect" id="node4" href="$classscheduler_1_1statemanager_1_1_partition_state_manager_with_abort.html" title="Local to every TPGScheduler context." alt="" coords="325,93,561,134"/>
+<area shape="rect" id="node5" href="$interfacescheduler_1_1oplevel_1_1statemanager_1_1_operation_state_listener.html" title=" " alt="" coords="24,219,259,261"/>
+<area shape="rect" id="node6" href="$classscheduler_1_1oplevel_1_1statemanager_1_1_partition_state_manager.html" title="Local to every TPGscheduler context." alt="" coords="326,158,561,199"/>
+<area shape="rect" id="node7" href="$classscheduler_1_1oplevel_1_1statemanager_1_1_partition_state_manager_with_abort.html" title="Local to every TPGscheduler context." alt="" coords="326,223,561,265"/>
+<area shape="rect" id="node8" title=" " alt="" coords="100,165,183,192"/>
+</map>

@@ -1,0 +1,13 @@
+<map id="combo.SPOUTCombo" name="combo.SPOUTCombo">
+<area shape="rect" id="node1" title=" " alt="" coords="231,437,389,464"/>
+<area shape="rect" id="node8" href="$classcombo_1_1_g_s_combo.html" title=" " alt="" coords="5,512,140,539"/>
+<area shape="rect" id="node9" href="$classcombo_1_1_o_b_combo.html" title=" " alt="" coords="164,512,299,539"/>
+<area shape="rect" id="node10" href="$classcombo_1_1_s_l_combo.html" title=" " alt="" coords="323,512,454,539"/>
+<area shape="rect" id="node11" href="$classcombo_1_1_t_p_combo.html" title=" " alt="" coords="479,512,611,539"/>
+<area shape="rect" id="node2" href="$classcomponents_1_1operators_1_1api_1_1_transactional_spout.html" title=" " alt="" coords="212,348,408,389"/>
+<area shape="rect" id="node3" href="$classcomponents_1_1operators_1_1api_1_1_abstract_spout.html" title="Abstract AbstractSpout is a special partition&#45;pass Operator." alt="" coords="103,259,299,300"/>
+<area shape="rect" id="node4" href="$classcomponents_1_1operators_1_1api_1_1_operator.html" title=" " alt="" coords="103,169,299,211"/>
+<area shape="rect" id="node5" href="$interfacecomponents_1_1operators_1_1api_1_1_i_operator.html" title="Created by shuhaozhang on 12/7/16." alt="" coords="103,80,299,121"/>
+<area shape="rect" id="node6" title=" " alt="" coords="151,5,250,32"/>
+<area shape="rect" id="node7" href="$interfacecomponents_1_1operators_1_1api_1_1_checkpointable.html" title=" " alt="" coords="323,259,519,300"/>
+</map>

@@ -1,0 +1,4 @@
+<map id="operator.IndexScanOperator.estimateStats" name="operator.IndexScanOperator.estimateStats">
+<area shape="rect" id="node1" title="Estimates the table statistics for the result of executing this query operator." alt="" coords="260,5,525,47"/>
+<area shape="rect" id="node2" href="$classoperator_1_1_index_scan_operator.html#aa6bd9d33fb681bbe684f48a998d1c3f8" title="An index scan operator." alt="" coords="5,5,212,47"/>
+</map>

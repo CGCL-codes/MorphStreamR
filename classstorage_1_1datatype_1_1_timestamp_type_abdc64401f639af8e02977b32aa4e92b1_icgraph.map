@@ -1,0 +1,4 @@
+<map id="storage.datatype.TimestampType.getTime" name="storage.datatype.TimestampType.getTime">
+<area shape="rect" id="node1" title="Read the microsecond in time stored by this timestamp." alt="" coords="264,5,475,47"/>
+<area shape="rect" id="node2" href="$classstorage_1_1datatype_1_1_timestamp_type.html#ac6c80fe69ef268bbc71588513c2103c3" title="Hashcode with the same uniqueness as a Java Date." alt="" coords="5,5,216,47"/>
+</map>

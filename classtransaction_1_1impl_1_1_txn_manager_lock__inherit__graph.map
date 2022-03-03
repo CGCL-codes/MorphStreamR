@@ -1,0 +1,7 @@
+<map id="transaction.impl.TxnManagerLock" name="transaction.impl.TxnManagerLock">
+<area shape="rect" id="node1" title="conventional two&#45;phase locking with no&#45;sync_ratio strategy from Cavalia." alt="" coords="5,244,248,271"/>
+<area shape="rect" id="node5" href="$classtransaction_1_1impl_1_1_txn_manager_no_lock.html" title="No Locks at all." alt="" coords="20,319,233,360"/>
+<area shape="rect" id="node2" href="$classtransaction_1_1impl_1_1_txn_manager_dedicated_locked.html" title="TxnManagerDedicated is a thread&#45;local structure." alt="" coords="20,155,233,196"/>
+<area shape="rect" id="node3" href="$classtransaction_1_1_txn_manager.html" title="Every thread has its own TxnManager." alt="" coords="37,80,217,107"/>
+<area shape="rect" id="node4" href="$interfacetransaction_1_1_i_txn_manager.html" title="Every thread has its own TxnManager." alt="" coords="35,5,219,32"/>
+</map>

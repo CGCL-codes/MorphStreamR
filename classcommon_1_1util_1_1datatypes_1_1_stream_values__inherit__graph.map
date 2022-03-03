@@ -1,0 +1,18 @@
+<map id="common.util.datatypes.StreamValues&lt; E &gt;" name="common.util.datatypes.StreamValues&lt; E &gt;">
+<area shape="rect" id="node1" title=" " alt="" coords="236,365,460,407"/>
+<area shape="rect" id="node3" href="$classcommon_1_1datatype_1_1_abstract_l_r_b_tuple.html" title="Base class for all LRB tuples." alt="" coords="508,201,707,243"/>
+<area shape="rect" id="node12" href="$classcommon_1_1datatype_1_1internal_1_1_accident_tuple.html" title="AccidentTuple represents an intermediate result tuple; and reports and accident that occurred in a sp..." alt="" coords="508,267,707,308"/>
+<area shape="rect" id="node13" href="$classcommon_1_1datatype_1_1internal_1_1_avg_speed_tuple.html" title="AvgSpeedTuple represents an intermediate result tuple; the average speed of all vehicle in a segment ..." alt="" coords="508,332,707,373"/>
+<area shape="rect" id="node14" href="$classcommon_1_1datatype_1_1internal_1_1_avg_vehicle_speed_tuple.html" title="AvgVehicleSpeedTuple represents an intermediate result tuple; the average speed of an vehicle in a se..." alt="" coords="508,397,707,439"/>
+<area shape="rect" id="node15" href="$classcommon_1_1datatype_1_1internal_1_1_count_tuple.html" title="CountTuple represents an intermediate result tuple; the number of vehicles in a segment within a &#39;min..." alt="" coords="508,463,707,504"/>
+<area shape="rect" id="node16" href="$classcommon_1_1datatype_1_1internal_1_1_lav_tuple.html" title="LavTuple represents an intermediate result tuple; the &quot;latest average velocity&quot; (LAV) of a segment wi..." alt="" coords="508,528,707,569"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,373,188,399"/>
+<area shape="rect" id="node4" href="$classcommon_1_1datatype_1_1_abstract_input_tuple.html" title="The comm class for all LRB input tuples (ie, position reports and query requests)." alt="" coords="755,136,953,177"/>
+<area shape="rect" id="node9" href="$classcommon_1_1datatype_1_1_abstract_output_tuple.html" title="The comm class for all LRB output tuples (including intermediate result tuples)." alt="" coords="755,267,953,308"/>
+<area shape="rect" id="node5" href="$classcommon_1_1datatype_1_1_account_balance_request.html" title="A AccountBalanceRequest from the LRB data generator." alt="" coords="1005,5,1255,47"/>
+<area shape="rect" id="node6" href="$classcommon_1_1datatype_1_1_daily_expenditure_request.html" title="A DailyExpenditureRequest from the LRB data generator." alt="" coords="1001,71,1259,112"/>
+<area shape="rect" id="node7" href="$classcommon_1_1datatype_1_1_position_report.html" title="A PositionReport from the LRB data generator." alt="" coords="1031,136,1229,177"/>
+<area shape="rect" id="node8" href="$classcommon_1_1datatype_1_1_travel_time_request.html" title="A TravelTimeRequest from the LRB data generator." alt="" coords="1021,201,1239,243"/>
+<area shape="rect" id="node10" href="$classcommon_1_1datatype_1_1_accident_notification.html" title="An AccidentNotification represent an alert that must be sent to vehicle approaching an accident." alt="" coords="1029,267,1231,308"/>
+<area shape="rect" id="node11" href="$classcommon_1_1datatype_1_1_toll_notification.html" title="An TollNotification represent an toll information that must be sent to vehicles entering a new segmen..." alt="" coords="1009,333,1251,359"/>
+</map>

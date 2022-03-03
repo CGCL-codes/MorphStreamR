@@ -1,0 +1,4 @@
+<map id="components.windowing.TupleFieldTimestampExtractor" name="components.windowing.TupleFieldTimestampExtractor">
+<area shape="rect" id="node1" title="A org.apache.storm.windowing.TimestampExtractor that extracts timestamp from a specific field in the ..." alt="" coords="25,95,240,136"/>
+<area shape="rect" id="node2" href="$interfacecomponents_1_1windowing_1_1_timestamp_extractor.html" title=" " alt="" coords="5,5,260,47"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="storage.table.stats.IntHistogram.getMaxValueIndex" name="storage.table.stats.IntHistogram.getMaxValueIndex">
+<area shape="rect" id="node1" title="Gets the estimate maximum value_list of this." alt="" coords="664,5,923,47"/>
+<area shape="rect" id="node2" href="$classstorage_1_1table_1_1stats_1_1_int_histogram.html#a806c6638e77a4d926e3448137a0650c6" title="Computes the reduction factor that a predicate and value_list result in over this IntHistogram." alt="" coords="321,5,616,47"/>
+<area shape="rect" id="node3" href="$classstorage_1_1table_1_1stats_1_1_int_histogram.html#a9790652a659a644ddd953cb06c84e05f" title="Creates a new IntHistogram that would result from applying the given predicate and value_list over th..." alt="" coords="5,5,273,47"/>
+</map>

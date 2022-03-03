@@ -1,0 +1,5 @@
+<map id="storage.store.disk.PageAllocator.fetchPage" name="storage.store.disk.PageAllocator.fetchPage">
+<area shape="rect" id="node1" title="Fetches the page corresponding to virtual page number pageNum." alt="" coords="5,35,304,61"/>
+<area shape="rect" id="node2" href="$classstorage_1_1store_1_1disk_1_1_page.html#a4097b4d2cd30cd0462b159c98f0d0da4" title="Read the single byte at offset position." alt="" coords="352,5,589,32"/>
+<area shape="rect" id="node3" href="$classstorage_1_1store_1_1disk_1_1_page.html#ab2a630d1713f66495aded1d6301639f5" title="Reads num bytes from offset position into buf." alt="" coords="367,57,574,98"/>
+</map>

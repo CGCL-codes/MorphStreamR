@@ -1,0 +1,5 @@
+<map id="scheduler.oplevel.statemanager.PartitionStateManagerWithAbort" name="scheduler.oplevel.statemanager.PartitionStateManagerWithAbort">
+<area shape="rect" id="node1" title="Local to every TPGscheduler context." alt="" coords="96,95,331,136"/>
+<area shape="rect" id="node2" href="$interfacescheduler_1_1oplevel_1_1statemanager_1_1_operation_state_listener.html" title=" " alt="" coords="5,5,240,47"/>
+<area shape="rect" id="node3" title=" " alt="" coords="264,13,347,39"/>
+</map>

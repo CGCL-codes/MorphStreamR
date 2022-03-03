@@ -1,0 +1,4 @@
+<map id="storage.table.ShareTable.InsertRecord" name="storage.table.ShareTable.InsertRecord">
+<area shape="rect" id="node1" title="Adds a new d_record to this table." alt="" coords="5,5,192,47"/>
+<area shape="rect" id="node2" href="$classstorage_1_1_schema_record.html#afdc7b517b79f294c277b31bac9a4b45d" title="Assume the primary key is always a String, and is always the first field." alt="" coords="240,5,439,47"/>
+</map>

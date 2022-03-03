@@ -1,0 +1,7 @@
+<map id="net.openhft.affinity.lockchecker.LockChecker" name="net.openhft.affinity.lockchecker.LockChecker">
+<area shape="rect" id="node1" title=" " alt="" coords="5,39,233,80"/>
+<area shape="rect" id="node2" href="$classnet_1_1openhft_1_1affinity_1_1lockchecker_1_1_file_based_lock_checker.html" title=" " alt="" coords="281,39,509,80"/>
+<area shape="rect" id="node3" href="$classnet_1_1openhft_1_1affinity_1_1lockchecker_1_1_file_lock_based_lock_checker.html" title=" " alt="" coords="557,5,785,47"/>
+<area shape="rect" id="node5" href="$classnet_1_1openhft_1_1affinity_1_1testimpl_1_1_test_file_based_lock_checker.html" title=" " alt="" coords="568,71,775,112"/>
+<area shape="rect" id="node4" href="$classnet_1_1openhft_1_1affinity_1_1testimpl_1_1_test_file_lock_based_lock_checker.html" title=" " alt="" coords="833,5,1056,47"/>
+</map>

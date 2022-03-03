@@ -1,0 +1,6 @@
+<map id="common.model.finance.QuoteFetcher" name="common.model.finance.QuoteFetcher">
+<area shape="rect" id="node1" title=" " alt="" coords="131,80,350,121"/>
+<area shape="rect" id="node3" href="$classcommon_1_1model_1_1finance_1_1_google_quote_fetcher.html" title=" " alt="" coords="5,169,231,211"/>
+<area shape="rect" id="node4" href="$classcommon_1_1model_1_1finance_1_1_yahoo_quote_fetcher.html" title=" " alt="" coords="255,169,472,211"/>
+<area shape="rect" id="node2" title=" " alt="" coords="191,5,290,32"/>
+</map>

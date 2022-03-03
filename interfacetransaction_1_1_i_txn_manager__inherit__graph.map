@@ -1,0 +1,12 @@
+<map id="transaction.ITxnManager" name="transaction.ITxnManager">
+<area shape="rect" id="node1" title="Every thread has its own TxnManager." alt="" coords="5,111,189,138"/>
+<area shape="rect" id="node2" href="$classtransaction_1_1_txn_manager.html" title="Every thread has its own TxnManager." alt="" coords="237,111,417,138"/>
+<area shape="rect" id="node3" href="$classtransaction_1_1impl_1_1_txn_manager_dedicated_asy.html" title="TxnManagerDedicated is a thread&#45;local structure." alt="" coords="465,39,679,80"/>
+<area shape="rect" id="node5" href="$classtransaction_1_1impl_1_1_txn_manager_dedicated_locked.html" title="TxnManagerDedicated is a thread&#45;local structure." alt="" coords="465,136,679,177"/>
+<area shape="rect" id="node4" href="$classtransaction_1_1impl_1_1ordered_1_1_txn_manager_t_stream.html" title=" " alt="" coords="755,5,941,47"/>
+<area shape="rect" id="node6" href="$classtransaction_1_1impl_1_1ordered_1_1_txn_manager_l_w_m.html" title="mimic of ACEP&#39;s LWM method." alt="" coords="755,71,941,112"/>
+<area shape="rect" id="node7" href="$classtransaction_1_1impl_1_1ordered_1_1_txn_manager_order_lock_blocking.html" title="conventional two&#45;phase locking with no&#45;sync_ratio strategy from Cavalia." alt="" coords="735,136,961,177"/>
+<area shape="rect" id="node8" href="$classtransaction_1_1impl_1_1ordered_1_1_txn_manager_s_store.html" title="mimic of S&#45;Store" alt="" coords="755,201,941,243"/>
+<area shape="rect" id="node9" href="$classtransaction_1_1impl_1_1_txn_manager_lock.html" title="conventional two&#45;phase locking with no&#45;sync_ratio strategy from Cavalia." alt="" coords="727,267,969,294"/>
+<area shape="rect" id="node10" href="$classtransaction_1_1impl_1_1_txn_manager_no_lock.html" title="No Locks at all." alt="" coords="1017,260,1231,301"/>
+</map>

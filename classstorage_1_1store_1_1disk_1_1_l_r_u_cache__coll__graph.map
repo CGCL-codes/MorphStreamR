@@ -1,0 +1,4 @@
+<map id="storage.store.disk.LRUCache&lt; k extends Long, v extends Page &gt;" name="storage.store.disk.LRUCache&lt; k extends Long, v extends Page &gt;">
+<area shape="rect" id="node1" title="A least&#45;recently used cache used for buffer management." alt="" coords="5,95,264,136"/>
+<area shape="rect" id="node2" title=" " alt="" coords="39,5,230,47"/>
+</map>

@@ -1,0 +1,4 @@
+<map id="storage.datatype.VoltType.get" name="storage.datatype.VoltType.get">
+<area shape="rect" id="node1" title="Statically create an enum value_list from the corresponding byte." alt="" coords="279,13,496,39"/>
+<area shape="rect" id="node2" href="$enumstorage_1_1datatype_1_1_volt_type.html#a5e478523cc748ede95d94cbde1aa82c3" title="Ascertain the most appropriate VoltType given a java class." alt="" coords="5,5,231,47"/>
+</map>

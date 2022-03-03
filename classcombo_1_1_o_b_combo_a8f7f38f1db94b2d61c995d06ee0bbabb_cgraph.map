@@ -1,0 +1,5 @@
+<map id="combo.OBCombo.initialize" name="combo.OBCombo.initialize">
+<area shape="rect" id="node1" title="This is the API to client application code." alt="" coords="5,13,200,39"/>
+<area shape="rect" id="node2" href="$classcomponents_1_1operators_1_1api_1_1_operator.html#aa53cf24bd014c61f4080164091dcded7" title="This is the API to talk to actual thread." alt="" coords="248,5,444,47"/>
+<area shape="rect" id="node3" href="$classcomponents_1_1context_1_1_topology_context.html#a1d2504c45a2fe87928450d0fe6006df3" title="Gets the Task id of this Task." alt="" coords="492,5,709,47"/>
+</map>

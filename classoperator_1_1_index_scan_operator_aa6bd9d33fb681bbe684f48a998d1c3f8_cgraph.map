@@ -1,0 +1,10 @@
+<map id="operator.IndexScanOperator.IndexScanOperator" name="operator.IndexScanOperator.IndexScanOperator">
+<area shape="rect" id="node1" title="An index scan operator." alt="" coords="5,71,212,112"/>
+<area shape="rect" id="node2" href="$classoperator_1_1_query_operator.html#a9b75b1fa0a9277d81123e8685e6b1430" title="Utility method to determine whether or not a specified column name is valid with a given schema." alt="" coords="284,5,501,47"/>
+<area shape="rect" id="node4" href="$classoperator_1_1_index_scan_operator.html#aef8a54ef7e4d108b89b3303f1fd37399" title="Estimates the IO cost of executing this query operator." alt="" coords="260,71,525,112"/>
+<area shape="rect" id="node5" href="$classoperator_1_1_index_scan_operator.html#a4e503bb9e8ac8f2b4ffc349e51db4195" title="Estimates the table statistics for the result of executing this query operator." alt="" coords="260,136,525,177"/>
+<area shape="rect" id="node3" href="$classoperator_1_1_query_operator.html#ac230252ab4acc917c72f011acf4aa65e" title="Utility method that checks to see if a column is found in a schema using dot notation." alt="" coords="573,5,791,47"/>
+<area shape="rect" id="node6" href="$classstorage_1_1table_1_1stats_1_1_table_stats.html#aee8654c38cf5fae91c26017a06bc158c" title="Creates a new TableStats which is the statistics for the table that results from the given predicate ..." alt="" coords="591,136,773,177"/>
+<area shape="rect" id="node7" href="$interfacestorage_1_1table_1_1stats_1_1_histogram.html#a913e6c3a54c86aa70cd42ef6a040a4a2" title="Returns the current count for the given value_list If the value_list was never entered into the histo..." alt="" coords="839,114,1080,141"/>
+<area shape="rect" id="node8" href="$classstorage_1_1table_1_1stats_1_1_table_stats.html#a485cdef7d012d33c82522f459c01e32c" title="Creates a new TableStats with a given RecordSchema." alt="" coords="868,165,1051,207"/>
+</map>

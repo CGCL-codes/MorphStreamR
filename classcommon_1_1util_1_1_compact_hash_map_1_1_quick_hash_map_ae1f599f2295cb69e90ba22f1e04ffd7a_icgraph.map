@@ -1,0 +1,6 @@
+<map id="common.util.CompactHashMap.QuickHashMap.isEmpty" name="common.util.CompactHashMap.QuickHashMap.isEmpty">
+<area shape="rect" id="node1" title="Returns true if this map contains no key&#45;value mappings." alt="" coords="284,93,515,134"/>
+<area shape="rect" id="node2" href="$classcommon_1_1util_1_1_compact_hash_map_1_1_quick_hash_map.html#a799cc059be11a1e8aba3f02084c89944" title="Returns true if this map maps one or more keys to the specified value." alt="" coords="5,5,236,61"/>
+<area shape="rect" id="node3" href="$classcommon_1_1util_1_1_compact_hash_map_1_1_quick_hash_map.html#aefa8cc34b632f75b17c8bfac04799798" title="Compares the specified object with this map for equality." alt="" coords="5,85,236,141"/>
+<area shape="rect" id="node4" href="$classcommon_1_1util_1_1_compact_hash_map_1_1_quick_hash_map.html#a820a91f5433657b5ae748b9522342046" title="Returns the hash code value for this map." alt="" coords="5,165,236,221"/>
+</map>

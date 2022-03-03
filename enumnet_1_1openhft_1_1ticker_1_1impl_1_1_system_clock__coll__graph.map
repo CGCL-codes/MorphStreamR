@@ -1,0 +1,4 @@
+<map id="net.openhft.ticker.impl.SystemClock" name="net.openhft.ticker.impl.SystemClock">
+<area shape="rect" id="node1" title="Default implementation, use plain System#nanoTime()." alt="" coords="11,80,183,121"/>
+<area shape="rect" id="node2" href="$interfacenet_1_1openhft_1_1ticker_1_1_i_ticker.html" title=" " alt="" coords="5,5,188,32"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="common.tools.SlotBasedCounter.wipeSlot" name="common.tools.SlotBasedCounter.wipeSlot">
+<area shape="rect" id="node1" title="Reset the slot count of any tracked objects to zero for the given slot." alt="" coords="336,57,631,84"/>
+<area shape="rect" id="node2" href="$classcommon_1_1tools_1_1_sliding_window_aggregator.html#a30ad3d3eb66851738d042ba3f4df75b8" title="Return the current (total) counts of all tracked objects, then advance the window." alt="" coords="21,5,272,61"/>
+<area shape="rect" id="node3" href="$classcommon_1_1tools_1_1_sliding_window_counter.html#ab67babcd91767ee68de51c7bddaa4976" title="Return the current (total) counts of all tracked objects, then advance the window." alt="" coords="5,86,288,127"/>
+</map>

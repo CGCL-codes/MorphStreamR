@@ -1,0 +1,8 @@
+<map id="scheduler.context.GSTPGContextWithAbort" name="scheduler.context.GSTPGContextWithAbort">
+<area shape="rect" id="node1" title=" " alt="" coords="1021,49,1257,90"/>
+<area shape="rect" id="node2" href="$classscheduler_1_1context_1_1_abstract_g_s_t_p_g_context.html" title=" " alt="" coords="540,5,823,61"/>
+<area shape="rect" id="node3" href="$classscheduler_1_1statemanager_1_1_partition_state_manager_with_abort.html" title="Local to every TPGScheduler context." alt="" coords="563,86,799,127"/>
+<area shape="rect" id="node4" title=" " alt="" coords="157,28,239,55"/>
+<area shape="rect" id="node5" href="$interfacescheduler_1_1statemanager_1_1_operation_chain_state_listener.html" title=" " alt="" coords="62,79,334,135"/>
+<area shape="rect" id="node6" title=" " alt="" coords="5,159,391,230"/>
+</map>

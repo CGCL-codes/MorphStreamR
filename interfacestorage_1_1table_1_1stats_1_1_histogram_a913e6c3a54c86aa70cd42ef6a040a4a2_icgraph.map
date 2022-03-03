@@ -1,0 +1,13 @@
+<map id="storage.table.stats.Histogram.get" name="storage.table.stats.Histogram.get">
+<area shape="rect" id="node1" title="Returns the current count for the given value_list If the value_list was never entered into the histo..." alt="" coords="1075,137,1316,163"/>
+<area shape="rect" id="node2" href="$classstorage_1_1table_1_1stats_1_1_table_stats.html#a91f1c8ce5e416da82e43909d22136a14" title="Creates a new TableStats which is the statistics for the table that results from this TableStats join..." alt="" coords="288,161,471,203"/>
+<area shape="rect" id="node4" href="$classstorage_1_1table_1_1stats_1_1_table_stats.html#aee8654c38cf5fae91c26017a06bc158c" title="Creates a new TableStats which is the statistics for the table that results from the given predicate ..." alt="" coords="844,71,1027,112"/>
+<area shape="rect" id="node9" href="$classstorage_1_1table_1_1stats_1_1_table_stats.html#abcef09212c7b651060abc804c9631cba" title="Gets the histogram for a certain column." alt="" coords="844,188,1027,229"/>
+<area shape="rect" id="node3" href="$classoperator_1_1_join_operator.html#ad332a47e07f87770cd04ce6c77043755" title="Estimates the table statistics for the result of executing this query operator." alt="" coords="5,161,228,203"/>
+<area shape="rect" id="node5" href="$classoperator_1_1_select_operator.html#a22a0a7e8f47333e3bef782cba229f2ba" title="Estimates the table statistics for the result of executing this query operator." alt="" coords="544,71,783,112"/>
+<area shape="rect" id="node7" href="$classoperator_1_1_index_scan_operator.html#a4e503bb9e8ac8f2b4ffc349e51db4195" title="Estimates the table statistics for the result of executing this query operator." alt="" coords="531,5,796,47"/>
+<area shape="rect" id="node6" href="$classoperator_1_1_select_operator.html#acc6775836705fe70cb86441971a6a1f7" title="Creates a new SelectOperator that pulls from source and only returns tuples for which the predicate i..." alt="" coords="289,71,469,112"/>
+<area shape="rect" id="node8" href="$classoperator_1_1_index_scan_operator.html#aa6bd9d33fb681bbe684f48a998d1c3f8" title="An index scan operator." alt="" coords="276,5,483,47"/>
+<area shape="rect" id="node10" href="$classstorage_1_1table_1_1stats_1_1_table_stats.html#ae1fe80bb86aef21257f39d869d1bbd9f" title="Gets the estimate number of distinct entries for a certain column." alt="" coords="572,188,755,229"/>
+<area shape="rect" id="node11" href="$classstorage_1_1table_1_1stats_1_1_table_stats.html#a2288e5f55677e783c9f8540ccc275f28" title="Gets the estimate reduction factor a predicate and value_list would result in over a certain column." alt="" coords="571,253,755,295"/>
+</map>

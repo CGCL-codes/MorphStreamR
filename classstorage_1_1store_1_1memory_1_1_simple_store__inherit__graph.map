@@ -1,0 +1,4 @@
+<map id="storage.store.memory.SimpleStore" name="storage.store.memory.SimpleStore">
+<area shape="rect" id="node1" title="This is a simple interface for a table to Store and retrieve SchemaRecord data." alt="" coords="5,80,220,121"/>
+<area shape="rect" id="node2" href="$interfacestorage_1_1store_1_1_store.html" title="This is the interface for a table to Store and retrieve SchemaRecord data." alt="" coords="39,5,186,32"/>
+</map>

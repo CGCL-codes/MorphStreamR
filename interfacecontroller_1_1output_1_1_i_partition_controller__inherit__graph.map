@@ -1,0 +1,11 @@
+<map id="controller.output.IPartitionController" name="controller.output.IPartitionController">
+<area shape="rect" id="node1" title="Created by shuhaozhang on 11/7/16." alt="" coords="152,104,343,145"/>
+<area shape="rect" id="node3" href="$classcontroller_1_1output_1_1_partition_controller.html" title="Created by shuhaozhang on 11/7/16." alt="" coords="391,104,577,145"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,111,104,138"/>
+<area shape="rect" id="node4" href="$classcontroller_1_1output_1_1partition_1_1_all_partition_controller.html" title="Created by shuhaozhang on 12/7/16." alt="" coords="625,5,817,47"/>
+<area shape="rect" id="node5" href="$classcontroller_1_1output_1_1partition_1_1_fields_partition_controller.html" title="Created by shuhaozhang on 12/7/16." alt="" coords="625,71,817,112"/>
+<area shape="rect" id="node7" href="$classcontroller_1_1output_1_1partition_1_1_global_partition_controller.html" title="Created by shuhaozhang on 11/7/16." alt="" coords="625,136,817,177"/>
+<area shape="rect" id="node8" href="$classcontroller_1_1output_1_1partition_1_1_shuffle_partition_controller.html" title="Created by shuhaozhang on 11/7/16." alt="" coords="625,201,817,243"/>
+<area shape="rect" id="node6" href="$classcontroller_1_1output_1_1partition_1_1_partial_key_grouping_controller.html" title="Created by shuhaozhang on 11/7/16." alt="" coords="875,71,1086,112"/>
+<area shape="rect" id="node9" href="$classcontroller_1_1output_1_1partition_1_1_marker_shuffle_partition_controller.html" title="Created by shuhaozhang on 11/7/16." alt="" coords="865,201,1096,243"/>
+</map>

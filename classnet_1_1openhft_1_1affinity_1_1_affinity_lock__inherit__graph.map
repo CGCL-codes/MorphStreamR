@@ -1,0 +1,4 @@
+<map id="net.openhft.affinity.AffinityLock" name="net.openhft.affinity.AffinityLock">
+<area shape="rect" id="node1" title="This utility class support locking a thread to a single core, or reserving a whole core for a thread." alt="" coords="5,80,231,107"/>
+<area shape="rect" id="node2" title=" " alt="" coords="75,5,161,32"/>
+</map>

@@ -1,0 +1,6 @@
+<map id="controller.output.PartitionController.try_offer" name="controller.output.PartitionController.try_offer">
+<area shape="rect" id="node1" title="Try_offer won&#39;t allow sequential execution due to potential drop tuples." alt="" coords="368,71,555,112"/>
+<area shape="rect" id="node2" href="$classcontroller_1_1output_1_1partition_1_1_marker_shuffle_partition_controller.html#a83a2c6f135ad95b8bedbaa869f185a99" title="partition according to partition ratio." alt="" coords="5,5,320,47"/>
+<area shape="rect" id="node3" href="$classcontroller_1_1output_1_1partition_1_1_partial_key_grouping_controller.html#affe0411c10219744e7946c0fcd2b35ff" title="partition according to partition ratio." alt="" coords="15,71,310,112"/>
+<area shape="rect" id="node4" href="$classcontroller_1_1output_1_1partition_1_1_shuffle_partition_controller.html#a57a4b6bd8691dedc4b7bc5734bb6f4f7" title="partition according to partition ratio." alt="" coords="28,136,297,177"/>
+</map>

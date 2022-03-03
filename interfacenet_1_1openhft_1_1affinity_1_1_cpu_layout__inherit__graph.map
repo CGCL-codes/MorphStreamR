@@ -1,0 +1,5 @@
+<map id="net.openhft.affinity.CpuLayout" name="net.openhft.affinity.CpuLayout">
+<area shape="rect" id="node1" title=" " alt="" coords="112,5,285,47"/>
+<area shape="rect" id="node2" href="$classnet_1_1openhft_1_1affinity_1_1impl_1_1_no_cpu_layout.html" title="This assumes there is one socket with every cpu on a different core." alt="" coords="5,95,187,136"/>
+<area shape="rect" id="node3" href="$classnet_1_1openhft_1_1affinity_1_1impl_1_1_vanilla_cpu_layout.html" title=" " alt="" coords="211,95,392,136"/>
+</map>

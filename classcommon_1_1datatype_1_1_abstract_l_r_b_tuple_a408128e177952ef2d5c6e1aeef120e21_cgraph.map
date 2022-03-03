@@ -1,0 +1,5 @@
+<map id="common.datatype.AbstractLRBTuple.getMinuteNumber" name="common.datatype.AbstractLRBTuple.getMinuteNumber">
+<area shape="rect" id="node1" title="TODO remove class Time ???" alt="" coords="5,39,208,80"/>
+<area shape="rect" id="node2" href="$classcommon_1_1collections_1_1_time.html#a6420d2bb00352e309ef729cfcfdd4748" title="Computes the &#39;minute number&#39; if a time (in seconds)." alt="" coords="256,5,471,47"/>
+<area shape="rect" id="node3" href="$classcommon_1_1datatype_1_1_abstract_l_r_b_tuple.html#a94f4d286b31e8b6f4eb8fc1de86353bd" title="Returns the timestamp (in LRB seconds) of this AbstractLRBTuple." alt="" coords="264,71,463,112"/>
+</map>

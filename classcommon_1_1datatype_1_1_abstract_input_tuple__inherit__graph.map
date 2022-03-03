@@ -1,0 +1,10 @@
+<map id="common.datatype.AbstractInputTuple" name="common.datatype.AbstractInputTuple">
+<area shape="rect" id="node1" title="The comm class for all LRB input tuples (ie, position reports and query requests)." alt="" coords="755,104,953,145"/>
+<area shape="rect" id="node5" href="$classcommon_1_1datatype_1_1_account_balance_request.html" title="A AccountBalanceRequest from the LRB data generator." alt="" coords="1005,5,1255,47"/>
+<area shape="rect" id="node6" href="$classcommon_1_1datatype_1_1_daily_expenditure_request.html" title="A DailyExpenditureRequest from the LRB data generator." alt="" coords="1001,71,1259,112"/>
+<area shape="rect" id="node7" href="$classcommon_1_1datatype_1_1_position_report.html" title="A PositionReport from the LRB data generator." alt="" coords="1031,136,1229,177"/>
+<area shape="rect" id="node8" href="$classcommon_1_1datatype_1_1_travel_time_request.html" title="A TravelTimeRequest from the LRB data generator." alt="" coords="1021,201,1239,243"/>
+<area shape="rect" id="node2" href="$classcommon_1_1datatype_1_1_abstract_l_r_b_tuple.html" title="Base class for all LRB tuples." alt="" coords="508,104,707,145"/>
+<area shape="rect" id="node3" href="$classcommon_1_1util_1_1datatypes_1_1_stream_values.html" title=" " alt="" coords="236,104,460,145"/>
+<area shape="rect" id="node4" title=" " alt="" coords="5,111,188,138"/>
+</map>

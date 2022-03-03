@@ -1,0 +1,6 @@
+<map id="common.datatype.util.IPositionIdentifier" name="common.datatype.util.IPositionIdentifier">
+<area shape="rect" id="node1" title="Each type that contains the three position identifier attributes XWAY, LANE, POSITION,..." alt="" coords="108,80,335,121"/>
+<area shape="rect" id="node3" href="$classcommon_1_1datatype_1_1_position_report.html" title="A PositionReport from the LRB data generator." alt="" coords="5,169,203,211"/>
+<area shape="rect" id="node4" href="$classcommon_1_1datatype_1_1util_1_1_position_identifier.html" title="PositionIdentifier represent an express way, lane, position, and direction." alt="" coords="227,169,450,211"/>
+<area shape="rect" id="node2" title=" " alt="" coords="172,5,271,32"/>
+</map>

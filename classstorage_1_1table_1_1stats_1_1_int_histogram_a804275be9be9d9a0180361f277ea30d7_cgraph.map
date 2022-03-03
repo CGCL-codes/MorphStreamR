@@ -1,0 +1,4 @@
+<map id="storage.table.stats.IntHistogram.copyWithReduction" name="storage.table.stats.IntHistogram.copyWithReduction">
+<area shape="rect" id="node1" title="Creates a new IntHistogram that would result from applying the given reduction factor over this." alt="" coords="5,5,273,47"/>
+<area shape="rect" id="node2" href="$classstorage_1_1table_1_1stats_1_1_int_histogram.html#ab9373043435489c3a7229081795e3f7c" title="Creates a new IntHistogram with no entries." alt="" coords="321,5,559,47"/>
+</map>

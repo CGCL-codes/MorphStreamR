@@ -1,0 +1,4 @@
+<map id="storage.store.disk.PageAllocator.freePage" name="storage.store.disk.PageAllocator.freePage">
+<area shape="rect" id="node1" title="Frees the page to be returned back to the system." alt="" coords="345,5,637,32"/>
+<area shape="rect" id="node2" href="$classstorage_1_1store_1_1disk_1_1_page_allocator.html#ac284d5cc4e50a03fd71232952f7e4212" title="Frees the page to be returned back to the system." alt="" coords="5,5,297,32"/>
+</map>

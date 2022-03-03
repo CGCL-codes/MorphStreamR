@@ -1,0 +1,10 @@
+<map id="storage.store.disk.PageAllocator.allocPage" name="storage.store.disk.PageAllocator.allocPage">
+<area shape="rect" id="node1" title="Allocates a new page in the file." alt="" coords="5,140,303,167"/>
+<area shape="rect" id="node2" href="$classstorage_1_1store_1_1disk_1_1_page_allocator.html#a0112dc8c8e75f18b44a8f11bd7f0ad66" title="Fetches the page corresponding to virtual page number pageNum." alt="" coords="351,13,649,40"/>
+<area shape="rect" id="node4" href="$classstorage_1_1store_1_1disk_1_1_page.html#ab2a630d1713f66495aded1d6301639f5" title="Reads num bytes from offset position into buf." alt="" coords="713,57,919,98"/>
+<area shape="rect" id="node5" href="$classstorage_1_1store_1_1disk_1_1_page.html#a20ef0c86190834aae81540e757c2f9fc" title="Force the page to disk." alt="" coords="395,115,605,141"/>
+<area shape="rect" id="node6" href="$classstorage_1_1store_1_1disk_1_1_page.html#a43f284791b98d1269f564468c5dfa3bd" title="Completely wipe (zero out) the page." alt="" coords="395,165,605,192"/>
+<area shape="rect" id="node7" href="$classstorage_1_1store_1_1disk_1_1_page.html#a6bc61d968b51a0adaf991e23f78e37c0" title="Write num bytes from buf at offset position." alt="" coords="711,183,921,225"/>
+<area shape="rect" id="node8" href="$classstorage_1_1store_1_1disk_1_1_page.html#a829c438977d3f02dca9e43d5b8667f28" title="Write a single byte into the file at offset position." alt="" coords="379,267,621,293"/>
+<area shape="rect" id="node3" href="$classstorage_1_1store_1_1disk_1_1_page.html#a4097b4d2cd30cd0462b159c98f0d0da4" title="Read the single byte at offset position." alt="" coords="697,5,935,32"/>
+</map>

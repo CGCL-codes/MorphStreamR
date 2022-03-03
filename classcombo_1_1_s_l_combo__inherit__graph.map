@@ -1,0 +1,10 @@
+<map id="combo.SLCombo" name="combo.SLCombo">
+<area shape="rect" id="node1" title=" " alt="" coords="147,512,278,539"/>
+<area shape="rect" id="node2" href="$classcombo_1_1_s_p_o_u_t_combo.html" title=" " alt="" coords="133,437,292,464"/>
+<area shape="rect" id="node3" href="$classcomponents_1_1operators_1_1api_1_1_transactional_spout.html" title=" " alt="" coords="115,348,311,389"/>
+<area shape="rect" id="node4" href="$classcomponents_1_1operators_1_1api_1_1_abstract_spout.html" title="Abstract AbstractSpout is a special partition&#45;pass Operator." alt="" coords="5,259,201,300"/>
+<area shape="rect" id="node5" href="$classcomponents_1_1operators_1_1api_1_1_operator.html" title=" " alt="" coords="5,169,201,211"/>
+<area shape="rect" id="node6" href="$interfacecomponents_1_1operators_1_1api_1_1_i_operator.html" title="Created by shuhaozhang on 12/7/16." alt="" coords="5,80,201,121"/>
+<area shape="rect" id="node7" title=" " alt="" coords="54,5,153,32"/>
+<area shape="rect" id="node8" href="$interfacecomponents_1_1operators_1_1api_1_1_checkpointable.html" title=" " alt="" coords="225,259,421,300"/>
+</map>

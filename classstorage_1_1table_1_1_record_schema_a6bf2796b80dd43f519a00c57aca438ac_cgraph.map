@@ -1,0 +1,5 @@
+<map id="storage.table.RecordSchema.verify" name="storage.table.RecordSchema.verify">
+<area shape="rect" id="node1" title="Verifies that a list of DataBoxes corresponds to this schema." alt="" coords="5,31,256,57"/>
+<area shape="rect" id="node2" href="$classstorage_1_1datatype_1_1_data_box.html#abd97fa09df75e5d142df7962a29bb10b" title="Returns the fixed size of this DataBox." alt="" coords="304,5,549,32"/>
+<area shape="rect" id="node3" href="$classstorage_1_1datatype_1_1_data_box.html#a7dc85f76061357f336cf6882506b4a90" title="Returns the type of the DataBox." alt="" coords="313,56,540,83"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="db.SimpleDatabase.Transaction.deleteRecord" name="db.SimpleDatabase.Transaction.deleteRecord">
+<area shape="rect" id="node1" title="Delete all records." alt="" coords="5,5,277,47"/>
+<area shape="rect" id="node2" href="$classstorage_1_1table_1_1_simple_table.html#ae90f3b392710b5e1a9737a0992c34992" title="Delete all records in the table." alt="" coords="325,13,556,39"/>
+<area shape="rect" id="node3" href="$classstorage_1_1table_1_1stats_1_1_table_stats.html#ad430158d678a2abc626ae7a3d776dd5f" title="Clean the table states." alt="" coords="604,5,787,47"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="db.SimpleDatabase.Transaction.updateRecord" name="db.SimpleDatabase.Transaction.updateRecord">
+<area shape="rect" id="node1" title=" " alt="" coords="5,39,281,80"/>
+<area shape="rect" id="node2" href="$classdb_1_1_simple_database_1_1_transaction.html#ab7da409524382e5504fdc3deaef5d12c" title="Perform a check to see if the database has an index on this (table,column)." alt="" coords="329,5,596,47"/>
+<area shape="rect" id="node3" href="$classstorage_1_1table_1_1_simple_table.html#a48c208c7067296f8f90529e546bd9c52" title="Updates an existing d_record with new values and returns the old version of the d_record." alt="" coords="343,71,583,112"/>
+<area shape="rect" id="node4" href="$classstorage_1_1table_1_1stats_1_1_table_stats.html#a98937a417fce60b5a4c0151c77afc73c" title="Remove the stats for an existing d_record." alt="" coords="678,41,861,83"/>
+<area shape="rect" id="node5" href="$classstorage_1_1table_1_1_record_schema.html#a6bf2796b80dd43f519a00c57aca438ac" title="Verifies that a list of DataBoxes corresponds to this schema." alt="" coords="644,107,895,134"/>
+<area shape="rect" id="node6" href="$classstorage_1_1datatype_1_1_data_box.html#abd97fa09df75e5d142df7962a29bb10b" title="Returns the fixed size of this DataBox." alt="" coords="943,82,1188,109"/>
+<area shape="rect" id="node7" href="$classstorage_1_1datatype_1_1_data_box.html#a7dc85f76061357f336cf6882506b4a90" title="Returns the type of the DataBox." alt="" coords="952,133,1179,159"/>
+</map>

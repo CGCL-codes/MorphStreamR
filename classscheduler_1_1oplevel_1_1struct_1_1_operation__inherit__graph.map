@@ -1,0 +1,5 @@
+<map id="scheduler.oplevel.struct.Operation" name="scheduler.oplevel.struct.Operation">
+<area shape="rect" id="node1" title="contains the place&#45;holder to fill, as well as timestamp (counter)." alt="" coords="111,95,292,136"/>
+<area shape="rect" id="node2" href="$classscheduler_1_1oplevel_1_1struct_1_1_abstract_operation.html" title="TODO: clean state&quot; and&lt;/tt&gt;reference&quot;." alt="" coords="5,5,187,47"/>
+<area shape="rect" id="node3" title=" " alt="" coords="211,13,405,39"/>
+</map>

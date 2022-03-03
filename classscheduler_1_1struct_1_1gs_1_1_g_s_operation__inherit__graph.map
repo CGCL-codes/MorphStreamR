@@ -1,0 +1,6 @@
+<map id="scheduler.struct.gs.GSOperation" name="scheduler.struct.gs.GSOperation">
+<area shape="rect" id="node1" title="contains the place&#45;holder to fill, as well as timestamp (counter)." alt="" coords="15,169,245,196"/>
+<area shape="rect" id="node4" href="$classscheduler_1_1struct_1_1gs_1_1_g_s_operation_with_abort.html" title="contains the place&#45;holder to fill, as well as timestamp (counter)." alt="" coords="15,244,245,285"/>
+<area shape="rect" id="node2" href="$classscheduler_1_1struct_1_1_abstract_operation.html" title="TODO: clean state&quot; and&lt;/tt&gt;reference&quot;." alt="" coords="39,80,221,121"/>
+<area shape="rect" id="node3" title=" " alt="" coords="5,5,255,32"/>
+</map>

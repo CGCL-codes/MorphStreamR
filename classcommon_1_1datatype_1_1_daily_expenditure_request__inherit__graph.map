@@ -1,0 +1,7 @@
+<map id="common.datatype.DailyExpenditureRequest" name="common.datatype.DailyExpenditureRequest">
+<area shape="rect" id="node1" title="A DailyExpenditureRequest from the LRB data generator." alt="" coords="5,348,263,389"/>
+<area shape="rect" id="node2" href="$classcommon_1_1datatype_1_1_abstract_input_tuple.html" title="The comm class for all LRB input tuples (ie, position reports and query requests)." alt="" coords="35,259,233,300"/>
+<area shape="rect" id="node3" href="$classcommon_1_1datatype_1_1_abstract_l_r_b_tuple.html" title="Base class for all LRB tuples." alt="" coords="35,169,233,211"/>
+<area shape="rect" id="node4" href="$classcommon_1_1util_1_1datatypes_1_1_stream_values.html" title=" " alt="" coords="22,80,246,121"/>
+<area shape="rect" id="node5" title=" " alt="" coords="43,5,225,32"/>
+</map>

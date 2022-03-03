@@ -1,0 +1,4 @@
+<map id="storage.table.stats.IntHistogram.computeReductionFactor" name="storage.table.stats.IntHistogram.computeReductionFactor">
+<area shape="rect" id="node1" title="Computes the reduction factor that a predicate and value_list result in over this IntHistogram." alt="" coords="321,5,616,47"/>
+<area shape="rect" id="node2" href="$classstorage_1_1table_1_1stats_1_1_int_histogram.html#a9790652a659a644ddd953cb06c84e05f" title="Creates a new IntHistogram that would result from applying the given predicate and value_list over th..." alt="" coords="5,5,273,47"/>
+</map>

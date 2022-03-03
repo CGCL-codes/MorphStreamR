@@ -1,0 +1,4 @@
+<map id="benchmark.datagenerator.apps.SL.TPGTxnGenerator.SLTPGDataGenerator" name="benchmark.datagenerator.apps.SL.TPGTxnGenerator.SLTPGDataGenerator">
+<area shape="rect" id="node1" title="\textbf{Workload Configurations.} We extend SL for workload sensitivity study by tweaking its workloa..." alt="" coords="5,95,300,136"/>
+<area shape="rect" id="node2" href="$classbenchmark_1_1datagenerator_1_1_data_generator.html" title="Data generator for benchmarks, this class contains all common methods and attributes that can be used..." alt="" coords="55,5,250,47"/>
+</map>

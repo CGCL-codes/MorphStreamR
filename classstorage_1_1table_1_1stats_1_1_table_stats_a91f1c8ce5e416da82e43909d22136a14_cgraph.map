@@ -1,0 +1,10 @@
+<map id="storage.table.stats.TableStats.copyWithJoin" name="storage.table.stats.TableStats.copyWithJoin">
+<area shape="rect" id="node1" title="Creates a new TableStats which is the statistics for the table that results from this TableStats join..." alt="" coords="5,152,188,193"/>
+<area shape="rect" id="node2" href="$interfacestorage_1_1table_1_1stats_1_1_histogram.html#a913e6c3a54c86aa70cd42ef6a040a4a2" title="Returns the current count for the given value_list If the value_list was never entered into the histo..." alt="" coords="697,63,939,90"/>
+<area shape="rect" id="node3" href="$classstorage_1_1table_1_1stats_1_1_table_stats.html#ad341aac3459001169791b706e222d6bf" title="Gets the histograms of this TableStatistics." alt="" coords="236,53,419,95"/>
+<area shape="rect" id="node4" href="$classstorage_1_1table_1_1stats_1_1_table_stats.html#ae1fe80bb86aef21257f39d869d1bbd9f" title="Gets the estimate number of distinct entries for a certain column." alt="" coords="236,119,419,160"/>
+<area shape="rect" id="node6" href="$classstorage_1_1table_1_1stats_1_1_table_stats.html#a04ab8e3ccc3cf07515e37341c70f8832" title="Gets the number of records the target table contains." alt="" coords="236,184,419,225"/>
+<area shape="rect" id="node7" href="$classstorage_1_1table_1_1stats_1_1_table_stats.html#a2d09961b8bdb3e7bd9e73c8fc18e9350" title="Gets the schema of this TableStatistics." alt="" coords="236,249,419,291"/>
+<area shape="rect" id="node8" href="$classstorage_1_1table_1_1stats_1_1_table_stats.html#a485cdef7d012d33c82522f459c01e32c" title="Creates a new TableStats with a given RecordSchema." alt="" coords="236,315,419,356"/>
+<area shape="rect" id="node5" href="$classstorage_1_1table_1_1stats_1_1_table_stats.html#abcef09212c7b651060abc804c9631cba" title="Gets the histogram for a certain column." alt="" coords="467,85,649,127"/>
+</map>

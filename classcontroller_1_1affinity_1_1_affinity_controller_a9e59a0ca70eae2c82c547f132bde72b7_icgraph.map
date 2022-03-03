@@ -1,0 +1,4 @@
+<map id="controller.affinity.AffinityController.require" name="controller.affinity.AffinityController.require">
+<area shape="rect" id="node1" title="one thread one socket mapping." alt="" coords="240,5,423,47"/>
+<area shape="rect" id="node2" href="$classcontroller_1_1affinity_1_1_affinity_controller.html#ae269f61efa3dec9bb8fe9b836838d2e2" title="one thread one core mapping." alt="" coords="5,5,192,47"/>
+</map>

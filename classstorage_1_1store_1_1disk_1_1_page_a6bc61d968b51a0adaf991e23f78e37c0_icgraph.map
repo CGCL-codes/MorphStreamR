@@ -1,0 +1,8 @@
+<map id="storage.store.disk.Page.writeBytes" name="storage.store.disk.Page.writeBytes">
+<area shape="rect" id="node1" title="Write num bytes from buf at offset position." alt="" coords="691,52,901,93"/>
+<area shape="rect" id="node2" href="$classstorage_1_1store_1_1disk_1_1_page_allocator.html#a8163b2fc5822c68b2e3ffadbc1425fcd" title="Allocates a new page in the file." alt="" coords="5,8,303,35"/>
+<area shape="rect" id="node3" href="$classstorage_1_1store_1_1disk_1_1_page_allocator.html#a80f62bf0d186504658ccdbccc3c65002" title="Frees the page to be returned back to the system." alt="" coords="351,84,643,111"/>
+<area shape="rect" id="node5" href="$classstorage_1_1store_1_1disk_1_1_page.html#a43f284791b98d1269f564468c5dfa3bd" title="Completely wipe (zero out) the page." alt="" coords="392,34,601,60"/>
+<area shape="rect" id="node6" href="$classstorage_1_1store_1_1disk_1_1_page.html#aea3aac597804e95c3b69b5463b6edf28" title="Write a 4&#45;byte integer into the page at offset startPos." alt="" coords="383,135,611,162"/>
+<area shape="rect" id="node4" href="$classstorage_1_1store_1_1disk_1_1_page_allocator.html#ac284d5cc4e50a03fd71232952f7e4212" title="Frees the page to be returned back to the system." alt="" coords="8,84,300,111"/>
+</map>

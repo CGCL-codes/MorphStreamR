@@ -1,0 +1,11 @@
+<map id="transaction.impl.ordered.TxnManagerTStream" name="transaction.impl.ordered.TxnManagerTStream">
+<area shape="rect" id="node1" title=" " alt="" coords="972,150,1159,191"/>
+<area shape="rect" id="node2" href="$classtransaction_1_1impl_1_1_txn_manager_dedicated_asy.html" title="TxnManagerDedicated is a thread&#45;local structure." alt="" coords="709,150,923,191"/>
+<area shape="rect" id="node3" href="$classtransaction_1_1_txn_manager.html" title="Every thread has its own TxnManager." alt="" coords="343,64,523,91"/>
+<area shape="rect" id="node4" href="$interfacetransaction_1_1_i_txn_manager.html" title="Every thread has its own TxnManager." alt="" coords="14,5,198,32"/>
+<area shape="rect" id="node5" href="$interfacescheduler_1_1impl_1_1_i_scheduler.html" title=" " alt="" coords="11,57,201,98"/>
+<area shape="rect" id="node6" href="$classstorage_1_1_storage_manager.html" title=" " alt="" coords="342,121,525,148"/>
+<area shape="rect" id="node7" title=" " alt="" coords="5,122,207,163"/>
+<area shape="rect" id="node8" href="$interfacescheduler_1_1context_1_1_scheduler_context.html" title=" " alt="" coords="331,173,536,214"/>
+<area shape="rect" id="node9" href="$interfacetransaction_1_1context_1_1_txn_access.html" title=" " alt="" coords="323,239,544,265"/>
+</map>

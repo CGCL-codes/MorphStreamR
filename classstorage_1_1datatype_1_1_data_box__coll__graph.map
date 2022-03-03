@@ -1,0 +1,5 @@
+<map id="storage.datatype.DataBox" name="storage.datatype.DataBox">
+<area shape="rect" id="node1" title="Abstract DataBox for all database primitives Currently supported: integers, booleans,..." alt="" coords="18,80,211,107"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,5,107,32"/>
+<area shape="rect" id="node3" title=" " alt="" coords="131,5,218,32"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="utils.lib.NonBlockingSetInt" name="utils.lib.NonBlockingSetInt">
+<area shape="rect" id="node1" title="A multi&#45;threaded bit&#45;vector set, implemented as an array of primitive." alt="" coords="67,95,261,121"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,5,168,47"/>
+<area shape="rect" id="node3" title=" " alt="" coords="192,13,291,39"/>
+</map>

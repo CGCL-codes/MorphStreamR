@@ -1,0 +1,4 @@
+<map id="benchmark.datagenerator.apps.SL.Transaction.SLDepositEvent" name="benchmark.datagenerator.apps.SL.Transaction.SLDepositEvent">
+<area shape="rect" id="node1" title="Streamledger deposit transaction, which write without dependency." alt="" coords="5,95,235,136"/>
+<area shape="rect" id="node2" href="$classbenchmark_1_1datagenerator_1_1_event.html" title=" " alt="" coords="23,5,217,47"/>
+</map>

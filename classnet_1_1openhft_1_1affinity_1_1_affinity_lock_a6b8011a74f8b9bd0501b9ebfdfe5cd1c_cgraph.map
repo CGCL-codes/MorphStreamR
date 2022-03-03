@@ -1,0 +1,5 @@
+<map id="net.openhft.affinity.AffinityLock.acquireCore" name="net.openhft.affinity.AffinityLock.acquireCore">
+<area shape="rect" id="node1" title="Assign a core(and all its cpus) which can be bound to the current thread or another thread." alt="" coords="5,39,200,80"/>
+<area shape="rect" id="node2" href="$classnet_1_1openhft_1_1affinity_1_1_affinity_lock.html#a9935990754c82aefe438b6394ad4e308" title="Assign any free core to this thread." alt="" coords="248,5,443,47"/>
+<area shape="rect" id="node3" href="$classnet_1_1openhft_1_1affinity_1_1_affinity_lock.html#ac7236c1de574cd59e58cb0131852883d" title="Bind the current thread to this reservable lock." alt="" coords="248,71,443,112"/>
+</map>

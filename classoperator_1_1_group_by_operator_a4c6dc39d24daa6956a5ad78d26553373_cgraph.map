@@ -1,0 +1,7 @@
+<map id="operator.GroupByOperator.GroupByOperator" name="operator.GroupByOperator.GroupByOperator">
+<area shape="rect" id="node1" title="Create a new GroupByOperator that pulls from source and groups by groupByColumn." alt="" coords="5,71,201,112"/>
+<area shape="rect" id="node2" href="$classoperator_1_1_query_operator.html#a9b75b1fa0a9277d81123e8685e6b1430" title="Utility method to determine whether or not a specified column name is valid with a given schema." alt="" coords="268,5,485,47"/>
+<area shape="rect" id="node4" href="$classoperator_1_1_group_by_operator.html#a20ed7218e0203a0d66eca2385c8e3442" title="Estimates the IO cost of executing this query operator." alt="" coords="249,71,504,112"/>
+<area shape="rect" id="node5" href="$classoperator_1_1_group_by_operator.html#a7f21a89013a38d5f5d7862e7f395ec3f" title="Estimates the table statistics for the result of executing this query operator." alt="" coords="249,136,504,177"/>
+<area shape="rect" id="node3" href="$classoperator_1_1_query_operator.html#ac230252ab4acc917c72f011acf4aa65e" title="Utility method that checks to see if a column is found in a schema using dot notation." alt="" coords="552,5,769,47"/>
+</map>

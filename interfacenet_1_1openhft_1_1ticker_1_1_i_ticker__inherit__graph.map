@@ -1,0 +1,5 @@
+<map id="net.openhft.ticker.ITicker" name="net.openhft.ticker.ITicker">
+<area shape="rect" id="node1" title=" " alt="" coords="97,5,280,32"/>
+<area shape="rect" id="node2" href="$enumnet_1_1openhft_1_1ticker_1_1impl_1_1_j_n_i_clock.html" title="JNI&#45;based implementation, trying to use rdtsc() system call to access the most precise timer availabl..." alt="" coords="5,80,177,121"/>
+<area shape="rect" id="node3" href="$enumnet_1_1openhft_1_1ticker_1_1impl_1_1_system_clock.html" title="Default implementation, use plain System#nanoTime()." alt="" coords="201,80,373,121"/>
+</map>

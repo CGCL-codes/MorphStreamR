@@ -1,0 +1,5 @@
+<map id="storage.store.disk.Page.getPageNum" name="storage.store.disk.Page.getPageNum">
+<area shape="rect" id="node1" title=" " alt="" coords="685,5,884,47"/>
+<area shape="rect" id="node2" href="$classstorage_1_1store_1_1disk_1_1_page_allocator.html#a80f62bf0d186504658ccdbccc3c65002" title="Frees the page to be returned back to the system." alt="" coords="345,13,637,39"/>
+<area shape="rect" id="node3" href="$classstorage_1_1store_1_1disk_1_1_page_allocator.html#ac284d5cc4e50a03fd71232952f7e4212" title="Frees the page to be returned back to the system." alt="" coords="5,13,297,39"/>
+</map>

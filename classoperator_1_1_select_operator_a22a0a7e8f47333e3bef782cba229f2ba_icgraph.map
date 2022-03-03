@@ -1,0 +1,4 @@
+<map id="operator.SelectOperator.estimateStats" name="operator.SelectOperator.estimateStats">
+<area shape="rect" id="node1" title="Estimates the table statistics for the result of executing this query operator." alt="" coords="233,5,472,47"/>
+<area shape="rect" id="node2" href="$classoperator_1_1_select_operator.html#acc6775836705fe70cb86441971a6a1f7" title="Creates a new SelectOperator that pulls from source and only returns tuples for which the predicate i..." alt="" coords="5,5,185,47"/>
+</map>

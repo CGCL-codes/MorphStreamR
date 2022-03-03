@@ -1,0 +1,5 @@
+<map id="execution.runtime.boltThread" name="execution.runtime.boltThread">
+<area shape="rect" id="node1" title="Task thread that hosts bolt logic." alt="" coords="5,169,220,196"/>
+<area shape="rect" id="node2" href="$classexecution_1_1runtime_1_1executor_thread.html" title=" " alt="" coords="13,80,213,121"/>
+<area shape="rect" id="node3" title=" " alt="" coords="79,5,146,32"/>
+</map>

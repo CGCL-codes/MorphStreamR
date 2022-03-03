@@ -1,0 +1,4 @@
+<map id="net.openhft.ticker.impl.JNIClock" name="net.openhft.ticker.impl.JNIClock">
+<area shape="rect" id="node1" title="JNI&#45;based implementation, trying to use rdtsc() system call to access the most precise timer availabl..." alt="" coords="11,80,183,121"/>
+<area shape="rect" id="node2" href="$interfacenet_1_1openhft_1_1ticker_1_1_i_ticker.html" title=" " alt="" coords="5,5,188,32"/>
+</map>

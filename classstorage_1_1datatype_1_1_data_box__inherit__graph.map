@@ -1,0 +1,14 @@
+<map id="storage.datatype.DataBox" name="storage.datatype.DataBox">
+<area shape="rect" id="node1" title="Abstract DataBox for all database primitives Currently supported: integers, booleans,..." alt="" coords="155,224,348,251"/>
+<area shape="rect" id="node4" href="$classstorage_1_1datatype_1_1_bool_data_box.html" title="Boolean data type which serializes to 1 byte." alt="" coords="404,5,627,32"/>
+<area shape="rect" id="node5" href="$classstorage_1_1datatype_1_1_double_data_box.html" title="Float data type which serializes to 14 bytes." alt="" coords="396,56,635,83"/>
+<area shape="rect" id="node6" href="$classstorage_1_1datatype_1_1_float_data_box.html" title="Float data type which serializes to 14 bytes." alt="" coords="402,107,629,133"/>
+<area shape="rect" id="node7" href="$classstorage_1_1datatype_1_1_hash_set_data_box.html" title="Integer data type which serializes to 4 bytes." alt="" coords="420,158,611,199"/>
+<area shape="rect" id="node8" href="$classstorage_1_1datatype_1_1_int_data_box.html" title="Integer data type which serializes to 4 bytes." alt="" coords="410,224,621,251"/>
+<area shape="rect" id="node9" href="$classstorage_1_1datatype_1_1_list_double_data_box.html" title=" " alt="" coords="412,275,619,317"/>
+<area shape="rect" id="node10" href="$classstorage_1_1datatype_1_1_long_data_box.html" title="Long data type which serializes to 8 bytes." alt="" coords="403,341,627,368"/>
+<area shape="rect" id="node11" href="$classstorage_1_1datatype_1_1_string_data_box.html" title="Fixed&#45;length String data type which serializes to UTF&#45;8 bytes." alt="" coords="400,392,631,419"/>
+<area shape="rect" id="node12" href="$classstorage_1_1datatype_1_1_time_stamp_data_box.html" title="Long data type which serializes to 8 bytes." alt="" coords="409,443,621,485"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,199,107,225"/>
+<area shape="rect" id="node3" title=" " alt="" coords="13,249,99,276"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="transaction.TxnManager" name="transaction.TxnManager">
+<area shape="rect" id="node1" title="Every thread has its own TxnManager." alt="" coords="113,109,293,136"/>
+<area shape="rect" id="node2" href="$interfacetransaction_1_1_i_txn_manager.html" title="Every thread has its own TxnManager." alt="" coords="5,13,189,39"/>
+<area shape="rect" id="node3" href="$interfacescheduler_1_1impl_1_1_i_scheduler.html" title=" " alt="" coords="213,5,403,47"/>
+</map>

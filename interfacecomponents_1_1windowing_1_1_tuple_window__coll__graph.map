@@ -1,0 +1,4 @@
+<map id="components.windowing.TupleWindow" name="components.windowing.TupleWindow">
+<area shape="rect" id="node1" title="A Window that contains Tuple objects." alt="" coords="5,95,220,136"/>
+<area shape="rect" id="node2" title="A view of events in a sliding window." alt="" coords="23,5,203,47"/>
+</map>

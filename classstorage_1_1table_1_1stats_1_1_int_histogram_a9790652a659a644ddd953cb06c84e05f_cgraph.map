@@ -1,0 +1,8 @@
+<map id="storage.table.stats.IntHistogram.copyWithPredicate" name="storage.table.stats.IntHistogram.copyWithPredicate">
+<area shape="rect" id="node1" title="Creates a new IntHistogram that would result from applying the given predicate and value_list over th..." alt="" coords="5,135,273,176"/>
+<area shape="rect" id="node2" href="$classstorage_1_1table_1_1stats_1_1_int_histogram.html#a806c6638e77a4d926e3448137a0650c6" title="Computes the reduction factor that a predicate and value_list result in over this IntHistogram." alt="" coords="321,73,616,115"/>
+<area shape="rect" id="node5" href="$classstorage_1_1table_1_1stats_1_1_int_histogram.html#aa7a77a44184ca4493d7bbc46e3bc7140" title="Gets the estimate number of distinct entries in this histogram." alt="" coords="664,136,923,177"/>
+<area shape="rect" id="node6" href="$classstorage_1_1table_1_1stats_1_1_int_histogram.html#ab9373043435489c3a7229081795e3f7c" title="Creates a new IntHistogram with no entries." alt="" coords="350,193,587,235"/>
+<area shape="rect" id="node3" href="$classstorage_1_1table_1_1stats_1_1_int_histogram.html#aab5612f849db3aba38b8e11b5b0b6fe2" title="Gets the estimate maximum value_list of this." alt="" coords="664,5,923,47"/>
+<area shape="rect" id="node4" href="$classstorage_1_1table_1_1stats_1_1_int_histogram.html#a438b82b028ade7ec11f1dfa8ca80bcdc" title="Gets the estimate minimum value_list of this." alt="" coords="664,71,923,112"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="operator.JoinOperator" name="operator.JoinOperator">
+<area shape="rect" id="node1" title=" " alt="" coords="16,185,177,212"/>
+<area shape="rect" id="node2" href="$classoperator_1_1_query_operator.html" title=" " alt="" coords="9,109,185,136"/>
+<area shape="rect" id="node3" href="$classstorage_1_1table_1_1stats_1_1_table_stats.html" title="A wrapper class to represent the statistics for a partition table." alt="" coords="5,5,188,47"/>
+</map>

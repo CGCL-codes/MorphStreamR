@@ -1,0 +1,6 @@
+<map id="storage.store.disk.Page.writeByte" name="storage.store.disk.Page.writeByte">
+<area shape="rect" id="node1" title="Write a single byte into the file at offset position." alt="" coords="691,31,932,57"/>
+<area shape="rect" id="node2" href="$classstorage_1_1store_1_1disk_1_1_page_allocator.html#a8163b2fc5822c68b2e3ffadbc1425fcd" title="Allocates a new page in the file." alt="" coords="345,5,643,32"/>
+<area shape="rect" id="node3" href="$classstorage_1_1store_1_1disk_1_1_page_allocator.html#a80f62bf0d186504658ccdbccc3c65002" title="Frees the page to be returned back to the system." alt="" coords="348,56,640,83"/>
+<area shape="rect" id="node4" href="$classstorage_1_1store_1_1disk_1_1_page_allocator.html#ac284d5cc4e50a03fd71232952f7e4212" title="Frees the page to be returned back to the system." alt="" coords="5,56,297,83"/>
+</map>

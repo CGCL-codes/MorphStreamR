@@ -1,0 +1,4 @@
+<map id="storage.StorageManager.dropTable" name="storage.StorageManager.dropTable">
+<area shape="rect" id="node1" title="Delete a table in this database." alt="" coords="268,5,483,47"/>
+<area shape="rect" id="node2" href="$classstorage_1_1_storage_manager.html#aca920e3b75893a5872d1dced8ef1054e" title="Delete all tables from this database." alt="" coords="5,5,220,47"/>
+</map>
