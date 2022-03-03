@@ -1,0 +1,9 @@
+<map id="transaction.context.TxnAccess.Access" name="transaction.context.TxnAccess.Access">
+<area shape="rect" id="node1" title=" " alt="" coords="362,288,587,329"/>
+<area shape="rect" id="node2" href="$classstorage_1_1_schema_record.html" title="A wrapper class for an individual d_record." alt="" coords="391,95,563,121"/>
+<area shape="rect" id="node4" href="$classstorage_1_1_table_record.html" title=" " alt="" coords="249,191,404,218"/>
+<area shape="rect" id="node3" href="$classstorage_1_1table_1_1_record_schema.html" title="The RecordSchema of a particular table." alt="" coords="373,5,582,32"/>
+<area shape="rect" id="node5" title=" " alt="" coords="5,95,216,121"/>
+<area shape="rect" id="node6" href="$interfacecontent_1_1_content.html" title=" " alt="" coords="241,95,367,121"/>
+<area shape="rect" id="node7" href="$enumcontent_1_1common_1_1_common_meta_types_1_1_access_type.html" title=" " alt="" coords="590,184,818,225"/>
+</map>

@@ -1,0 +1,4 @@
+<map id="storage.table.SimpleTable.deleteRecord" name="storage.table.SimpleTable.deleteRecord">
+<area shape="rect" id="node1" title="Deletes the d_record specified by rid from the table." alt="" coords="5,5,241,47"/>
+<area shape="rect" id="node2" href="$classstorage_1_1table_1_1stats_1_1_table_stats.html#a98937a417fce60b5a4c0151c77afc73c" title="Remove the stats for an existing d_record." alt="" coords="289,5,472,47"/>
+</map>

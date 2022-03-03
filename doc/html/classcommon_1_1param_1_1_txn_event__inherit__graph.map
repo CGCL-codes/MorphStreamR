@@ -1,0 +1,10 @@
+<map id="common.param.TxnEvent" name="common.param.TxnEvent">
+<area shape="rect" id="node1" title=" " alt="" coords="245,132,436,159"/>
+<area shape="rect" id="node3" href="$classcommon_1_1param_1_1mb_1_1_micro_event.html" title="Support Multi workset since 1 SEP 2018." alt="" coords="489,5,715,32"/>
+<area shape="rect" id="node4" href="$classcommon_1_1param_1_1ob_1_1_alert_event.html" title=" " alt="" coords="493,56,711,83"/>
+<area shape="rect" id="node5" href="$classcommon_1_1param_1_1ob_1_1_buying_event.html" title=" " alt="" coords="487,107,717,133"/>
+<area shape="rect" id="node6" href="$classcommon_1_1param_1_1ob_1_1_topping_event.html" title=" " alt="" coords="484,157,720,184"/>
+<area shape="rect" id="node7" href="$classcommon_1_1param_1_1sl_1_1_deposit_event.html" title=" " alt="" coords="487,208,717,235"/>
+<area shape="rect" id="node8" href="$classcommon_1_1param_1_1sl_1_1_transaction_event.html" title=" " alt="" coords="493,259,711,301"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,132,197,159"/>
+</map>

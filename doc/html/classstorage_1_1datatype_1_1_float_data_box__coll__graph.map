@@ -1,0 +1,6 @@
+<map id="storage.datatype.FloatDataBox" name="storage.datatype.FloatDataBox">
+<area shape="rect" id="node1" title="Float data type which serializes to 14 bytes." alt="" coords="5,155,232,181"/>
+<area shape="rect" id="node2" href="$classstorage_1_1datatype_1_1_data_box.html" title="Abstract DataBox for all database primitives Currently supported: integers, booleans,..." alt="" coords="22,80,215,107"/>
+<area shape="rect" id="node3" title=" " alt="" coords="9,5,111,32"/>
+<area shape="rect" id="node4" title=" " alt="" coords="135,5,222,32"/>
+</map>

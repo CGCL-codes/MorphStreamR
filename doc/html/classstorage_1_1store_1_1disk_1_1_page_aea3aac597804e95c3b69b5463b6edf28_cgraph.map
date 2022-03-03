@@ -1,0 +1,4 @@
+<map id="storage.store.disk.Page.writeInt" name="storage.store.disk.Page.writeInt">
+<area shape="rect" id="node1" title="Write a 4&#45;byte integer into the page at offset startPos." alt="" coords="5,13,233,39"/>
+<area shape="rect" id="node2" href="$classstorage_1_1store_1_1disk_1_1_page.html#a6bc61d968b51a0adaf991e23f78e37c0" title="Write num bytes from buf at offset position." alt="" coords="281,5,492,47"/>
+</map>

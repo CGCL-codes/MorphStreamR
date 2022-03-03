@@ -1,0 +1,5 @@
+<map id="execution.ExecutionManager.distributeTasks" name="execution.ExecutionManager.distributeTasks">
+<area shape="rect" id="node1" title="Launch threads for each executor in executionGraph We make sure no interference among threads &#45;&#45;&gt; one..." alt="" coords="544,5,819,47"/>
+<area shape="rect" id="node2" href="$classoptimization_1_1_optimization_manager.html#a01e06a1f2f0e7b9ae1955c8461a6b6bd" title="Only naive distribute is supported in TStream." alt="" coords="304,5,496,47"/>
+<area shape="rect" id="node3" href="$classtopology_1_1_topology_submitter.html#ad428be4b97fb18f2d1bb86ec5729931e" title="TODO: support different configurations in TM." alt="" coords="5,5,256,47"/>
+</map>

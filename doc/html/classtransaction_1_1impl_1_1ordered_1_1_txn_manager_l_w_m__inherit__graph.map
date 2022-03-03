@@ -1,0 +1,6 @@
+<map id="transaction.impl.ordered.TxnManagerLWM" name="transaction.impl.ordered.TxnManagerLWM">
+<area shape="rect" id="node1" title="mimic of ACEP&#39;s LWM method." alt="" coords="19,244,205,285"/>
+<area shape="rect" id="node2" href="$classtransaction_1_1impl_1_1_txn_manager_dedicated_locked.html" title="TxnManagerDedicated is a thread&#45;local structure." alt="" coords="5,155,219,196"/>
+<area shape="rect" id="node3" href="$classtransaction_1_1_txn_manager.html" title="Every thread has its own TxnManager." alt="" coords="22,80,202,107"/>
+<area shape="rect" id="node4" href="$interfacetransaction_1_1_i_txn_manager.html" title="Every thread has its own TxnManager." alt="" coords="20,5,204,32"/>
+</map>

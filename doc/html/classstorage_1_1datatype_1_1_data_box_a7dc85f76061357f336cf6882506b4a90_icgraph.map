@@ -1,0 +1,7 @@
+<map id="storage.datatype.DataBox.type" name="storage.datatype.DataBox.type">
+<area shape="rect" id="node1" title="Returns the type of the DataBox." alt="" coords="916,46,1143,73"/>
+<area shape="rect" id="node2" href="$classstorage_1_1table_1_1_record_schema.html#a6bf2796b80dd43f519a00c57aca438ac" title="Verifies that a list of DataBoxes corresponds to this schema." alt="" coords="617,46,868,73"/>
+<area shape="rect" id="node3" href="$classstorage_1_1table_1_1_simple_table.html#a5ec5a7fabeeda720e23c5d1c098f2d5d" title="Adds a new d_record to this table." alt="" coords="340,5,559,47"/>
+<area shape="rect" id="node4" href="$classstorage_1_1table_1_1_simple_table.html#a48c208c7067296f8f90529e546bd9c52" title="Updates an existing d_record with new values and returns the old version of the d_record." alt="" coords="329,71,569,112"/>
+<area shape="rect" id="node5" href="$classdb_1_1_simple_database_1_1_transaction.html#af81c64d73e7f63110f690dc32f3d2541" title=" " alt="" coords="5,71,281,112"/>
+</map>

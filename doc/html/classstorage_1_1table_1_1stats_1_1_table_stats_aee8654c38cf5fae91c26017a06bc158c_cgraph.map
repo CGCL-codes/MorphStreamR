@@ -1,0 +1,5 @@
+<map id="storage.table.stats.TableStats.copyWithPredicate" name="storage.table.stats.TableStats.copyWithPredicate">
+<area shape="rect" id="node1" title="Creates a new TableStats which is the statistics for the table that results from the given predicate ..." alt="" coords="5,27,188,69"/>
+<area shape="rect" id="node2" href="$interfacestorage_1_1table_1_1stats_1_1_histogram.html#a913e6c3a54c86aa70cd42ef6a040a4a2" title="Returns the current count for the given value_list If the value_list was never entered into the histo..." alt="" coords="236,5,477,32"/>
+<area shape="rect" id="node3" href="$classstorage_1_1table_1_1stats_1_1_table_stats.html#a485cdef7d012d33c82522f459c01e32c" title="Creates a new TableStats with a given RecordSchema." alt="" coords="265,57,448,98"/>
+</map>

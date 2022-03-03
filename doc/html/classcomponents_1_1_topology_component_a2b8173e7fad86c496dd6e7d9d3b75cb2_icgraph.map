@@ -1,0 +1,5 @@
+<map id="components.TopologyComponent.get_output_fields" name="components.TopologyComponent.get_output_fields">
+<area shape="rect" id="node1" title=" " alt="" coords="571,5,835,47"/>
+<area shape="rect" id="node2" href="$classcomponents_1_1context_1_1_topology_context.html#a8a80f37565eb9befce56f738440ccd02" title="Gets the declared output fields for the specified component." alt="" coords="268,5,523,47"/>
+<area shape="rect" id="node3" href="$classexecution_1_1runtime_1_1tuple_1_1impl_1_1_tuple.html#ac856c3161dabd85adda18ed194879820" title="Gets fields in this Brisk.execution.runtime.tuple." alt="" coords="5,5,220,47"/>
+</map>

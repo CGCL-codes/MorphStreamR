@@ -1,0 +1,5 @@
+<map id="components.context.TopologyContext.getComponent" name="components.context.TopologyContext.getComponent">
+<area shape="rect" id="node1" title="Gets the component for the specified Task id." alt="" coords="531,5,748,47"/>
+<area shape="rect" id="node2" href="$classexecution_1_1runtime_1_1tuple_1_1impl_1_1_tuple.html#a99498120ef492235928c3858f1ffc178" title="Gets the id of the component that created this Brisk.execution.runtime.tuple." alt="" coords="268,5,483,47"/>
+<area shape="rect" id="node3" href="$classexecution_1_1runtime_1_1tuple_1_1impl_1_1_tuple.html#ac856c3161dabd85adda18ed194879820" title="Gets fields in this Brisk.execution.runtime.tuple." alt="" coords="5,5,220,47"/>
+</map>

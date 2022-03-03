@@ -1,0 +1,5 @@
+<map id="storage.store.disk.Page.readBytes" name="storage.store.disk.Page.readBytes">
+<area shape="rect" id="node1" title="Read all the bytes in file." alt="" coords="277,35,484,76"/>
+<area shape="rect" id="node2" href="$classstorage_1_1store_1_1disk_1_1_page.html#a881485bdc7c12c178ad214b2e3ae8c16" title="Reads num bytes from offset position and returns them in a new byte array." alt="" coords="14,5,221,47"/>
+<area shape="rect" id="node3" href="$classstorage_1_1store_1_1disk_1_1_page.html#a0534e6211d3ed0d7bfa540be5d622d61" title="Read a 4&#45;byte integer from the page at offset startPos." alt="" coords="5,71,229,98"/>
+</map>

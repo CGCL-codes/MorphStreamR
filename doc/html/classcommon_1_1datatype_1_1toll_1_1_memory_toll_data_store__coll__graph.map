@@ -1,0 +1,4 @@
+<map id="common.datatype.toll.MemoryTollDataStore" name="common.datatype.toll.MemoryTollDataStore">
+<area shape="rect" id="node1" title="a TollDataStore which stores data in memory." alt="" coords="5,95,229,136"/>
+<area shape="rect" id="node2" href="$interfacecommon_1_1datatype_1_1toll_1_1_toll_data_store.html" title="An interface for the storage of toll data (encapsulated in TollEntry) for historical queries." alt="" coords="21,5,213,47"/>
+</map>

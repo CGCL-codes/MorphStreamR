@@ -1,0 +1,6 @@
+<map id="storage.table.stats.IntHistogram.computeReductionFactor" name="storage.table.stats.IntHistogram.computeReductionFactor">
+<area shape="rect" id="node1" title="Computes the reduction factor that a predicate and value_list result in over this IntHistogram." alt="" coords="5,71,300,112"/>
+<area shape="rect" id="node2" href="$classstorage_1_1table_1_1stats_1_1_int_histogram.html#aab5612f849db3aba38b8e11b5b0b6fe2" title="Gets the estimate maximum value_list of this." alt="" coords="348,5,607,47"/>
+<area shape="rect" id="node3" href="$classstorage_1_1table_1_1stats_1_1_int_histogram.html#a438b82b028ade7ec11f1dfa8ca80bcdc" title="Gets the estimate minimum value_list of this." alt="" coords="348,71,607,112"/>
+<area shape="rect" id="node4" href="$classstorage_1_1table_1_1stats_1_1_int_histogram.html#aa7a77a44184ca4493d7bbc46e3bc7140" title="Gets the estimate number of distinct entries in this histogram." alt="" coords="348,136,607,177"/>
+</map>

@@ -1,0 +1,4 @@
+<map id="net.openhft.affinity.AffinityLock.acquireLock" name="net.openhft.affinity.AffinityLock.acquireLock">
+<area shape="rect" id="node1" title="Give another affinity lock relative to this one based on a list of strategies." alt="" coords="5,5,200,47"/>
+<area shape="rect" id="node2" href="$classnet_1_1openhft_1_1affinity_1_1_affinity_lock.html#ae11e1e4a42ae7def12b5d54bf8271186" title="Assign any free cpu to this thread." alt="" coords="248,5,443,47"/>
+</map>

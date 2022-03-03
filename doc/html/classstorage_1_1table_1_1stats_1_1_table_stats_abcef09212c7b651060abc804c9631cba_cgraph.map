@@ -1,0 +1,4 @@
+<map id="storage.table.stats.TableStats.getHistogram" name="storage.table.stats.TableStats.getHistogram">
+<area shape="rect" id="node1" title="Gets the histogram for a certain column." alt="" coords="5,5,188,47"/>
+<area shape="rect" id="node2" href="$interfacestorage_1_1table_1_1stats_1_1_histogram.html#a913e6c3a54c86aa70cd42ef6a040a4a2" title="Returns the current count for the given value_list If the value_list was never entered into the histo..." alt="" coords="236,13,477,39"/>
+</map>

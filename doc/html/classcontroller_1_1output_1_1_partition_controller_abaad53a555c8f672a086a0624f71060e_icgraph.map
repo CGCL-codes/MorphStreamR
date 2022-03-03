@@ -1,0 +1,6 @@
+<map id="controller.output.PartitionController.offer" name="controller.output.PartitionController.offer">
+<area shape="rect" id="node1" title="TODO: temporally store the tuples if failed to push？" alt="" coords="316,71,503,112"/>
+<area shape="rect" id="node2" href="$classcontroller_1_1output_1_1partition_1_1_marker_shuffle_partition_controller.html#a406882a6eec19a2901097fee4fb40c00" title="partition according to partition ratio." alt="" coords="5,5,268,47"/>
+<area shape="rect" id="node3" href="$classcontroller_1_1output_1_1partition_1_1_shuffle_partition_controller.html#ad7b980db1cda9fb49ba608fe1110fc73" title="partition according to partition ratio." alt="" coords="27,71,246,112"/>
+<area shape="rect" id="node4" href="$classcontroller_1_1output_1_1partition_1_1_partial_key_grouping_controller.html#a5c98e8b566b0d733e4f4d9f40a5f4f89" title="partition according to partition ratio." alt="" coords="15,136,258,177"/>
+</map>

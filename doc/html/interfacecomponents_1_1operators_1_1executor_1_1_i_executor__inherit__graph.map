@@ -1,0 +1,10 @@
+<map id="components.operators.executor.IExecutor" name="components.operators.executor.IExecutor">
+<area shape="rect" id="node1" title=" " alt="" coords="152,136,383,177"/>
+<area shape="rect" id="node3" href="$classcomponents_1_1operators_1_1executor_1_1_bolt_executor.html" title=" " alt="" coords="431,71,661,112"/>
+<area shape="rect" id="node6" href="$classcomponents_1_1operators_1_1executor_1_1_spout_executor.html" title=" " alt="" coords="431,136,661,177"/>
+<area shape="rect" id="node8" href="$classcomponents_1_1operators_1_1executor_1_1_virtual_executor.html" title=" " alt="" coords="431,201,661,243"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,143,104,170"/>
+<area shape="rect" id="node4" href="$classcomponents_1_1operators_1_1executor_1_1_basic_bolt_batch_executor.html" title=" " alt="" coords="709,5,940,47"/>
+<area shape="rect" id="node5" href="$classcomponents_1_1operators_1_1executor_1_1_basic_window_bolt_batch_executor.html" title=" " alt="" coords="709,71,940,112"/>
+<area shape="rect" id="node7" href="$classcomponents_1_1operators_1_1executor_1_1_basic_spout_batch_executor.html" title=" " alt="" coords="709,136,940,177"/>
+</map>

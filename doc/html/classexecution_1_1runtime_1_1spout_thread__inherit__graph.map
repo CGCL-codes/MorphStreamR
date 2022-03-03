@@ -1,0 +1,5 @@
+<map id="execution.runtime.spoutThread" name="execution.runtime.spoutThread">
+<area shape="rect" id="node1" title="Task thread that hosts spout logic." alt="" coords="5,169,231,196"/>
+<area shape="rect" id="node2" href="$classexecution_1_1runtime_1_1executor_thread.html" title=" " alt="" coords="18,80,218,121"/>
+<area shape="rect" id="node3" title=" " alt="" coords="85,5,151,32"/>
+</map>

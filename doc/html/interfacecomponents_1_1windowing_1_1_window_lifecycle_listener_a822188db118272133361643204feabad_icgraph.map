@@ -1,0 +1,4 @@
+<map id="components.windowing.WindowLifecycleListener.onActivation" name="components.windowing.WindowLifecycleListener.onActivation">
+<area shape="rect" id="node1" title="Called on activation of the window due to the TriggerPolicy." alt="" coords="285,13,517,54"/>
+<area shape="rect" id="node2" href="$classcomponents_1_1windowing_1_1_window_manager.html#aaabb3f11ba16ac5443b4535cd8bc196a" title="The callback_bolt invoked by the trigger policy." alt="" coords="5,5,237,61"/>
+</map>

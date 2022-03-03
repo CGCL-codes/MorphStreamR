@@ -1,0 +1,6 @@
+<map id="transaction.impl.ordered.TxnManagerOrderLockBlocking" name="transaction.impl.ordered.TxnManagerOrderLockBlocking">
+<area shape="rect" id="node1" title="conventional two&#45;phase locking with no&#45;sync_ratio strategy from Cavalia." alt="" coords="5,244,231,285"/>
+<area shape="rect" id="node2" href="$classtransaction_1_1impl_1_1_txn_manager_dedicated_locked.html" title="TxnManagerDedicated is a thread&#45;local structure." alt="" coords="11,155,225,196"/>
+<area shape="rect" id="node3" href="$classtransaction_1_1_txn_manager.html" title="Every thread has its own TxnManager." alt="" coords="28,80,208,107"/>
+<area shape="rect" id="node4" href="$interfacetransaction_1_1_i_txn_manager.html" title="Every thread has its own TxnManager." alt="" coords="26,5,210,32"/>
+</map>

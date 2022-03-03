@@ -1,0 +1,5 @@
+<map id="scheduler.signal.op.OnRootSignal" name="scheduler.signal.op.OnRootSignal">
+<area shape="rect" id="node1" title=" " alt="" coords="13,184,212,225"/>
+<area shape="rect" id="node2" href="$classscheduler_1_1signal_1_1op_1_1_operation_signal.html" title=" " alt="" coords="5,95,220,136"/>
+<area shape="rect" id="node3" href="$interfacescheduler_1_1signal_1_1_notification_signal.html" title=" " alt="" coords="9,5,216,47"/>
+</map>

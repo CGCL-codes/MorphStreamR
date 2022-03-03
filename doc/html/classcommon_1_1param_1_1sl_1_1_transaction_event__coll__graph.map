@@ -1,0 +1,9 @@
+<map id="common.param.sl.TransactionEvent" name="common.param.sl.TransactionEvent">
+<area shape="rect" id="node1" title=" " alt="" coords="743,147,961,189"/>
+<area shape="rect" id="node2" href="$classcommon_1_1param_1_1_txn_event.html" title=" " alt="" coords="359,31,549,57"/>
+<area shape="rect" id="node3" title=" " alt="" coords="5,5,197,32"/>
+<area shape="rect" id="node4" title=" " alt="" coords="68,56,135,83"/>
+<area shape="rect" id="node5" href="$classstorage_1_1_schema_record_ref.html" title="A hack ref to SchemaRecord, simulating C++ pointer." alt="" coords="357,109,551,136"/>
+<area shape="rect" id="node6" href="$classstorage_1_1_table_record_ref.html" title=" " alt="" coords="366,199,542,225"/>
+<area shape="rect" id="node7" href="$classcommon_1_1bolts_1_1transactional_1_1sl_1_1_transaction_result.html" title="Data type describing the result of a processed transaction." alt="" coords="343,250,565,291"/>
+</map>

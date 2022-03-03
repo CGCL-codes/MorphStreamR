@@ -1,0 +1,4 @@
+<map id="optimization.OptimizationManager.lanuch" name="optimization.OptimizationManager.lanuch">
+<area shape="rect" id="node1" title="Only naive distribute is supported in TStream." alt="" coords="5,5,197,47"/>
+<area shape="rect" id="node2" href="$classexecution_1_1_execution_manager.html#a1d58e0b124df50f2f7e8cbd9b50354c2" title="Launch threads for each executor in executionGraph We make sure no interference among threads &#45;&#45;&gt; one..." alt="" coords="245,5,520,47"/>
+</map>

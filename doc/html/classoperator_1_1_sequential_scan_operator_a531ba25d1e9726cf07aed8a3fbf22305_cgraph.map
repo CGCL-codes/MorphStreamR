@@ -1,0 +1,5 @@
+<map id="operator.SequentialScanOperator.SequentialScanOperator" name="operator.SequentialScanOperator.SequentialScanOperator">
+<area shape="rect" id="node1" title="Creates a new SequentialScanOperator that provides an iterator on all tuples in a table." alt="" coords="5,39,245,80"/>
+<area shape="rect" id="node2" href="$classoperator_1_1_sequential_scan_operator.html#aae73610cfe5b456a74a6420fd16cb395" title="Estimates the IO cost of executing this query operator." alt="" coords="293,5,592,47"/>
+<area shape="rect" id="node3" href="$classoperator_1_1_sequential_scan_operator.html#a22cb858e96402b79a7cd156ea750c6a0" title="Estimates the table statistics for the result of executing this query operator." alt="" coords="293,71,592,112"/>
+</map>

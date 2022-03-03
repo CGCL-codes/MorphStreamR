@@ -1,0 +1,11 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$interfacescheduler_1_1oplevel_1_1signal_1_1_notification_signal.html" title=" " alt="" coords="5,201,188,243"/>
+<area shape="rect" id="node2" href="$classscheduler_1_1oplevel_1_1signal_1_1op_1_1_operation_signal.html" title=" " alt="" coords="236,201,439,243"/>
+<area shape="rect" id="node3" href="$classscheduler_1_1oplevel_1_1signal_1_1op_1_1_on_header_start_abort_handling_signal.html" title=" " alt="" coords="487,5,737,47"/>
+<area shape="rect" id="node4" href="$classscheduler_1_1oplevel_1_1signal_1_1op_1_1_on_need_abort_handling_signal.html" title=" " alt="" coords="509,71,715,112"/>
+<area shape="rect" id="node5" href="$classscheduler_1_1oplevel_1_1signal_1_1op_1_1_on_parent_updated_signal.html" title=" " alt="" coords="511,136,713,177"/>
+<area shape="rect" id="node6" href="$classscheduler_1_1oplevel_1_1signal_1_1op_1_1_on_processed_signal.html" title=" " alt="" coords="511,201,713,243"/>
+<area shape="rect" id="node7" href="$classscheduler_1_1oplevel_1_1signal_1_1op_1_1_on_ready_parent_executed_signal.html" title="this signal is used for read operation to elect a new ready candidate." alt="" coords="501,267,723,308"/>
+<area shape="rect" id="node8" href="$classscheduler_1_1oplevel_1_1signal_1_1op_1_1_on_rollback_and_redo_signal.html" title=" " alt="" coords="511,332,713,373"/>
+<area shape="rect" id="node9" href="$classscheduler_1_1oplevel_1_1signal_1_1op_1_1_on_root_signal.html" title=" " alt="" coords="511,397,713,439"/>
+</map>

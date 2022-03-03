@@ -1,0 +1,9 @@
+<map id="benchmark.datagenerator.apps.SL.OCTxnGenerator.LayeredOCDataGenerator" name="benchmark.datagenerator.apps.SL.OCTxnGenerator.LayeredOCDataGenerator">
+<area shape="rect" id="node1" title=" " alt="" coords="920,132,1239,173"/>
+<area shape="rect" id="node2" href="$classbenchmark_1_1datagenerator_1_1_data_generator.html" title="Data generator for benchmarks, this class contains all common methods and attributes that can be used..." alt="" coords="474,21,669,63"/>
+<area shape="rect" id="node3" href="$interfacebenchmark_1_1datagenerator_1_1apps_1_1_s_l_1_1output_1_1_i_output_handler.html" title=" " alt="" coords="5,5,235,47"/>
+<area shape="rect" id="node4" href="$classbenchmark_1_1datagenerator_1_1_data_generator_config.html" title=" " alt="" coords="23,83,217,124"/>
+<area shape="rect" id="node6" href="$classbenchmark_1_1datagenerator_1_1apps_1_1_s_l_1_1_o_c_txn_generator_1_1_layered_o_c_data_generator_config.html" title="Generator Config that is tunable for comprehensive experiments." alt="" coords="412,87,731,143"/>
+<area shape="rect" id="node5" href="$classbenchmark_1_1datagenerator_1_1apps_1_1_s_l_1_1_o_c_txn_generator_1_1_s_l_data_operation_chain.html" title="maintains the actual OCs will be constructed based on the data generator." alt="" coords="422,176,721,217"/>
+<area shape="rect" id="node7" title=" " alt="" coords="472,243,671,270"/>
+</map>

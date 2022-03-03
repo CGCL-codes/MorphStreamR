@@ -1,0 +1,15 @@
+<map id="controller.output.partition.MarkerShufflePartitionController" name="controller.output.partition.MarkerShufflePartitionController">
+<area shape="rect" id="node1" title="Created by shuhaozhang on 11/7/16." alt="" coords="1709,323,1940,364"/>
+<area shape="rect" id="node2" href="$classcontroller_1_1output_1_1partition_1_1_shuffle_partition_controller.html" title="Created by shuhaozhang on 11/7/16." alt="" coords="1468,259,1660,300"/>
+<area shape="rect" id="node3" href="$classcontroller_1_1output_1_1_partition_controller.html" title="Created by shuhaozhang on 11/7/16." alt="" coords="1116,195,1303,236"/>
+<area shape="rect" id="node4" href="$interfacecontroller_1_1output_1_1_i_partition_controller.html" title="Created by shuhaozhang on 11/7/16." alt="" coords="492,115,683,156"/>
+<area shape="rect" id="node5" title=" " alt="" coords="5,198,104,225"/>
+<area shape="rect" id="node6" href="$classcomponents_1_1_topology_component.html" title="Helper class." alt="" coords="707,173,945,199"/>
+<area shape="rect" id="node7" href="$classcomponents_1_1grouping_1_1_grouping.html" title="Created by shuhaozhang on 12/7/16." alt="" coords="197,325,424,351"/>
+<area shape="rect" id="node8" title=" " alt="" coords="153,173,468,199"/>
+<area shape="rect" id="node9" title=" " alt="" coords="237,223,385,250"/>
+<area shape="rect" id="node10" title=" " alt="" coords="748,346,904,373"/>
+<area shape="rect" id="node11" href="$classcomponents_1_1context_1_1_topology_context.html" title="A TopologyContext is created for each executor." alt="" coords="717,224,935,265"/>
+<area shape="rect" id="node12" title=" " alt="" coords="719,290,933,317"/>
+<area shape="rect" id="node13" title=" " alt="" coords="717,5,935,47"/>
+</map>

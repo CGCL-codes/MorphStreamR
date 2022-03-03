@@ -1,0 +1,4 @@
+<map id="components.windowing.CountTriggerPolicy&lt; T &gt;" name="components.windowing.CountTriggerPolicy&lt; T &gt;">
+<area shape="rect" id="node1" title="A trigger that tracks input_event counts and calls back TriggerHandler#onTrigger() when the count thr..." alt="" coords="8,95,227,136"/>
+<area shape="rect" id="node2" href="$interfacecomponents_1_1windowing_1_1_trigger_policy.html" title=" " alt="" coords="5,5,229,47"/>
+</map>

@@ -1,0 +1,4 @@
+<map id="operator.ProjectOperator.estimateIOCost" name="operator.ProjectOperator.estimateIOCost">
+<area shape="rect" id="node1" title="Estimates the IO cost of executing this query operator." alt="" coords="239,5,481,47"/>
+<area shape="rect" id="node2" href="$classoperator_1_1_project_operator.html#a3b9040a74249851e7b1410d06a576ccf" title="Creates a new ProjectOperator that reads tuples from source and filters out columns." alt="" coords="5,5,191,47"/>
+</map>

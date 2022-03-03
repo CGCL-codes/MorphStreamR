@@ -1,0 +1,9 @@
+<map id="components.context.TopologyContext.getThisTaskId" name="components.context.TopologyContext.getThisTaskId">
+<area shape="rect" id="node1" title="Gets the Task id of this Task." alt="" coords="525,115,743,156"/>
+<area shape="rect" id="node2" href="$classcomponents_1_1operators_1_1api_1_1_operator.html#aa53cf24bd014c61f4080164091dcded7" title="This is the API to talk to actual thread." alt="" coords="281,115,477,156"/>
+<area shape="rect" id="node3" href="$classcommon_1_1bolts_1_1transactional_1_1ob_1_1_o_b_bolt__lwm.html#a01248d3655305273a18d55f35b302533" title="This is the API to client application code." alt="" coords="5,5,233,47"/>
+<area shape="rect" id="node4" href="$classcombo_1_1_g_s_combo.html#a178cffabaf44cf5051ad889d8846e4b1" title="This is the API to client application code." alt="" coords="22,71,217,98"/>
+<area shape="rect" id="node5" href="$classcombo_1_1_s_l_combo.html#aaadb665de96020f96c0a767482092851" title="This is the API to client application code." alt="" coords="24,122,215,149"/>
+<area shape="rect" id="node6" href="$classcombo_1_1_t_p_combo.html#ac8263ae151396b4103bec9eb1f892f7e" title="This is the API to client application code." alt="" coords="23,173,215,199"/>
+<area shape="rect" id="node7" href="$classcombo_1_1_o_b_combo.html#a8f7f38f1db94b2d61c995d06ee0bbabb" title="This is the API to client application code." alt="" coords="22,223,217,250"/>
+</map>

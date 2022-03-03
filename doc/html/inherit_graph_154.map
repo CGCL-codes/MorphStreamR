@@ -1,0 +1,4 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$interfacecomponents_1_1windowing_1_1_trigger_policy.html" title=" " alt="" coords="5,5,229,47"/>
+<area shape="rect" id="node2" href="$classcomponents_1_1windowing_1_1_count_trigger_policy.html" title="A trigger that tracks input_event counts and calls back TriggerHandler#onTrigger() when the count thr..." alt="" coords="277,5,496,47"/>
+</map>

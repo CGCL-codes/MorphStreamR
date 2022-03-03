@@ -1,0 +1,5 @@
+<map id="net.openhft.affinity.AffinityLock.acquireLock" name="net.openhft.affinity.AffinityLock.acquireLock">
+<area shape="rect" id="node1" title="Assign any free cpu to this thread." alt="" coords="253,39,448,80"/>
+<area shape="rect" id="node2" href="$classnet_1_1openhft_1_1affinity_1_1_affinity_lock.html#a8c540bf684166d087b293b37672a0f8e" title="Assign a cpu which can be bound to the current thread or another thread." alt="" coords="8,5,203,47"/>
+<area shape="rect" id="node3" href="$classnet_1_1openhft_1_1affinity_1_1_affinity_lock.html#a4a6cd2ac0af010fb3a21cceeef13edf9" title="Allocate from the end." alt="" coords="5,71,205,112"/>
+</map>

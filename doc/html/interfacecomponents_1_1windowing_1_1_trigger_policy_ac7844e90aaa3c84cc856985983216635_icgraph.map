@@ -1,0 +1,4 @@
+<map id="components.windowing.TriggerPolicy.start" name="components.windowing.TriggerPolicy.start">
+<area shape="rect" id="node1" title="Starts the trigger policy." alt="" coords="285,13,509,54"/>
+<area shape="rect" id="node2" href="$classcomponents_1_1windowing_1_1_window_manager.html#aa2a9d769c24e57d7cff7913ab0037de4" title="Start the trigger policy and waterMarkEventGenerator if set." alt="" coords="5,5,237,61"/>
+</map>

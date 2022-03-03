@@ -1,0 +1,4 @@
+<map id="storage.SchemaRecord.GetPrimaryKey" name="storage.SchemaRecord.GetPrimaryKey">
+<area shape="rect" id="node1" title="Assume the primary key is always a String, and is always the first field." alt="" coords="240,5,439,47"/>
+<area shape="rect" id="node2" href="$classstorage_1_1table_1_1_share_table.html#adc3c8fff52c9c06111dd220d57e79fb2" title="Adds a new d_record to this table." alt="" coords="5,5,192,47"/>
+</map>

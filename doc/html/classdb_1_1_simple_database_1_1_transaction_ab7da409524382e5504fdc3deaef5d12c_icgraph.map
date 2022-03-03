@@ -1,0 +1,4 @@
+<map id="db.SimpleDatabase.Transaction.indexExists" name="db.SimpleDatabase.Transaction.indexExists">
+<area shape="rect" id="node1" title="Perform a check to see if the database has an index on this (table,column)." alt="" coords="329,5,596,47"/>
+<area shape="rect" id="node2" href="$classdb_1_1_simple_database_1_1_transaction.html#af81c64d73e7f63110f690dc32f3d2541" title=" " alt="" coords="5,5,281,47"/>
+</map>

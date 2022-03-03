@@ -1,0 +1,5 @@
+<map id="common.param.lr.LREvent" name="common.param.lr.LREvent">
+<area shape="rect" id="node1" title="Currently only consider position events." alt="" coords="83,109,277,136"/>
+<area shape="rect" id="node2" href="$classstorage_1_1_schema_record_ref.html" title="A hack ref to SchemaRecord, simulating C++ pointer." alt="" coords="5,5,200,32"/>
+<area shape="rect" id="node3" title=" " alt="" coords="224,5,291,32"/>
+</map>

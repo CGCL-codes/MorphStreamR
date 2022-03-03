@@ -1,0 +1,7 @@
+<map id="common.datatype.internal.AvgSpeedTuple" name="common.datatype.internal.AvgSpeedTuple">
+<area shape="rect" id="node1" title="AvgSpeedTuple represents an intermediate result tuple; the average speed of all vehicle in a segment ..." alt="" coords="143,169,342,211"/>
+<area shape="rect" id="node2" href="$classcommon_1_1util_1_1datatypes_1_1_stream_values.html" title=" " alt="" coords="5,80,229,121"/>
+<area shape="rect" id="node3" title=" " alt="" coords="26,5,209,32"/>
+<area shape="rect" id="node4" href="$interfacecommon_1_1datatype_1_1util_1_1_i_segment_identifier.html" title="Each type that contains the three segment identifier attributes XWAY, SEGMENT, DIR must implement thi..." alt="" coords="253,80,485,121"/>
+<area shape="rect" id="node5" title=" " alt="" coords="320,5,419,32"/>
+</map>

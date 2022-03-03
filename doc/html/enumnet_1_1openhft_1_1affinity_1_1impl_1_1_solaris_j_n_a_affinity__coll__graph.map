@@ -1,0 +1,4 @@
+<map id="net.openhft.affinity.impl.SolarisJNAAffinity" name="net.openhft.affinity.impl.SolarisJNAAffinity">
+<area shape="rect" id="node1" title="This is essentially the same as the NullAffinity implementation but with concrete support for getThre..." alt="" coords="14,80,195,121"/>
+<area shape="rect" id="node2" href="$interfacenet_1_1openhft_1_1affinity_1_1_i_affinity.html" title="Implementation interface." alt="" coords="5,5,204,32"/>
+</map>

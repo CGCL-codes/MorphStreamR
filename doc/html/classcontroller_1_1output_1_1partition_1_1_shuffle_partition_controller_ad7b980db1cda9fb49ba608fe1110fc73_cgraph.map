@@ -1,0 +1,4 @@
+<map id="controller.output.partition.ShufflePartitionController.emit" name="controller.output.partition.ShufflePartitionController.emit">
+<area shape="rect" id="node1" title="partition according to partition ratio." alt="" coords="5,5,224,47"/>
+<area shape="rect" id="node2" href="$classcontroller_1_1output_1_1_partition_controller.html#abaad53a555c8f672a086a0624f71060e" title="TODO: temporally store the tuples if failed to push？" alt="" coords="272,5,459,47"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="components.windowing.EvictionContext.getReferenceTime" name="components.windowing.EvictionContext.getReferenceTime">
+<area shape="rect" id="node1" title="Returns the reference time that the eviction policy could use to evict the events." alt="" coords="285,43,517,84"/>
+<area shape="rect" id="node2" href="$classcomponents_1_1windowing_1_1_time_eviction_policy.html#a2ac9a5ef98cfcedd32bbf2c40b9e791d" title=" " alt="" coords="15,5,228,47"/>
+<area shape="rect" id="node3" href="$classcomponents_1_1windowing_1_1_window_manager.html#aaabb3f11ba16ac5443b4535cd8bc196a" title="The callback_bolt invoked by the trigger policy." alt="" coords="5,71,237,127"/>
+</map>

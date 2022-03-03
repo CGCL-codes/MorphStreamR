@@ -1,0 +1,4 @@
+<map id="common.util.hash.BloomFilter.getFalsePositiveProbability" name="common.util.hash.BloomFilter.getFalsePositiveProbability">
+<area shape="rect" id="node1" title="Get the current probability of a false positive." alt="" coords="335,5,577,47"/>
+<area shape="rect" id="node2" href="$classcommon_1_1util_1_1hash_1_1_bloom_filter.html#a0fb8b0526e7fce9eab5c0442d51eb600" title="Calculates the expected probability of false positives based on the number of expected filter element..." alt="" coords="5,5,287,47"/>
+</map>

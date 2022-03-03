@@ -1,0 +1,7 @@
+<map id="controller.input.InputStreamController" name="controller.input.InputStreamController">
+<area shape="rect" id="node1" title="Created by shuhaozhang on 17/7/16." alt="" coords="349,39,553,80"/>
+<area shape="rect" id="node4" href="$classcontroller_1_1input_1_1scheduler_1_1_sequential_scheduler.html" title="Created by shuhaozhang on 17/7/16." alt="" coords="601,5,792,47"/>
+<area shape="rect" id="node5" href="$classcontroller_1_1input_1_1scheduler_1_1_uniformed_scheduler.html" title="TODO: The over head is still too large." alt="" coords="601,71,792,112"/>
+<area shape="rect" id="node2" title="Created by shuhaozhang on 17/7/16." alt="" coords="152,46,301,73"/>
+<area shape="rect" id="node3" title=" " alt="" coords="5,46,104,73"/>
+</map>

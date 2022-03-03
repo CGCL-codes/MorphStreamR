@@ -1,0 +1,5 @@
+<map id="operator.ProjectOperator.ProjectOperator" name="operator.ProjectOperator.ProjectOperator">
+<area shape="rect" id="node1" title="Creates a new ProjectOperator that reads tuples from source and filters out columns." alt="" coords="5,39,191,80"/>
+<area shape="rect" id="node2" href="$classoperator_1_1_project_operator.html#a48c4bd85d637fb26550fa1e1e326c705" title="Estimates the IO cost of executing this query operator." alt="" coords="239,5,481,47"/>
+<area shape="rect" id="node3" href="$classoperator_1_1_project_operator.html#aa45972926a9a9f5aecaca8e1591ed703" title="Estimates the table statistics for the result of executing this query operator." alt="" coords="239,71,481,112"/>
+</map>

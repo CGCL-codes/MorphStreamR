@@ -1,0 +1,7 @@
+<map id="common.datatype.toll.FileTollDataStore.retrieveToll" name="common.datatype.toll.FileTollDataStore.retrieveToll">
+<area shape="rect" id="node1" title="Retrieves the toll value_list of the underlying data Store." alt="" coords="5,78,199,119"/>
+<area shape="rect" id="node2" href="$classcommon_1_1bolts_1_1model_1_1_toll_entry.html#abfc757dfb8364f648c38221a83f261e3" title=" " alt="" coords="247,5,525,32"/>
+<area shape="rect" id="node3" href="$classcommon_1_1bolts_1_1model_1_1_toll_entry.html#ac38134a0a5ee0fe5120adf4e7ecb0510" title=" " alt="" coords="253,56,519,83"/>
+<area shape="rect" id="node4" href="$classcommon_1_1bolts_1_1model_1_1_toll_entry.html#a41ddcfe2500033660d1df59c82772e61" title=" " alt="" coords="265,107,507,149"/>
+<area shape="rect" id="node5" href="$classcommon_1_1bolts_1_1model_1_1_toll_entry.html#aafa6aa16fe189ef6edc1cfd8dedaae56" title=" " alt="" coords="247,173,525,200"/>
+</map>

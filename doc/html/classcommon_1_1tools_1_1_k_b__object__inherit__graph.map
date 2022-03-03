@@ -1,0 +1,4 @@
+<map id="common.tools.KB_object" name="common.tools.KB_object">
+<area shape="rect" id="node1" title="each myObject is 8 bytes let&#39;s change it to 1 MB!! that is 1*1024*1024 bytes." alt="" coords="5,80,189,107"/>
+<area shape="rect" id="node2" title=" " alt="" coords="48,5,147,32"/>
+</map>

@@ -1,0 +1,14 @@
+<map id="controller.output.partition.GlobalPartitionController" name="controller.output.partition.GlobalPartitionController">
+<area shape="rect" id="node1" title="Created by shuhaozhang on 11/7/16." alt="" coords="1352,163,1544,204"/>
+<area shape="rect" id="node2" href="$classcontroller_1_1output_1_1_partition_controller.html" title="Created by shuhaozhang on 11/7/16." alt="" coords="1116,163,1303,204"/>
+<area shape="rect" id="node3" href="$interfacecontroller_1_1output_1_1_i_partition_controller.html" title="Created by shuhaozhang on 11/7/16." alt="" coords="492,36,683,78"/>
+<area shape="rect" id="node4" title=" " alt="" coords="5,69,104,96"/>
+<area shape="rect" id="node5" href="$classcomponents_1_1_topology_component.html" title="Helper class." alt="" coords="707,120,945,146"/>
+<area shape="rect" id="node6" href="$classcomponents_1_1grouping_1_1_grouping.html" title="Created by shuhaozhang on 12/7/16." alt="" coords="197,145,424,172"/>
+<area shape="rect" id="node7" title=" " alt="" coords="153,196,468,222"/>
+<area shape="rect" id="node8" title=" " alt="" coords="237,246,385,273"/>
+<area shape="rect" id="node9" title=" " alt="" coords="748,170,904,197"/>
+<area shape="rect" id="node10" href="$classcomponents_1_1context_1_1_topology_context.html" title="A TopologyContext is created for each executor." alt="" coords="717,222,935,263"/>
+<area shape="rect" id="node11" title=" " alt="" coords="719,288,933,314"/>
+<area shape="rect" id="node12" title=" " alt="" coords="717,339,935,380"/>
+</map>

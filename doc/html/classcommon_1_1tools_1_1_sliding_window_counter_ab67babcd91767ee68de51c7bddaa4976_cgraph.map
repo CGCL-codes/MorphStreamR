@@ -1,0 +1,5 @@
+<map id="common.tools.SlidingWindowCounter.getCountsThenAdvanceWindow" name="common.tools.SlidingWindowCounter.getCountsThenAdvanceWindow">
+<area shape="rect" id="node1" title="Return the current (total) counts of all tracked objects, then advance the window." alt="" coords="5,27,288,69"/>
+<area shape="rect" id="node2" href="$classcommon_1_1tools_1_1_slot_based_counter.html#a35dceb743b2007016e451d6e9c0126c1" title="Reset the slot count of any tracked objects to zero for the given slot." alt="" coords="336,5,631,32"/>
+<area shape="rect" id="node3" href="$classcommon_1_1tools_1_1_slot_based_counter.html#ac6af438a4e965cb7848b5f39a9666903" title="Remove any object from the counter whose total count is zero (to free up memory)." alt="" coords="349,57,618,98"/>
+</map>

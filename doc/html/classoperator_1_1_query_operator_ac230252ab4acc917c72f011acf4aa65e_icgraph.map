@@ -1,0 +1,8 @@
+<map id="operator.QueryOperator.checkColumnNameEquality" name="operator.QueryOperator.checkColumnNameEquality">
+<area shape="rect" id="node1" title="Utility method that checks to see if a column is found in a schema using dot notation." alt="" coords="525,104,743,145"/>
+<area shape="rect" id="node2" href="$classoperator_1_1_query_operator.html#a9b75b1fa0a9277d81123e8685e6b1430" title="Utility method to determine whether or not a specified column name is valid with a given schema." alt="" coords="260,104,477,145"/>
+<area shape="rect" id="node3" href="$classoperator_1_1_group_by_operator.html#a4c6dc39d24daa6956a5ad78d26553373" title="Create a new GroupByOperator that pulls from source and groups by groupByColumn." alt="" coords="11,5,207,47"/>
+<area shape="rect" id="node4" href="$classoperator_1_1_index_scan_operator.html#aa6bd9d33fb681bbe684f48a998d1c3f8" title="An index scan operator." alt="" coords="5,71,212,112"/>
+<area shape="rect" id="node5" href="$classoperator_1_1_order_by_operator.html#a056da7577176a201c8bdc8fab9b37087" title="Create a new GroupByOperator that pulls from source and groups by groupByColumn." alt="" coords="12,136,205,177"/>
+<area shape="rect" id="node6" href="$classoperator_1_1_select_operator.html#acc6775836705fe70cb86441971a6a1f7" title="Creates a new SelectOperator that pulls from source and only returns tuples for which the predicate i..." alt="" coords="19,201,199,243"/>
+</map>

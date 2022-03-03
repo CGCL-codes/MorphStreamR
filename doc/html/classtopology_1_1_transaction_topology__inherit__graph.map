@@ -1,0 +1,9 @@
+<map id="topology.TransactionTopology" name="topology.TransactionTopology">
+<area shape="rect" id="node1" title="The basic topology has only one spout and one sink, configured by the default configuration keys." alt="" coords="469,111,683,138"/>
+<area shape="rect" id="node4" href="$classcommon_1_1topology_1_1transactional_1_1_grep_sum.html" title=" " alt="" coords="731,5,961,47"/>
+<area shape="rect" id="node5" href="$classcommon_1_1topology_1_1transactional_1_1_online_biding.html" title="Short term as OB." alt="" coords="731,71,961,112"/>
+<area shape="rect" id="node6" href="$classcommon_1_1topology_1_1transactional_1_1_stream_ledger.html" title="Short term as SL." alt="" coords="731,136,961,177"/>
+<area shape="rect" id="node7" href="$classcommon_1_1topology_1_1transactional_1_1_toll_processing.html" title=" " alt="" coords="731,201,961,243"/>
+<area shape="rect" id="node2" href="$classtopology_1_1_basic_topology.html" title="The basic topology has only one spout and one sink, configured by the default configuration keys." alt="" coords="247,111,421,138"/>
+<area shape="rect" id="node3" href="$classtopology_1_1_abstract_topology.html" title=" " alt="" coords="5,111,199,138"/>
+</map>

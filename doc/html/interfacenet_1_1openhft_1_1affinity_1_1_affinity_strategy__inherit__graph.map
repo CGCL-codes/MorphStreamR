@@ -1,0 +1,4 @@
+<map id="net.openhft.affinity.AffinityStrategy" name="net.openhft.affinity.AffinityStrategy">
+<area shape="rect" id="node1" title="Allow you define a strategy for find the a cpu relative to another select cpu." alt="" coords="5,5,200,47"/>
+<area shape="rect" id="node2" href="$enumnet_1_1openhft_1_1affinity_1_1_affinity_strategies.html" title="Pre&#45;defined strategies for determining which thread to pick next." alt="" coords="5,95,200,136"/>
+</map>

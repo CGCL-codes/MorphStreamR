@@ -1,0 +1,4 @@
+<map id="net.openhft.affinity.AffinityLock.cpuLayout" name="net.openhft.affinity.AffinityLock.cpuLayout">
+<area shape="rect" id="node1" title=" " alt="" coords="248,5,443,47"/>
+<area shape="rect" id="node2" href="$classnet_1_1openhft_1_1affinity_1_1_affinity_lock.html#adb76a5738b7c84ff5561d9f08b45b124" title="Set the CPU layout for this machine." alt="" coords="5,5,200,47"/>
+</map>

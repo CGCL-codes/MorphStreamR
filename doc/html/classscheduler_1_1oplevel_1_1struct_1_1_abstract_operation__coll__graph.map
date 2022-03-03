@@ -1,0 +1,16 @@
+<map id="scheduler.oplevel.struct.AbstractOperation" name="scheduler.oplevel.struct.AbstractOperation">
+<area shape="rect" id="node1" title="TODO: clean state&quot; and&lt;/tt&gt;reference&quot;." alt="" coords="1087,203,1268,244"/>
+<area shape="rect" id="node2" title=" " alt="" coords="705,5,912,47"/>
+<area shape="rect" id="node3" href="$classstorage_1_1_schema_record_ref.html" title="A hack ref to SchemaRecord, simulating C++ pointer." alt="" coords="711,71,906,98"/>
+<area shape="rect" id="node4" href="$classstorage_1_1_table_record_ref.html" title=" " alt="" coords="721,122,897,149"/>
+<area shape="rect" id="node5" href="$interfacecontent_1_1common_1_1_common_meta_types.html" title=" " alt="" coords="695,173,923,215"/>
+<area shape="rect" id="node6" href="$classtransaction_1_1function_1_1_condition.html" title=" " alt="" coords="699,239,918,266"/>
+<area shape="rect" id="node7" href="$classtransaction_1_1context_1_1_txn_context.html" title=" " alt="" coords="695,290,922,317"/>
+<area shape="rect" id="node8" href="$classtransaction_1_1function_1_1_function.html" title="Push down function." alt="" coords="703,341,914,367"/>
+<area shape="rect" id="node9" title=" " alt="" coords="423,339,489,366"/>
+<area shape="rect" id="node10" href="$classstorage_1_1_table_record.html" title=" " alt="" coords="731,437,886,463"/>
+<area shape="rect" id="node11" title=" " alt="" coords="351,390,561,417"/>
+<area shape="rect" id="node12" href="$classstorage_1_1_schema_record.html" title="A wrapper class for an individual d_record." alt="" coords="370,441,542,467"/>
+<area shape="rect" id="node13" href="$classstorage_1_1table_1_1_record_schema.html" title="The RecordSchema of a particular table." alt="" coords="5,441,215,467"/>
+<area shape="rect" id="node14" href="$interfacecontent_1_1_content.html" title=" " alt="" coords="393,491,519,518"/>
+</map>

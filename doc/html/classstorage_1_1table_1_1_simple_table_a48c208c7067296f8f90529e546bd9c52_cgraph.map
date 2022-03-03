@@ -1,0 +1,7 @@
+<map id="storage.table.SimpleTable.updateRecord" name="storage.table.SimpleTable.updateRecord">
+<area shape="rect" id="node1" title="Updates an existing d_record with new values and returns the old version of the d_record." alt="" coords="5,35,245,76"/>
+<area shape="rect" id="node2" href="$classstorage_1_1table_1_1stats_1_1_table_stats.html#a98937a417fce60b5a4c0151c77afc73c" title="Remove the stats for an existing d_record." alt="" coords="327,5,510,47"/>
+<area shape="rect" id="node3" href="$classstorage_1_1table_1_1_record_schema.html#a6bf2796b80dd43f519a00c57aca438ac" title="Verifies that a list of DataBoxes corresponds to this schema." alt="" coords="293,71,544,98"/>
+<area shape="rect" id="node4" href="$classstorage_1_1datatype_1_1_data_box.html#abd97fa09df75e5d142df7962a29bb10b" title="Returns the fixed size of this DataBox." alt="" coords="592,46,837,73"/>
+<area shape="rect" id="node5" href="$classstorage_1_1datatype_1_1_data_box.html#a7dc85f76061357f336cf6882506b4a90" title="Returns the type of the DataBox." alt="" coords="601,97,828,123"/>
+</map>

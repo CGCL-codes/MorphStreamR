@@ -1,0 +1,5 @@
+<map id="storage.table.stats.TableStats.getNumRecords" name="storage.table.stats.TableStats.getNumRecords">
+<area shape="rect" id="node1" title="Gets the number of records the target table contains." alt="" coords="507,5,689,47"/>
+<area shape="rect" id="node2" href="$classstorage_1_1table_1_1stats_1_1_table_stats.html#a91f1c8ce5e416da82e43909d22136a14" title="Creates a new TableStats which is the statistics for the table that results from this TableStats join..." alt="" coords="276,5,459,47"/>
+<area shape="rect" id="node3" href="$classoperator_1_1_join_operator.html#ad332a47e07f87770cd04ce6c77043755" title="Estimates the table statistics for the result of executing this query operator." alt="" coords="5,5,228,47"/>
+</map>

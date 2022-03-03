@@ -1,0 +1,4 @@
+<map id="operator.SequentialScanOperator.estimateIOCost" name="operator.SequentialScanOperator.estimateIOCost">
+<area shape="rect" id="node1" title="Estimates the IO cost of executing this query operator." alt="" coords="293,5,592,47"/>
+<area shape="rect" id="node2" href="$classoperator_1_1_sequential_scan_operator.html#a531ba25d1e9726cf07aed8a3fbf22305" title="Creates a new SequentialScanOperator that provides an iterator on all tuples in a table." alt="" coords="5,5,245,47"/>
+</map>

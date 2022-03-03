@@ -1,0 +1,9 @@
+<map id="common.bolts.wc.SplitSentenceBolt" name="common.bolts.wc.SplitSentenceBolt">
+<area shape="rect" id="node1" title=" " alt="" coords="8,512,264,539"/>
+<area shape="rect" id="node2" href="$classcomponents_1_1operators_1_1base_1_1split_bolt.html" title="Created by tony on 5/8/2017." alt="" coords="5,437,267,464"/>
+<area shape="rect" id="node3" href="$classcomponents_1_1operators_1_1api_1_1_base_operator.html" title="we don&#39;t have to differentiate parent operators or parent executors." alt="" coords="38,348,234,389"/>
+<area shape="rect" id="node4" href="$classcomponents_1_1operators_1_1api_1_1_abstract_bolt.html" title="Created by shuhaozhang on 19/9/16." alt="" coords="38,259,234,300"/>
+<area shape="rect" id="node5" href="$classcomponents_1_1operators_1_1api_1_1_operator.html" title=" " alt="" coords="38,169,234,211"/>
+<area shape="rect" id="node6" href="$interfacecomponents_1_1operators_1_1api_1_1_i_operator.html" title="Created by shuhaozhang on 12/7/16." alt="" coords="38,80,234,121"/>
+<area shape="rect" id="node7" title=" " alt="" coords="87,5,185,32"/>
+</map>

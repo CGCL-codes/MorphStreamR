@@ -1,0 +1,6 @@
+<map id="storage.datatype.DoubleDataBox" name="storage.datatype.DoubleDataBox">
+<area shape="rect" id="node1" title="Float data type which serializes to 14 bytes." alt="" coords="5,155,244,181"/>
+<area shape="rect" id="node2" href="$classstorage_1_1datatype_1_1_data_box.html" title="Abstract DataBox for all database primitives Currently supported: integers, booleans,..." alt="" coords="28,80,221,107"/>
+<area shape="rect" id="node3" title=" " alt="" coords="15,5,117,32"/>
+<area shape="rect" id="node4" title=" " alt="" coords="141,5,228,32"/>
+</map>

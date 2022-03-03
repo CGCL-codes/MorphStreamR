@@ -1,0 +1,13 @@
+<map id="common.bolts.transactional.gs.GSBolt_Locks" name="common.bolts.transactional.gs.GSBolt_Locks">
+<area shape="rect" id="node1" title="Combine Read&#45;Write for nocc." alt="" coords="107,705,334,747"/>
+<area shape="rect" id="node11" href="$classcommon_1_1bolts_1_1transactional_1_1gs_1_1_g_s_bolt__nocc.html" title="Combine Read&#45;Write for nocc." alt="" coords="107,795,334,836"/>
+<area shape="rect" id="node2" href="$classcommon_1_1bolts_1_1transactional_1_1gs_1_1_g_s_bolt.html" title=" " alt="" coords="107,616,334,657"/>
+<area shape="rect" id="node3" href="$classcomponents_1_1operators_1_1api_1_1_transactional_bolt.html" title=" " alt="" coords="123,527,319,568"/>
+<area shape="rect" id="node4" href="$classcomponents_1_1operators_1_1base_1_1_map_bolt.html" title="Created by I309939 on 8/28/2016." alt="" coords="5,437,212,479"/>
+<area shape="rect" id="node5" href="$classcomponents_1_1operators_1_1api_1_1_base_operator.html" title="we don&#39;t have to differentiate parent operators or parent executors." alt="" coords="11,348,207,389"/>
+<area shape="rect" id="node6" href="$classcomponents_1_1operators_1_1api_1_1_abstract_bolt.html" title="Created by shuhaozhang on 19/9/16." alt="" coords="11,259,207,300"/>
+<area shape="rect" id="node7" href="$classcomponents_1_1operators_1_1api_1_1_operator.html" title=" " alt="" coords="11,169,207,211"/>
+<area shape="rect" id="node8" href="$interfacecomponents_1_1operators_1_1api_1_1_i_operator.html" title="Created by shuhaozhang on 12/7/16." alt="" coords="11,80,207,121"/>
+<area shape="rect" id="node9" title=" " alt="" coords="59,5,158,32"/>
+<area shape="rect" id="node10" href="$interfacecomponents_1_1operators_1_1api_1_1_checkpointable.html" title=" " alt="" coords="236,437,432,479"/>
+</map>

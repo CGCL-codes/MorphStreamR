@@ -1,0 +1,8 @@
+<map id="utils.lib.NonBlockingIdentityHashMap.contains" name="utils.lib.NonBlockingIdentityHashMap.contains">
+<area shape="rect" id="node1" title="Legacy method testing if some key maps into the specified value_list in this table." alt="" coords="5,68,212,109"/>
+<area shape="rect" id="node2" href="$classutils_1_1lib_1_1_non_blocking_identity_hash_map.html#a0c05610009764236bacf4ef27a4be4fd" title="Returns true if this Map maps one or more keys to the specified value_list." alt="" coords="260,39,467,80"/>
+<area shape="rect" id="node3" href="$classutils_1_1lib_1_1_non_blocking_identity_hash_map.html#afa9141e0555fc1f211f2977e47d9bccb" title="Returns a Collection view of the values contained in this map." alt="" coords="515,39,721,80"/>
+<area shape="rect" id="node4" href="$classutils_1_1lib_1_1_non_blocking_identity_hash_map.html#ada99914cf6c4ee21d55c952334f1bbc0" title="Removes all of the mappings from this map." alt="" coords="769,5,976,47"/>
+<area shape="rect" id="node6" href="$classutils_1_1lib_1_1_non_blocking_identity_hash_map.html#a8ceec557331435edecf9b1c6512a3a6a" title="Returns the number of key&#45;value_list mappings in this map." alt="" coords="769,71,976,112"/>
+<area shape="rect" id="node5" href="$classutils_1_1lib_1_1_non_blocking_identity_hash_map.html#afcae56c0bdde0a1a781138aff9390183" title="Create a new NonBlockingHashMap with default minimum size (currently set to 8 K/V pairs or roughly 84..." alt="" coords="1024,5,1304,47"/>
+</map>

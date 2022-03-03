@@ -1,0 +1,7 @@
+<map id="common.datatype.AccountBalanceRequest" name="common.datatype.AccountBalanceRequest">
+<area shape="rect" id="node1" title="A AccountBalanceRequest from the LRB data generator." alt="" coords="5,348,255,389"/>
+<area shape="rect" id="node2" href="$classcommon_1_1datatype_1_1_abstract_input_tuple.html" title="The comm class for all LRB input tuples (ie, position reports and query requests)." alt="" coords="31,259,229,300"/>
+<area shape="rect" id="node3" href="$classcommon_1_1datatype_1_1_abstract_l_r_b_tuple.html" title="Base class for all LRB tuples." alt="" coords="31,169,229,211"/>
+<area shape="rect" id="node4" href="$classcommon_1_1util_1_1datatypes_1_1_stream_values.html" title=" " alt="" coords="18,80,242,121"/>
+<area shape="rect" id="node5" title=" " alt="" coords="39,5,221,32"/>
+</map>

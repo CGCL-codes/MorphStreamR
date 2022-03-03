@@ -1,0 +1,17 @@
+<map id="scheduler.struct.layered.bfs.BFSOperation" name="scheduler.struct.layered.bfs.BFSOperation">
+<area shape="rect" id="node1" title="contains the place&#45;holder to fill, as well as timestamp (counter)." alt="" coords="1340,202,1547,243"/>
+<area shape="rect" id="node2" href="$classscheduler_1_1struct_1_1_abstract_operation.html" title="TODO: clean state&quot; and&lt;/tt&gt;reference&quot;." alt="" coords="1108,202,1291,243"/>
+<area shape="rect" id="node3" title=" " alt="" coords="695,5,944,32"/>
+<area shape="rect" id="node4" href="$classstorage_1_1_schema_record_ref.html" title="A hack ref to SchemaRecord, simulating C++ pointer." alt="" coords="722,56,917,83"/>
+<area shape="rect" id="node5" title=" " alt="" coords="726,107,913,149"/>
+<area shape="rect" id="node6" href="$interfacecontent_1_1common_1_1_common_meta_types.html" title=" " alt="" coords="705,173,933,214"/>
+<area shape="rect" id="node7" href="$classtransaction_1_1function_1_1_condition.html" title=" " alt="" coords="710,239,929,265"/>
+<area shape="rect" id="node8" href="$classtransaction_1_1context_1_1_txn_context.html" title=" " alt="" coords="706,289,933,316"/>
+<area shape="rect" id="node9" href="$classtransaction_1_1function_1_1_function.html" title="Push down function." alt="" coords="714,340,925,367"/>
+<area shape="rect" id="node10" title=" " alt="" coords="423,339,489,365"/>
+<area shape="rect" id="node11" href="$classstorage_1_1_table_record.html" title=" " alt="" coords="742,436,897,463"/>
+<area shape="rect" id="node12" title=" " alt="" coords="351,389,561,416"/>
+<area shape="rect" id="node13" href="$classstorage_1_1_schema_record.html" title="A wrapper class for an individual d_record." alt="" coords="370,440,542,467"/>
+<area shape="rect" id="node14" href="$classstorage_1_1table_1_1_record_schema.html" title="The RecordSchema of a particular table." alt="" coords="5,440,215,467"/>
+<area shape="rect" id="node15" href="$interfacecontent_1_1_content.html" title=" " alt="" coords="393,491,519,517"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="operator.SequentialScanOperator" name="operator.SequentialScanOperator">
+<area shape="rect" id="node1" title=" " alt="" coords="5,185,243,212"/>
+<area shape="rect" id="node2" href="$classoperator_1_1_query_operator.html" title=" " alt="" coords="36,109,212,136"/>
+<area shape="rect" id="node3" href="$classstorage_1_1table_1_1stats_1_1_table_stats.html" title="A wrapper class to represent the statistics for a partition table." alt="" coords="33,5,215,47"/>
+</map>

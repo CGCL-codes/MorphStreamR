@@ -1,0 +1,4 @@
+<map id="scheduler.impl.layered.BFSSchedulerWithAbort" name="scheduler.impl.layered.BFSSchedulerWithAbort">
+<area shape="rect" id="node1" title="The scheduler based on TPG, this is to be invoked when the queue is empty of each thread,..." alt="" coords="13,109,276,151"/>
+<area shape="rect" id="node2" href="$classscheduler_1_1impl_1_1layered_1_1_abstract_b_f_s_scheduler.html" title=" " alt="" coords="5,5,284,61"/>
+</map>

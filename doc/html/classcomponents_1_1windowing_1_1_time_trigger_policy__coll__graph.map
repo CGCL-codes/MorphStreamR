@@ -1,0 +1,4 @@
+<map id="components.windowing.TimeTriggerPolicy&lt; T &gt;" name="components.windowing.TimeTriggerPolicy&lt; T &gt;">
+<area shape="rect" id="node1" title="Invokes TriggerHandler#onTrigger() after the duration." alt="" coords="11,95,224,136"/>
+<area shape="rect" id="node2" href="$interfacecomponents_1_1windowing_1_1_trigger_policy.html" title=" " alt="" coords="5,5,229,47"/>
+</map>

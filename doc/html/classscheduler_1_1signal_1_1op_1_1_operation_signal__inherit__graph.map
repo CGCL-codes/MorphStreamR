@@ -1,0 +1,10 @@
+<map id="scheduler.signal.op.OperationSignal" name="scheduler.signal.op.OperationSignal">
+<area shape="rect" id="node1" title=" " alt="" coords="260,169,475,211"/>
+<area shape="rect" id="node3" href="$classscheduler_1_1signal_1_1op_1_1_on_descendant_updated_signal.html" title=" " alt="" coords="523,5,769,47"/>
+<area shape="rect" id="node4" href="$classscheduler_1_1signal_1_1op_1_1_on_header_updated_signal.html" title=" " alt="" coords="538,71,754,112"/>
+<area shape="rect" id="node5" href="$classscheduler_1_1signal_1_1op_1_1_on_parent_updated_signal.html" title=" " alt="" coords="541,136,751,177"/>
+<area shape="rect" id="node6" href="$classscheduler_1_1signal_1_1op_1_1_on_processed_signal.html" title=" " alt="" coords="529,201,763,243"/>
+<area shape="rect" id="node7" href="$classscheduler_1_1signal_1_1op_1_1_on_ready_parent_executed_signal.html" title="this signal is used for read operation to elect a new ready candidate." alt="" coords="541,267,751,308"/>
+<area shape="rect" id="node8" href="$classscheduler_1_1signal_1_1op_1_1_on_root_signal.html" title=" " alt="" coords="547,332,745,373"/>
+<area shape="rect" id="node2" href="$interfacescheduler_1_1signal_1_1_notification_signal.html" title=" " alt="" coords="5,169,212,211"/>
+</map>

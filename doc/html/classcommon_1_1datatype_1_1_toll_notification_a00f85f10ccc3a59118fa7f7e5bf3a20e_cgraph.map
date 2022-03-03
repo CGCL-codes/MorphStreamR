@@ -1,0 +1,7 @@
+<map id="common.datatype.TollNotification.equals" name="common.datatype.TollNotification.equals">
+<area shape="rect" id="node1" title="Compares the specified object with this TollNotification object for equality." alt="" coords="5,107,295,134"/>
+<area shape="rect" id="node2" href="$classcommon_1_1datatype_1_1_toll_notification.html#a0342f437d239e54219bba227ff98a048" title="Returns the 5&#45;minute average speed of the segment of this TollNotification." alt="" coords="354,5,621,47"/>
+<area shape="rect" id="node3" href="$classcommon_1_1datatype_1_1_abstract_l_r_b_tuple.html#a94f4d286b31e8b6f4eb8fc1de86353bd" title="Returns the timestamp (in LRB seconds) of this AbstractLRBTuple." alt="" coords="388,71,587,112"/>
+<area shape="rect" id="node4" href="$classcommon_1_1datatype_1_1_toll_notification.html#a98a8cc80183e72bfb3c24888794f1056" title="Returns the toll of this TollNotification." alt="" coords="343,137,632,163"/>
+<area shape="rect" id="node5" href="$classcommon_1_1datatype_1_1_toll_notification.html#ac9cfac08bca75a0e46bdb9b7e17057ad" title="Returns the vehicle ID of this TollNotification." alt="" coords="343,187,631,214"/>
+</map>

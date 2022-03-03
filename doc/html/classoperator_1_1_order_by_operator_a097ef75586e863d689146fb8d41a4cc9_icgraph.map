@@ -1,0 +1,4 @@
+<map id="operator.OrderByOperator.estimateStats" name="operator.OrderByOperator.estimateStats">
+<area shape="rect" id="node1" title="Estimates the table statistics for the result of executing this query operator." alt="" coords="247,5,497,47"/>
+<area shape="rect" id="node2" href="$classoperator_1_1_order_by_operator.html#a056da7577176a201c8bdc8fab9b37087" title="Create a new GroupByOperator that pulls from source and groups by groupByColumn." alt="" coords="5,5,199,47"/>
+</map>

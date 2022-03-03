@@ -1,0 +1,4 @@
+<map id="storage.table.SimpleTable.deleteRecord" name="storage.table.SimpleTable.deleteRecord">
+<area shape="rect" id="node1" title="Deletes the d_record specified by rid from the table." alt="" coords="325,5,561,47"/>
+<area shape="rect" id="node2" href="$classdb_1_1_simple_database_1_1_transaction.html#a2cc7f0e13136466dd8f872757ffd5e94" title="Delete a row form the table." alt="" coords="5,5,277,47"/>
+</map>

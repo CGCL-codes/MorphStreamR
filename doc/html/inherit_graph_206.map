@@ -1,0 +1,10 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$interfacenet_1_1openhft_1_1affinity_1_1_i_affinity.html" title="Implementation interface." alt="" coords="5,209,204,235"/>
+<area shape="rect" id="node2" href="$enumnet_1_1openhft_1_1affinity_1_1impl_1_1_linux_j_n_a_affinity.html" title=" " alt="" coords="316,5,497,47"/>
+<area shape="rect" id="node3" href="$enumnet_1_1openhft_1_1affinity_1_1impl_1_1_null_affinity.html" title=" " alt="" coords="316,71,497,112"/>
+<area shape="rect" id="node4" href="$enumnet_1_1openhft_1_1affinity_1_1impl_1_1_o_s_x_j_n_a_affinity.html" title="This is essentially the same as the NullAffinity implementation but with concrete support for getThre..." alt="" coords="316,136,497,177"/>
+<area shape="rect" id="node5" href="$enumnet_1_1openhft_1_1affinity_1_1impl_1_1_posix_j_n_a_affinity.html" title="Implementation of IAffinity based on JNA call of sched_setaffinity(3)/sched_getaffinity(3) from &#39;c&#39; l..." alt="" coords="316,201,497,243"/>
+<area shape="rect" id="node6" href="$enumnet_1_1openhft_1_1affinity_1_1impl_1_1_solaris_j_n_a_affinity.html" title="This is essentially the same as the NullAffinity implementation but with concrete support for getThre..." alt="" coords="316,267,497,308"/>
+<area shape="rect" id="node7" href="$enumnet_1_1openhft_1_1affinity_1_1impl_1_1_windows_j_n_a_affinity.html" title="Implementation of IAffinity based on JNA call of sched_SetThreadAffinityMask/GetProcessAffinityMask f..." alt="" coords="316,332,497,373"/>
+<area shape="rect" id="node8" href="$enumsoftware_1_1chronicle_1_1enterprise_1_1internals_1_1impl_1_1_native_affinity.html" title=" " alt="" coords="252,397,561,439"/>
+</map>

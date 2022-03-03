@@ -1,0 +1,4 @@
+<map id="net.openhft.affinity.impl.PosixJNAAffinity" name="net.openhft.affinity.impl.PosixJNAAffinity">
+<area shape="rect" id="node1" title="Implementation of IAffinity based on JNA call of sched_setaffinity(3)/sched_getaffinity(3) from &#39;c&#39; l..." alt="" coords="14,80,195,121"/>
+<area shape="rect" id="node2" href="$interfacenet_1_1openhft_1_1affinity_1_1_i_affinity.html" title="Implementation interface." alt="" coords="5,5,204,32"/>
+</map>

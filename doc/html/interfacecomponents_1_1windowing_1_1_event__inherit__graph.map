@@ -1,0 +1,5 @@
+<map id="components.windowing.Event&lt; T &gt;" name="components.windowing.Event&lt; T &gt;">
+<area shape="rect" id="node1" title="An input_event is a wrapper object that gets stored in the window." alt="" coords="5,5,260,32"/>
+<area shape="rect" id="node2" href="$classcomponents_1_1windowing_1_1_basic_event.html" title=" " alt="" coords="25,80,240,121"/>
+<area shape="rect" id="node3" href="$classcomponents_1_1windowing_1_1_water_mark_event.html" title="Watermark input_event used for tracking progress of time when processing input_event based ts." alt="" coords="43,169,223,211"/>
+</map>

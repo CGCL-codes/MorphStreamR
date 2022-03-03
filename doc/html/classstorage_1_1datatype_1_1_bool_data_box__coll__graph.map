@@ -1,0 +1,6 @@
+<map id="storage.datatype.BoolDataBox" name="storage.datatype.BoolDataBox">
+<area shape="rect" id="node1" title="Boolean data type which serializes to 1 byte." alt="" coords="5,155,228,181"/>
+<area shape="rect" id="node2" href="$classstorage_1_1datatype_1_1_data_box.html" title="Abstract DataBox for all database primitives Currently supported: integers, booleans,..." alt="" coords="20,80,213,107"/>
+<area shape="rect" id="node3" title=" " alt="" coords="7,5,109,32"/>
+<area shape="rect" id="node4" title=" " alt="" coords="133,5,220,32"/>
+</map>

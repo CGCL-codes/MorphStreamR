@@ -1,0 +1,4 @@
+<map id="common.datatype.toll.FileTollDataStore" name="common.datatype.toll.FileTollDataStore">
+<area shape="rect" id="node1" title="A TollDataStore that uses a file for storage including all disadvantages." alt="" coords="5,95,199,136"/>
+<area shape="rect" id="node2" href="$interfacecommon_1_1datatype_1_1toll_1_1_toll_data_store.html" title="An interface for the storage of toll data (encapsulated in TollEntry) for historical queries." alt="" coords="6,5,198,47"/>
+</map>

@@ -1,0 +1,4 @@
+<map id="controller.output.partition.PartialKeyGroupingController.emit_nowait" name="controller.output.partition.PartialKeyGroupingController.emit_nowait">
+<area shape="rect" id="node1" title="partition according to partition ratio." alt="" coords="5,5,300,47"/>
+<area shape="rect" id="node2" href="$classcontroller_1_1output_1_1_partition_controller.html#a7a05781bc1213b15c4d1c2878168b740" title="Try_offer won&#39;t allow sequential execution due to potential drop tuples." alt="" coords="348,5,535,47"/>
+</map>

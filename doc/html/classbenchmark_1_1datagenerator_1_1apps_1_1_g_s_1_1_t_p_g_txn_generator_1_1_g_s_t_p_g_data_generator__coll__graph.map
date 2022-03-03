@@ -1,0 +1,7 @@
+<map id="benchmark.datagenerator.apps.GS.TPGTxnGenerator.GSTPGDataGenerator" name="benchmark.datagenerator.apps.GS.TPGTxnGenerator.GSTPGDataGenerator">
+<area shape="rect" id="node1" title="\textbf{Workload Configurations.} We extend SL for workload sensitivity study by tweaking its workloa..." alt="" coords="821,72,1124,113"/>
+<area shape="rect" id="node2" href="$classbenchmark_1_1datagenerator_1_1_data_generator.html" title="Data generator for benchmarks, this class contains all common methods and attributes that can be used..." alt="" coords="433,37,627,79"/>
+<area shape="rect" id="node3" href="$interfacebenchmark_1_1datagenerator_1_1apps_1_1_s_l_1_1output_1_1_i_output_handler.html" title=" " alt="" coords="5,5,235,47"/>
+<area shape="rect" id="node4" href="$classbenchmark_1_1datagenerator_1_1_data_generator_config.html" title=" " alt="" coords="23,71,217,112"/>
+<area shape="rect" id="node5" href="$classcommon_1_1tools_1_1_fast_zipf_generator.html" title=" " alt="" coords="412,103,648,130"/>
+</map>

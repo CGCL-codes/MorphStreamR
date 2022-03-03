@@ -1,0 +1,7 @@
+<map id="storage.table.stats.TableStats.getHistogram" name="storage.table.stats.TableStats.getHistogram">
+<area shape="rect" id="node1" title="Gets the histogram for a certain column." alt="" coords="739,39,921,80"/>
+<area shape="rect" id="node2" href="$classstorage_1_1table_1_1stats_1_1_table_stats.html#ae1fe80bb86aef21257f39d869d1bbd9f" title="Gets the estimate number of distinct entries for a certain column." alt="" coords="507,5,690,47"/>
+<area shape="rect" id="node5" href="$classstorage_1_1table_1_1stats_1_1_table_stats.html#a2288e5f55677e783c9f8540ccc275f28" title="Gets the estimate reduction factor a predicate and value_list would result in over a certain column." alt="" coords="507,71,691,112"/>
+<area shape="rect" id="node3" href="$classstorage_1_1table_1_1stats_1_1_table_stats.html#a91f1c8ce5e416da82e43909d22136a14" title="Creates a new TableStats which is the statistics for the table that results from this TableStats join..." alt="" coords="276,5,459,47"/>
+<area shape="rect" id="node4" href="$classoperator_1_1_join_operator.html#ad332a47e07f87770cd04ce6c77043755" title="Estimates the table statistics for the result of executing this query operator." alt="" coords="5,5,228,47"/>
+</map>

@@ -1,0 +1,13 @@
+<map id="scheduler.struct.gs.AbstractGSOperationChain&lt; ExecutionUnit extends GSOperation &gt;" name="scheduler.struct.gs.AbstractGSOperationChain&lt; ExecutionUnit extends GSOperation &gt;">
+<area shape="rect" id="node1" title="We still call it OperationChain in TPG but with different representation The OperationChain only trie..." alt="" coords="1229,159,1476,215"/>
+<area shape="rect" id="node2" href="$classscheduler_1_1struct_1_1_operation_chain.html" title="We still call it OperationChain in TPG but with different representation The OperationChain only trie..." alt="" coords="871,93,1114,134"/>
+<area shape="rect" id="node3" title=" " alt="" coords="449,137,667,178"/>
+<area shape="rect" id="node4" title=" " alt="" coords="501,5,615,32"/>
+<area shape="rect" id="node5" href="$classutils_1_1lib_1_1_concurrent_hash_map.html" title=" " alt="" coords="412,56,704,112"/>
+<area shape="rect" id="node6" href="$classscheduler_1_1context_1_1_abstract_g_s_t_p_g_context.html" title=" " alt="" coords="857,188,1128,273"/>
+<area shape="rect" id="node7" href="$classscheduler_1_1context_1_1_o_c_scheduler_context.html" title=" " alt="" coords="476,203,640,259"/>
+<area shape="rect" id="node8" href="$interfacescheduler_1_1context_1_1_scheduler_context.html" title=" " alt="" coords="27,163,232,205"/>
+<area shape="rect" id="node9" title=" " alt="" coords="16,287,243,313"/>
+<area shape="rect" id="node10" title=" " alt="" coords="44,229,215,256"/>
+<area shape="rect" id="node11" title=" " alt="" coords="5,112,253,139"/>
+</map>

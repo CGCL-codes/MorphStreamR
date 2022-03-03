@@ -1,0 +1,4 @@
+<map id="storage.MarkerRecord" name="storage.MarkerRecord">
+<area shape="rect" id="node1" title="An empty d_record used to delineate groups in the GroupByOperator." alt="" coords="9,80,174,107"/>
+<area shape="rect" id="node2" href="$classstorage_1_1_schema_record.html" title="A wrapper class for an individual d_record." alt="" coords="5,5,177,32"/>
+</map>

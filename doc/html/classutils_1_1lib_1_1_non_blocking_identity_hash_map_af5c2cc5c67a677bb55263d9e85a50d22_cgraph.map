@@ -1,0 +1,4 @@
+<map id="utils.lib.NonBlockingIdentityHashMap.isEmpty" name="utils.lib.NonBlockingIdentityHashMap.isEmpty">
+<area shape="rect" id="node1" title="Returns size() == 0." alt="" coords="5,5,212,47"/>
+<area shape="rect" id="node2" href="$classutils_1_1lib_1_1_non_blocking_identity_hash_map.html#a8ceec557331435edecf9b1c6512a3a6a" title="Returns the number of key&#45;value_list mappings in this map." alt="" coords="260,5,467,47"/>
+</map>

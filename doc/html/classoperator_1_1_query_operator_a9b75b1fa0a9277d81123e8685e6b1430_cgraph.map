@@ -1,0 +1,4 @@
+<map id="operator.QueryOperator.checkSchemaForColumn" name="operator.QueryOperator.checkSchemaForColumn">
+<area shape="rect" id="node1" title="Utility method to determine whether or not a specified column name is valid with a given schema." alt="" coords="5,5,223,47"/>
+<area shape="rect" id="node2" href="$classoperator_1_1_query_operator.html#ac230252ab4acc917c72f011acf4aa65e" title="Utility method that checks to see if a column is found in a schema using dot notation." alt="" coords="271,5,488,47"/>
+</map>
