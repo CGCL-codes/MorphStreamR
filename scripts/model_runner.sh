@@ -16,7 +16,7 @@ function ResetParameters() {
   isCyclic=0
 }
 
-function runTStream() {
+function runTStream() { 
   totalEvents=`expr $checkpointInterval \* $tthread`
   # NUM_ITEMS=`expr $totalEvents`
   echo "java -Xms100g -Xmx100g -jar -d64 application-0.0.2-jar-with-dependencies.jar \
