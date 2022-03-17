@@ -89,7 +89,7 @@ public abstract class Runner implements IRunner {
     @Parameter(names = {"--isRuntime"}, description = "Collect runtime information")
     public boolean isRuntime = false;
     @Parameter(names = {"--isDynamic"}, description = "Dynamic Workload")
-    public boolean isDynamic = true;
+    public boolean isDynamic = false;
     @Parameter(names = {"--schedulerPool"}, description = "Schedulers in the SchedulerPool[OG_DFS,OP_DFS]")
     public String schedulerPools = "OP_NS_A,OP_BFS_A,OP_BFS,OG_BFS";
     @Parameter(names = {"--defaultScheduler"}, description = "Default scheduler")
