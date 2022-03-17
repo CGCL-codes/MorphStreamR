@@ -35,7 +35,7 @@ matplotlib.rcParams['xtick.labelsize'] = TICK_FONT_SIZE
 matplotlib.rcParams['ytick.labelsize'] = TICK_FONT_SIZE
 matplotlib.rcParams['font.family'] = OPT_FONT_NAME
 
-FIGURE_FOLDER = './results/model/granularity'
+FIGURE_FOLDER = './results/model/exploration'
 FILE_FOLER = '/home/shuhao/data/stats'
 
 
@@ -97,26 +97,48 @@ def DrawFigure(x_values, y_values, legend_labels, x_label, y_label, y_min, y_max
 
     plt.savefig(FIGURE_FOLDER + "/" + filename + ".pdf", bbox_inches='tight')
 
+
 def ReadFileGS(x_axis, tthread, batchInterval, NUM_ITEMS, NUM_ACCESS, key_skewness, overlap_ratio, abort_ratio, txn_length, isCyclic, complexity):
     w, h = 2, len(x_axis)
     y = [[] for _ in range(w)]
 
-    for NUM_ACCESS in x_axis:
+    for key_skewness in x_axis:
         events = tthread * batchInterval
-        op_gs_path = getPathGS("OP_NS_A", events, tthread, NUM_ITEMS, NUM_ACCESS, key_skewness, overlap_ratio, abort_ratio, txn_length, isCyclic, complexity)
+        op_gs_path = getPathGS("OP_NS", events, tthread, NUM_ITEMS, NUM_ACCESS, key_skewness, overlap_ratio, abort_ratio, txn_length, isCyclic, complexity)
         lines = open(op_gs_path).readlines()
         throughput = lines[0].split(": ")[1]
         y[0].append(float(throughput))
 
-    for NUM_ACCESS in x_axis:
+    for key_skewness in x_axis:
         events = tthread * batchInterval
-        op_gs_path = getPathGS("OG_NS_A", events, tthread, NUM_ITEMS, NUM_ACCESS, key_skewness, overlap_ratio, abort_ratio, txn_length, isCyclic, complexity)
-        lines = open(op_gs_path).readlines()
+        op_dfs_path = getPathGS("OP_BFS", events, tthread, NUM_ITEMS, NUM_ACCESS, key_skewness, overlap_ratio, abort_ratio, txn_length, isCyclic, complexity)
+        lines = open(op_dfs_path).readlines()
         throughput = lines[0].split(": ")[1]
         y[1].append(float(throughput))
 
     print(y)
+    return y
 
+
+def ReadFileSL(x_axis, tthread, batchInterval, NUM_ITEMS, deposit_ratio, key_skewness, overlap_ratio, abort_ratio, txn_length, isCyclic, complexity):
+    w, h = 2, len(x_axis)
+    y = [[] for _ in range(w)]
+
+    for key_skewness in x_axis:
+        events = tthread * batchInterval
+        op_gs_path = getPathSL("OP_NS", events, tthread, NUM_ITEMS, deposit_ratio, key_skewness, overlap_ratio, abort_ratio, txn_length, isCyclic, complexity)
+        lines = open(op_gs_path).readlines()
+        throughput = lines[0].split(": ")[1]
+        y[0].append(float(throughput))
+
+    for key_skewness in x_axis:
+        events = tthread * batchInterval
+        op_dfs_path = getPathSL("OP_BFS", events, tthread, NUM_ITEMS, deposit_ratio, key_skewness, overlap_ratio, abort_ratio, txn_length, isCyclic, complexity)
+        lines = open(op_dfs_path).readlines()
+        throughput = lines[0].split(": ")[1]
+        y[1].append(float(throughput))
+
+    print(y)
     return y
 
 
@@ -171,13 +193,15 @@ if __name__ == '__main__':
         elif opt in ['-m']:
             complexity = int(arg)
 
-    # NUM_ACCESS
-    x_values = [1, 2, 4, 6, 8, 10]
-    legend_labels = ["Fine-grained", "Coarse-grained"]
+    x_values = [0, 25, 50, 75, 100]
+    x_axis = [0, 0.25, 0.5, 0.75, 1]
+    legend_labels = ["NS", "BFS"]
     legend = True
-    y_values = ReadFileGS(x_values, tthread, batchInterval, NUM_ITEMS, NUM_ACCESS, key_skewness, overlap_ratio,
-                          abort_ratio, txn_length, isCyclic, complexity)
-    DrawFigure(x_values, y_values, legend_labels,
-               'Num. of State Access Per Op.', 'Throughput (K/sec)', 0,
-               400, 'granularity_comparison_access_t{}_b{}_{}_{}_{}_{}_{}_{}_{}_{}'
-                .format(tthread, NUM_ITEMS, batchInterval, NUM_ACCESS, key_skewness, overlap_ratio, abort_ratio, txn_length, isCyclic, complexity), legend)
+    y_axis = ReadFileSL(x_values, tthread, batchInterval, NUM_ITEMS, deposit_ratio, key_skewness, overlap_ratio, abort_ratio, txn_length, isCyclic, complexity)
+    DrawFigure(x_axis, y_axis, legend_labels, 'Zipfian Skew', 'Throughput (K/sec)', 0, 400, 'sl_exploration_strategy_skewness_t{}_b{}_{}_{}_{}_{}_{}_{}_{}_{}'
+            .format(tthread, NUM_ITEMS, batchInterval, deposit_ratio, key_skewness, overlap_ratio, abort_ratio, txn_length, isCyclic, complexity),
+            legend)
+    y_axis = ReadFileGS(x_values, tthread, batchInterval, NUM_ITEMS, NUM_ACCESS, key_skewness, overlap_ratio, abort_ratio, txn_length, isCyclic, complexity)
+    DrawFigure(x_axis, y_axis, legend_labels, 'Zipfian Skew', 'Throughput (K/sec)', 0, 400, 'gs_exploration_strategy_skewness_t{}_b{}_{}_{}_{}_{}_{}_{}_{}_{}'
+                .format(tthread, NUM_ITEMS, batchInterval, NUM_ACCESS, key_skewness, overlap_ratio, abort_ratio, txn_length, isCyclic, complexity),
+                legend)
