@@ -103,8 +103,9 @@ public class GSTPGDataGenerator extends DataGenerator {
         events.add(event);
     }
 
-    private GSEvent randomEvent() {
+    private GSEvent randomEvent() { // todo: GC optimization
         int[] keys = new int[NUM_ACCESS*Transaction_Length];
+        ArrayList<Integer> writeKeys = new ArrayList<>();
         int writeLevel = -1;
         if (!isUnique) {
             if (enable_states_partition) {
@@ -113,26 +114,23 @@ public class GSTPGDataGenerator extends DataGenerator {
                     for (int i = 0; i < NUM_ACCESS; i++) {
                         int offset = j * NUM_ACCESS + i;
                         if (AppConfig.isCyclic) {
-                            int key = getKey(partitionedKeyZipf[partitionId], partitionId, generatedKeys);
-                            if (offset % NUM_ACCESS == 0) {
-                                // make sure this one is different with other write key
-                                for (int k = 0; k < j; k++) {
-                                    while (keys[k*NUM_ACCESS] == key) {
-                                        key = getKey(partitionedKeyZipf[partitionId], partitionId, generatedKeys);
-                                    }
-                                }
-                            }
-                            keys[offset] = key;
-                        } else {
-                            // TODO: correct it later
                             keys[offset] = getKey(partitionedKeyZipf[partitionId], partitionId, generatedKeys);
-                            if (i == 0) {
-                                while (idToLevel.get(keys[offset]) == 0) {
+                            if (i == 0) { // make sure this one is different with other write key
+                                while (writeKeys.contains(keys[offset])) {
                                     keys[offset] = getKey(partitionedKeyZipf[partitionId], partitionId, generatedKeys);
                                 }
+                                writeKeys.add(keys[offset]);
+                            }
+                        } else {
+                            keys[offset] = getKey(partitionedKeyZipf[partitionId], partitionId, generatedKeys);
+                            if (i == 0) { // make sure this one is different with other write key
+                                while (idToLevel.get(keys[offset]) == 0 || writeKeys.contains(keys[offset])) {
+                                    keys[offset] = getKey(partitionedKeyZipf[partitionId], partitionId, generatedKeys);
+                                }
+                                writeKeys.add(keys[offset]);
                                 writeLevel = idToLevel.get(keys[offset]);
                             } else {
-                                while (writeLevel <= idToLevel.get(keys[offset])) {
+                                while (writeLevel <= idToLevel.get(keys[offset])) { // make sure that all read level is lower than write level
                                     keys[offset] = getKey(partitionedKeyZipf[partitionId], partitionId, generatedKeys);
                                 }
                             }
