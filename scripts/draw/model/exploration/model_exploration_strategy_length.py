@@ -35,8 +35,8 @@ matplotlib.rcParams['xtick.labelsize'] = TICK_FONT_SIZE
 matplotlib.rcParams['ytick.labelsize'] = TICK_FONT_SIZE
 matplotlib.rcParams['font.family'] = OPT_FONT_NAME
 
-FIGURE_FOLDER = './results/sensitivity'
-FILE_FOLER = '/home/shuhao/TStream/data/stats'
+FIGURE_FOLDER = './results/model/exploration'
+FILE_FOLER = '/home/shuhao/data/stats'
 
 
 def ConvertEpsToPdf(dir_filename):
@@ -44,38 +44,53 @@ def ConvertEpsToPdf(dir_filename):
     os.system("rm -rf " + dir_filename + ".eps")
 
 
-# draw a line chart
-def DrawFigure(xvalues, yvalues, legend_labels, x_label, y_label, filename, allow_legend):
-    if not os.path.exists(FIGURE_FOLDER):
-        os.makedirs(FIGURE_FOLDER)
-
+# draw a bar chart
+def DrawFigure(x_values, y_values, legend_labels, x_label, y_label, y_min, y_max, filename, allow_legend):
     # you may change the figure size on your own.
     fig = plt.figure(figsize=(10, 5))
     figure = fig.add_subplot(111)
 
     FIGURE_LABEL = legend_labels
 
-    x_values = xvalues
-    y_values = yvalues
-    lines = [None] * (len(FIGURE_LABEL))
+    if not os.path.exists(FIGURE_FOLDER):
+        os.makedirs(FIGURE_FOLDER)
+
+    # values in the x_xis
+    index = np.arange(len(x_values))
+    # the bar width.
+    # you may need to tune it to get the best figure.
+    width = 0.08
+    # draw the bars
+    bars = [None] * (len(FIGURE_LABEL))
     for i in range(len(y_values)):
-        lines[i], = figure.plot(x_values[i], y_values[i], color=LINE_COLORS[i], \
-                                linewidth=LINE_WIDTH, marker=MARKERS[i], \
-                                markersize=MARKER_SIZE, label=FIGURE_LABEL[i],
-                                markeredgewidth=1, markeredgecolor='k')
+        bars[i] = plt.bar(index + i * width + width / 2,
+                          y_values[i], width,
+                          hatch=PATTERNS[i],
+                          color=LINE_COLORS[i],
+                          label=FIGURE_LABEL[i],
+                          edgecolor="black", lw=3
+                          )
+
     # sometimes you may not want to draw legends.
     if allow_legend == True:
-        plt.legend(lines,
-                   FIGURE_LABEL,
+        plt.legend(bars, FIGURE_LABEL,
                    prop=LEGEND_FP,
+                   ncol=4,
                    loc='upper center',
-                   ncol=6,
-                   #                     mode='expand',
-                   bbox_to_anchor=(0.5, 1.2), shadow=False,
+                   # mode='expand',
+                   shadow=False,
+                   bbox_to_anchor=(0.5, 1.2),
                    columnspacing=0.1,
-                   frameon=True, borderaxespad=0.0, handlelength=1.5,
-                   handletextpad=0.1,
-                   labelspacing=0.1)
+                   handletextpad=0.2,
+                   #                     bbox_transform=ax.transAxes,
+                   #                     frameon=True,
+                   #                     columnspacing=5.5,
+                   handlelength=2,
+                   )
+
+    plt.xticks(index + 2 * width, x_values)
+    figure.get_xaxis().set_tick_params(direction='in', pad=10)
+    figure.get_yaxis().set_tick_params(direction='in', pad=10)
 
     plt.xlabel(x_label, fontproperties=LABEL_FP)
     plt.ylabel(y_label, fontproperties=LABEL_FP)
@@ -161,9 +176,9 @@ if __name__ == '__main__':
 
     x_value = [1, 2, 4, 6, 8, 10]
     legend_labels = ["NS", "BFS"]
-    x_axis = [x_value] * len(legend_labels)
+    x_axis = x_value
     legend = True
     y_axis = ReadFileGS(x_value, tthread, batchInterval, NUM_ITEMS, NUM_ACCESS, key_skewness, overlap_ratio, abort_ratio, isCyclic, complexity)
-    DrawFigure(x_axis, y_axis, legend_labels, 'Transaction Length', 'Throughput (K/sec)', 'exploration_strategy_comparison_length_t{}_b{}_{}_{}_{}_{}_{}_{}_{}'
+    DrawFigure(x_axis, y_axis, legend_labels, 'Transaction Length', 'Throughput (K/sec)', 0, 400, 'exploration_strategy_comparison_length_t{}_b{}_{}_{}_{}_{}_{}_{}_{}'
                 .format(tthread, NUM_ITEMS, batchInterval, NUM_ACCESS, key_skewness, overlap_ratio, abort_ratio, isCyclic, complexity),
                 legend)

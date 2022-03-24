@@ -202,15 +202,15 @@ if __name__ == '__main__':
     # x_values = [0, 1, 10, 100, 1000, 2000, 5000]
     x_values = [0, 1000, 2000, 5000, 7000, 9000]
     legend_labels = ["Eager", "Lazy"]
-    x_axis = [x_values] * len(legend_labels)
+    x_axis = [[0, 10, 20, 50, 70, 90]] * len(legend_labels)
     legend = True
     y_axis = ReadFileGS(x_values, tthread, batchInterval, NUM_ITEMS, NUM_ACCESS, key_skewness, overlap_ratio,
                           abort_ratio, txn_length, isCyclic, complexity)
-    DrawFigure(x_values, y_axis, legend_labels, 'Ratio of Aborting Txns (\%)', 'Throughput (K/sec)', 0 ,400,
+    DrawFigure(x_values, y_axis, legend_labels, 'Ratio of Aborting Txns (%)', 'Throughput (K/sec)', 0 ,400,
                'gs_abort_mechanism_comparison_t{}_b{}_{}_{}_{}_{}_{}_{}_{}_{}'
-                .format(tthread, NUM_ITEMS, batchInterval, deposit_ratio, key_skewness, overlap_ratio, abort_ratio, txn_length, isCyclic, complexity), legend)
+                .format(tthread, NUM_ITEMS, batchInterval, NUM_ACCESS, key_skewness, overlap_ratio, abort_ratio, txn_length, isCyclic, complexity), legend)
     y_axis = ReadFileSL(x_values, tthread, batchInterval, NUM_ITEMS, deposit_ratio, key_skewness, overlap_ratio,
                           abort_ratio, txn_length, isCyclic, complexity)
-    DrawFigure(x_values, y_axis, legend_labels, 'Ratio of Aborting Txns (\%)', 'Throughput (K/sec)', 0 ,400,
+    DrawFigure(x_values, y_axis, legend_labels, 'Ratio of Aborting Txns (%)', 'Throughput (K/sec)', 0 ,400,
                'sl_abort_mechanism_comparison_t{}_b{}_{}_{}_{}_{}_{}_{}_{}_{}'
                 .format(tthread, NUM_ITEMS, batchInterval, deposit_ratio, key_skewness, overlap_ratio, abort_ratio, txn_length, isCyclic, complexity), legend)

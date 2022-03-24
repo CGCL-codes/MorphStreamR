@@ -209,10 +209,10 @@ if __name__ == '__main__':
     y_axis = ReadFileGS(x_values, tthread, batchInterval, NUM_ITEMS, NUM_ACCESS, key_skewness, overlap_ratio,
                           abort_ratio, txn_length, isCyclic, complexity)
     DrawFigure(x_values, y_axis, legend_labels, "Computation Complexity (nsec)", "Throughput (K/sec)", 0 ,400,
-               'gs_abort_mechanism_comparison_complexity_t{}_b{}_{}_{}_{}_{}_{}_{}_{}'
-                .format(tthread, NUM_ITEMS, batchInterval, deposit_ratio, key_skewness, overlap_ratio, abort_ratio, txn_length, isCyclic, complexity), legend)
+               'gs_abort_mechanism_comparison_complexity_t{}_b{}_{}_{}_{}_{}_{}_{}_{}_{}'
+                .format(tthread, NUM_ITEMS, batchInterval, NUM_ACCESS, key_skewness, overlap_ratio, abort_ratio, txn_length, isCyclic, complexity), legend)
     y_axis = ReadFileSL(x_values, tthread, batchInterval, NUM_ITEMS, deposit_ratio, key_skewness, overlap_ratio,
                           abort_ratio, txn_length, isCyclic, complexity)
     DrawFigure(x_values, y_axis, legend_labels, "Computation Complexity (nsec)", "Throughput (K/sec)", 0 ,400,
-               'sl_abort_mechanism_comparison_complexity_t{}_b{}_{}_{}_{}_{}_{}_{}_{}'
+               'sl_abort_mechanism_comparison_complexity_t{}_b{}_{}_{}_{}_{}_{}_{}_{}_{}'
                 .format(tthread, NUM_ITEMS, batchInterval, deposit_ratio, key_skewness, overlap_ratio, abort_ratio, txn_length, isCyclic, complexity), legend)
