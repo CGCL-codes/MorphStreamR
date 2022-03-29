@@ -103,6 +103,7 @@ public abstract class OGSScheduler<Context extends OGSContext> extends OGSchedul
         if (ocs != null && context.currentLevelIndex < ocs.size()) {
             oc = ocs.get(context.currentLevelIndex++);
             context.scheduledOPs += oc.getOperations().size();
+            context.operationChains.remove(oc);
         }
         return oc;
     }

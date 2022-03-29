@@ -86,6 +86,16 @@ public class SOURCE_CONTROL {
             ex.printStackTrace();
         }
     }
+
+    public void waitForOtherThreadsAbort2() {
+        try {
+            System.out.println("phase 2: " + dLevelEndBarrier.getPhase());
+            dLevelEndBarrier.arriveAndAwaitAdvance();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
      public void waitForSchedulerSwitch(int threadId){
         try{
             switchSchedulerBarrier.await();
