@@ -16,12 +16,6 @@ public class Platform implements Serializable {
     public double CLOCK_RATE;//2.27GHz ... 2.27 cycles per nanosecond
     public int num_socket;
     public int num_cores;
-    /**
-     * -----bandwidth----
-     * MB/s ---> B/ns
-     * /
-     */
-    public double bandwdith_convert = 1E-9 * 1024 * 1024;
     public double[][] bandwidth_map;//MB/s
     public double[][] latency_map;
     public CacheInfo cachedInformation = new CacheInfo();//Store cached statistics information to avoid repeat access to file.
@@ -94,18 +88,19 @@ public class Platform implements Serializable {
                     node_7};
         } else if (machine == 3){
 //            //a simple single-socket 48-core machine.
-//            int cores = 48;
-//            Integer[] no_0 = new Integer[cores];
-//            for (int lop = 0; lop < cores; lop++) {
-//                no_0[lop] = lop;
-//            }
-//            node_0 = new ArrayList<>(Arrays.asList(no_0));
-//            return new ArrayList[]{
-//                    node_0
-//            };
             Integer[] no_0 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23};
             node_0 = new ArrayList<>(Arrays.asList(no_0));
             Integer[] no_1 = {24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47};
+            ArrayList<Integer> node_1 = new ArrayList<>(Arrays.asList(no_1));
+            return new ArrayList[]{
+                    node_0,
+                    node_1};
+        } else if (machine == 4) {
+            //a two-sockets 40-core machine
+            //Intel(R) Xeon(R) Gold 6230 CPU @ 2.10GHz
+            Integer[] no_0 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19};
+            node_0 = new ArrayList<>(Arrays.asList(no_0));
+            Integer[] no_1 = {20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39};
             ArrayList<Integer> node_1 = new ArrayList<>(Arrays.asList(no_1));
             return new ArrayList[]{
                     node_0,
