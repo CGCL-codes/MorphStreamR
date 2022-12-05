@@ -90,23 +90,21 @@ init_sys() {
 # $3: Result directory
 
 init_emon_profiling() {
-  # Attention: we are passing array name, and need convert it into an internal
-  # array format
+  # Attention: we are passing array name, and need convert it into an internal array format
   local cxl_exparr_name=$1[@]
   local cxl_exparr=( "${!cxl_exparr_name}" )
-  local base_exparr_name=$2[@]
-  local base_exparr=( "${!base_exparr_name}" )
-  local rstdir=$3
+  local rstdir=$2
 
   mkdir -p $rstdir
 
   # CXL
+  # ${#var} Calculate the length of the variable
     for ((et = 0; et < ${#cxl_exparr[@]}; et++)); do
         e=${cxl_exparr[$et]}
-        if [[ $e == "L100" ]]; then
+        if [[ $e == "no-share" ]]; then
             run_cmd="numactl --cpunodebind 0 --membind 0 -- bash ./cmd.sh"
-        elif [[ $e == "L0" ]]; then
-            run_cmd="numactl --cpunodebind 0 --membind 1 -- bash ./cmd.sh"
+        elif [[ $e == "CXL-shared" ]]; then
+            run_cmd="numactl --cpunodebind 0 1 --membind 5 -- bash ./cmd.sh"
         elif [[ $e == "CXL-Interleave" ]]; then
             run_cmd="numactl --cpunodebind 0 --interleave=all -- bash ./cmd.sh"
         else
@@ -120,43 +118,18 @@ init_emon_profiling() {
         cat cmd.sh > $rstdir/emon-${e}.cmd
         cat emon-$e.sh >> $rstdir/emon-${e}.cmd
     done
-  # BASE
-    for ((et = 0; et < ${#base_exparr[@]}; et++)); do
-        e=${base_exparr[$et]}
-        if [[ $e == "Base-Interleave" ]]; then
-            run_cmd="numactl --interleave=all -- bash ./cmd.sh"
-        else
-            echo "==> Error: unsupported experiment type: [$et]"
-            exit
-        fi
-
-        echo "${run_cmd}" > emon-$e.sh
-        chmod u+x emon-$e.sh
-        # Keep one copy for record
-        cat cmd.sh > $rstdir/emon-${e}.sh
-        cat emon-$e.sh >> $rstdir/emon-${e}.sh
-    done
 }
 # $1: CXL experiment type array, EXL_EXPARR, (pass array by name!)
 # $2: Base experiment type array
 cleanup_emon_profiling()
 {
-    # Attention: we are passing array name, and need convert it into an internal
-    # array format
+    # Attention: we are passing array name, and need convert it into an internal array format
     local cxl_exparr_name=$1[@]
     local cxl_exparr=( "${!cxl_exparr_name}" )
-    local base_exparr_name=$2[@]
-    local base_exparr=( "${!base_exparr_name}" )
 
     # CXL
     for ((et = 0; et < ${#cxl_exparr[@]}; et++)); do
         e=${cxl_exparr[$et]}
-        rm -rf emon-$e.sh
-    done
-
-    # BASE
-    for ((et = 0; et < ${#base_exparr[@]}; et++)); do
-        e=${base_exparr[$et]}
         rm -rf emon-$e.sh
     done
 }
