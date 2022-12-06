@@ -113,7 +113,7 @@ init_emon_profiling() {
         fi
 
         echo "${run_cmd}" > $rstdir/emon-$e.sh
-        chmod u+x $rstdir/emon-$e.sh$
+        chmod u+x $rstdir/emon-$e.sh
     done
 }
 # $1: CXL experiment type array, EXL_EXPARR, (pass array by name!)
@@ -179,4 +179,3 @@ run_emon_one() {
    killall pidstat >/dev/null 2>&1
    kill -9 $mpid >/dev/null 2>&1
 }
-
