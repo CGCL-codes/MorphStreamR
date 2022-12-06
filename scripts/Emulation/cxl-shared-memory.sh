@@ -112,11 +112,8 @@ init_emon_profiling() {
             exit
         fi
 
-        echo "${run_cmd}" > emon-$e.sh
-        chmod u+x emon-$e.sh
-        # Keep one copy for record
-        cat cmd.sh > $rstdir/emon-${e}.cmd
-        cat emon-$e.sh >> $rstdir/emon-${e}.cmd
+        echo "${run_cmd}" > $rstdir/emon-$e.sh
+        chmod u+x $rstdir/emon-$e.sh$
     done
 }
 # $1: CXL experiment type array, EXL_EXPARR, (pass array by name!)
