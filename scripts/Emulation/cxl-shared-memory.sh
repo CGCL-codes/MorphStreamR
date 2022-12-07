@@ -35,7 +35,7 @@ enable_turbo()
     echo 0 | sudo tee /sys/devices/system/cpu/intel_pstate/no_turbo >/dev/null 2>&1
 }
 
-# 0: no randomization, everyting is static
+# 0: no randomization, everything is static
 # 1: conservative randomization, shared libraries, stack, mmap(), VDSO and heap
 # are randomized
 # 2: full randomization, the above points in 1 plus brk()
