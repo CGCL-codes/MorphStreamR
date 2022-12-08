@@ -87,7 +87,7 @@ public class AffinityController {
      * @param node
      * @return
      */
-    public synchronized long[] requirePerCore(int node) {
+    public synchronized long[] requirePeAArCore(int node) {
         node += offset;//pick cores from next nodes.
         if (node == -1) {//run as native execution
             return require();
