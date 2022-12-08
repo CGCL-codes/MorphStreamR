@@ -17,11 +17,11 @@ public class SequentialBinding {
      * @return
      */
     public static int next_cpu() {
-        ArrayList[] mapping_node = Platform.getNodes(3);
+        ArrayList[] mapping_node = Platform.getNodes(4);
         ArrayList<Integer> list = mapping_node[socket];
         Integer core = list.get(cpu);
         cpu ++;
-        if (cpu == 24) {//assume one socket 24 cores.
+        if (cpu == 20) {//assume one socket 24 cores.
             socket++;
             cpu = 0;
         }

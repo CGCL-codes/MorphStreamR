@@ -95,16 +95,6 @@ public class Platform implements Serializable {
             return new ArrayList[]{
                     node_0,
                     node_1};
-        } else if (machine == 4) {
-            //a two-sockets 40-core machine
-            //Intel(R) Xeon(R) Gold 6230 CPU @ 2.10GHz
-            Integer[] no_0 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19};
-            node_0 = new ArrayList<>(Arrays.asList(no_0));
-            Integer[] no_1 = {20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39};
-            ArrayList<Integer> node_1 = new ArrayList<>(Arrays.asList(no_1));
-            return new ArrayList[]{
-                    node_0,
-                    node_1};
         } else {
             //a two-sockets 40-core machine
             //Intel(R) Xeon(R) Gold 6230 CPU @ 2.10GHz
