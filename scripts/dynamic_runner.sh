@@ -16,7 +16,7 @@ function ResetParameters() {
   isCyclic=0
   isDynamic=0
   workloadType="default,unchanging,unchanging,unchanging,Up_skew,Up_skew,Up_skew,Up_PD,Up_PD,Up_PD,Up_abort,Up_abort,Up_abort"
-  schedulerPool="OG_DFS_A,OG_NS_A,OP_NS_A,OP_NS"
+  schedulerPool="OG_BFS_A,OG_NS_A,OP_NS_A,OP_NS"
   rootFilePath="${RSTDIR}"
   shiftRate=1
   totalEvents=`expr $checkpointInterval \* $tthread \* 13 \* $shiftRate`
