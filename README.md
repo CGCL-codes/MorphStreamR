@@ -2,7 +2,7 @@
 
 # MorphStreamDR
 
-- "R" stands for fast durability and recovery 
+- "R" stands for fast durability and recovery (R)
 - "D" stands for distributed (D) transactional stream processing engine
 
 This project aims at 
