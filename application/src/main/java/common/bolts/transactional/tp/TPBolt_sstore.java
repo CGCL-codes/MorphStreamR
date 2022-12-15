@@ -4,8 +4,6 @@ import combo.SINKCombo;
 import common.bolts.transactional.sl.GlobalSorter;
 import common.param.TxnEvent;
 import common.param.lr.LREvent;
-import common.param.sl.DepositEvent;
-import common.param.sl.TransactionEvent;
 import components.context.TopologyContext;
 import db.DatabaseException;
 import execution.ExecutionGraph;
@@ -25,22 +23,21 @@ import java.util.Map;
 import java.util.concurrent.BrokenBarrierException;
 
 import static common.CONTROL.combo_bid_size;
-import static common.CONTROL.enable_log;
 import static profiler.MeasureTools.*;
 
 /**
  * Combine Read-Write for TStream.
  */
-public class TPBolt_SSTORE extends TPBolt_LA {
-    private static final Logger LOG = LoggerFactory.getLogger(TPBolt_SSTORE.class);
+public class TPBolt_sstore extends TPBolt_LA {
+    private static final Logger LOG = LoggerFactory.getLogger(TPBolt_sstore.class);
     private static final long serialVersionUID = -5968750340131744744L;
     ArrayDeque<Tuple> tuples = new ArrayDeque<>();
-    public TPBolt_SSTORE(int fid, SINKCombo sink) {
+    public TPBolt_sstore(int fid, SINKCombo sink) {
         super(LOG, fid, sink);
 
     }
 
-    public TPBolt_SSTORE(int fid) {
+    public TPBolt_sstore(int fid) {
         super(LOG, fid, null);
 
     }

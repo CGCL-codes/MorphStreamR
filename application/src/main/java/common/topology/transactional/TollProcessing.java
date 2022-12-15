@@ -23,7 +23,6 @@ import transaction.TableInitilizer;
 import static common.CONTROL.enable_app_combo;
 import static common.constants.LinearRoadConstants.Conf.Executor_Threads;
 import static common.constants.TPConstants.Component.EXECUTOR;
-import static common.constants.TPConstants.Constant.NUM_SEGMENTS;
 import static common.constants.TPConstants.PREFIX;
 import static content.Content.*;
 import static utils.PartitionHelper.setPartition_interval;
@@ -104,7 +103,7 @@ public class TollProcessing extends TransactionTopology {
                         break;
                     }
                     case CCOption_SStore: {//SStore
-                        builder.setBolt(LinearRoadConstants.Component.EXECUTOR, new TPBolt_SSTORE(0)//
+                        builder.setBolt(LinearRoadConstants.Component.EXECUTOR, new TPBolt_sstore(0)//
                                 , config.getInt(Executor_Threads, 2)
                                 , new ShuffleGrouping(LinearRoadConstants.Component.SPOUT));
                         break;

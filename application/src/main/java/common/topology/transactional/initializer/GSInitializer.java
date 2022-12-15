@@ -139,12 +139,12 @@ public class GSInitializer extends TableInitilizer {
      * "INSERT INTO Table (key, value_list) VALUES (?, ?);"
      * initial account value_list is 0...?
      */
-    private void insertMicroRecord(String key, long value, int pid, SpinLock[] spinlock_) {
+    private void insertMicroRecord(String key, long value, int pid, SpinLock[] spinlock_, int partition_id) {
         try {
             if (spinlock_ != null)
-                db.InsertRecord("MicroTable", new TableRecord(Record(key, value), pid, spinlock_));
+                db.InsertRecord("MicroTable", new TableRecord(Record(key, value), pid, spinlock_), partition_id);
             else
-                db.InsertRecord("MicroTable", new TableRecord(Record(key, value)));
+                db.InsertRecord("MicroTable", new TableRecord(Record(key, value)), partition_id);
         } catch (DatabaseException e) {
             e.printStackTrace();
         }
@@ -156,33 +156,6 @@ public class GSInitializer extends TableInitilizer {
         values.add(new LongDataBox(value));
         return new SchemaRecord(values);
     }
-
-//    /**
-//     * "INSERT INTO MicroTable (key, value_list) VALUES (?, ?);"
-//     */
-//    private void insertMicroRecord(int key, String value, int pid, SpinLock[] spinlock_) {
-//        List<DataBox> values = new ArrayList<>();
-//        values.add(new IntDataBox(key));
-//        values.add(new StringDataBox(value, value.length()));
-//        SchemaRecord schemaRecord = new SchemaRecord(values);
-//        try {
-//            db.InsertRecord("MicroTable", new TableRecord(schemaRecord, pid, spinlock_));
-//        } catch (DatabaseException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    private void insertMicroRecord(int key, String value) {
-//        List<DataBox> values = new ArrayList<>();
-//        values.add(new IntDataBox(key));
-//        values.add(new StringDataBox(value, value.length()));
-//        SchemaRecord schemaRecord = new SchemaRecord(values);
-//        try {
-//            db.InsertRecord("MicroTable", new TableRecord(schemaRecord));
-//        } catch (DatabaseException e) {
-//            e.printStackTrace();
-//        }
-//    }
 
     @Override
     public void loadDB(int thread_id, int NUM_TASK) {
@@ -204,51 +177,11 @@ public class GSInitializer extends TableInitilizer {
         for (int key = left_bound; key < right_bound; key++) {
             pid = get_pid(partition_interval, key);
             _key = String.valueOf(key);
-//            assert value.length() == VALUE_LEN;
-            insertMicroRecord(_key, startingValue , pid, spinlock);
+            insertMicroRecord(_key, startingValue , pid, spinlock, thread_id);
         }
         if (enable_log)
             LOG.info("Thread:" + thread_id + " finished loading data from: " + left_bound + " to: " + right_bound);
     }
-
-//    @Override
-//    public void loadDB(int thread_id, int NUMTasks) {
-//        int partition_interval = getPartition_interval();
-//        int left_bound = thread_id * partition_interval;
-//        int right_bound;
-//        if (thread_id == NUMTasks - 1) {//last executor need to handle left-over
-//            right_bound = NUM_ITEMS;
-//        } else {
-//            right_bound = (thread_id + 1) * partition_interval;
-//        }
-//        for (int key = left_bound; key < right_bound; key++) {
-//            String value = GenerateValue(key);
-//            assert value.length() == VALUE_LEN;
-//            insertMicroRecord(key, value);
-//        }
-//        if (enable_log)
-//            LOG.info("Thread:" + thread_id + " finished loading data from: " + left_bound + " to: " + right_bound);
-//    }
-//
-//    @Override
-//    public void loadDB(int thread_id, SpinLock[] spinlock_, int NUMTasks) {
-//        int partition_interval = getPartition_interval();
-//        int left_bound = thread_id * partition_interval;
-//        int right_bound;
-//        if (thread_id == NUMTasks - 1) {//last executor need to handle left-over
-//            right_bound = NUM_ITEMS;
-//        } else {
-//            right_bound = (thread_id + 1) * partition_interval;
-//        }
-//        for (int key = left_bound; key < right_bound; key++) {
-//            int pid = get_pid(partition_interval, key);
-//            String value = GenerateValue(key);
-//            assert value.length() == VALUE_LEN;
-//            insertMicroRecord(key, value, pid, spinlock_);
-//        }
-//        if (enable_log)
-//            LOG.info("Thread:" + thread_id + " finished loading data from: " + left_bound + " to: " + right_bound);
-//    }
 
     @Override
     public void loadDB(SchedulerContext context, int thread_id, int NUMTasks) {
@@ -400,7 +333,7 @@ public class GSInitializer extends TableInitilizer {
 
     public void creates_Table(Configuration config) {
         RecordSchema s = MicroTableSchema();
-        db.createTable(s, "MicroTable");
+        db.createTable(s, "MicroTable", config.getInt("tthread"), config.getInt("NUM_ITEMS"));
         try {
             prepare_input_events(config.getInt("totalEvents"));
             if (getTranToDecisionConf() != null && getTranToDecisionConf().size() !=0){

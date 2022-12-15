@@ -19,7 +19,7 @@ public class CavaliaDatabase extends Database {
      * @throws DatabaseException
      */
     @Override
-    public void InsertRecord(String table, TableRecord record) throws DatabaseException {
-        storageManager.InsertRecord(table, record);
+    public void InsertRecord(String table, TableRecord record, int partition_id) throws DatabaseException {
+        storageManager.InsertRecord(table, record, partition_id);
     }
 }

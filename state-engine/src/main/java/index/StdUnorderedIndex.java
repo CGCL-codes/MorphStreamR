@@ -5,13 +5,17 @@ import storage.TableRecord;
 import java.util.Iterator;
 
 public class StdUnorderedIndex extends BaseUnorderedIndex {
+    public StdUnorderedIndex(int partition_num, int num_items) {
+        super(partition_num, num_items);
+    }
+
     @Override
     public TableRecord SearchRecord(String primary_key) {
         return null;
     }
 
     @Override
-    public boolean InsertRecord(String s, TableRecord record) {
+    public boolean InsertRecord(String s, TableRecord record, int partition_id) {
         return false;
     }
 

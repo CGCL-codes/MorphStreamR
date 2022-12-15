@@ -46,7 +46,7 @@ public abstract class BaseTable implements ITable {
      * @throws DatabaseException if the values passed in to this method do not
      *                           correspond to the schema of this table
      */
-    public abstract boolean InsertRecord(TableRecord record) throws DatabaseException;
+    public abstract boolean InsertRecord(TableRecord record, int partition_id) throws DatabaseException;
 
     /**
      * Delete all records in the table.

@@ -151,7 +151,7 @@ public class TPCombo extends SPOUTCombo {
                 break;
             }
             case CCOption_SStore: {//SStore
-                bolt = new TPBolt_SSTORE(0, sink);
+                bolt = new TPBolt_sstore(0, sink);
                 _combo_bid_size = 1;
                 break;
             }

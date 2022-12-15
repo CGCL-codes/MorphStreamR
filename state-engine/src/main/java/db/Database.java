@@ -34,16 +34,18 @@ public abstract class Database {
     /**
      * @param tableSchema
      * @param tableName
+     * @param partition_num
+     * To snapshot and recover in parallel, we need separate table for each partition
      */
-    public void createTable(RecordSchema tableSchema, String tableName) {
+    public void createTable(RecordSchema tableSchema, String tableName, int partition_num, int num_items) {
         try {
-            storageManager.createTable(tableSchema, tableName);
+            storageManager.createTable(tableSchema, tableName, partition_num, num_items);
         } catch (DatabaseException e) {
             e.printStackTrace();
         }
     }
 
-    public abstract void InsertRecord(String table, TableRecord record) throws DatabaseException;
+    public abstract void InsertRecord(String table, TableRecord record, int partition_id) throws DatabaseException;
 
     public StorageManager getStorageManager() {
         return storageManager;

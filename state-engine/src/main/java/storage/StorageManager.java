@@ -28,9 +28,9 @@ public class StorageManager {
         return tables.get(tableName);
     }
 
-    public void InsertRecord(String tableName, TableRecord record) throws DatabaseException {
+    public void InsertRecord(String tableName, TableRecord record, int partition_id) throws DatabaseException {
         BaseTable tab = getTable(tableName);
-        tab.InsertRecord(record);
+        tab.InsertRecord(record, partition_id);
     }
 
     /**
@@ -40,11 +40,11 @@ public class StorageManager {
      * @param tableName the name of the table
      * @throws DatabaseException
      */
-    public synchronized void createTable(RecordSchema s, String tableName) throws DatabaseException {
+    public synchronized void createTable(RecordSchema s, String tableName, int partition_num, int num_items) throws DatabaseException {
         if (tables.containsKey(tableName)) {
             throw new DatabaseException("Table name already exists");
         }
-        tables.put(tableName, new ShareTable(s, tableName, true));//here we decide which table to use.
+        tables.put(tableName, new ShareTable(s, tableName, true, partition_num, num_items));//here we decide which table to use.
         table_count++;
     }
 
@@ -58,7 +58,7 @@ public class StorageManager {
      * @param indexColumns the list of unique columnNames on the maintain an index on
      * @throws DatabaseException
      */
-    public synchronized void createTableWithIndices(RecordSchema s, String tableName, List<String> indexColumns) throws DatabaseException {
+    public synchronized void createTableWithIndices(RecordSchema s, String tableName, List<String> indexColumns, int partition_num, int num_items) throws DatabaseException {
         if (tables.containsKey(tableName)) {
             throw new DatabaseException("SimpleTable name already exists");
         }
@@ -76,7 +76,7 @@ public class StorageManager {
             seenColNames.add(col);
             schemaColIndex.add(schemaColNames.indexOf(col));
         }
-        tables.put(tableName, new ShareTable(s, tableName, true));
+        tables.put(tableName, new ShareTable(s, tableName, true, partition_num, num_items));
         for (int i : schemaColIndex) {
             String colName = schemaColNames.get(i);
             DataBox colType = schemaColType.get(i);
