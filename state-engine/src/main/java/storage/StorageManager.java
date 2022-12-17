@@ -1,6 +1,9 @@
 package storage;
 
+import common.collections.Configuration;
 import db.DatabaseException;
+import durability.snapshot.SnapshotOptions;
+import durability.snapshot.SnapshotStrategy.ImplSnapshotStrategy.InMemorySnapshotStrategy;
 import storage.datatype.DataBox;
 import storage.table.BaseTable;
 import storage.table.RecordSchema;
@@ -14,11 +17,19 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class StorageManager {
+    /**
+     * Add for snapshot
+     * */
+    private final InMemorySnapshotStrategy checkpointSnapshotStrategy;
+    private SnapshotOptions snapshotOptions;
+    private String snapshotPath;
+
     public Map<String, BaseTable> tables;
     int table_count;
 
-    public StorageManager() {
+    public StorageManager(Configuration configuration) {
         tables = new ConcurrentHashMap<>();
+        checkpointSnapshotStrategy = null;
     }
 
     public BaseTable getTable(String tableName) throws DatabaseException {

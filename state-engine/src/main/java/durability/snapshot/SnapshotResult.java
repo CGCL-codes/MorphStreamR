@@ -1,4 +1,4 @@
-package db.snapshot;
+package durability.snapshot;
 /**
  * The snapshot result
  * Snapshot Path

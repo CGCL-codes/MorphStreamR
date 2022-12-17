@@ -9,8 +9,6 @@ import java.util.Iterator;
 public class HashTableIndex extends BaseUnorderedIndex {
     /**
      * To snapshot and recover in parallel, we need separate hashmap for each partition
-     **/
-    /**
      * To support recover database in parallel, we need concurrent hashmap
      */
     private final ConcurrentHashMap<Integer, HashMap<String, TableRecord>> hash_index_by_partition = new ConcurrentHashMap<>();
