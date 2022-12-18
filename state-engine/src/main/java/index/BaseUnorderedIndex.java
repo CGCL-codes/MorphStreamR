@@ -11,6 +11,8 @@ public abstract class BaseUnorderedIndex implements Iterable<TableRecord> {
 
     public abstract boolean InsertRecord(String key, TableRecord record, int partition_id);
 
+    public abstract boolean InsertRecord(String key, TableRecord record);
+
     public BaseUnorderedIndex(int partition_num, int num_items) {
         this.partition_num = partition_num;
         this.num_items = num_items;

@@ -20,6 +20,11 @@ public class StdUnorderedIndex extends BaseUnorderedIndex {
     }
 
     @Override
+    public boolean InsertRecord(String key, TableRecord record) {
+        return false;
+    }
+
+    @Override
     public Iterator<TableRecord> iterator() {
         return null;
     }

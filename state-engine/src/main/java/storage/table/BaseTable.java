@@ -47,6 +47,7 @@ public abstract class BaseTable implements ITable {
      *                           correspond to the schema of this table
      */
     public abstract boolean InsertRecord(TableRecord record, int partition_id) throws DatabaseException;
+    public abstract boolean InsertRecord(TableRecord record) throws DatabaseException;
 
     /**
      * Delete all records in the table.

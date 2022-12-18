@@ -32,6 +32,12 @@ public class HashTableIndex extends BaseUnorderedIndex {
     }
 
     @Override
+    public boolean InsertRecord(String key, TableRecord record) {
+        hash_index_by_partition.get(getPartitionId(key)).put(key, record);
+        return true;
+    }
+
+    @Override
     public Iterator<TableRecord> iterator() {
         //
         HashMap<String, TableRecord> temp = new HashMap<>();

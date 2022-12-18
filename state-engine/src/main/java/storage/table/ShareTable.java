@@ -1,5 +1,6 @@
 package storage.table;
 
+import db.DatabaseException;
 import index.BaseUnorderedIndex;
 import index.HashTableIndex;
 import index.StdUnorderedIndex;
@@ -57,9 +58,20 @@ public class ShareTable extends BaseTable {
             int records = numRecords.getAndIncrement();
             record.setID(new RowID(records));
             //TODO: build secondary index here
-//			for (int i = 1; i < secondary_count_; ++i) {
-//				secondary_indexes_[i].InsertRecord(record_ptr.GetSecondaryKey(i), record);
-//			}
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean InsertRecord(TableRecord record) throws DatabaseException {
+        SchemaRecord record_ptr = record.record_;
+        assert record.record_ != null;
+        if (primary_index_.InsertRecord(record_ptr.GetPrimaryKey(), record)) {
+            int records = numRecords.getAndIncrement();
+            record.setID(new RowID(records));
+            //TODO: build secondary index here
             return true;
         } else {
             return false;
