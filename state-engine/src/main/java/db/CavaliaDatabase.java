@@ -1,6 +1,7 @@
 package db;
 
 import common.collections.Configuration;
+import durability.snapshot.SnapshotResult.SnapshotResult;
 import storage.EventManager;
 import storage.StorageManager;
 import storage.TableRecord;
@@ -22,5 +23,10 @@ public class CavaliaDatabase extends Database {
     @Override
     public void InsertRecord(String table, TableRecord record, int partition_id) throws DatabaseException {
         storageManager.InsertRecord(table, record, partition_id);
+    }
+
+    @Override
+    public SnapshotResult parallelSnapshot(long snapshotId, int partitionId) throws Exception {
+        return null;
     }
 }

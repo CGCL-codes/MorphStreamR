@@ -2,6 +2,7 @@ package index;
 
 import storage.TableRecord;
 
+import java.util.HashMap;
 import java.util.Iterator;
 
 public class StdUnorderedIndex extends BaseUnorderedIndex {
@@ -22,6 +23,11 @@ public class StdUnorderedIndex extends BaseUnorderedIndex {
     @Override
     public boolean InsertRecord(String key, TableRecord record) {
         return false;
+    }
+
+    @Override
+    public HashMap<String, TableRecord> getTableIndexByPartitionId(int partitionId) {
+        return null;
     }
 
     @Override

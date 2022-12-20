@@ -38,6 +38,11 @@ public class HashTableIndex extends BaseUnorderedIndex {
     }
 
     @Override
+    public HashMap<String, TableRecord> getTableIndexByPartitionId(int partitionId) {
+        return this.hash_index_by_partition.get(partitionId);
+    }
+
+    @Override
     public Iterator<TableRecord> iterator() {
         //
         HashMap<String, TableRecord> temp = new HashMap<>();

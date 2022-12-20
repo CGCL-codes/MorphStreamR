@@ -1,35 +1,35 @@
 package storage;
 
 import common.collections.Configuration;
+import common.collections.OsUtils;
 import db.DatabaseException;
 import durability.snapshot.SnapshotOptions;
+import durability.snapshot.SnapshotResult.SnapshotResult;
 import durability.snapshot.SnapshotStrategy.ImplSnapshotStrategy.InMemorySnapshotStrategy;
+import durability.snapshot.SnapshotStream.ImplSnapshotStreamFactory.NIOSnapshotStreamFactory;
 import storage.datatype.DataBox;
 import storage.table.BaseTable;
 import storage.table.RecordSchema;
 import storage.table.ShareTable;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.io.Serializable;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class StorageManager {
     /**
      * Add for snapshot
      * */
-    private final InMemorySnapshotStrategy checkpointSnapshotStrategy;
-    private SnapshotOptions snapshotOptions;
-    private String snapshotPath;
-
+    private final InMemorySnapshotStrategy snapshotStrategy;
     public Map<String, BaseTable> tables;
     int table_count;
 
     public StorageManager(Configuration configuration) {
         tables = new ConcurrentHashMap<>();
-        checkpointSnapshotStrategy = null;
+        snapshotStrategy = new InMemorySnapshotStrategy(tables,
+                new SnapshotOptions(configuration.getInt("parallelNum"), configuration.getString("compressionAlg")),
+                configuration.getString("rootFilePath") + OsUtils.OS_wrapper("snapshot"));
     }
 
     public BaseTable getTable(String tableName) throws DatabaseException {
@@ -56,6 +56,7 @@ public class StorageManager {
             throw new DatabaseException("Table name already exists");
         }
         tables.put(tableName, new ShareTable(s, tableName, true, partition_num, num_items));//here we decide which table to use.
+        this.snapshotStrategy.registerTable(tableName, s);
         table_count++;
     }
 
@@ -119,6 +120,12 @@ public class StorageManager {
         for (String s : tableNames) {
             dropTable(s);
         }
+    }
+
+    public SnapshotResult asyncSnapshot(long snapshotId, int partitionId) {
+
+
+        return null;
     }
 
     /**

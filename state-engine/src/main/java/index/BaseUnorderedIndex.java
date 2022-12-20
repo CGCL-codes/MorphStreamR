@@ -2,6 +2,8 @@ package index;
 
 import storage.TableRecord;
 
+import java.util.HashMap;
+
 public abstract class BaseUnorderedIndex implements Iterable<TableRecord> {
     protected final int partition_num;
     protected final int num_items;
@@ -13,6 +15,8 @@ public abstract class BaseUnorderedIndex implements Iterable<TableRecord> {
 
     public abstract boolean InsertRecord(String key, TableRecord record);
 
+    public abstract HashMap<String, TableRecord> getTableIndexByPartitionId(int partitionId);
+
     public BaseUnorderedIndex(int partition_num, int num_items) {
         this.partition_num = partition_num;
         this.num_items = num_items;
@@ -23,4 +27,5 @@ public abstract class BaseUnorderedIndex implements Iterable<TableRecord> {
         int key = Integer.parseInt(primary_key);
         return key / delta;
     }
+
 }

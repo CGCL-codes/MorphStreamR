@@ -9,6 +9,7 @@ import storage.TableRecord;
 import storage.TableRecords;
 import storage.datatype.DataBox;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -76,6 +77,11 @@ public class ShareTable extends BaseTable {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public HashMap<String, TableRecord> getTableIndexByPartitionId(int partitionId) {
+        return this.primary_index_.getTableIndexByPartitionId(partitionId);
     }
 
     @Override
