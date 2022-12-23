@@ -1,5 +1,7 @@
 package durability.snapshot.SnapshotResources.ImplSnapshotResources;
 
+import common.io.ByteIO.DataOutputView;
+import common.tools.Serialize;
 import durability.snapshot.SnapshotOptions;
 import durability.snapshot.SnapshotResources.SnapshotResources;
 import durability.snapshot.SnapshotResources.StateMetaInfoSnapshot;
@@ -7,12 +9,12 @@ import durability.snapshot.SnapshotStrategy.ImplSnapshotStrategy.InMemorySnapsho
 import storage.TableRecord;
 import storage.table.BaseTable;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+
+import static utils.FaultToleranceConstants.END_OF_TABLE_GROUP_MARK;
 
 public class InMemoryFullSnapshotResources implements SnapshotResources {
     private final List<StateMetaInfoSnapshot> stateMetaInfoSnapshots = new ArrayList<>();
@@ -38,8 +40,39 @@ public class InMemoryFullSnapshotResources implements SnapshotResources {
         }
     }
 
-    public ByteBuffer createWriteBuffer(SnapshotOptions snapshotOptions) {
-        return null;
+    public ByteBuffer createWriteBuffer(SnapshotOptions snapshotOptions) throws IOException {
+        //TODO:implementation compressionAlg, Different compressionAlg -> different dataOutputView
+        DataOutputView dataOutputView = new DataOutputView();
+        writeKVStateMetaData(dataOutputView);
+        writeKVStateDate(dataOutputView);
+        return ByteBuffer.wrap(dataOutputView.getByteArray());
+    }
+
+    private void writeKVStateMetaData(DataOutputView dataOutputView) throws IOException {
+        dataOutputView.writeInt(this.stateMetaInfoSnapshots.size());
+        List<byte[]> objects = new ArrayList<>();
+        for (StateMetaInfoSnapshot stateMetaInfoSnapshot : this.stateMetaInfoSnapshots) {
+            objects.add(Serialize.serializeObject(stateMetaInfoSnapshot));
+        }
+        for (byte[] o: objects) {
+            dataOutputView.writeInt(o.length);
+            dataOutputView.write(o);
+        }
+    }
+
+    private void writeKVStateDate(DataOutputView dataOutputView) throws IOException {
+        Iterator<HashMap<String, TableRecord>> iterator = snapshotResource.values().iterator();
+        while (iterator.hasNext()) {
+            dataOutputView.writeInt(END_OF_TABLE_GROUP_MARK);
+            HashMap<String, TableRecord> tables = iterator.next();
+            Iterator<TableRecord> recordIterator = tables.values().iterator();
+            while (recordIterator.hasNext()) {
+                TableRecord tableRecord = recordIterator.next();
+                String str = tableRecord.toSerializableString(this.snapshotId);
+                dataOutputView.writeInt(str.getBytes(StandardCharsets.UTF_8).length);
+                dataOutputView.write(str.getBytes(StandardCharsets.UTF_8));
+            }
+        }
     }
 
     @Override

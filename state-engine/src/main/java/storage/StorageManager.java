@@ -3,6 +3,7 @@ package storage;
 import common.collections.Configuration;
 import common.collections.OsUtils;
 import db.DatabaseException;
+import durability.manager.FTManager;
 import durability.snapshot.SnapshotOptions;
 import durability.snapshot.SnapshotResult.SnapshotResult;
 import durability.snapshot.SnapshotStrategy.ImplSnapshotStrategy.InMemorySnapshotStrategy;
@@ -122,10 +123,8 @@ public class StorageManager {
         }
     }
 
-    public SnapshotResult asyncSnapshot(long snapshotId, int partitionId) {
-
-
-        return null;
+    public void asyncSnapshot(long snapshotId, int partitionId, FTManager ftManager) throws IOException {
+        this.snapshotStrategy.asyncSnapshot(snapshotId, partitionId, ftManager);
     }
 
     /**

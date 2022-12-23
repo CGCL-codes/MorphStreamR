@@ -1,6 +1,6 @@
 package db;
 
-import durability.snapshot.SnapshotResult.SnapshotResult;
+import durability.manager.FTManager;
 import storage.EventManager;
 import storage.StorageManager;
 import storage.TableRecord;
@@ -54,10 +54,10 @@ public abstract class Database {
 
     /**
      * To parallel take a snapshot
+     *
      * @param snapshotId
      * @param partitionId
-     * @return
      * @throws Exception
      */
-    public abstract SnapshotResult parallelSnapshot(final long snapshotId, final int partitionId) throws Exception;
+    public abstract void parallelSnapshot(final long snapshotId, final int partitionId, final FTManager ftManager) throws Exception;
 }

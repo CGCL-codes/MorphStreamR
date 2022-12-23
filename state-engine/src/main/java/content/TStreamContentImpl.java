@@ -22,6 +22,11 @@ public class TStreamContentImpl extends TStreamContent {
     }
 
     @Override
+    public SchemaRecord ReadAccess(long snapshotId, boolean clean) {
+        return readValues(snapshotId, clean);
+    }
+
+    @Override
     public void WriteAccess(long ts, long previous_mark_ID, boolean clean, SchemaRecord local_record_) {
         updateValues(ts, previous_mark_ID, clean, local_record_);//mvcc, value_list @ts=0
     }

@@ -1,7 +1,7 @@
 package db;
 
 import common.collections.Configuration;
-import durability.snapshot.SnapshotResult.SnapshotResult;
+import durability.manager.FTManager;
 import storage.EventManager;
 import storage.StorageManager;
 import storage.TableRecord;
@@ -26,7 +26,7 @@ public class CavaliaDatabase extends Database {
     }
 
     @Override
-    public SnapshotResult parallelSnapshot(long snapshotId, int partitionId) throws Exception {
-        return null;
+    public void parallelSnapshot(long snapshotId, int partitionId, FTManager ftManager) throws Exception {
+        this.storageManager.asyncSnapshot(snapshotId, partitionId, ftManager);
     }
 }

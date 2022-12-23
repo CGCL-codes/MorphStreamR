@@ -138,6 +138,14 @@ public abstract class TStreamContent implements Content {
         return record;
     }
 
+    public SchemaRecord readValues(long snapshotId, boolean clean) {
+        SchemaRecord schemaRecord = versions.lowerEntry(snapshotId).getValue();
+        if (clean) {
+            //TODO: clean old version
+        }
+        return schemaRecord;
+    }
+
     @Override
     public void clean_map() {
 //        versions = (ConcurrentSkipListMap<Long, SchemaRecord>) versions.tailMap(versions.lastKey());

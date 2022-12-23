@@ -19,4 +19,7 @@ public class Attachment {
         this.path = path;
         this.ftManager = ftManager;
     }
+    public SnapshotResult getSnapshotResult() {
+        return new SnapshotResult(this.snapshotId, this.partitionId, this.path);
+    }
 }

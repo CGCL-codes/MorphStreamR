@@ -69,6 +69,8 @@ public interface Content {
 
     SchemaRecord ReadAccess(long ts, long mark_ID, boolean clean, CommonMetaTypes.AccessType accessType);
 
+    SchemaRecord ReadAccess(long snapshotId, boolean clean);
+
     void WriteAccess(long commit_timestamp, long mark_ID, boolean clean, SchemaRecord local_record_);
 
     void ReleaseCertifyLock();

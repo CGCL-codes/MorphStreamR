@@ -1,5 +1,7 @@
 package durability.snapshot.SnapshotResult;
 
+import utils.FaultToleranceConstants;
+
 import java.io.IOException;
 import java.nio.channels.CompletionHandler;
 
@@ -7,7 +9,10 @@ public class SnapshotHandler implements CompletionHandler<Integer, Attachment> {
     @Override
     public void completed(Integer result, Attachment attach) {
         try {
-            //TODO: create snapshot result and commit to FTManager
+            SnapshotResult snapshotResult = attach.getSnapshotResult();
+            attach.ftManager.boltRegister(attach.partitionId,
+                    FaultToleranceConstants.FaultToleranceStatus.Snapshot,
+                    snapshotResult);
             attach.asyncChannel.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -17,6 +22,7 @@ public class SnapshotHandler implements CompletionHandler<Integer, Attachment> {
     @Override
     public void failed(Throwable exc, Attachment attach) {
         try {
+            //TODO: notify the operator to reExecute snapshot
             attach.asyncChannel.close();
         } catch (IOException e1) {
             e1.printStackTrace();
