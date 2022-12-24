@@ -11,6 +11,7 @@ import components.Topology;
 import components.exception.InvalidIDException;
 import components.grouping.ShuffleGrouping;
 import controller.input.scheduler.SequentialScheduler;
+import durability.manager.FTManager;
 import lock.PartitionedOrderLock;
 import lock.SpinLock;
 import org.slf4j.Logger;

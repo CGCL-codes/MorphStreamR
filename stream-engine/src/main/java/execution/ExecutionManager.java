@@ -5,6 +5,8 @@ import components.context.TopologyContext;
 import components.exception.UnhandledCaseException;
 import controller.affinity.AffinityController;
 import db.Database;
+import durability.manager.FTManager;
+import durability.manager.ImplFTManager.CheckpointManager;
 import execution.runtime.boltThread;
 import execution.runtime.executorThread;
 import execution.runtime.spoutThread;
@@ -32,12 +34,25 @@ public class ExecutionManager {
     public final AffinityController AC;
     private final OptimizationManager optimizationManager;
     private final ExecutionGraph g;
+    private final FTManager ftManager;
 
     public ExecutionManager(ExecutionGraph g, Configuration conf, OptimizationManager optimizationManager) {
         this.g = g;
         AC = new AffinityController(conf);
         this.optimizationManager = optimizationManager;
+        switch (conf.getInt("FTOption")) {
+            case 0:
+                this.ftManager = null;
+                break;
+            default:
+                this.ftManager = new CheckpointManager();
+                this.ftManager.initialize(conf);
+                break;
+        }
+    }
 
+    private void loadFTManger() {
+        this.ftManager.start();
     }
 
 
@@ -50,6 +65,7 @@ public class ExecutionManager {
     public void distributeTasks(Configuration conf,
                                 CountDownLatch latch, Database db) throws UnhandledCaseException {
         g.build_inputScheduler();
+        this.loadFTManger();
         //TODO: support multi-stages later.
         if (enable_shared_state) {
             HashMap<Integer, List<Integer>> stage_map = new HashMap<>();//Stages --> Executors.
@@ -174,6 +190,14 @@ public class ExecutionManager {
     public void exist() {
         if (enable_log) LOG.info("Execution stops.");
         this.getSinkThread().getContext().Sequential_stopAll();
+        this.closeFTM();
+    }
+
+    public void closeFTM() {
+        this.ftManager.running = false;
+        while (ftManager.isAlive()) {
+            ftManager.interrupt();
+        }
     }
 
     public executorThread getSinkThread() {

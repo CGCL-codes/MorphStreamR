@@ -78,25 +78,6 @@ public class SLCombo extends SPOUTCombo {
         return Math.max(0, conc);
     }
 
-    protected void show_stats() {
-        while (cnt < 8) {
-            for (Object myevent : myevents) {
-                concurrency += conflict((TxnEvent) myevent);
-                prevents.add((TxnEvent) myevent);
-                if (prevents.size() == concerned_length[cnt]) {
-                    if (pre_concurrency == 0)
-                        pre_concurrency = concurrency;
-                    else
-                        pre_concurrency = (pre_concurrency + concurrency) / 2;
-                    concurrency = 0;
-                    prevents.clear();
-                }
-            }
-            System.out.println(concerned_length[cnt] + ",\t " + pre_concurrency + ",");
-            cnt++;
-        }
-    }
-
     @Override
     public void loadEvent(String filePath, Configuration config, TopologyContext context, OutputCollector collector) {
         int storageIndex = 0;

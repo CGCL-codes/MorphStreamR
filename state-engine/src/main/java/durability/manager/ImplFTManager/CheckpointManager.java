@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayDeque;
 import java.util.List;
 import java.util.Queue;
 import java.util.Vector;
@@ -23,9 +22,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import static common.CONTROL.enable_log;
 import static utils.FaultToleranceConstants.*;
 
-public class CheckpointManager extends Thread implements FTManager {
+public class CheckpointManager extends FTManager {
     private final Logger LOG = LoggerFactory.getLogger(CheckpointManager.class);
-    public boolean running = true;
     private int parallelNum;
     private ConcurrentHashMap<Long, List<FaultToleranceStatus>> callCommit;
     //<snapshotId, SnapshotCommitInformation>
@@ -43,12 +41,13 @@ public class CheckpointManager extends Thread implements FTManager {
             file.mkdirs();
             if (enable_log) LOG.info("CheckpointManager initialize successfully");
         }
+        this.setName("CheckpointManager");
     }
 
     @Override
     public boolean spoutRegister(long snapshotId) {
         if (this.registerSnapshot.containsKey(snapshotId)) {
-            //TODO: if these is too many uncommitted snapshot, notify the spout not to register
+            //TODO: if these are too many uncommitted snapshot, notify the spout not to register
             LOG.info("SnapshotID has been registered already");
             return false;
         } else {
@@ -93,6 +92,7 @@ public class CheckpointManager extends Thread implements FTManager {
 
     @Override
     public void run() {
+        LOG.info("CheckpointManager starts!");
         try {
             Listener();
         } catch (IOException e) {

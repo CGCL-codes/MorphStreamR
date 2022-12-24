@@ -36,6 +36,11 @@ public class SStoreContentImpl extends SStoreContent {
     }
 
     @Override
+    public SchemaRecord ReadAccess(long snapshotId, boolean clean) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public SchemaRecord readPreValues(long ts) {
         return null;
     }

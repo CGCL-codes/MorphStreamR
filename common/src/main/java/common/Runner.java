@@ -187,7 +187,6 @@ public abstract class Runner implements IRunner {
     /**
      * Evaluation parameters
      */
-    //multicoreEvaluation
     @Parameter(names = {"--multicoreEvaluation"}, description = "Evaluation the multicoreScalability. Default to be false.")
     public Integer multicoreEvaluation = 0;
     @Parameter(names = {"--maxThreads"}, description = "Evaluation the multicoreScalability. The max number of threads.")
@@ -196,6 +195,13 @@ public abstract class Runner implements IRunner {
     @Parameter(names = {"--cleanUp"}, description = "Whether to clean temporal objects. Default to be false.")
     public Integer cleanUp = 0;
 
+    /* Fault Tolerance */
+    @Parameter(names = {"--FTOption"}, description = "Fault tolerance mechanisms: 0 for noFT, 1 for checkpoint, ")
+    public Integer FTOption = 0;
+    @Parameter(names = {"--compressionAlg"}, description = "compression Alg: ")
+    public String  compressionAlg = "None";
+    @Parameter(names = {"--snapshotInterval"}, description = "Snapshot interval ")
+    public Integer snapshotInterval = 0;
 
     public Runner() {
         CFG_PATH = "/config/%s.properties";
@@ -347,6 +353,11 @@ public abstract class Runner implements IRunner {
             config.put("cleanUp",true);
         }
 
+        /* Fault Tolerance */
+        config.put("FTOption", FTOption);
+        config.put("parallelNum", tthread);
+        config.put("compressionAlg", compressionAlg);
+        config.put("snapshotInterval", snapshotInterval);
 
         System.setProperty("my.log", metric_path);
     }
