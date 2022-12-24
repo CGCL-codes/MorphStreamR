@@ -19,8 +19,10 @@ import transaction.function.DEC;
 import transaction.function.INC;
 import transaction.impl.ordered.TxnManagerTStream;
 
+import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.BrokenBarrierException;
 
 import static common.CONTROL.*;
@@ -63,7 +65,7 @@ public class SLBolt_ts extends SLBolt {
 
 
     @Override
-    public void execute(Tuple in) throws InterruptedException, DatabaseException, BrokenBarrierException {
+    public void execute(Tuple in) throws InterruptedException, DatabaseException, BrokenBarrierException, IOException {
 
         if (in.isMarker()) {
             int transSize = transactionEvents.size();
@@ -76,6 +78,9 @@ public class SLBolt_ts extends SLBolt {
                 MeasureTools.BEGIN_TXN_TIME_MEASURE(thread_Id);
                 {
                     transactionManager.start_evaluate(thread_Id, in.getBID(), num_events);//start lazy evaluation in transaction manager.
+                    if (Objects.equals(in.getMarker().getMessage(), "snapshot")) {
+                        this.db.asyncSnapshot(in.getMarker().getSnapshotId(), this.thread_Id, this.ftManager);
+                    }
                     TRANSFER_REQUEST_CORE();
                 }
                 MeasureTools.END_TXN_TIME_MEASURE(thread_Id);

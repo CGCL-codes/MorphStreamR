@@ -2,6 +2,7 @@ package storage.datatype;
 
 import storage.SchemaRecord;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
 
@@ -14,7 +15,7 @@ import java.util.List;
  * Provides default functionality for all DataBox subclasses by assuming that the contained value_list is
  * not of the type specified.
  */
-public abstract class DataBox implements Comparable, Cloneable {
+public abstract class DataBox implements Comparable, Cloneable, Serializable {
     public DataBox() throws DataBoxException {
     }
 

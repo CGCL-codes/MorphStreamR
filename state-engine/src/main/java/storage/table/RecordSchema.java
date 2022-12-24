@@ -3,6 +3,7 @@ package storage.table;
 import storage.SchemaRecord;
 import storage.datatype.*;
 
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,7 +17,7 @@ import java.util.List;
  * `fieldTypes`: an ordered list of data types corresponding to the columns
  * `size`: physical size (in bytes) of a d_record conforming to this schema
  */
-public class RecordSchema {
+public class RecordSchema implements Serializable {
     private final int secondary_num_;
     private final List<String> fields;
     private final List<DataBox> fieldTypes;

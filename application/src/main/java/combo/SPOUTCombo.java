@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import utils.SOURCE_CONTROL;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Random;
 import java.util.concurrent.BrokenBarrierException;
 
@@ -76,11 +77,17 @@ public abstract class SPOUTCombo extends TransactionalSpout {
 
                 if (ccOption == CCOption_TStream || ccOption == CCOption_SStore) {// This is only required by T-Stream.
                     if (model_switch(counter)) {
-                        marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration));
+                        if (snapshot(counter)) {
+                            marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration, "snapshot", counter));
+                            if (this.taskId == 0) {
+                                this.ftManager.spoutRegister(counter);
+                            }
+                        } else {
+                            marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration));
+                        }
                         bolt.execute(marker);
                     }
                 }
-
                 if (counter == the_end) {
 //                    if (ccOption == CCOption_SStore)
 //                        MeasureTools.END_TOTAL_TIME_MEASURE(taskId);//otherwise deadlock.
@@ -92,6 +99,8 @@ public abstract class SPOUTCombo extends TransactionalSpout {
             }
         } catch (DatabaseException | BrokenBarrierException e) {
             e.printStackTrace();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

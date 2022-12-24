@@ -75,8 +75,6 @@ public class ExecutionManager {
             }
             int stage = 0;//currently only stage 0 is required..
             List<Integer> integers = stage_map.get(stage);
-//            TxnProcessingEngine tp_engine = new TxnProcessingEngine(stage);
-//            tp_engine = TxnProcessingEngine.getInstance();
             if (integers != null) {
                 int totalThread = conf.getInt("tthread");
                 int numberOfStates = conf.getInt("NUM_ITEMS");
@@ -102,12 +100,12 @@ public class ExecutionManager {
         for (ExecutionNode e : g.getExecutionNodeArrayList()) {
             switch (e.operator.type) {
                 case spoutType:
-                    thread = launchSpout_SingleCore(e, new TopologyContext(g, db, e, ThreadMap)
+                    thread = launchSpout_SingleCore(e, new TopologyContext(g, db, ftManager, e, ThreadMap)
                             , conf, 0, latch); //TODO: schedule to numa node wisely.
                     break;
                 case boltType:
                 case sinkType:
-                    thread = launchBolt_SingleCore(e, new TopologyContext(g, db, e, ThreadMap)
+                    thread = launchBolt_SingleCore(e, new TopologyContext(g, db, ftManager, e, ThreadMap)
                             , conf, 0, latch); //TODO: schedule to numa node wisely.
                     break;
                 case virtualType:

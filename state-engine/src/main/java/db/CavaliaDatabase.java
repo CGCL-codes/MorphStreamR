@@ -6,6 +6,8 @@ import storage.EventManager;
 import storage.StorageManager;
 import storage.TableRecord;
 
+import java.io.IOException;
+
 /**
  * original designer for CavaliaDatabase: Yingjun Wu.
  */
@@ -26,7 +28,7 @@ public class CavaliaDatabase extends Database {
     }
 
     @Override
-    public void parallelSnapshot(long snapshotId, int partitionId, FTManager ftManager) throws Exception {
+    public void asyncSnapshot(long snapshotId, int partitionId, FTManager ftManager) throws IOException {
         this.storageManager.asyncSnapshot(snapshotId, partitionId, ftManager);
     }
 }

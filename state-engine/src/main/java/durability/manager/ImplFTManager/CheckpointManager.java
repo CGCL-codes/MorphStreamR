@@ -2,6 +2,7 @@ package durability.manager.ImplFTManager;
 
 import common.collections.Configuration;
 import common.collections.OsUtils;
+import common.io.LocalFS.FileSystem;
 import common.io.LocalFS.LocalDataOutputStream;
 import common.tools.Serialize;
 import durability.manager.FTManager;
@@ -25,19 +26,20 @@ import static utils.FaultToleranceConstants.*;
 public class CheckpointManager extends FTManager {
     private final Logger LOG = LoggerFactory.getLogger(CheckpointManager.class);
     private int parallelNum;
-    private ConcurrentHashMap<Long, List<FaultToleranceStatus>> callCommit;
+    private ConcurrentHashMap<Long, List<FaultToleranceStatus>> callCommit = new ConcurrentHashMap<>();
     //<snapshotId, SnapshotCommitInformation>
     private ConcurrentHashMap<Long, SnapshotCommitInformation> registerSnapshot = new ConcurrentHashMap<>();
     private String metaPath;
+    private String basePath;
     private Queue<Long> uncommittedId = new ConcurrentLinkedQueue<>();
     private long pendingSnapshotId;
     @Override
     public void initialize(Configuration config) {
         this.parallelNum = config.getInt("parallelNum");
-        metaPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("snapshot") + OsUtils.OS_wrapper("MetaData");
-        File file = new File(this.metaPath);
-        if (file.exists()) {
-            file.delete();
+        basePath = config.getString("rootFilePath") + OsUtils.OS_wrapper("snapshot");
+        metaPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("snapshot") + OsUtils.OS_wrapper("metaData.log");
+        File file = new File(this.basePath);
+        if (!file.exists()) {
             file.mkdirs();
             if (enable_log) LOG.info("CheckpointManager initialize successfully");
         }
@@ -52,8 +54,9 @@ public class CheckpointManager extends FTManager {
             return false;
         } else {
             this.registerSnapshot.put(snapshotId, new SnapshotCommitInformation(snapshotId));
-            this.uncommittedId.add(snapshotId);
             callCommit.put(snapshotId, initCallCommit());
+            this.uncommittedId.add(snapshotId);
+            LOG.info("Register snapshot with offset: " + snapshotId + "; pending snapshot: " + uncommittedId.size());
             return true;
         }
     }
@@ -74,7 +77,7 @@ public class CheckpointManager extends FTManager {
     public void Listener() throws IOException {
         while (running) {
             if (all_register()) {
-                if (callCommit.containsKey(FaultToleranceStatus.Snapshot)) {
+                if (callCommit.get(pendingSnapshotId).contains(FaultToleranceStatus.Snapshot)) {
                     snapshotComplete(pendingSnapshotId);
                     LOG.info("CheckpointManager received all register and commit snapshot");
                     if (uncommittedId.size() != 0) {
@@ -82,7 +85,7 @@ public class CheckpointManager extends FTManager {
                     } else {
                         this.pendingSnapshotId = 0;
                     }
-                    LOG.info("The number of uncommitted snapshot");
+                    LOG.info("Pending snapshot: " + uncommittedId.size());
                 } else {
                     //TODO: add other operation, such as recovery
                 }
@@ -98,10 +101,8 @@ public class CheckpointManager extends FTManager {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-            File file = new File(this.metaPath);
-            if (file.exists()) {
-                file.delete();
-            }
+            File file = new File(this.basePath);
+            FileSystem.deleteFile(file);
             LOG.info("CheckpointManager stops");
         }
     }

@@ -59,5 +59,5 @@ public abstract class Database {
      * @param partitionId
      * @throws Exception
      */
-    public abstract void parallelSnapshot(final long snapshotId, final int partitionId, final FTManager ftManager) throws Exception;
+    public abstract void asyncSnapshot(final long snapshotId, final int partitionId, final FTManager ftManager) throws IOException;
 }
