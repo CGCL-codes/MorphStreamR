@@ -6,7 +6,7 @@ import scheduler.signal.oc.OnExecutedSignal;
 import scheduler.signal.oc.OnParentExecutedSignal;
 import scheduler.signal.oc.OnRootSignal;
 import scheduler.signal.oc.OperationChainSignal;
-import scheduler.struct.og.MetaTypes.DependencyType;
+import scheduler.struct.MetaTypes.DependencyType;
 import scheduler.struct.og.OperationChain;
 
 import java.util.Queue;

@@ -19,6 +19,7 @@ public abstract class Database {
     public EventManager getEventManager() {
         return eventManager;
     }
+    public LoggingManager getLoggingManager() { return loggingManager;}
 //	public transient TxnParam param;
 
     /**

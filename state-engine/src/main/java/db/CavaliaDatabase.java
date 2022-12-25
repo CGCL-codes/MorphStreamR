@@ -16,7 +16,7 @@ public class CavaliaDatabase extends Database {
     public CavaliaDatabase(Configuration configuration) {
         storageManager = new StorageManager(configuration);
         eventManager = new EventManager();
-        switch (configuration.getInt("FFOption")) {
+        switch (configuration.getInt("FTOption")) {
             case 0 :
             case 1 :
                 this.loggingManager = null;

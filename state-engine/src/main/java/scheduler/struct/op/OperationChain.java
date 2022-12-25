@@ -1,6 +1,6 @@
 package scheduler.struct.op;
 
-import scheduler.struct.op.MetaTypes.DependencyType;
+import scheduler.struct.MetaTypes.DependencyType;
 import transaction.impl.ordered.MyList;
 import utils.lib.ConcurrentHashMap;
 

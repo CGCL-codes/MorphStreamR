@@ -1,8 +1,8 @@
 package durability.logging.LoggingResource.ImplLoggingResources;
 
 import common.io.ByteIO.DataOutputView;
+import durability.logging.LoggingEntry.LogRecord;
 import durability.logging.LoggingStrategy.ImplLoggingManager.WALManager;
-import durability.logging.LoggingEntry.Update;
 import durability.logging.LoggingResource.WalMetaInfoSnapshot;
 import durability.logging.LoggingResource.LoggingResources;
 
@@ -17,11 +17,11 @@ import java.util.concurrent.ConcurrentSkipListSet;
 
 public class PartitionWalResources implements LoggingResources {
     private final List<WalMetaInfoSnapshot>  metaInfoSnapshots = new ArrayList<>();
-    private final HashMap<String, ConcurrentSkipListSet<Update>> logResources = new HashMap<>();
+    private final HashMap<String, ConcurrentSkipListSet<LogRecord>> logResources = new HashMap<>();
     private final long groupId;
     private final int partitionId;
 
-    public PartitionWalResources(long groupId, int partitionId, Map<String, Map<Integer, ConcurrentSkipListSet<Update>>> pendingEntries, ConcurrentHashMap<String, WALManager.WriteAheadLogTableInfo> metaInformation) {
+    public PartitionWalResources(long groupId, int partitionId, Map<String, Map<Integer, ConcurrentSkipListSet<LogRecord>>> pendingEntries, ConcurrentHashMap<String, WALManager.WriteAheadLogTableInfo> metaInformation) {
         this.groupId = groupId;
         this.partitionId = partitionId;
         createLogMetaInfoSnapshots(metaInformation);
@@ -33,8 +33,8 @@ public class PartitionWalResources implements LoggingResources {
         }
     }
 
-    private void createLogResources(Map<String, Map<Integer, ConcurrentSkipListSet<Update>>> pendingEntries) {
-        for (Map.Entry<String, Map<Integer, ConcurrentSkipListSet<Update>>> entry: pendingEntries.entrySet()) {
+    private void createLogResources(Map<String, Map<Integer, ConcurrentSkipListSet<LogRecord>>> pendingEntries) {
+        for (Map.Entry<String, Map<Integer, ConcurrentSkipListSet<LogRecord>>> entry: pendingEntries.entrySet()) {
             this.logResources.put(entry.getKey(), entry.getValue().get(this.partitionId));
         }
     }

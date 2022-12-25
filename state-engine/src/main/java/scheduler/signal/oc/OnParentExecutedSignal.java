@@ -1,7 +1,6 @@
 package scheduler.signal.oc;
 
-import scheduler.struct.og.Operation;
-import scheduler.struct.og.MetaTypes.DependencyType;
+import scheduler.struct.MetaTypes.DependencyType;
 import scheduler.struct.og.OperationChain;
 
 public class OnParentExecutedSignal extends OperationChainSignal {

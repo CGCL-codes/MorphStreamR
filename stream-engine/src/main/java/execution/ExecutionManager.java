@@ -79,6 +79,7 @@ public class ExecutionManager {
                 int numberOfStates = conf.getInt("NUM_ITEMS");
                 String schedulerType = conf.getString("scheduler");
                 int app = conf.getInt("app");
+                TxnManager.loggingManager = db.getLoggingManager();
                 if (conf.getBoolean("isDynamic")) {
                     String schedulers=conf.getString("schedulersPool");
                     TxnManager.initSchedulerPool(conf.getString("defaultScheduler"), schedulers, totalThread, numberOfStates, app);

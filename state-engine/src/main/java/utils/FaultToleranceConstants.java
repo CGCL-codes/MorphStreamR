@@ -7,5 +7,8 @@ public class FaultToleranceConstants {
      public enum FaultToleranceStatus {
          NULL,Undo,Persist,Recovery,Snapshot
      }
+     public enum Vote{
+        Abort, Commit
+     }
      public static final int END_OF_TABLE_GROUP_MARK = 0xFFFF;
 }

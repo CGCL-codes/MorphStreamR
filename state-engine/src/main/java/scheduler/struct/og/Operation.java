@@ -3,7 +3,8 @@ package scheduler.struct.og;
 import content.common.CommonMetaTypes;
 import scheduler.context.og.OGSchedulerContext;
 import scheduler.struct.AbstractOperation;
-import scheduler.struct.op.MetaTypes.OperationStateType;
+import scheduler.struct.MetaTypes.OperationStateType;
+import scheduler.struct.MetaTypes.DependencyType;
 import storage.SchemaRecordRef;
 import storage.TableRecord;
 import transaction.context.TxnContext;
@@ -95,6 +96,7 @@ public class Operation extends AbstractOperation implements Comparable<Operation
 
     public void stateTransition(OperationStateType state) {
         operationState = state;
+        logRecord.setVote(state);
     }
 
     public OperationStateType getOperationState() {

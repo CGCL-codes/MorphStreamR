@@ -1,17 +1,27 @@
 package durability.logging.LoggingEntry;
 
+import scheduler.struct.MetaTypes.OperationStateType;
+import utils.FaultToleranceConstants;
+
 import java.io.Serializable;
 import java.util.Objects;
 
-public class LogRecord implements Serializable {
+public class LogRecord implements Serializable, Comparable {
     public String tableName;
-    public int partitionId;
     public long bid;
-    public Update update;
-    public LogRecord (String tableName, int partitionId, long bid, String key) {
+    public String key;
+    public Object update;
+    public OperationStateType vote;
+    public LogRecord (String tableName, long bid, String key) {
         this.bid = bid;
         this.tableName = tableName;
-        this.update = new Update(bid, key);
+        this.key = key;
+    }
+    public void addUpdate(Object update) {
+        this.update = update;
+    }
+    public void setVote(OperationStateType vote) {
+        this.vote = vote;
     }
 
     @Override
@@ -22,11 +32,24 @@ public class LogRecord implements Serializable {
         LogRecord entry = (LogRecord) o;
 
         if (bid != entry.bid) return false;
+        if (!key.equals(((LogRecord) o).key)) return false;
         return Objects.equals(update, entry.update);
     }
 
     public String toString() {
-        return tableName + ";" + update.toString();
+        return tableName + "," + bid + "," + key + "," + update.toString();
     }
 
+    @Override
+    public int compareTo(Object obj) {
+        if (this.getClass() != obj.getClass()) {
+            return 0;
+        }
+        LogRecord other = (LogRecord) obj;
+        if (this.bid != other.bid) {
+            return Long.compare(this.bid, other.bid);
+        } else {
+            return Integer.compare(Integer.parseInt(key), Integer.parseInt(other.key));
+        }
+    }
 }

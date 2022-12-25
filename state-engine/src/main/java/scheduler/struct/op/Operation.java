@@ -7,8 +7,8 @@ import scheduler.context.op.OPSContext;
 import scheduler.context.op.OPSchedulerContext;
 import scheduler.signal.op.OnParentUpdatedSignal;
 import scheduler.struct.AbstractOperation;
-import scheduler.struct.op.MetaTypes.DependencyType;
-import scheduler.struct.op.MetaTypes.OperationStateType;
+import scheduler.struct.MetaTypes.DependencyType;
+import scheduler.struct.MetaTypes.OperationStateType;
 import storage.SchemaRecordRef;
 import storage.TableRecord;
 import transaction.context.TxnContext;
@@ -189,6 +189,7 @@ public class Operation extends AbstractOperation implements Comparable<Operation
 //        LOG.debug(this + " : state transit " + operationState + " -> " + state);
 //        operationState.getAndSet(state);
         operationState = state;
+        logRecord.setVote(state);
     }
 
     public OperationStateType getOperationState() {

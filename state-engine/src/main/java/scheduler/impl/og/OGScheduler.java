@@ -1,16 +1,17 @@
 package scheduler.impl.og;
 
 
+import durability.logging.LoggingStrategy.LoggingManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import profiler.MeasureTools;
 import scheduler.Request;
 import scheduler.context.og.OGSchedulerContext;
 import scheduler.impl.IScheduler;
+import scheduler.struct.MetaTypes;
 import scheduler.struct.og.Operation;
 import scheduler.struct.og.OperationChain;
 import scheduler.struct.og.TaskPrecedenceGraph;
-import scheduler.struct.op.MetaTypes;
 import storage.SchemaRecord;
 import storage.TableRecord;
 import storage.datatype.DataBox;
@@ -35,7 +36,8 @@ public abstract class OGScheduler<Context extends OGSchedulerContext>
     private static final Logger log = LoggerFactory.getLogger(OGScheduler.class);
     public final int delta;//range of each partition. depends on the number of op in the stage.
     public final TaskPrecedenceGraph<Context> tpg; // TPG to be maintained in this global instance.
-
+    public LoggingManager loggingManager; // Used by fault tolerance
+    public boolean isLogging = false;// Used by fault tolerance
     protected OGScheduler(int totalThreads, int NUM_ITEMS, int app) {
         delta = (int) Math.ceil(NUM_ITEMS / (double) totalThreads); // Check id generation in DateGenerator.
         this.tpg = new TaskPrecedenceGraph<>(totalThreads, delta, NUM_ITEMS, app);
@@ -44,6 +46,12 @@ public abstract class OGScheduler<Context extends OGSchedulerContext>
     @Override
     public void initTPG(int offset) {
         tpg.initTPG(offset);
+    }
+
+    @Override
+    public void setLoggingManager(LoggingManager loggingManager) {
+        this.loggingManager = loggingManager;
+        this.isLogging = true;
     }
 
     /**
@@ -278,6 +286,10 @@ public abstract class OGScheduler<Context extends OGSchedulerContext>
             operation.d_record.record_.getValues().get(1).setLong(operation.value);
         } else {
             throw new UnsupportedOperationException();
+        }
+        if (isLogging) {
+            operation.logRecord.addUpdate(operation.d_record.content_.readPreValues(operation.bid));
+            this.loggingManager.addLogRecord(operation.logRecord);
         }
     }
 

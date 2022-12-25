@@ -3,7 +3,7 @@ package scheduler.impl.op.structured;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scheduler.context.op.OPSContext;
-import scheduler.struct.op.MetaTypes;
+import scheduler.struct.MetaTypes;
 import scheduler.struct.op.Operation;
 
 public class OPDFSScheduler<Context extends OPSContext> extends OPSScheduler<Context> {

@@ -1,7 +1,7 @@
 package scheduler.signal.op;
 
 
-import scheduler.struct.op.MetaTypes;
+import scheduler.struct.MetaTypes;
 import scheduler.struct.op.Operation;
 
 public class OnRollbackAndRedoSignal extends OperationSignal {

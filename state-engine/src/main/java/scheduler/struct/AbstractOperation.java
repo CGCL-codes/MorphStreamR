@@ -1,6 +1,7 @@
 package scheduler.struct;
 
 import content.common.CommonMetaTypes;
+import durability.logging.LoggingEntry.LogRecord;
 import storage.SchemaRecordRef;
 import storage.TableRecord;
 import storage.TableRecordRef;
@@ -33,6 +34,8 @@ public abstract class AbstractOperation {
     public volatile TableRecord[] condition_records;
     public Condition condition;
     public int[] success;
+    //required by Wal
+    public LogRecord logRecord;
 
     public AbstractOperation(Function function, String table_name, SchemaRecordRef record_ref, TableRecord[] condition_records, Condition condition, int[] success,
                              TxnContext txn_context, CommonMetaTypes.AccessType accessType, TableRecord s_record, TableRecord d_record, long bid) {
@@ -47,5 +50,6 @@ public abstract class AbstractOperation {
         this.s_record = s_record;
         this.d_record = d_record;
         this.bid = bid;
+        this.logRecord = new LogRecord(table_name, bid, d_record.record_.GetPrimaryKey());
     }
 }

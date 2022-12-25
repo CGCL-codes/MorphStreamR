@@ -3,9 +3,9 @@ package scheduler.impl.og.structured;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scheduler.context.og.OGSAContext;
+import scheduler.struct.MetaTypes;
 import scheduler.struct.og.Operation;
 import scheduler.struct.og.OperationChain;
-import scheduler.struct.op.MetaTypes;
 import utils.SOURCE_CONTROL;
 
 import java.util.ArrayList;

@@ -2,10 +2,9 @@ package scheduler.statemanager.op;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import profiler.MeasureTools;
 import scheduler.impl.op.nonstructured.OPNSAScheduler;
-import scheduler.struct.op.MetaTypes.DependencyType;
-import scheduler.struct.op.MetaTypes.OperationStateType;
+import scheduler.struct.MetaTypes.DependencyType;
+import scheduler.struct.MetaTypes.OperationStateType;
 import scheduler.struct.op.Operation;
 import scheduler.signal.op.*;
 

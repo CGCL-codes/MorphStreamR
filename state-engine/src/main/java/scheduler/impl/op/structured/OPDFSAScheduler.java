@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import profiler.MeasureTools;
 import scheduler.context.op.OPSAContext;
-import scheduler.struct.op.MetaTypes;
+import scheduler.struct.MetaTypes;
 import scheduler.struct.op.Operation;
 import utils.SOURCE_CONTROL;
 

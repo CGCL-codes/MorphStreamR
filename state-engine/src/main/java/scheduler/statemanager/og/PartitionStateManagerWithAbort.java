@@ -3,14 +3,14 @@ package scheduler.statemanager.og;
 import scheduler.context.og.OGNSAContext;
 import scheduler.impl.og.nonstructured.OGNSAScheduler;
 import scheduler.signal.oc.*;
-import scheduler.struct.og.MetaTypes.DependencyType;
+import scheduler.struct.MetaTypes.DependencyType;
 import scheduler.struct.og.Operation;
 import scheduler.struct.og.OperationChain;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static scheduler.struct.op.MetaTypes.*;
+import static scheduler.struct.MetaTypes.*;
 
 /**
  * Local to every TPGScheduler context.

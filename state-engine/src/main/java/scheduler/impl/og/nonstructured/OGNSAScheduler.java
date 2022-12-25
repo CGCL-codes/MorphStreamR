@@ -1,9 +1,9 @@
 package scheduler.impl.og.nonstructured;
 
 import scheduler.context.og.OGNSAContext;
+import scheduler.struct.MetaTypes;
 import scheduler.struct.og.Operation;
 import scheduler.struct.og.OperationChain;
-import scheduler.struct.op.MetaTypes;
 import transaction.impl.ordered.MyList;
 import utils.SOURCE_CONTROL;
 

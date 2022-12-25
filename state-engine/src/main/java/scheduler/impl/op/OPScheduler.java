@@ -1,6 +1,7 @@
 package scheduler.impl.op;
 
 
+import durability.logging.LoggingStrategy.LoggingManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import profiler.MeasureTools;
@@ -8,7 +9,7 @@ import scheduler.Request;
 import scheduler.impl.IScheduler;
 import scheduler.context.op.OPSchedulerContext;
 import scheduler.struct.AbstractOperation;
-import scheduler.struct.op.MetaTypes;
+import scheduler.struct.MetaTypes;
 import scheduler.struct.op.Operation;
 import scheduler.struct.op.TaskPrecedenceGraph;
 import storage.SchemaRecord;
@@ -32,6 +33,8 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
     private static final Logger log = LoggerFactory.getLogger(OPScheduler.class);
     public final int delta;//range of each partition. depends on the number of op in the stage.
     public final TaskPrecedenceGraph<Context> tpg; // TPG to be maintained in this global instance.
+    public LoggingManager loggingManager; // Used by fault tolerance
+    public boolean isLogging = false;// Used by fault tolerance
     public OPScheduler(int totalThreads, int NUM_ITEMS, int app) {
         delta = (int) Math.ceil(NUM_ITEMS / (double) totalThreads); // Check id generation in DateGenerator.
         this.tpg = new TaskPrecedenceGraph<>(totalThreads, delta, NUM_ITEMS, app);
@@ -40,6 +43,13 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
     public void initTPG(int offset) {
         tpg.initTPG(offset);
     }
+
+    @Override
+    public void setLoggingManager(LoggingManager loggingManager) {
+        this.loggingManager = loggingManager;
+        this.isLogging = true;
+    }
+
     /**
      * state to thread mapping
      *
@@ -84,7 +94,7 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
         if (operation.accessType.equals(READ_WRITE_COND_READ)) {
             success = operation.success[0];
             Transfer_Fun(operation, mark_ID, clean);
-            // check whether needs to return a read results of the operation
+            // check whether it needs to return a read results of the operation
             if (operation.record_ref != null) {
                 operation.record_ref.setRecord(operation.d_record.content_.readPreValues(operation.bid));//read the resulting tuple.
             }
@@ -160,6 +170,10 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
             }
         } else {
             throw new UnsupportedOperationException();
+        }
+        if (isLogging) {
+            operation.logRecord.addUpdate(operation.d_record.content_.readPreValues(operation.bid));
+            this.loggingManager.addLogRecord(operation.logRecord);
         }
 
         assert operation.getOperationState() != MetaTypes.OperationStateType.EXECUTED;

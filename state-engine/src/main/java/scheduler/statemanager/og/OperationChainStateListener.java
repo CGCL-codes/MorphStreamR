@@ -1,6 +1,6 @@
 package scheduler.statemanager.og;
 
-import scheduler.struct.og.MetaTypes.DependencyType;
+import scheduler.struct.MetaTypes.DependencyType;
 import scheduler.struct.og.OperationChain;
 
 public interface OperationChainStateListener {

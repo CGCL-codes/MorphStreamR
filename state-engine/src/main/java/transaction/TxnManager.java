@@ -1,5 +1,7 @@
 package transaction;
 
+import durability.logging.LoggingStrategy.LoggingManager;
+import org.apache.zookeeper.txn.Txn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scheduler.collector.Collector;
@@ -47,6 +49,8 @@ public abstract class TxnManager implements ITxnManager {
     public static boolean enableGroup = false;
     public static int groupNum;
 
+    public static LoggingManager loggingManager;
+
     public static void CreateSchedulerByGroup(String schedulerType, int threadCount,int numberOfStates, int app){
         schedulerByGroup = new HashMap<>();
         schedulerTypeByGroup = new HashMap<>();
@@ -55,6 +59,9 @@ public abstract class TxnManager implements ITxnManager {
             TxnManager.schedulerByGroup.put(i,CreateSchedulerByType(scheduler[i], threadCount / scheduler.length, numberOfStates / scheduler.length, app));
             TxnManager.schedulerTypeByGroup.put(i, scheduler[i]);
             TxnManager.schedulerByGroup.get(i).initTPG(i * (threadCount / scheduler.length));
+            if (loggingManager != null) {
+                TxnManager.schedulerByGroup.get(i).setLoggingManager(loggingManager);
+            }
         }
         enableGroup = true;
         groupNum = scheduler.length;
@@ -141,6 +148,9 @@ public abstract class TxnManager implements ITxnManager {
         for (int i = 0; i < scheduler.length; i++) {
             TxnManager.schedulerPool.put(scheduler[i], CreateSchedulerByType(scheduler[i], threadCount, numberOfStates, app));
             TxnManager.schedulerPool.get(scheduler[i]).initTPG(0);
+            if (loggingManager != null) {
+                TxnManager.schedulerPool.get(scheduler[i]).setLoggingManager(loggingManager);
+            }
         }
         for (int i = 0; i < threadCount; i++) {
             TxnManager.currentSchedulerType.put(i, defaultScheduler);

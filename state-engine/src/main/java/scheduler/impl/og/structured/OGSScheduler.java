@@ -4,9 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scheduler.context.og.OGSContext;
 import scheduler.impl.og.OGScheduler;
+import scheduler.struct.MetaTypes;
 import scheduler.struct.og.Operation;
 import scheduler.struct.og.OperationChain;
-import scheduler.struct.op.MetaTypes;
 import transaction.impl.ordered.MyList;
 import utils.SOURCE_CONTROL;
 
