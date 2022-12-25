@@ -5,9 +5,10 @@ import java.util.Objects;
 
 public class LogRecord implements Serializable {
     public String tableName;
+    public int partitionId;
     public long bid;
     public Update update;
-    public LogRecord (String tableName, long bid, String key) {
+    public LogRecord (String tableName, int partitionId, long bid, String key) {
         this.bid = bid;
         this.tableName = tableName;
         this.update = new Update(bid, key);
