@@ -4,11 +4,13 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class LogRecord implements Serializable {
+    public String tableName;
     public long bid;
     public Update update;
-    public LogRecord (long bid, Update update) {
+    public LogRecord (String tableName, long bid, String key) {
         this.bid = bid;
-        this.update = update;
+        this.tableName = tableName;
+        this.update = new Update(bid, key);
     }
 
     @Override
@@ -23,6 +25,7 @@ public class LogRecord implements Serializable {
     }
 
     public String toString() {
-        return bid + ";" + update.toString();
+        return tableName + ";" + update.toString();
     }
+
 }
