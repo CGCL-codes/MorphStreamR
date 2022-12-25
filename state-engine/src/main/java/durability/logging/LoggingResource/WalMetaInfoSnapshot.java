@@ -1,4 +1,4 @@
-package durability.wal.WalResource;
+package durability.logging.LoggingResource;
 
 import java.io.Serializable;
 

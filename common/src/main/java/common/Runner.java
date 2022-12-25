@@ -196,7 +196,7 @@ public abstract class Runner implements IRunner {
     public Integer cleanUp = 0;
 
     /* Fault Tolerance */
-    @Parameter(names = {"--FTOption"}, description = "Fault tolerance mechanisms: 0 for noFT, 1 for checkpoint, ")
+    @Parameter(names = {"--FTOption"}, description = "Fault tolerance mechanisms: 0 for noFT, 1 for checkpoint, 2 for wal, ")
     public Integer FTOption = 0;
     @Parameter(names = {"--compressionAlg"}, description = "compression Alg: ")
     public String  compressionAlg = "None";

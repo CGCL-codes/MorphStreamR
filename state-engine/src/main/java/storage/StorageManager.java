@@ -3,18 +3,15 @@ package storage;
 import common.collections.Configuration;
 import common.collections.OsUtils;
 import db.DatabaseException;
-import durability.manager.FTManager;
+import durability.ftmanager.FTManager;
 import durability.snapshot.SnapshotOptions;
-import durability.snapshot.SnapshotResult.SnapshotResult;
 import durability.snapshot.SnapshotStrategy.ImplSnapshotStrategy.InMemorySnapshotStrategy;
-import durability.snapshot.SnapshotStream.ImplSnapshotStreamFactory.NIOSnapshotStreamFactory;
 import storage.datatype.DataBox;
 import storage.table.BaseTable;
 import storage.table.RecordSchema;
 import storage.table.ShareTable;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 

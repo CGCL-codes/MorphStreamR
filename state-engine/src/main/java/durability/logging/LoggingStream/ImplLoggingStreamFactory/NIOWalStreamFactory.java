@@ -1,7 +1,7 @@
-package durability.wal.WalStream.ImplWalStreamFactory;
+package durability.logging.LoggingStream.ImplLoggingStreamFactory;
 
 import common.collections.OsUtils;
-import durability.wal.WalStream.WalStreamFactory;
+import durability.logging.LoggingStream.LoggingStreamFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,8 +13,8 @@ import java.nio.file.Paths;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.WRITE;
 
-public class NIOWalStreamFactory implements WalStreamFactory {
-    private static final Logger LOG = LoggerFactory.getLogger(WalStreamFactory.class);
+public class NIOWalStreamFactory implements LoggingStreamFactory {
+    private static final Logger LOG = LoggerFactory.getLogger(LoggingStreamFactory.class);
     private final Path walPath;
 
     public NIOWalStreamFactory(String walPath, int partitionId) {

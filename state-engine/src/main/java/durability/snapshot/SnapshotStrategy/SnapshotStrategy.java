@@ -1,6 +1,6 @@
 package durability.snapshot.SnapshotStrategy;
 
-import durability.manager.FTManager;
+import durability.ftmanager.FTManager;
 import durability.snapshot.SnapshotResources.SnapshotResources;
 import storage.table.RecordSchema;
 

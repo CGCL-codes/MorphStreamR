@@ -1,6 +1,6 @@
 package durability.snapshot.SnapshotResult;
 
-import durability.manager.FTManager;
+import durability.ftmanager.FTManager;
 
 import java.nio.channels.AsynchronousFileChannel;
 import java.nio.file.Path;

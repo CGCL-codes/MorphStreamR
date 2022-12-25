@@ -4,7 +4,7 @@ import components.TopologyComponent;
 import components.grouping.Grouping;
 import controller.input.InputStreamController;
 import db.Database;
-import durability.manager.FTManager;
+import durability.ftmanager.FTManager;
 import execution.ExecutionGraph;
 import execution.ExecutionNode;
 import execution.runtime.executorThread;

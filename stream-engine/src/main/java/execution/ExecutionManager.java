@@ -5,8 +5,8 @@ import components.context.TopologyContext;
 import components.exception.UnhandledCaseException;
 import controller.affinity.AffinityController;
 import db.Database;
-import durability.manager.FTManager;
-import durability.manager.ImplFTManager.CheckpointManager;
+import durability.ftmanager.FTManager;
+import durability.ftmanager.ImplFTManager.CheckpointManager;
 import execution.runtime.boltThread;
 import execution.runtime.executorThread;
 import execution.runtime.spoutThread;
@@ -14,7 +14,6 @@ import optimization.OptimizationManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import transaction.TxnManager;
-import utils.AppConfig;
 
 import java.util.HashMap;
 import java.util.LinkedList;

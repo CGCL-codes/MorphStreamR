@@ -1,6 +1,8 @@
 package db;
 
-import durability.manager.FTManager;
+import durability.ftmanager.FTManager;
+import durability.logging.LoggingStrategy.ImplLoggingManager.WALManager;
+import durability.logging.LoggingStrategy.LoggingManager;
 import storage.EventManager;
 import storage.StorageManager;
 import storage.TableRecord;
@@ -12,6 +14,7 @@ public abstract class Database {
     public int numTransactions = 0;//current number of activate transactions
     StorageManager storageManager;
     EventManager eventManager;
+    LoggingManager loggingManager;
 
     public EventManager getEventManager() {
         return eventManager;
@@ -41,6 +44,9 @@ public abstract class Database {
     public void createTable(RecordSchema tableSchema, String tableName, int partition_num, int num_items) {
         try {
             storageManager.createTable(tableSchema, tableName, partition_num, num_items);
+            if (loggingManager != null) {
+                loggingManager.registerTable(tableName);
+            }
         } catch (DatabaseException e) {
             e.printStackTrace();
         }

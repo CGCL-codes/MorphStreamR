@@ -1,6 +1,6 @@
 package durability.snapshot.SnapshotStrategy.ImplSnapshotStrategy;
 
-import durability.manager.FTManager;
+import durability.ftmanager.FTManager;
 import durability.snapshot.SnapshotOptions;
 import durability.snapshot.SnapshotResources.ImplSnapshotResources.InMemoryFullSnapshotResources;
 import durability.snapshot.SnapshotResult.Attachment;

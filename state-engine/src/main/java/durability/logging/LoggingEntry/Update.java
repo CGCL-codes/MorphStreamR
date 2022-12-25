@@ -1,4 +1,4 @@
-package durability.wal.WalEntry;
+package durability.logging.LoggingEntry;
 
 import java.io.Serializable;
 import java.util.Objects;

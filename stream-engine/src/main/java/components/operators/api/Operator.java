@@ -5,7 +5,7 @@ import common.collections.OsUtils;
 import common.constants.BaseConstants;
 import components.context.TopologyContext;
 import db.Database;
-import durability.manager.FTManager;
+import durability.ftmanager.FTManager;
 import execution.ExecutionGraph;
 import execution.ExecutionNode;
 import execution.runtime.collector.OutputCollector;

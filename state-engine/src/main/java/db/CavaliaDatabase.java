@@ -1,7 +1,8 @@
 package db;
 
 import common.collections.Configuration;
-import durability.manager.FTManager;
+import durability.ftmanager.FTManager;
+import durability.logging.LoggingStrategy.ImplLoggingManager.WALManager;
 import storage.EventManager;
 import storage.StorageManager;
 import storage.TableRecord;
@@ -15,6 +16,14 @@ public class CavaliaDatabase extends Database {
     public CavaliaDatabase(Configuration configuration) {
         storageManager = new StorageManager(configuration);
         eventManager = new EventManager();
+        switch (configuration.getInt("FFOption")) {
+            case 0 :
+            case 1 :
+                this.loggingManager = null;
+                break;
+            case 2 :
+                this.loggingManager = new WALManager(configuration);
+        }
     }
 
     /**

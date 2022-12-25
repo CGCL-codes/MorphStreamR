@@ -1,11 +1,11 @@
-package durability.manager.ImplFTManager;
+package durability.ftmanager.ImplFTManager;
 
 import common.collections.Configuration;
 import common.collections.OsUtils;
 import common.io.LocalFS.FileSystem;
 import common.io.LocalFS.LocalDataOutputStream;
 import common.tools.Serialize;
-import durability.manager.FTManager;
+import durability.ftmanager.FTManager;
 import durability.snapshot.SnapshotResult.SnapshotCommitInformation;
 import durability.snapshot.SnapshotResult.SnapshotResult;
 import org.slf4j.Logger;

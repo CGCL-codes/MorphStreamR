@@ -1,10 +1,10 @@
-package durability.wal.WalResource.ImplWalResources;
+package durability.logging.LoggingResource.ImplLoggingResources;
 
 import common.io.ByteIO.DataOutputView;
-import durability.wal.WALManager;
-import durability.wal.WalEntry.Update;
-import durability.wal.WalResource.WalMetaInfoSnapshot;
-import durability.wal.WalResource.WalResources;
+import durability.logging.LoggingStrategy.ImplLoggingManager.WALManager;
+import durability.logging.LoggingEntry.Update;
+import durability.logging.LoggingResource.WalMetaInfoSnapshot;
+import durability.logging.LoggingResource.LoggingResources;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
-public class PartitionWalResources implements WalResources {
+public class PartitionWalResources implements LoggingResources {
     private final List<WalMetaInfoSnapshot>  metaInfoSnapshots = new ArrayList<>();
     private final HashMap<String, ConcurrentSkipListSet<Update>> logResources = new HashMap<>();
     private final long groupId;
