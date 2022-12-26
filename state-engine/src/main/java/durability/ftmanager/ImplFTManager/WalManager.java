@@ -45,8 +45,8 @@ public class WalManager extends FTManager {
         if (!walFile.exists()) {
             walFile.mkdirs();
         }
-        LOG.info("WSC initialize successfully");
-        this.setName("WSCManager");
+        LOG.info("WalManager initialize successfully");
+        this.setName("WalManager");
     }
 
     @Override
@@ -82,7 +82,7 @@ public class WalManager extends FTManager {
         while (running) {
             if (all_register_commit()) {
                 if (callCommit.get(pendingId).contains(FaultToleranceStatus.Persist)) {
-                    LOG.info("WSC received all register and commit log");
+                    LOG.info("Wal received all register and commit log");
                     logComplete(pendingId);
                     if (uncommittedId.size() != 0) {
                         this.pendingId = uncommittedId.poll();
@@ -95,7 +95,7 @@ public class WalManager extends FTManager {
         }
     }
     public void run() {
-        LOG.info("WSCManager starts!");
+        LOG.info("WalManager starts!");
         try {
             Listener();
         } catch (IOException e) {
@@ -103,7 +103,7 @@ public class WalManager extends FTManager {
         } finally {
             File file = new File(this.walPath);
             FileSystem.deleteFile(file);
-            LOG.info("WSCManager stops");
+            LOG.info("WalManager stops");
         }
     }
 
@@ -118,7 +118,7 @@ public class WalManager extends FTManager {
         dataOutputStream.write(result);
         dataOutputStream.close();
         this.registerCommit.remove(pendingId);
-        LOG.info("WSC commit the wal to the current.log");
+        LOG.info("WalManager commit the wal to the current.log");
     }
 
     private List<FaultToleranceStatus> initCallCommit() {

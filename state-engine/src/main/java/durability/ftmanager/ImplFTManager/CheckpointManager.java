@@ -44,9 +44,9 @@ public class CheckpointManager extends FTManager {
         File file = new File(this.basePath);
         if (!file.exists()) {
             file.mkdirs();
-            LOG.info("ISCManager initialize successfully");
+            LOG.info("CheckpointManager initialize successfully");
         }
-        this.setName("ISCManager");
+        this.setName("CheckpointManager");
     }
 
     @Override
@@ -82,8 +82,8 @@ public class CheckpointManager extends FTManager {
         while (running) {
             if (all_register()) {
                 if (callCommit.get(pendingSnapshotId).contains(FaultToleranceStatus.Snapshot)) {
+                    LOG.info("CheckpointManager received all register and commit snapshot");
                     snapshotComplete(pendingSnapshotId);
-                    LOG.info("ISC received all register and commit snapshot");
                     if (uncommittedId.size() != 0) {
                         this.pendingSnapshotId = uncommittedId.poll();
                     } else {
@@ -97,7 +97,7 @@ public class CheckpointManager extends FTManager {
 
     @Override
     public void run() {
-        LOG.info("ISCManager starts!");
+        LOG.info("CheckpointManager starts!");
         try {
             Listener();
         } catch (IOException e) {
@@ -105,7 +105,7 @@ public class CheckpointManager extends FTManager {
         } finally {
             File file = new File(this.basePath);
             FileSystem.deleteFile(file);
-            LOG.info("ISCManager stops");
+            LOG.info("CheckpointManager stops");
         }
     }
 
@@ -140,6 +140,6 @@ public class CheckpointManager extends FTManager {
         dataOutputStream.write(result);
         dataOutputStream.close();
         this.registerSnapshot.remove(snapshotId);
-        LOG.info("ISC commit the snapshot to the current.log");
+        LOG.info("CheckpointManager commit the snapshot to the current.log");
     }
 }
