@@ -21,14 +21,13 @@ import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static common.CONTROL.enable_log;
 import static utils.FaultToleranceConstants.*;
 
 /**
  * Input-Store&State Checkpoint (ISC)
  */
-public class ISCManager extends FTManager {
-    private final Logger LOG = LoggerFactory.getLogger(ISCManager.class);
+public class CheckpointManager extends FTManager {
+    private final Logger LOG = LoggerFactory.getLogger(CheckpointManager.class);
     private int parallelNum;
     private ConcurrentHashMap<Long, List<FaultToleranceStatus>> callCommit = new ConcurrentHashMap<>();
     //<snapshotId, SnapshotCommitInformation>
@@ -104,9 +103,9 @@ public class ISCManager extends FTManager {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-            File file = new File(this.basePath);
-            FileSystem.deleteFile(file);
-            LOG.info("ISCManager stops");
+//            File file = new File(this.basePath);
+//            FileSystem.deleteFile(file);
+//            LOG.info("ISCManager stops");
         }
     }
 

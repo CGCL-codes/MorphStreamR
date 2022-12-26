@@ -46,6 +46,7 @@ public abstract class Operator implements IOperator {
     public TopologyContext context;
     public transient Database db;//this is only used if the bolt is transactional bolt. DB is shared by all operators.
     public transient FTManager ftManager;//this is only used if the bolt is fault tolerance bolt. FTManager is shared by all operators.
+    public transient FTManager loggingManager;//this is only used if the bolt is fault tolerance bolt. LoggingManager is shared by all operators.
     //
     public transient TxnContext[] txn_context = new TxnContext[combo_bid_size];
     public int fid = -1;//if fid is -1 it means it does not participate
@@ -230,6 +231,7 @@ public abstract class Operator implements IOperator {
         }
         db = getContext().getDb();
         ftManager = getContext().getFtManager();
+        loggingManager = getContext().getLoggingManager();
         initialize(thread_Id, thisTaskId, graph);
     }
 

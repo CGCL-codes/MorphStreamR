@@ -57,6 +57,7 @@ public class WALManager implements LoggingManager {
         return new PartitionWalResources(groupId, partitionId, pendingEntries, metaInformation);
     }
 
+    @Override
     public void commitLog(long groupId, int partitionId, FTManager ftManager) throws IOException {
         NIOWalStreamFactory nioWalStreamFactory = new NIOWalStreamFactory(this.walPath);
         PartitionWalResources partitionWalResources = syncPrepareResource(groupId, partitionId);

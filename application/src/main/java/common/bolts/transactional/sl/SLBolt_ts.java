@@ -80,6 +80,11 @@ public class SLBolt_ts extends SLBolt {
                     transactionManager.start_evaluate(thread_Id, in.getBID(), num_events);//start lazy evaluation in transaction manager.
                     if (Objects.equals(in.getMarker().getMessage(), "snapshot")) {
                         this.db.asyncSnapshot(in.getMarker().getSnapshotId(), this.thread_Id, this.ftManager);
+                    } else if (Objects.equals(in.getMarker().getMessage(), "commit")){
+                        this.db.asyncCommit(in.getMarker().getSnapshotId(), this.thread_Id, this.loggingManager);
+                    } else if (Objects.equals(in.getMarker().getMessage(), "commit_snapshot")){
+                        this.db.asyncCommit(in.getMarker().getSnapshotId(), this.thread_Id, this.loggingManager);
+                        this.db.asyncSnapshot(in.getMarker().getSnapshotId(), this.thread_Id, this.ftManager);
                     }
                     TRANSFER_REQUEST_CORE();
                 }

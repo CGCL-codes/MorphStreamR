@@ -6,7 +6,8 @@ import components.exception.UnhandledCaseException;
 import controller.affinity.AffinityController;
 import db.Database;
 import durability.ftmanager.FTManager;
-import durability.ftmanager.ImplFTManager.ISCManager;
+import durability.ftmanager.ImplFTManager.CheckpointManager;
+import durability.ftmanager.ImplFTManager.WalManager;
 import execution.runtime.boltThread;
 import execution.runtime.executorThread;
 import execution.runtime.spoutThread;
@@ -34,24 +35,38 @@ public class ExecutionManager {
     private final OptimizationManager optimizationManager;
     private final ExecutionGraph g;
     private final FTManager ftManager;
+    private final FTManager loggingManager;
 
     public ExecutionManager(ExecutionGraph g, Configuration conf, OptimizationManager optimizationManager) {
         this.g = g;
         AC = new AffinityController(conf);
         this.optimizationManager = optimizationManager;
         switch (conf.getInt("FTOption")) {
-            case 0:
-                this.ftManager = null;
+            case 1:
+                this.ftManager = new CheckpointManager();
+                this.loggingManager = null;
+                this.ftManager.initialize(conf);
+                break;
+            case 2:
+                this.ftManager = new CheckpointManager();
+                this.loggingManager = new WalManager();
+                this.ftManager.initialize(conf);
+                this.loggingManager.initialize(conf);
                 break;
             default:
-                this.ftManager = new ISCManager();
-                this.ftManager.initialize(conf);
+                this.ftManager = null;
+                this.loggingManager = null;
                 break;
         }
     }
 
     private void loadFTManger() {
-        this.ftManager.start();
+        if (this.ftManager != null) {
+            this.ftManager.start();
+        }
+        if (this.loggingManager != null) {
+            this.loggingManager.start();
+        }
     }
 
 
@@ -100,12 +115,12 @@ public class ExecutionManager {
         for (ExecutionNode e : g.getExecutionNodeArrayList()) {
             switch (e.operator.type) {
                 case spoutType:
-                    thread = launchSpout_SingleCore(e, new TopologyContext(g, db, ftManager, e, ThreadMap)
+                    thread = launchSpout_SingleCore(e, new TopologyContext(g, db, ftManager, loggingManager, e, ThreadMap)
                             , conf, 0, latch); //TODO: schedule to numa node wisely.
                     break;
                 case boltType:
                 case sinkType:
-                    thread = launchBolt_SingleCore(e, new TopologyContext(g, db, ftManager, e, ThreadMap)
+                    thread = launchBolt_SingleCore(e, new TopologyContext(g, db, ftManager, loggingManager, e, ThreadMap)
                             , conf, 0, latch); //TODO: schedule to numa node wisely.
                     break;
                 case virtualType:
@@ -192,9 +207,13 @@ public class ExecutionManager {
     }
 
     public void closeFTM() {
-        this.ftManager.running = false;
-        while (ftManager.isAlive()) {
+        if (this.ftManager != null) {
+            this.ftManager.running = false;
             ftManager.interrupt();
+        }
+        if (this.loggingManager != null) {
+            this.loggingManager.running = false;
+            loggingManager.interrupt();
         }
     }
 

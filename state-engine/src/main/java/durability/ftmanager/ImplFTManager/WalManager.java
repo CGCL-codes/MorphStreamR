@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 /**
  * Write-Ahead-Log&State Checkpoint (WSC)
  * */
-public class WSCManager extends FTManager {
+public class WalManager extends FTManager {
     private final Logger LOG = LoggerFactory.getLogger(FTManager.class);
     private int parallelNum;
     private ConcurrentHashMap<Long, List<FaultToleranceStatus>> callCommit = new ConcurrentHashMap<>();
@@ -39,8 +39,8 @@ public class WSCManager extends FTManager {
     @Override
     public void initialize(Configuration config) {
         this.parallelNum = config.getInt("parallelNum");
-        walPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("wal");
-        walMetaPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("wal") + OsUtils.OS_wrapper("metaData.log");
+        walPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("logging");
+        walMetaPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("logging") + OsUtils.OS_wrapper("metaData.log");
         File walFile = new File(walPath);
         if (!walFile.exists()) {
             walFile.mkdirs();
@@ -101,9 +101,9 @@ public class WSCManager extends FTManager {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-            File file = new File(this.walPath);
-            FileSystem.deleteFile(file);
-            LOG.info("WSCManager stops");
+//            File file = new File(this.walPath);
+//            FileSystem.deleteFile(file);
+//            LOG.info("WSCManager stops");
         }
     }
 

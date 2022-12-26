@@ -17,6 +17,7 @@ public abstract class TransactionalSpout extends AbstractSpout implements Checkp
     public transient BufferedWriter writer;
     public int taskId;
     public int ccOption;
+    public int ftOption;
     public long bid = 0;//local bid.
     public int empty = 0;//execute without emit.
 

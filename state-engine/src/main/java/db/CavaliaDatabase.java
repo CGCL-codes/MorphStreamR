@@ -40,4 +40,9 @@ public class CavaliaDatabase extends Database {
     public void asyncSnapshot(long snapshotId, int partitionId, FTManager ftManager) throws IOException {
         this.storageManager.asyncSnapshot(snapshotId, partitionId, ftManager);
     }
+
+    @Override
+    public void asyncCommit(long groupId, int partitionId, FTManager ftManager) throws IOException {
+        this.loggingManager.commitLog(groupId, partitionId, ftManager);
+    }
 }

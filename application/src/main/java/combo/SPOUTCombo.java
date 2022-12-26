@@ -24,6 +24,8 @@ import static common.CONTROL.enable_log;
 import static common.Constants.DEFAULT_STREAM_ID;
 import static content.Content.CCOption_SStore;
 import static content.Content.CCOption_TStream;
+import static utils.FaultToleranceConstants.FTOption_ISC;
+import static utils.FaultToleranceConstants.FTOption_WSC;
 
 //TODO: Re-name microbenchmark as GS (Grep and Sum).
 public abstract class SPOUTCombo extends TransactionalSpout {
@@ -77,10 +79,22 @@ public abstract class SPOUTCombo extends TransactionalSpout {
 
                 if (ccOption == CCOption_TStream || ccOption == CCOption_SStore) {// This is only required by T-Stream.
                     if (model_switch(counter)) {
-                        if (snapshot(counter)) {
+                        if (ftOption == FTOption_ISC && snapshot(counter)) {
                             marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration, "snapshot", counter));
                             if (this.taskId == 0) {
                                 this.ftManager.spoutRegister(counter, "snapshot");
+                            }
+                        } else if (ftOption == FTOption_WSC){
+                            if (snapshot(counter)) {
+                                marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration, "commit_snapshot", counter));
+                                if (this.taskId == 0) {
+                                    this.ftManager.spoutRegister(counter, "snapshot");
+                                }
+                            } else {
+                                marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration, "commit", counter));
+                            }
+                            if (this.taskId == 0) {
+                                this.loggingManager.spoutRegister(counter, "commit");
                             }
                         } else {
                             marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration));
@@ -119,6 +133,7 @@ public abstract class SPOUTCombo extends TransactionalSpout {
         long end = System.nanoTime();
         if (enable_log) LOG.info("spout initialize takes (ms):" + (end - start) / 1E6);
         ccOption = config.getInt("CCOption", 0);
+        ftOption = config.getInt("FTOption", 0);
         bid = 0;
         counter = 0;
 

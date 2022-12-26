@@ -67,4 +67,5 @@ public abstract class Database {
      * @throws Exception
      */
     public abstract void asyncSnapshot(final long snapshotId, final int partitionId, final FTManager ftManager) throws IOException;
+    public abstract void asyncCommit(final long groupId, final int partitionId, final FTManager ftManager) throws IOException;
 }
