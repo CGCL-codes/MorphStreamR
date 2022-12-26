@@ -80,7 +80,7 @@ public abstract class SPOUTCombo extends TransactionalSpout {
                         if (snapshot(counter)) {
                             marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration, "snapshot", counter));
                             if (this.taskId == 0) {
-                                this.ftManager.spoutRegister(counter);
+                                this.ftManager.spoutRegister(counter, "snapshot");
                             }
                         } else {
                             marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration));

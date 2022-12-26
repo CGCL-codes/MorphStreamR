@@ -2,15 +2,21 @@ package durability.logging.LoggingStrategy.ImplLoggingManager;
 
 import common.collections.Configuration;
 import common.collections.OsUtils;
+import durability.logging.LoggingResult.Attachment;
+import durability.logging.LoggingResult.LoggingHandler;
 import durability.logging.LoggingStrategy.LoggingManager;
 import durability.ftmanager.FTManager;
 import durability.logging.LoggingEntry.LogRecord;
 import durability.logging.LoggingResource.ImplLoggingResources.PartitionWalResources;
+import durability.logging.LoggingStream.ImplLoggingStreamFactory.NIOWalStreamFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
 import java.io.Serializable;
+import java.nio.ByteBuffer;
+import java.nio.channels.AsynchronousFileChannel;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -51,8 +57,13 @@ public class WALManager implements LoggingManager {
         return new PartitionWalResources(groupId, partitionId, pendingEntries, metaInformation);
     }
 
-    public void commitLog(long snapshotId, int partitionId, FTManager ftManager) {
-
+    public void commitLog(long groupId, int partitionId, FTManager ftManager) throws IOException {
+        NIOWalStreamFactory nioWalStreamFactory = new NIOWalStreamFactory(this.walPath);
+        PartitionWalResources partitionWalResources = syncPrepareResource(groupId, partitionId);
+        AsynchronousFileChannel afc = nioWalStreamFactory.createLoggingStream();
+        Attachment attachment = new Attachment(nioWalStreamFactory.getWalPath(), groupId, partitionId, afc, ftManager);
+        ByteBuffer dataBuffer = partitionWalResources.createWriteBuffer();
+        afc.write(dataBuffer, 0, attachment, new LoggingHandler());
     }
 
     public static class WriteAheadLogTableInfo implements Serializable {

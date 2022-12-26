@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.channels.AsynchronousFileChannel;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.UUID;
 
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.WRITE;
@@ -17,13 +18,13 @@ public class NIOWalStreamFactory implements LoggingStreamFactory {
     private static final Logger LOG = LoggerFactory.getLogger(LoggingStreamFactory.class);
     private final Path walPath;
 
-    public NIOWalStreamFactory(String walPath, int partitionId) {
-        String filePath = walPath + OsUtils.OS_wrapper(".wal_" + partitionId);
+    public NIOWalStreamFactory(String walPath) {
+        String filePath = walPath + OsUtils.OS_wrapper(UUID.randomUUID() + ".wal");
         this.walPath = Paths.get(filePath);
     }
 
     @Override
-    public AsynchronousFileChannel createSnapshotStream() throws IOException {
+    public AsynchronousFileChannel createLoggingStream() throws IOException {
         return AsynchronousFileChannel.open(walPath, WRITE, CREATE);
     }
 

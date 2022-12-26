@@ -6,7 +6,7 @@ import components.exception.UnhandledCaseException;
 import controller.affinity.AffinityController;
 import db.Database;
 import durability.ftmanager.FTManager;
-import durability.ftmanager.ImplFTManager.CheckpointManager;
+import durability.ftmanager.ImplFTManager.ISCManager;
 import execution.runtime.boltThread;
 import execution.runtime.executorThread;
 import execution.runtime.spoutThread;
@@ -44,7 +44,7 @@ public class ExecutionManager {
                 this.ftManager = null;
                 break;
             default:
-                this.ftManager = new CheckpointManager();
+                this.ftManager = new ISCManager();
                 this.ftManager.initialize(conf);
                 break;
         }

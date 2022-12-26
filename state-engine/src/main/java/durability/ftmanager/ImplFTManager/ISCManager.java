@@ -8,6 +8,7 @@ import common.tools.Serialize;
 import durability.ftmanager.FTManager;
 import durability.snapshot.SnapshotResult.SnapshotCommitInformation;
 import durability.snapshot.SnapshotResult.SnapshotResult;
+import durability.struct.Result.persistResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,8 +24,11 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import static common.CONTROL.enable_log;
 import static utils.FaultToleranceConstants.*;
 
-public class CheckpointManager extends FTManager {
-    private final Logger LOG = LoggerFactory.getLogger(CheckpointManager.class);
+/**
+ * Input-Store&State Checkpoint (ISC)
+ */
+public class ISCManager extends FTManager {
+    private final Logger LOG = LoggerFactory.getLogger(ISCManager.class);
     private int parallelNum;
     private ConcurrentHashMap<Long, List<FaultToleranceStatus>> callCommit = new ConcurrentHashMap<>();
     //<snapshotId, SnapshotCommitInformation>
@@ -41,13 +45,13 @@ public class CheckpointManager extends FTManager {
         File file = new File(this.basePath);
         if (!file.exists()) {
             file.mkdirs();
-            if (enable_log) LOG.info("CheckpointManager initialize successfully");
+            LOG.info("ISCManager initialize successfully");
         }
-        this.setName("CheckpointManager");
+        this.setName("ISCManager");
     }
 
     @Override
-    public boolean spoutRegister(long snapshotId) {
+    public boolean spoutRegister(long snapshotId, String message) {
         if (this.registerSnapshot.containsKey(snapshotId)) {
             //TODO: if these are too many uncommitted snapshot, notify the spout not to register
             LOG.info("SnapshotID has been registered already");
@@ -67,7 +71,8 @@ public class CheckpointManager extends FTManager {
     }
 
     @Override
-    public boolean boltRegister(int partitionId, FaultToleranceStatus status, SnapshotResult snapshotResult) {
+    public boolean boltRegister(int partitionId, FaultToleranceStatus status, persistResult result) {
+        SnapshotResult snapshotResult = (SnapshotResult) result;
         this.registerSnapshot.get(snapshotResult.snapshotId).snapshotResults.add(snapshotResult);
         this.callCommit.get(snapshotResult.snapshotId).set(partitionId, FaultToleranceStatus.Snapshot);
         return true;
@@ -79,15 +84,13 @@ public class CheckpointManager extends FTManager {
             if (all_register()) {
                 if (callCommit.get(pendingSnapshotId).contains(FaultToleranceStatus.Snapshot)) {
                     snapshotComplete(pendingSnapshotId);
-                    LOG.info("CheckpointManager received all register and commit snapshot");
+                    LOG.info("ISC received all register and commit snapshot");
                     if (uncommittedId.size() != 0) {
                         this.pendingSnapshotId = uncommittedId.poll();
                     } else {
                         this.pendingSnapshotId = 0;
                     }
                     LOG.info("Pending snapshot: " + uncommittedId.size());
-                } else {
-                    //TODO: add other operation, such as recovery
                 }
             }
         }
@@ -95,7 +98,7 @@ public class CheckpointManager extends FTManager {
 
     @Override
     public void run() {
-        LOG.info("CheckpointManager starts!");
+        LOG.info("ISCManager starts!");
         try {
             Listener();
         } catch (IOException e) {
@@ -103,7 +106,7 @@ public class CheckpointManager extends FTManager {
         } finally {
             File file = new File(this.basePath);
             FileSystem.deleteFile(file);
-            LOG.info("CheckpointManager stops");
+            LOG.info("ISCManager stops");
         }
     }
 
@@ -138,6 +141,6 @@ public class CheckpointManager extends FTManager {
         dataOutputStream.write(result);
         dataOutputStream.close();
         this.registerSnapshot.remove(snapshotId);
-        LOG.info("CheckpointManager commit the checkpoint to the current.log");
+        LOG.info("ISC commit the snapshot to the current.log");
     }
 }

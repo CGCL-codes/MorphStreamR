@@ -1,5 +1,7 @@
 package durability.snapshot.SnapshotResult;
 
+import durability.struct.Result.persistResult;
+
 import java.io.Serializable;
 import java.nio.file.Path;
 
@@ -8,7 +10,7 @@ import java.nio.file.Path;
  * Snapshot Path
  * Offset
  * */
-public class SnapshotResult implements Serializable {
+public class SnapshotResult implements Serializable, persistResult {
     public final String path;
     public final long snapshotId;
     public final int partitionId;
