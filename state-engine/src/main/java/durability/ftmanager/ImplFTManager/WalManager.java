@@ -82,8 +82,8 @@ public class WalManager extends FTManager {
         while (running) {
             if (all_register_commit()) {
                 if (callCommit.get(pendingId).contains(FaultToleranceStatus.Persist)) {
-                    logComplete(pendingId);
                     LOG.info("WSC received all register and commit log");
+                    logComplete(pendingId);
                     if (uncommittedId.size() != 0) {
                         this.pendingId = uncommittedId.poll();
                     } else {
@@ -101,9 +101,9 @@ public class WalManager extends FTManager {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-//            File file = new File(this.walPath);
-//            FileSystem.deleteFile(file);
-//            LOG.info("WSCManager stops");
+            File file = new File(this.walPath);
+            FileSystem.deleteFile(file);
+            LOG.info("WSCManager stops");
         }
     }
 

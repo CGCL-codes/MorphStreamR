@@ -74,6 +74,7 @@ public class PartitionWalResources implements LoggingResources {
                     dataOutputView.write(str.getBytes(StandardCharsets.UTF_8));
                 }
             }
+            records.clear();
         }
     }
 }

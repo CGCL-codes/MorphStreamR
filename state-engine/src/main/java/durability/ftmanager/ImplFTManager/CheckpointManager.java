@@ -103,9 +103,9 @@ public class CheckpointManager extends FTManager {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-//            File file = new File(this.basePath);
-//            FileSystem.deleteFile(file);
-//            LOG.info("ISCManager stops");
+            File file = new File(this.basePath);
+            FileSystem.deleteFile(file);
+            LOG.info("ISCManager stops");
         }
     }
 

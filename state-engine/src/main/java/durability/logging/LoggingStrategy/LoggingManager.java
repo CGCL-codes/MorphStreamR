@@ -6,7 +6,7 @@ import durability.logging.LoggingEntry.LogRecord;
 import java.io.IOException;
 
 public interface LoggingManager {
-    public void registerTable(String tableName);
-    public void addLogRecord(LogRecord logRecord);
-    public void commitLog(long groupId, int partitionId, FTManager ftManager) throws IOException;
+    void registerTable(String tableName);
+    void addLogRecord(LogRecord logRecord);
+    void commitLog(long groupId, int partitionId, FTManager ftManager) throws IOException;
 }
