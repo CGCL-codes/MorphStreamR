@@ -2,6 +2,8 @@ package durability.snapshot;
 
 import common.io.ByteIO.DataInputView;
 import common.io.ByteIO.DataOutputView;
+import common.io.ByteIO.InputWithDecompression.SnappyDataInputView;
+import common.io.ByteIO.OutputWithCompression.SnappyDataOutputView;
 import common.tools.Deserialize;
 
 import java.io.*;
@@ -11,8 +13,6 @@ import java.nio.channels.CompletionHandler;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -20,7 +20,7 @@ import static java.nio.file.StandardOpenOption.*;
 
 public class TextNIOFileWrite {
     public static void main(String[] args) throws Exception {
-       readNioFuture();
+       writeNio();
     }
     public static void writeNio() throws IOException, InterruptedException {
         Path path = Paths.get("/Users/curryzjj/hair-loss/SC/MorphStreamDR/snapshot/text.txt");
@@ -33,10 +33,7 @@ public class TextNIOFileWrite {
         attach.buffer = dataBuffer;
         attach.path = path;
         afc.write(dataBuffer, 0, attach, handler);
-        for (int i = 0; i < 20 ; i ++) {
-            System.out.println(i);
-            Thread.sleep(1000);
-        }
+        Thread.sleep(5000);
     }
     public static void readNio() throws IOException, InterruptedException {
         Path path = Paths.get("/Users/curryzjj/hair-loss/SC/MorphStreamDR/snapshot/text.txt");
@@ -59,14 +56,17 @@ public class TextNIOFileWrite {
         ByteBuffer dataBuffer = ByteBuffer.allocate(fileSize);
         Future<Integer> result = afc.read(dataBuffer, 0);
         int readBytes = result.get();
-        DataInputView inputView = new DataInputView(dataBuffer);
-        int length = inputView.readInt();
-        byte[] object = new byte[length];
-        inputView.readFully(object);
+        DataInputView inputView = new SnappyDataInputView(dataBuffer);
+        byte[] object = inputView.readFullyDecompression();
         Object t = Deserialize.Deserialize(object);
+        Test tt = (Test) t;
+        System.out.println(tt.b);
         boolean b = inputView.readBoolean();
         long l = inputView.readLong();
         double d = inputView.readDouble();
+        System.out.println(b);
+        System.out.println(l);
+        System.out.println(d);
     }
     public static void read() throws IOException, ClassNotFoundException, ExecutionException, InterruptedException {
         Path path = Paths.get("/Users/curryzjj/hair-loss/SC/MorphStreamDR/snapshot/text.txt");
@@ -85,10 +85,6 @@ public class TextNIOFileWrite {
         public int b = 1;
     }
     public static ByteBuffer getDataBuffer() throws IOException {
-        List<String> a = new ArrayList<>();
-        a.add("aaa");
-        a.add("bbb");
-        a.add("ccc");
         byte[] object;
         Test test = new Test();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -96,9 +92,8 @@ public class TextNIOFileWrite {
         oos.writeObject(test);
         oos.flush();
         object = baos.toByteArray();
-        DataOutputView dataOutputView = new DataOutputView();
-        dataOutputView.writeInt(object.length);
-        dataOutputView.write(object);
+        DataOutputView dataOutputView = new SnappyDataOutputView();
+        dataOutputView.writeCompression(object);
         dataOutputView.writeBoolean(true);
         dataOutputView.writeLong(90L);
         dataOutputView.writeDouble(0.9);

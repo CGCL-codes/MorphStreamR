@@ -82,7 +82,7 @@ public class WalManager extends FTManager {
         while (running) {
             if (all_register_commit()) {
                 if (callCommit.get(pendingId).contains(FaultToleranceStatus.Persist)) {
-                    LOG.info("Wal received all register and commit log");
+                    LOG.info("WalManager received all register and commit log");
                     logComplete(pendingId);
                     if (uncommittedId.size() != 0) {
                         this.pendingId = uncommittedId.poll();

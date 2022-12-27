@@ -1,6 +1,7 @@
 package durability.snapshot.SnapshotResources.ImplSnapshotResources;
 
 import common.io.ByteIO.DataOutputView;
+import common.io.ByteIO.OutputWithCompression.NativeDataOutputView;
 import common.tools.Serialize;
 import durability.snapshot.SnapshotOptions;
 import durability.snapshot.SnapshotResources.SnapshotResources;
@@ -42,7 +43,7 @@ public class InMemoryFullSnapshotResources implements SnapshotResources {
 
     public ByteBuffer createWriteBuffer(SnapshotOptions snapshotOptions) throws IOException {
         //TODO:implementation compressionAlg, Different compressionAlg -> different dataOutputView
-        DataOutputView dataOutputView = new DataOutputView();
+        DataOutputView dataOutputView = new NativeDataOutputView();
         writeKVStateMetaData(dataOutputView);
         writeKVStateDate(dataOutputView);
         return ByteBuffer.wrap(dataOutputView.getByteArray());
@@ -55,8 +56,7 @@ public class InMemoryFullSnapshotResources implements SnapshotResources {
             objects.add(Serialize.serializeObject(stateMetaInfoSnapshot));
         }
         for (byte[] o: objects) {
-            dataOutputView.writeInt(o.length);
-            dataOutputView.write(o);
+            dataOutputView.writeCompression(o);
         }
     }
 
@@ -69,8 +69,7 @@ public class InMemoryFullSnapshotResources implements SnapshotResources {
             while (recordIterator.hasNext()) {
                 TableRecord tableRecord = recordIterator.next();
                 String str = tableRecord.toSerializableString(this.snapshotId);
-                dataOutputView.writeInt(str.getBytes(StandardCharsets.UTF_8).length);
-                dataOutputView.write(str.getBytes(StandardCharsets.UTF_8));
+                dataOutputView.writeCompression(str.getBytes(StandardCharsets.UTF_8));
             }
         }
     }

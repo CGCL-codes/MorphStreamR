@@ -6,7 +6,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-public class DataInputView {
+public abstract class DataInputView {
     ByteArrayInputStream in;
     private byte readBuffer[] = new byte[8];
     public DataInputView(ByteBuffer buffer) {
@@ -65,4 +65,6 @@ public class DataInputView {
             throw new EOFException();
         return (ch != 0);
     }
+    public abstract byte[] decompression(byte[] in, int length);
+    public abstract byte[] readFullyDecompression() throws IOException;
 }

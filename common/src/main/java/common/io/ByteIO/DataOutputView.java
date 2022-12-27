@@ -1,18 +1,16 @@
 package common.io.ByteIO;
 
+import net.jpountz.lz4.LZ4Compressor;
+import net.jpountz.lz4.LZ4Factory;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public class DataOutputView {
+public abstract class DataOutputView {
     private ByteArrayOutputStream out = new ByteArrayOutputStream();
     private byte writeBuffer[] = new byte[8];
     public synchronized void write(byte b[]) throws IOException {
         out.write(b);
-    }
-    public synchronized void write(byte b[], int off, int len)
-            throws IOException
-    {
-        out.write(b, off, len);
     }
     public final void writeBoolean(boolean v) throws IOException {
         out.write(v ? 1 : 0);
@@ -48,12 +46,7 @@ public class DataOutputView {
     public final void writeDouble(double v) throws IOException {
         writeLong(Double.doubleToLongBits(v));
     }
-    public final void writeBytes(String s) throws IOException {
-        int len = s.length();
-        for (int i = 0 ; i < len ; i++) {
-            out.write((byte)s.charAt(i));
-        }
-    }
+
     public final void writeChars(String s) throws IOException {
         int len = s.length();
         for (int i = 0 ; i < len ; i++) {
@@ -66,4 +59,7 @@ public class DataOutputView {
     public byte[] getByteArray() {
         return this.out.toByteArray();
     }
+
+    public abstract byte[] compression(byte[] in) throws IOException;
+    public abstract void writeCompression(byte[] in) throws IOException;
 }

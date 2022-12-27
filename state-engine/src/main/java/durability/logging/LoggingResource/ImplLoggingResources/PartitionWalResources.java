@@ -1,6 +1,7 @@
 package durability.logging.LoggingResource.ImplLoggingResources;
 
 import common.io.ByteIO.DataOutputView;
+import common.io.ByteIO.OutputWithCompression.NativeDataOutputView;
 import common.tools.Serialize;
 import durability.logging.LoggingEntry.LogRecord;
 import durability.logging.LoggingStrategy.ImplLoggingManager.WALManager;
@@ -42,7 +43,7 @@ public class PartitionWalResources implements LoggingResources {
     }
     public ByteBuffer createWriteBuffer() throws IOException {
         //TODO:implementation compressionAlg, Different compressionAlg -> different dataOutputView
-        DataOutputView dataOutputView = new DataOutputView();
+        DataOutputView dataOutputView = new NativeDataOutputView();
         writeLogMetaData(dataOutputView);
         writeLogRecord(dataOutputView);
         return ByteBuffer.wrap(dataOutputView.getByteArray());
@@ -55,8 +56,7 @@ public class PartitionWalResources implements LoggingResources {
             objects.add(Serialize.serializeObject(info));
         }
         for (byte[] o : objects) {
-            dataOutputView.writeInt(o.length);
-            dataOutputView.write(o);
+            dataOutputView.writeCompression(o);
         }
     }
 
@@ -70,8 +70,7 @@ public class PartitionWalResources implements LoggingResources {
                 LogRecord logRecord = recordIterator.next();
                 if (logRecord.vote != MetaTypes.OperationStateType.ABORTED && logRecord.update != null) {
                     String str = logRecord.toString();
-                    dataOutputView.writeInt(str.getBytes(StandardCharsets.UTF_8).length);
-                    dataOutputView.write(str.getBytes(StandardCharsets.UTF_8));
+                    dataOutputView.writeCompression(str.getBytes(StandardCharsets.UTF_8));
                 }
             }
             records.clear();
