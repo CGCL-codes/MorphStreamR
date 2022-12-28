@@ -374,6 +374,7 @@ public class SLInitializer extends TableInitilizer {
 //                        accountTransfer,
 //                        bookEntryTransfer
                 );
+                event.setTimestamp(event.getBid() * this.increaseTime);
 //                for (int x = 0; x < 4; x++)
 //                    p_bids[(npid + x) % tthread]++;
 //                pids.replaceAll((k, v) -> p_bids[k]++);
@@ -397,7 +398,7 @@ public class SLInitializer extends TableInitilizer {
 //                for (int x = 0; x < 2; x++)
 //                    p_bids[(npid + x) % tthread]++;
 //                pids.replaceAll((k, v) -> p_bids[k]++);
-
+                event.setTimestamp(event.getBid() * this.increaseTime);
                 DataHolder.events.add(event);
             }
             if (enable_log) LOG.debug(String.format("%d transactions read...", count));

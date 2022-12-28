@@ -1,5 +1,6 @@
 package benchmark.datagenerator;
 
+import benchmark.DataHolder;
 import common.collections.Configuration;
 import common.collections.OsUtils;
 

@@ -40,6 +40,9 @@ public abstract class TableInitilizer {
     //dual-decision
     public transient int[] dual_decision = new int[]{0, 0, 0, 0, 1, 1, 1, 1};//1:1 deposite and transfer;
     private int i = 0;
+    public int arrivalRate;
+
+    public long increaseTime;
 
     public TableInitilizer(Database db, double theta, int tthread, Configuration config) {
         this.db = db;
@@ -74,6 +77,8 @@ public abstract class TableInitilizer {
         }
         floor_interval = (int) Math.floor(NUM_ITEMS / (double) tthread);//NUM_ITEMS / tthread;
         p_generator = new FastZipfGenerator(NUM_ITEMS, theta, 0);
+        this.arrivalRate = config.getInt("arrivalRate") ;
+        this.increaseTime = (long) (1E9 / (arrivalRate * 1000L));
     }
 
     protected int next_decision2() {

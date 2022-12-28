@@ -95,7 +95,6 @@ public class SLBolt_ts extends SLBolt {
                     DEPOSITE_REQUEST_POST();
                 }
                 END_POST_TIME_MEASURE_ACC(thread_Id);
-
                 //all tuples in the holder is finished.
                 transactionEvents.clear();
                 depositEvents.clear();

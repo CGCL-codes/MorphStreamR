@@ -235,7 +235,7 @@ public class SLTPGDynamicDataGenerator extends DynamicWorkloadGenerator {
         }
 
         // increase the timestamp i.e. transaction id
-        eventID++;
+        eventID ++;
         return t;
     }
 

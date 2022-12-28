@@ -1,8 +1,11 @@
-package combo;
+package combo.faulttolerance;
 
+import benchmark.DataHolder;
+import combo.SINKCombo;
 import common.CONTROL;
 import common.collections.Configuration;
 import common.collections.OsUtils;
+import common.param.TxnEvent;
 import components.context.TopologyContext;
 import components.operators.api.TransactionalBolt;
 import components.operators.api.TransactionalSpout;
@@ -24,10 +27,10 @@ import static common.CONTROL.enable_log;
 import static common.Constants.DEFAULT_STREAM_ID;
 import static content.Content.CCOption_SStore;
 import static content.Content.CCOption_TStream;
+import static utils.FaultToleranceConstants.FTOption_ISC;
+import static utils.FaultToleranceConstants.FTOption_WSC;
 
-//TODO: Re-name microbenchmark as GS (Grep and Sum).
-public abstract class SPOUTCombo extends TransactionalSpout {
-    private static final long serialVersionUID = -2394340130331865581L;
+public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTolerance {
     private static Logger LOG;
     public final String split_exp = ";";
     public int the_end;
@@ -46,7 +49,7 @@ public abstract class SPOUTCombo extends TransactionalSpout {
     int start_measure;
     Random random = new Random();
 
-    public SPOUTCombo(Logger log, int i) {
+    public FTSPOUTCombo(Logger log, int i) {
         super(log, i);
         LOG = log;
         this.scalable = false;
@@ -58,16 +61,24 @@ public abstract class SPOUTCombo extends TransactionalSpout {
     public void nextTuple() throws InterruptedException {
         try {
             if (counter == start_measure) {
-                if (taskId == 0)
+                if (taskId == 0) {
                     sink.start();
+                    DataHolder.SystemStartTime = System.nanoTime();
+                }
             }
             if (counter < num_events_per_thread) {
                 Object event = myevents[counter];
 
                 long bid = mybids[counter];
-                if (CONTROL.enable_latency_measurement)
-                    generalMsg = new GeneralMsg(DEFAULT_STREAM_ID, event, System.nanoTime());
-                else {
+                if (CONTROL.enable_latency_measurement){
+                    long time;
+                    if (arrivalControl) {
+                        time = DataHolder.SystemStartTime + ((TxnEvent) event).getTimestamp();
+                    } else {
+                        time = System.nanoTime();
+                    }
+                    generalMsg = new GeneralMsg(DEFAULT_STREAM_ID, event, time);
+                } else {
                     generalMsg = new GeneralMsg(DEFAULT_STREAM_ID, event);
                 }
 
@@ -77,7 +88,26 @@ public abstract class SPOUTCombo extends TransactionalSpout {
 
                 if (ccOption == CCOption_TStream || ccOption == CCOption_SStore) {// This is only required by T-Stream.
                     if (model_switch(counter)) {
-                        marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration));
+                        if (ftOption == FTOption_ISC && snapshot(counter)) {
+                            marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration, "snapshot", counter));
+                            if (this.taskId == 0) {
+                                this.ftManager.spoutRegister(counter, "snapshot");
+                            }
+                        } else if (ftOption == FTOption_WSC){
+                            if (snapshot(counter)) {
+                                marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration, "commit_snapshot", counter));
+                                if (this.taskId == 0) {
+                                    this.ftManager.spoutRegister(counter, "snapshot");
+                                }
+                            } else {
+                                marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration, "commit", counter));
+                            }
+                            if (this.taskId == 0) {
+                                this.loggingManager.spoutRegister(counter, "commit");
+                            }
+                        } else {
+                            marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration));
+                        }
                         bolt.execute(marker);
                     }
                 }
@@ -118,6 +148,7 @@ public abstract class SPOUTCombo extends TransactionalSpout {
 
         punctuation_interval = config.getInt("checkpoint");
         snapshot_interval = punctuation_interval * config.getInt("snapshotInterval");
+        arrivalControl = config.getBoolean("arrivalControl");
         // setup the checkpoint interval for measurement
         sink.punctuation_interval = punctuation_interval;
 
@@ -143,5 +174,9 @@ public abstract class SPOUTCombo extends TransactionalSpout {
         } else {
             global_cnt = (the_end - CONTROL.MeasureStart) * tthread;
         }
+    }
+    @Override
+    public boolean snapshot(int counter) throws InterruptedException, BrokenBarrierException {
+        return (counter % snapshot_interval == 0);
     }
 }

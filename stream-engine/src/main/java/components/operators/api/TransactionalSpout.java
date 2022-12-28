@@ -11,6 +11,7 @@ public abstract class TransactionalSpout extends AbstractSpout implements Checkp
     public double target_Hz;
     public int punctuation_interval;
     public int snapshot_interval;
+    public boolean arrivalControl;
     public volatile int control = 0;//control how many elements in each epoch.
     public int _combo_bid_size = 1;
     public int counter = 0;
@@ -44,8 +45,4 @@ public abstract class TransactionalSpout extends AbstractSpout implements Checkp
         return (counter % punctuation_interval == 0);
     }
 
-    @Override
-    public boolean snapshot(int counter) throws InterruptedException, BrokenBarrierException {
-        return (counter % snapshot_interval == 0);
-    }
 }

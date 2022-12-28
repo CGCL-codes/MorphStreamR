@@ -202,6 +202,10 @@ public abstract class Runner implements IRunner {
     public String  compressionAlg = "None";
     @Parameter(names = {"--snapshotInterval"}, description = "Snapshot interval ")
     public Integer snapshotInterval = 0;
+    @Parameter(names = {"--arrivalRate"}, description = "Arrival rate of event, 200k/s ")
+    public Integer arrivalRate = 200;
+    @Parameter(names = {"--arrivalControl"}, description = "Arrival control of event ")
+    public Integer arrivalControl = 0;
 
     public Runner() {
         CFG_PATH = "/config/%s.properties";
@@ -358,6 +362,12 @@ public abstract class Runner implements IRunner {
         config.put("parallelNum", tthread);
         config.put("compressionAlg", compressionAlg);
         config.put("snapshotInterval", snapshotInterval);
+        config.put("arrivalRate", arrivalRate);
+        if (arrivalControl == 0) {
+            config.put("arrivalControl", false);
+        } else {
+            config.put("arrivalControl", true);
+        }
 
         System.setProperty("my.log", metric_path);
     }

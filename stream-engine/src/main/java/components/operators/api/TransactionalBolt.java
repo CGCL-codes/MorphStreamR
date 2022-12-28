@@ -133,10 +133,6 @@ public abstract class TransactionalBolt extends MapBolt implements Checkpointabl
         return false;
     }
 
-    @Override
-    public boolean snapshot(int counter) throws InterruptedException, BrokenBarrierException {
-        return false;
-    }
 
     protected void PRE_EXECUTE(Tuple in) {
         if (enable_latency_measurement)

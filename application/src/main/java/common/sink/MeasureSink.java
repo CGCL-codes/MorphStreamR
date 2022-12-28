@@ -8,7 +8,6 @@ import common.sink.helper.stable_sink_helper;
 import components.operators.api.BaseSink;
 import execution.ExecutionGraph;
 import execution.runtime.tuple.impl.Tuple;
-import execution.runtime.tuple.impl.msgs.GeneralMsg;
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +19,6 @@ import java.util.ArrayDeque;
 import java.util.HashMap;
 
 import static common.CONTROL.*;
-import static common.Constants.STAT_Path;
 import static common.IRunner.CCOption_SStore;
 
 public class MeasureSink extends BaseSink {
@@ -29,7 +27,7 @@ public class MeasureSink extends BaseSink {
     private static final long serialVersionUID = 6249684803036342603L;
     protected static String directory;
     protected final ArrayDeque<Long> latency_map = new ArrayDeque();
-    public int checkpoint_interval;
+    public int punctuation_interval;
     protected stable_sink_helper helper;
     protected int ccOption;
     public int tthread;
