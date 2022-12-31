@@ -18,6 +18,7 @@ import execution.runtime.tuple.impl.msgs.GeneralMsg;
 import org.slf4j.Logger;
 import utils.SOURCE_CONTROL;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Random;
@@ -63,8 +64,8 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
             if (counter == start_measure) {
                 if (taskId == 0) {
                     sink.start();
-                    DataHolder.SystemStartTime = System.nanoTime();
                 }
+                input_store(counter);
             }
             if (counter < num_events_per_thread) {
                 Object event = myevents[counter];
@@ -84,31 +85,36 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
 
                 tuple = new Tuple(bid, this.taskId, context, generalMsg);
                 bolt.execute(tuple);  // public Tuple(long bid, int sourceId, TopologyContext context, Message message)
-                counter++;
+                counter ++;
 
                 if (ccOption == CCOption_TStream || ccOption == CCOption_SStore) {// This is only required by T-Stream.
                     if (model_switch(counter)) {
                         if (ftOption == FTOption_ISC && snapshot(counter)) {
+                            inputStoreCurrentPath = inputStoreRootPath + OsUtils.OS_wrapper(Integer.toString(counter));
                             marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration, "snapshot", counter));
                             if (this.taskId == 0) {
-                                this.ftManager.spoutRegister(counter, "snapshot");
+                                this.ftManager.spoutRegister(counter, "snapshot", inputStoreCurrentPath);
                             }
                         } else if (ftOption == FTOption_WSC){
                             if (snapshot(counter)) {
+                                inputStoreCurrentPath = inputStoreRootPath + OsUtils.OS_wrapper(Integer.toString(counter));
                                 marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration, "commit_snapshot", counter));
                                 if (this.taskId == 0) {
-                                    this.ftManager.spoutRegister(counter, "snapshot");
+                                    this.ftManager.spoutRegister(counter, "snapshot", inputStoreCurrentPath);
                                 }
                             } else {
                                 marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration, "commit", counter));
                             }
                             if (this.taskId == 0) {
-                                this.loggingManager.spoutRegister(counter, "commit");
+                                this.loggingManager.spoutRegister(counter, "commit", "");
                             }
                         } else {
                             marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration));
                         }
                         bolt.execute(marker);
+                        if ((ftOption == FTOption_ISC || ftOption == FTOption_WSC) && counter != the_end) {
+                            input_store(counter);
+                        }
                     }
                 }
                 if (counter == the_end) {
@@ -149,6 +155,8 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
         punctuation_interval = config.getInt("checkpoint");
         snapshot_interval = punctuation_interval * config.getInt("snapshotInterval");
         arrivalControl = config.getBoolean("arrivalControl");
+        inputStoreRootPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("inputStore");
+        inputStoreCurrentPath = inputStoreRootPath + OsUtils.OS_wrapper(Integer.toString(counter));
         // setup the checkpoint interval for measurement
         sink.punctuation_interval = punctuation_interval;
 
@@ -174,6 +182,7 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
         } else {
             global_cnt = (the_end - CONTROL.MeasureStart) * tthread;
         }
+        if (taskId == 0) DataHolder.SystemStartTime = System.nanoTime();
     }
     @Override
     public boolean snapshot(int counter) throws InterruptedException, BrokenBarrierException {

@@ -49,7 +49,7 @@ public abstract class TableInitilizer {
         this.theta = theta;
         this.tthread = tthread;
         this.config = config;
-//        State.initilize(config);
+//      State.initilize(config);
         double ratio_of_multi_partition = config.getDouble("ratio_of_multi_partition", 1);
         this.number_partitions = Math.min(tthread, config.getInt("number_partitions"));
         if (ratio_of_multi_partition == 0) {

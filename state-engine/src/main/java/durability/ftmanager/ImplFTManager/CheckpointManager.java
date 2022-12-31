@@ -34,29 +34,39 @@ public class CheckpointManager extends FTManager {
     private ConcurrentHashMap<Long, SnapshotCommitInformation> registerSnapshot = new ConcurrentHashMap<>();
     private String metaPath;
     private String basePath;
+    private String inputStoreRootPath;
     private Queue<Long> uncommittedId = new ConcurrentLinkedQueue<>();
     private long pendingSnapshotId;
     @Override
-    public void initialize(Configuration config) {
+    public void initialize(Configuration config) throws IOException {
         this.parallelNum = config.getInt("parallelNum");
         basePath = config.getString("rootFilePath") + OsUtils.OS_wrapper("snapshot");
         metaPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("snapshot") + OsUtils.OS_wrapper("metaData.log");
+        inputStoreRootPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("inputStore");
         File file = new File(this.basePath);
         if (!file.exists()) {
             file.mkdirs();
             LOG.info("CheckpointManager initialize successfully");
         }
+        SnapshotCommitInformation snapshotCommitInformation = new SnapshotCommitInformation(0L, config.getString("rootFilePath") + OsUtils.OS_wrapper("inputStore") + OsUtils.OS_wrapper("inputStore"));
+        byte[] result = Serialize.serializeObject(snapshotCommitInformation);
+        LocalDataOutputStream localDataOutputStream = new LocalDataOutputStream(new File(this.metaPath));
+        DataOutputStream dataOutputStream = new DataOutputStream(localDataOutputStream);
+        int length = result.length;
+        dataOutputStream.writeInt(length);
+        dataOutputStream.write(result);
+        dataOutputStream.close();
         this.setName("CheckpointManager");
     }
 
     @Override
-    public boolean spoutRegister(long snapshotId, String message) {
+    public boolean spoutRegister(long snapshotId, String message, String path) {
         if (this.registerSnapshot.containsKey(snapshotId)) {
             //TODO: if these are too many uncommitted snapshot, notify the spout not to register
             LOG.info("SnapshotID has been registered already");
             return false;
         } else {
-            this.registerSnapshot.put(snapshotId, new SnapshotCommitInformation(snapshotId));
+            this.registerSnapshot.put(snapshotId, new SnapshotCommitInformation(snapshotId, path));
             callCommit.put(snapshotId, initCallCommit());
             this.uncommittedId.add(snapshotId);
             LOG.info("Register snapshot with offset: " + snapshotId + "; pending snapshot: " + uncommittedId.size());
@@ -104,6 +114,8 @@ public class CheckpointManager extends FTManager {
             throw new RuntimeException(e);
         } finally {
             File file = new File(this.basePath);
+            FileSystem.deleteFile(file);
+            file = new File(this.inputStoreRootPath);
             FileSystem.deleteFile(file);
             LOG.info("CheckpointManager stops");
         }

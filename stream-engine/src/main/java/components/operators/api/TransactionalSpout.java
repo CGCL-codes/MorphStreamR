@@ -12,6 +12,8 @@ public abstract class TransactionalSpout extends AbstractSpout implements Checkp
     public int punctuation_interval;
     public int snapshot_interval;
     public boolean arrivalControl;
+    public String inputStoreRootPath;
+    public String inputStoreCurrentPath;
     public volatile int control = 0;//control how many elements in each epoch.
     public int _combo_bid_size = 1;
     public int counter = 0;

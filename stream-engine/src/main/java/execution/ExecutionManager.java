@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import transaction.TxnManager;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -41,22 +42,26 @@ public class ExecutionManager {
         this.g = g;
         AC = new AffinityController(conf);
         this.optimizationManager = optimizationManager;
-        switch (conf.getInt("FTOption")) {
-            case 1:
-                this.ftManager = new CheckpointManager();
-                this.loggingManager = null;
-                this.ftManager.initialize(conf);
-                break;
-            case 2:
-                this.ftManager = new CheckpointManager();
-                this.loggingManager = new WalManager();
-                this.ftManager.initialize(conf);
-                this.loggingManager.initialize(conf);
-                break;
-            default:
-                this.ftManager = null;
-                this.loggingManager = null;
-                break;
+        try{
+            switch (conf.getInt("FTOption")) {
+                case 1:
+                    this.ftManager = new CheckpointManager();
+                    this.loggingManager = null;
+                    this.ftManager.initialize(conf);
+                    break;
+                case 2:
+                    this.ftManager = new CheckpointManager();
+                    this.loggingManager = new WalManager();
+                    this.ftManager.initialize(conf);
+                    this.loggingManager.initialize(conf);
+                    break;
+                default:
+                    this.ftManager = null;
+                    this.loggingManager = null;
+                    break;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

@@ -50,7 +50,7 @@ public class WalManager extends FTManager {
     }
 
     @Override
-    public boolean spoutRegister(long groupId, String message) {
+    public boolean spoutRegister(long groupId, String message, String path) {
         if (this.registerCommit.containsKey(groupId)) {
             //TODO: if these are too many uncommitted group, notify the spout not to register
             LOG.info("groupID has been registered already");

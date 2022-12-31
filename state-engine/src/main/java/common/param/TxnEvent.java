@@ -1,8 +1,9 @@
 package common.param;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
-public class TxnEvent implements Comparable<TxnEvent> {
+public class TxnEvent implements Comparable<TxnEvent>, Serializable {
     protected final long bid;//as msg id.
     protected final int pid;
     protected long[] bid_array;
