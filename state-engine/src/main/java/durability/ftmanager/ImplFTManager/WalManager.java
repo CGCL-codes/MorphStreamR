@@ -42,7 +42,7 @@ public class WalManager extends FTManager {
         this.parallelNum = config.getInt("parallelNum");
         walPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("logging");
         walMetaPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("logging") + OsUtils.OS_wrapper("metaData.log");
-        isRecovery = config.getBoolean("recovery");
+        isRecovery = config.getBoolean("isRecovery");
         File walFile = new File(walPath);
         if (!walFile.exists()) {
             walFile.mkdirs();
@@ -109,8 +109,10 @@ public class WalManager extends FTManager {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-            File file = new File(this.walPath);
-            FileSystem.deleteFile(file);
+            if (isRecovery) {
+                File file = new File(this.walPath);
+                FileSystem.deleteFile(file);
+            }
             LOG.info("WalManager stops");
         }
     }

@@ -7,4 +7,7 @@ public interface FaultTolerance {
     boolean snapshot(int counter) throws InterruptedException, BrokenBarrierException;
 
     boolean input_store(long currentOffset) throws IOException;
+
+    boolean input_reload(long recoveryOffset) throws IOException;
+    boolean recoverData() throws IOException;
 }

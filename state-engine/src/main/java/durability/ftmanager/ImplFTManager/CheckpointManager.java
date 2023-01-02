@@ -6,6 +6,7 @@ import common.io.LocalFS.FileSystem;
 import common.io.LocalFS.LocalDataOutputStream;
 import common.tools.Serialize;
 import durability.ftmanager.FTManager;
+import durability.recovery.RecoveryHelperProvider;
 import durability.snapshot.SnapshotResult.SnapshotCommitInformation;
 import durability.snapshot.SnapshotResult.SnapshotResult;
 import durability.struct.Result.persistResult;
@@ -35,22 +36,24 @@ public class CheckpointManager extends FTManager {
     private String metaPath;
     private String basePath;
     private String inputStoreRootPath;
-    private boolean isRecovery;
     private Queue<Long> uncommittedId = new ConcurrentLinkedQueue<>();
     private long pendingSnapshotId;
+    /** Used during recovery */
+    private boolean isRecovery;
+    private SnapshotCommitInformation latestSnapshotCommitInformation;
     @Override
     public void initialize(Configuration config) throws IOException {
         this.parallelNum = config.getInt("parallelNum");
         basePath = config.getString("rootFilePath") + OsUtils.OS_wrapper("snapshot");
         metaPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("snapshot") + OsUtils.OS_wrapper("metaData.log");
         inputStoreRootPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("inputStore");
-        isRecovery = config.getBoolean("recovery");
+        isRecovery = config.getBoolean("isRecovery");
         File file = new File(this.basePath);
         if (!file.exists()) {
             file.mkdirs();
         }
         if (isRecovery) {
-            //TODO: load Snapshot Metadata
+            latestSnapshotCommitInformation = RecoveryHelperProvider.getLatestCommitSnapshotCommitInformation(new File(metaPath));
         } else {
             SnapshotCommitInformation snapshotCommitInformation = new SnapshotCommitInformation(0L, config.getString("rootFilePath") + OsUtils.OS_wrapper("inputStore") + OsUtils.OS_wrapper("inputStore"));
             byte[] result = Serialize.serializeObject(snapshotCommitInformation);
@@ -82,8 +85,7 @@ public class CheckpointManager extends FTManager {
 
     @Override
     public persistResult spoutAskRecovery(int taskId, long snapshotOffset) {
-        //TODO:implement return the consistent snapshotResult
-        return null;
+        return latestSnapshotCommitInformation.snapshotResults.get(taskId);
     }
 
     @Override
@@ -94,7 +96,7 @@ public class CheckpointManager extends FTManager {
     @Override
     public boolean boltRegister(int partitionId, FaultToleranceStatus status, persistResult result) {
         SnapshotResult snapshotResult = (SnapshotResult) result;
-        this.registerSnapshot.get(snapshotResult.snapshotId).snapshotResults.add(snapshotResult);
+        this.registerSnapshot.get(snapshotResult.snapshotId).snapshotResults.put(snapshotResult.partitionId, snapshotResult);
         this.callCommit.get(snapshotResult.snapshotId).set(partitionId, FaultToleranceStatus.Snapshot);
         return true;
     }
@@ -125,10 +127,12 @@ public class CheckpointManager extends FTManager {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-            File file = new File(this.basePath);
-            FileSystem.deleteFile(file);
-            file = new File(this.inputStoreRootPath);
-            FileSystem.deleteFile(file);
+            if (isRecovery) {
+                File file = new File(this.basePath);
+                FileSystem.deleteFile(file);
+                file = new File(this.inputStoreRootPath);
+                FileSystem.deleteFile(file);
+            }
             LOG.info("CheckpointManager stops");
         }
     }

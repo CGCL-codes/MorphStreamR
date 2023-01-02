@@ -206,8 +206,8 @@ public abstract class Runner implements IRunner {
     public Integer arrivalRate = 200;
     @Parameter(names = {"--arrivalControl"}, description = "Arrival control of event ")
     public Integer arrivalControl = 0;
-    @Parameter(names = {"--recovery"}, description = "First run or recovery")
-    public Integer recovery = 0;
+    @Parameter(names = {"--isRecovery"}, description = "First run or recovery")
+    public Integer isRecovery = 0;
 
     public Runner() {
         CFG_PATH = "/config/%s.properties";
@@ -370,10 +370,10 @@ public abstract class Runner implements IRunner {
         } else {
             config.put("arrivalControl", true);
         }
-        if (recovery == 0) {
-            config.put("recovery", false);
+        if (isRecovery == 0) {
+            config.put("isRecovery", false);
         } else {
-            config.put("recovery", true);
+            config.put("isRecovery", true);
         }
 
         System.setProperty("my.log", metric_path);

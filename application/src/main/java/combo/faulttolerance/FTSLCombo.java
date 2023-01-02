@@ -13,12 +13,7 @@ import execution.runtime.collector.OutputCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayDeque;
 
 import static common.CONTROL.combo_bid_size;
@@ -150,19 +145,7 @@ public class FTSLCombo extends FTSPOUTCombo{
     }
 
     @Override
-    public boolean input_store(long currentOffset) throws IOException {
-        File file = new File(inputStoreCurrentPath);
-        if (!file.exists()) {
-            file.mkdirs();
-        }
-        file = new File(inputStoreCurrentPath + OsUtils.OS_wrapper(taskId + ".input"));
-        if (!file.exists())
-            file.createNewFile();
-        BufferedWriter EventBufferedWriter = new BufferedWriter(new FileWriter(file, true));
-        for (int i = (int) currentOffset; i < currentOffset + punctuation_interval; i ++) {
-            EventBufferedWriter.write( this.myevents[i] + "\n");
-        }
-        EventBufferedWriter.close();
-        return true;
+    public boolean input_reload(long recoveryOffset) throws IOException {
+        return false;
     }
 }

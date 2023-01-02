@@ -10,6 +10,7 @@ import components.context.TopologyContext;
 import components.operators.api.TransactionalBolt;
 import components.operators.api.TransactionalSpout;
 import db.DatabaseException;
+import durability.snapshot.SnapshotResult.SnapshotResult;
 import execution.ExecutionGraph;
 import execution.runtime.collector.OutputCollector;
 import execution.runtime.tuple.impl.Marker;
@@ -18,8 +19,7 @@ import execution.runtime.tuple.impl.msgs.GeneralMsg;
 import org.slf4j.Logger;
 import utils.SOURCE_CONTROL;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.util.Random;
 import java.util.concurrent.BrokenBarrierException;
 
@@ -63,6 +63,10 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
             if (counter == start_measure) {
                 if (taskId == 0) {
                     sink.start();
+                }
+                if (isRecovery) {
+                    recoverData();
+                    return;
                 }
                 input_store(counter);
             }
@@ -156,6 +160,7 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
         arrivalControl = config.getBoolean("arrivalControl");
         inputStoreRootPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("inputStore");
         inputStoreCurrentPath = inputStoreRootPath + OsUtils.OS_wrapper(Integer.toString(counter));
+        isRecovery = config.getBoolean("isRecovery");
         // setup the checkpoint interval for measurement
         sink.punctuation_interval = punctuation_interval;
 
@@ -186,5 +191,29 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
     @Override
     public boolean snapshot(int counter) throws InterruptedException, BrokenBarrierException {
         return (counter % snapshot_interval == 0);
+    }
+    @Override
+    public boolean input_store(long currentOffset) throws IOException {
+        File file = new File(inputStoreCurrentPath);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+        file = new File(inputStoreCurrentPath + OsUtils.OS_wrapper(taskId + ".input"));
+        if (!file.exists())
+            file.createNewFile();
+        BufferedWriter EventBufferedWriter = new BufferedWriter(new FileWriter(file, true));
+        for (int i = (int) currentOffset; i < currentOffset + punctuation_interval; i ++) {
+            EventBufferedWriter.write( this.myevents[i] + "\n");
+        }
+        EventBufferedWriter.close();
+        return true;
+    }
+    @Override
+    public boolean recoverData() throws IOException {
+        SnapshotResult snapshotResult = (SnapshotResult) this.ftManager.spoutAskRecovery(this.taskId, 0L);
+        //TODO:implement loadDB
+        //TODO:implement redo write-ahead log
+        input_reload(snapshotResult.snapshotId);
+        return false;
     }
 }
