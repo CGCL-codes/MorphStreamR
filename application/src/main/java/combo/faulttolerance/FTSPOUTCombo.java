@@ -22,6 +22,7 @@ import utils.SOURCE_CONTROL;
 import java.io.*;
 import java.util.Random;
 import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.ExecutionException;
 
 import static common.CONTROL.enable_log;
 import static common.Constants.DEFAULT_STREAM_ID;
@@ -133,6 +134,8 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
             e.printStackTrace();
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -209,11 +212,19 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
         return true;
     }
     @Override
-    public boolean recoverData() throws IOException {
+    public boolean recoverData() throws IOException, ExecutionException, InterruptedException {
         SnapshotResult snapshotResult = (SnapshotResult) this.ftManager.spoutAskRecovery(this.taskId, 0L);
         //TODO:implement loadDB
+        this.bolt.db.syncReloadDB(snapshotResult);
         //TODO:implement redo write-ahead log
         input_reload(snapshotResult.snapshotId);
         return false;
+    }
+    @Override
+    public boolean input_reload(long recoveryOffset) throws IOException {
+        File file = new File(inputStoreRootPath + OsUtils.OS_wrapper(Long.toString(recoveryOffset)) + OsUtils.OS_wrapper(taskId + ".input"));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+        inputReload.reloadInput(reader, recoveryInput);
+        return true;
     }
 }

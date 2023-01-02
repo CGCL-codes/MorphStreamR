@@ -4,6 +4,7 @@ import benchmark.DataHolder;
 import common.bolts.transactional.sl.*;
 import common.collections.Configuration;
 import common.collections.OsUtils;
+import common.faulttolerance.inputReload.SLInputReload;
 import common.param.TxnEvent;
 import common.param.sl.DepositEvent;
 import common.param.sl.TransactionEvent;
@@ -13,7 +14,7 @@ import execution.runtime.collector.OutputCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayDeque;
 
 import static common.CONTROL.combo_bid_size;
@@ -91,16 +92,6 @@ public class FTSLCombo extends FTSPOUTCombo{
                 break;
             index += tthread * combo_bid_size;
         }
-
-//        //Load Deposit Events.
-//        for (int index = taskId; index < DataHolder.depositEvents.size(); ) {
-//            TxnEvent event = DataHolder.depositEvents.get(index).cloneEvent();
-//            mybids[storageIndex] = event.getBid();
-//            myevents[storageIndex++] = event;
-//            if (storageIndex == num_events_per_thread)
-//                break;
-//            index += tthread * combo_bid_size;
-//        }
         assert (storageIndex == num_events_per_thread);
     }
 
@@ -108,7 +99,7 @@ public class FTSLCombo extends FTSPOUTCombo{
     public void initialize(int thread_Id, int thisTaskId, ExecutionGraph graph) {
 
         super.initialize(thread_Id, thisTaskId, graph);
-
+        this.inputReload = new SLInputReload(config);
         sink.configPrefix = this.getConfigPrefix();
         sink.prepare(config, context, collector);
         _combo_bid_size = combo_bid_size;
@@ -142,10 +133,5 @@ public class FTSLCombo extends FTSPOUTCombo{
         if (enable_shared_state)
             bolt.loadDB(config, context, collector);
         loadEvent(config.getString("rootFilePath"), config, context, collector);
-    }
-
-    @Override
-    public boolean input_reload(long recoveryOffset) throws IOException {
-        return false;
     }
 }

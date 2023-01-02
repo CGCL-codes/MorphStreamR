@@ -1,9 +1,12 @@
 package components.operators.api;
 
+import durability.inputStore.InputReload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedWriter;
+import java.util.ArrayDeque;
+import java.util.Queue;
 import java.util.concurrent.BrokenBarrierException;
 
 public abstract class TransactionalSpout extends AbstractSpout implements Checkpointable {
@@ -25,6 +28,8 @@ public abstract class TransactionalSpout extends AbstractSpout implements Checkp
     public int empty = 0;//execute without emit.
     public boolean isRecovery = false;
     public boolean stopRecovery = false;
+    public InputReload inputReload;
+    public Queue<Object> recoveryInput = new ArrayDeque<>();
 
     protected TransactionalSpout(Logger log, int fid) {
         super(log);
