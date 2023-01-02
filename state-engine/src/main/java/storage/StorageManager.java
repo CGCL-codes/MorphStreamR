@@ -5,6 +5,7 @@ import common.collections.OsUtils;
 import db.DatabaseException;
 import durability.ftmanager.FTManager;
 import durability.snapshot.SnapshotOptions;
+import durability.snapshot.SnapshotResult.SnapshotResult;
 import durability.snapshot.SnapshotStrategy.ImplSnapshotStrategy.InMemorySnapshotStrategy;
 import storage.datatype.DataBox;
 import storage.table.BaseTable;
@@ -14,6 +15,7 @@ import storage.table.ShareTable;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 
 public class StorageManager {
     /**
@@ -122,6 +124,9 @@ public class StorageManager {
 
     public void asyncSnapshot(long snapshotId, int partitionId, FTManager ftManager) throws IOException {
         this.snapshotStrategy.asyncSnapshot(snapshotId, partitionId, ftManager);
+    }
+    public void syncReloadDatabase(SnapshotResult snapshotResult) throws IOException, ExecutionException, InterruptedException {
+        this.snapshotStrategy.syncRecoveryFromSnapshot(snapshotResult);
     }
 
     /**

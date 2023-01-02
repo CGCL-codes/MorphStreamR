@@ -64,7 +64,7 @@ public class SchemaRecord {
             StringBuilder s = new StringBuilder();
             for (DataBox d : values) {
                 s.append(d.toString().trim());
-                s.append(", ");
+                s.append(",");
             }
             return s.substring(0, s.length() - 2);
         } else if (single_value != null) {

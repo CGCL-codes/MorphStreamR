@@ -1,14 +1,15 @@
 package db;
 
 import durability.ftmanager.FTManager;
-import durability.logging.LoggingStrategy.ImplLoggingManager.WALManager;
 import durability.logging.LoggingStrategy.LoggingManager;
+import durability.snapshot.SnapshotResult.SnapshotResult;
 import storage.EventManager;
 import storage.StorageManager;
 import storage.TableRecord;
 import storage.table.RecordSchema;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 public abstract class Database {
     public int numTransactions = 0;//current number of activate transactions
@@ -68,4 +69,5 @@ public abstract class Database {
      */
     public abstract void asyncSnapshot(final long snapshotId, final int partitionId, final FTManager ftManager) throws IOException;
     public abstract void asyncCommit(final long groupId, final int partitionId, final FTManager ftManager) throws IOException;
+    public abstract void syncReloadDB(SnapshotResult snapshotResult) throws IOException, ExecutionException, InterruptedException;
 }

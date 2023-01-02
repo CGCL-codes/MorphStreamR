@@ -19,6 +19,7 @@ import static utils.FaultToleranceConstants.END_OF_TABLE_GROUP_MARK;
 
 public class InMemoryFullSnapshotResources implements SnapshotResources {
     private final List<StateMetaInfoSnapshot> stateMetaInfoSnapshots = new ArrayList<>();
+    //<TableName, <Key, TableRecord>>
     private final HashMap<String, HashMap<String, TableRecord>> snapshotResource = new HashMap<>();
     private long snapshotId;
     private int partitionId;
@@ -26,13 +27,15 @@ public class InMemoryFullSnapshotResources implements SnapshotResources {
     public InMemoryFullSnapshotResources(long snapshotId, int partitionId, Map<String, InMemorySnapshotStrategy.InMemoryKvStateInfo> kvStateInformation, Map<String, BaseTable> tables) {
         this.snapshotId = snapshotId;
         this.partitionId = partitionId;
-        createStateMetaInfoSnapshot(kvStateInformation);
         createSnapshotResources(tables);
+        createStateMetaInfoSnapshot(kvStateInformation);
     }
 
     private void createStateMetaInfoSnapshot(Map<String, InMemorySnapshotStrategy.InMemoryKvStateInfo> kvStateInformation) {
         for (InMemorySnapshotStrategy.InMemoryKvStateInfo info : kvStateInformation.values()) {
-            this.stateMetaInfoSnapshots.add(new StateMetaInfoSnapshot(info.recordSchema, info.tableName, this.partitionId));
+            StateMetaInfoSnapshot stateMetaInfoSnapshot = new StateMetaInfoSnapshot(info.recordSchema, info.tableName, this.partitionId);
+            stateMetaInfoSnapshot.setRecordNum(snapshotResource.get(info.tableName).size());
+            this.stateMetaInfoSnapshots.add(stateMetaInfoSnapshot);
         }
     }
     private void createSnapshotResources(Map<String, BaseTable> tables) {
@@ -61,10 +64,8 @@ public class InMemoryFullSnapshotResources implements SnapshotResources {
     }
 
     private void writeKVStateDate(DataOutputView dataOutputView) throws IOException {
-        Iterator<HashMap<String, TableRecord>> iterator = snapshotResource.values().iterator();
-        while (iterator.hasNext()) {
-            dataOutputView.writeInt(END_OF_TABLE_GROUP_MARK);
-            HashMap<String, TableRecord> tables = iterator.next();
+        for (StateMetaInfoSnapshot stateMetaInfoSnapshot : stateMetaInfoSnapshots) {
+            HashMap<String, TableRecord> tables = snapshotResource.get(stateMetaInfoSnapshot.tableName);
             Iterator<TableRecord> recordIterator = tables.values().iterator();
             while (recordIterator.hasNext()) {
                 TableRecord tableRecord = recordIterator.next();

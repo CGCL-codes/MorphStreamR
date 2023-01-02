@@ -3,11 +3,13 @@ package db;
 import common.collections.Configuration;
 import durability.ftmanager.FTManager;
 import durability.logging.LoggingStrategy.ImplLoggingManager.WALManager;
+import durability.snapshot.SnapshotResult.SnapshotResult;
 import storage.EventManager;
 import storage.StorageManager;
 import storage.TableRecord;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 /**
  * original designer for CavaliaDatabase: Yingjun Wu.
@@ -44,5 +46,10 @@ public class CavaliaDatabase extends Database {
     @Override
     public void asyncCommit(long groupId, int partitionId, FTManager ftManager) throws IOException {
         this.loggingManager.commitLog(groupId, partitionId, ftManager);
+    }
+
+    @Override
+    public void syncReloadDB(SnapshotResult snapshotResult) throws IOException, ExecutionException, InterruptedException {
+        this.storageManager.syncReloadDatabase(snapshotResult);
     }
 }
