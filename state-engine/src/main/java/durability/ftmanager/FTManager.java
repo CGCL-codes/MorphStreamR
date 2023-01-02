@@ -12,10 +12,10 @@ public abstract class FTManager extends Thread{
     public abstract void initialize(Configuration config) throws IOException;
     /**
      * @param snapshotId
-     * @param message
-     * @param path input store path
+     * @param path       input store path
      */
-    public abstract boolean spoutRegister(long snapshotId, String message, String path);
+    public abstract boolean spoutRegister(long snapshotId, String path);
+    public abstract persistResult spoutAskRecovery(int taskId, long snapshotOffset);
     public abstract boolean sinkRegister(long snapshot);
     /**
      * @param partitionId

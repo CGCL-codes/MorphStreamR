@@ -35,6 +35,7 @@ public class CheckpointManager extends FTManager {
     private String metaPath;
     private String basePath;
     private String inputStoreRootPath;
+    private boolean isRecovery;
     private Queue<Long> uncommittedId = new ConcurrentLinkedQueue<>();
     private long pendingSnapshotId;
     @Override
@@ -43,24 +44,29 @@ public class CheckpointManager extends FTManager {
         basePath = config.getString("rootFilePath") + OsUtils.OS_wrapper("snapshot");
         metaPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("snapshot") + OsUtils.OS_wrapper("metaData.log");
         inputStoreRootPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("inputStore");
+        isRecovery = config.getBoolean("recovery");
         File file = new File(this.basePath);
         if (!file.exists()) {
             file.mkdirs();
-            LOG.info("CheckpointManager initialize successfully");
         }
-        SnapshotCommitInformation snapshotCommitInformation = new SnapshotCommitInformation(0L, config.getString("rootFilePath") + OsUtils.OS_wrapper("inputStore") + OsUtils.OS_wrapper("inputStore"));
-        byte[] result = Serialize.serializeObject(snapshotCommitInformation);
-        LocalDataOutputStream localDataOutputStream = new LocalDataOutputStream(new File(this.metaPath));
-        DataOutputStream dataOutputStream = new DataOutputStream(localDataOutputStream);
-        int length = result.length;
-        dataOutputStream.writeInt(length);
-        dataOutputStream.write(result);
-        dataOutputStream.close();
+        if (isRecovery) {
+            //TODO: load Snapshot Metadata
+        } else {
+            SnapshotCommitInformation snapshotCommitInformation = new SnapshotCommitInformation(0L, config.getString("rootFilePath") + OsUtils.OS_wrapper("inputStore") + OsUtils.OS_wrapper("inputStore"));
+            byte[] result = Serialize.serializeObject(snapshotCommitInformation);
+            LocalDataOutputStream localDataOutputStream = new LocalDataOutputStream(new File(this.metaPath));
+            DataOutputStream dataOutputStream = new DataOutputStream(localDataOutputStream);
+            int length = result.length;
+            dataOutputStream.writeInt(length);
+            dataOutputStream.write(result);
+            dataOutputStream.close();
+        }
         this.setName("CheckpointManager");
+        LOG.info("CheckpointManager initialize successfully");
     }
 
     @Override
-    public boolean spoutRegister(long snapshotId, String message, String path) {
+    public boolean spoutRegister(long snapshotId, String path) {
         if (this.registerSnapshot.containsKey(snapshotId)) {
             //TODO: if these are too many uncommitted snapshot, notify the spout not to register
             LOG.info("SnapshotID has been registered already");
@@ -72,6 +78,12 @@ public class CheckpointManager extends FTManager {
             LOG.info("Register snapshot with offset: " + snapshotId + "; pending snapshot: " + uncommittedId.size());
             return true;
         }
+    }
+
+    @Override
+    public persistResult spoutAskRecovery(int taskId, long snapshotOffset) {
+        //TODO:implement return the consistent snapshotResult
+        return null;
     }
 
     @Override

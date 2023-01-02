@@ -18,7 +18,6 @@ import execution.runtime.tuple.impl.msgs.GeneralMsg;
 import org.slf4j.Logger;
 import utils.SOURCE_CONTROL;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Random;
@@ -93,20 +92,20 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
                             inputStoreCurrentPath = inputStoreRootPath + OsUtils.OS_wrapper(Integer.toString(counter));
                             marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration, "snapshot", counter));
                             if (this.taskId == 0) {
-                                this.ftManager.spoutRegister(counter, "snapshot", inputStoreCurrentPath);
+                                this.ftManager.spoutRegister(counter, inputStoreCurrentPath);
                             }
                         } else if (ftOption == FTOption_WSC){
                             if (snapshot(counter)) {
                                 inputStoreCurrentPath = inputStoreRootPath + OsUtils.OS_wrapper(Integer.toString(counter));
                                 marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration, "commit_snapshot", counter));
                                 if (this.taskId == 0) {
-                                    this.ftManager.spoutRegister(counter, "snapshot", inputStoreCurrentPath);
+                                    this.ftManager.spoutRegister(counter, inputStoreCurrentPath);
                                 }
                             } else {
                                 marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration, "commit", counter));
                             }
                             if (this.taskId == 0) {
-                                this.loggingManager.spoutRegister(counter, "commit", "");
+                                this.loggingManager.spoutRegister(counter, "");
                             }
                         } else {
                             marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration));

@@ -32,6 +32,7 @@ public class WalManager extends FTManager {
     private ConcurrentHashMap<Long, LoggingCommitInformation> registerCommit = new ConcurrentHashMap<>();
     private String walMetaPath;
     private String walPath;
+    private boolean isRecovery;
 
     private Queue<Long> uncommittedId = new ConcurrentLinkedQueue<>();
 
@@ -41,6 +42,7 @@ public class WalManager extends FTManager {
         this.parallelNum = config.getInt("parallelNum");
         walPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("logging");
         walMetaPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("logging") + OsUtils.OS_wrapper("metaData.log");
+        isRecovery = config.getBoolean("recovery");
         File walFile = new File(walPath);
         if (!walFile.exists()) {
             walFile.mkdirs();
@@ -50,7 +52,7 @@ public class WalManager extends FTManager {
     }
 
     @Override
-    public boolean spoutRegister(long groupId, String message, String path) {
+    public boolean spoutRegister(long groupId, String path) {
         if (this.registerCommit.containsKey(groupId)) {
             //TODO: if these are too many uncommitted group, notify the spout not to register
             LOG.info("groupID has been registered already");
@@ -62,6 +64,12 @@ public class WalManager extends FTManager {
             LOG.info("Register group with offset: " + groupId + "; pending group: " + uncommittedId.size());
             return true;
         }
+    }
+
+    @Override
+    public persistResult spoutAskRecovery(int taskId, long snapshotOffset) {
+        //TODO:implement return the consistent walResult according to the snapshot offset
+        return null;
     }
 
     @Override
