@@ -72,8 +72,12 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
                 input_store(counter);
             }
             if (counter < num_events_per_thread) {
-                Object event = myevents[counter];
-
+                Object event;
+                if (recoveryInput.size() != 0) {
+                    event = recoveryInput.poll();
+                } else {
+                    event = myevents[counter];
+                }
                 long bid = mybids[counter];
                 if (CONTROL.enable_latency_measurement){
                     long time;
@@ -218,7 +222,8 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
         this.bolt.db.syncReloadDB(snapshotResult);
         //TODO:implement redo write-ahead log
         input_reload(snapshotResult.snapshotId);
-        return false;
+        counter = (int) snapshotResult.snapshotId;
+        return true;
     }
     @Override
     public boolean input_reload(long recoveryOffset) throws IOException {
