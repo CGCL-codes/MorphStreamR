@@ -3,6 +3,7 @@ package db;
 import common.collections.Configuration;
 import durability.ftmanager.FTManager;
 import durability.logging.LoggingStrategy.ImplLoggingManager.WALManager;
+import durability.recovery.RedoLogResult;
 import durability.snapshot.SnapshotResult.SnapshotResult;
 import storage.EventManager;
 import storage.StorageManager;
@@ -24,7 +25,7 @@ public class CavaliaDatabase extends Database {
                 this.loggingManager = null;
                 break;
             case 2 :
-                this.loggingManager = new WALManager(configuration);
+                this.loggingManager = new WALManager(this.storageManager.tables, configuration);
         }
     }
 
@@ -51,5 +52,10 @@ public class CavaliaDatabase extends Database {
     @Override
     public void syncReloadDB(SnapshotResult snapshotResult) throws IOException, ExecutionException, InterruptedException {
         this.storageManager.syncReloadDatabase(snapshotResult);
+    }
+
+    @Override
+    public void syncRedoWriteAheadLog(RedoLogResult redoLogResult) throws IOException {
+        this.loggingManager.syncRedoWriteAheadLog(redoLogResult);
     }
 }

@@ -8,6 +8,8 @@ import common.tools.Serialize;
 import durability.ftmanager.FTManager;
 import durability.logging.LoggingResult.LoggingCommitInformation;
 import durability.logging.LoggingResult.LoggingResult;
+import durability.recovery.RecoveryHelperProvider;
+import durability.recovery.RedoLogResult;
 import durability.struct.Result.persistResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,13 +34,13 @@ public class WalManager extends FTManager {
     private ConcurrentHashMap<Long, LoggingCommitInformation> registerCommit = new ConcurrentHashMap<>();
     private String walMetaPath;
     private String walPath;
-    private boolean isRecovery;
-
     private Queue<Long> uncommittedId = new ConcurrentLinkedQueue<>();
-
     private long pendingId;
+    /** Used during recovery */
+    private boolean isRecovery;
+    private List<LoggingCommitInformation> LoggingCommitInformation = new Vector<>();
     @Override
-    public void initialize(Configuration config) {
+    public void initialize(Configuration config) throws IOException {
         this.parallelNum = config.getInt("parallelNum");
         walPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("logging");
         walMetaPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("logging") + OsUtils.OS_wrapper("metaData.log");
@@ -46,6 +48,9 @@ public class WalManager extends FTManager {
         File walFile = new File(walPath);
         if (!walFile.exists()) {
             walFile.mkdirs();
+        }
+        if (isRecovery) {
+            RecoveryHelperProvider.getCommittedLogMetaData(new File(walMetaPath), LoggingCommitInformation);
         }
         LOG.info("WalManager initialize successfully");
         this.setName("WalManager");
@@ -68,8 +73,14 @@ public class WalManager extends FTManager {
 
     @Override
     public persistResult spoutAskRecovery(int taskId, long snapshotOffset) {
-        //TODO:implement return the consistent walResult according to the snapshot offset
-        return null;
+        RedoLogResult redoLogResult = new RedoLogResult();
+        for (LoggingCommitInformation loggingCommitInformation : LoggingCommitInformation) {
+            if (loggingCommitInformation.groupId > snapshotOffset) {
+                redoLogResult.addPath(loggingCommitInformation.loggingResults.get(taskId).path);
+                redoLogResult.setLastedGroupId(loggingCommitInformation.groupId);
+            }
+        }
+        return redoLogResult;
     }
 
     @Override
@@ -80,7 +91,7 @@ public class WalManager extends FTManager {
     @Override
     public boolean boltRegister(int partitionId, FaultToleranceStatus status, persistResult result) {
         LoggingResult loggingResult = (LoggingResult) result;
-        this.registerCommit.get(loggingResult.groupId).loggingResults.add(loggingResult);
+        this.registerCommit.get(loggingResult.groupId).loggingResults.put(loggingResult.partitionId, loggingResult);
         this.callCommit.get(loggingResult.groupId).set(partitionId, FaultToleranceStatus.Persist);
         return true;
     }

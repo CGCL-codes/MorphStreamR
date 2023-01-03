@@ -2,6 +2,7 @@ package db;
 
 import durability.ftmanager.FTManager;
 import durability.logging.LoggingStrategy.LoggingManager;
+import durability.recovery.RedoLogResult;
 import durability.snapshot.SnapshotResult.SnapshotResult;
 import storage.EventManager;
 import storage.StorageManager;
@@ -47,7 +48,7 @@ public abstract class Database {
         try {
             storageManager.createTable(tableSchema, tableName, partition_num, num_items);
             if (loggingManager != null) {
-                loggingManager.registerTable(tableName);
+                loggingManager.registerTable(tableSchema, tableName);
             }
         } catch (DatabaseException e) {
             e.printStackTrace();
@@ -70,4 +71,5 @@ public abstract class Database {
     public abstract void asyncSnapshot(final long snapshotId, final int partitionId, final FTManager ftManager) throws IOException;
     public abstract void asyncCommit(final long groupId, final int partitionId, final FTManager ftManager) throws IOException;
     public abstract void syncReloadDB(SnapshotResult snapshotResult) throws IOException, ExecutionException, InterruptedException;
+    public abstract void syncRedoWriteAheadLog(RedoLogResult redoLogResult) throws IOException;
 }

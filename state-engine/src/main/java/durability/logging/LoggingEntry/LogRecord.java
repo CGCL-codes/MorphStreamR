@@ -37,7 +37,7 @@ public class LogRecord implements Serializable, Comparable {
     }
 
     public String toString() {
-        return bid + "," + key + "," + update.toString();
+        return bid + ";" + update.toString();
     }
 
     @Override

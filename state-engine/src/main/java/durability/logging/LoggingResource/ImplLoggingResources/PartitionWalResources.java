@@ -27,12 +27,14 @@ public class PartitionWalResources implements LoggingResources {
     public PartitionWalResources(long groupId, int partitionId, Map<String, Map<Integer, ConcurrentSkipListSet<LogRecord>>> pendingEntries, ConcurrentHashMap<String, WALManager.WriteAheadLogTableInfo> metaInformation) {
         this.groupId = groupId;
         this.partitionId = partitionId;
-        createLogMetaInfoSnapshots(metaInformation);
         createLogResources(pendingEntries);
+        createLogMetaInfoSnapshots(metaInformation);
     }
     private void createLogMetaInfoSnapshots(ConcurrentHashMap<String, WALManager.WriteAheadLogTableInfo> metaInformation) {
         for (WALManager.WriteAheadLogTableInfo info : metaInformation.values()) {
-            this.metaInfoSnapshots.add(new WalMetaInfoSnapshot(info.tableName, this.partitionId));
+            WalMetaInfoSnapshot walMetaInfoSnapshot = new WalMetaInfoSnapshot(info.recordSchema, info.tableName, this.partitionId);
+            walMetaInfoSnapshot.setLogRecordNumber(logResources.get(info.tableName).size());
+            this.metaInfoSnapshots.add(walMetaInfoSnapshot);
         }
     }
 
@@ -61,11 +63,9 @@ public class PartitionWalResources implements LoggingResources {
     }
 
     private void writeLogRecord(DataOutputView dataOutputView) throws IOException {
-        Iterator<ConcurrentSkipListSet<LogRecord>> iterator = logResources.values().iterator();
-        while (iterator.hasNext()) {
-            dataOutputView.writeInt(END_OF_TABLE_GROUP_MARK);
-            ConcurrentSkipListSet<LogRecord> records = iterator.next();
-            Iterator<LogRecord> recordIterator = records.iterator();
+        for (WalMetaInfoSnapshot walMetaInfoSnapshot : metaInfoSnapshots) {
+            ConcurrentSkipListSet<LogRecord> logRecords = logResources.get(walMetaInfoSnapshot.tableName);
+            Iterator<LogRecord> recordIterator = logRecords.iterator();
             while(recordIterator.hasNext()) {
                 LogRecord logRecord = recordIterator.next();
                 if (logRecord.vote != MetaTypes.OperationStateType.ABORTED && logRecord.update != null) {
@@ -73,7 +73,7 @@ public class PartitionWalResources implements LoggingResources {
                     dataOutputView.writeCompression(str.getBytes(StandardCharsets.UTF_8));
                 }
             }
-            records.clear();
+            logRecords.clear();
         }
     }
 }

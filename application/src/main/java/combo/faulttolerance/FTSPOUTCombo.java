@@ -10,6 +10,7 @@ import components.context.TopologyContext;
 import components.operators.api.TransactionalBolt;
 import components.operators.api.TransactionalSpout;
 import db.DatabaseException;
+import durability.recovery.RedoLogResult;
 import durability.snapshot.SnapshotResult.SnapshotResult;
 import execution.ExecutionGraph;
 import execution.runtime.collector.OutputCollector;
@@ -218,18 +219,27 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
     @Override
     public boolean recoverData() throws IOException, ExecutionException, InterruptedException {
         SnapshotResult snapshotResult = (SnapshotResult) this.ftManager.spoutAskRecovery(this.taskId, 0L);
-        //TODO:implement loadDB
         this.bolt.db.syncReloadDB(snapshotResult);
-        //TODO:implement redo write-ahead log
-        input_reload(snapshotResult.snapshotId);
-        counter = (int) snapshotResult.snapshotId;
+        if (ftOption == FTOption_WSC) {
+            RedoLogResult redoLogResult = (RedoLogResult) this.loggingManager.spoutAskRecovery(this.taskId, snapshotResult.snapshotId);
+            if (redoLogResult.redoLogPaths.size() != 0) {
+                this.db.syncRedoWriteAheadLog(redoLogResult);
+                input_reload(snapshotResult.snapshotId, redoLogResult.lastedGroupId);
+                counter = (int) redoLogResult.lastedGroupId;
+            } else {
+                input_reload(snapshotResult.snapshotId, 0);
+            }
+        } else if (ftOption == FTOption_ISC) {
+            input_reload(snapshotResult.snapshotId, 0);
+            counter = (int) snapshotResult.snapshotId;
+        }
         return true;
     }
     @Override
-    public boolean input_reload(long recoveryOffset) throws IOException {
-        File file = new File(inputStoreRootPath + OsUtils.OS_wrapper(Long.toString(recoveryOffset)) + OsUtils.OS_wrapper(taskId + ".input"));
+    public boolean input_reload(long snapshotOffset, long redoOffset) throws IOException {
+        File file = new File(inputStoreRootPath + OsUtils.OS_wrapper(Long.toString(snapshotOffset)) + OsUtils.OS_wrapper(taskId + ".input"));
         BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
-        inputReload.reloadInput(reader, recoveryInput);
+        inputReload.reloadInput(reader, recoveryInput, redoOffset);
         return true;
     }
 }

@@ -96,7 +96,9 @@ public class TransactionEvent extends TxnEvent {
     }
 
     public TransactionEvent cloneEvent() {
-        return new TransactionEvent((int) bid, pid, Arrays.toString(bid_array), Arrays.toString(partition_indexs), number_of_partitions, sourceAccountId, sourceBookEntryId, targetAccountId, targetBookEntryId, accountTransfer, bookEntryTransfer);
+        TransactionEvent transactionEvent = new TransactionEvent((int) bid, pid, Arrays.toString(bid_array), Arrays.toString(partition_indexs), number_of_partitions, sourceAccountId, sourceBookEntryId, targetAccountId, targetBookEntryId, accountTransfer, bookEntryTransfer);
+        transactionEvent.setTimestamp(this.timestamp);
+        return transactionEvent;
     }
 
     // ------------------------------------------------------------------------

@@ -3,7 +3,6 @@ package durability.snapshot.SnapshotStrategy.ImplSnapshotStrategy;
 import common.io.ByteIO.DataInputView;
 import common.io.ByteIO.InputWithDecompression.NativeDataInputView;
 import common.tools.Deserialize;
-import db.Database;
 import durability.ftmanager.AbstractRecoveryManager;
 import durability.ftmanager.FTManager;
 import durability.snapshot.SnapshotOptions;
@@ -106,5 +105,6 @@ public class InMemorySnapshotStrategy implements SnapshotStrategy<InMemoryFullSn
                 recordNum --;
             }
         }
+        LOG.info("Reload Database complete");
     }
 }

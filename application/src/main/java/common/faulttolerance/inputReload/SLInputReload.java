@@ -20,7 +20,11 @@ public class SLInputReload extends InputReload {
         this.partitionOffset = configuration.getInt("NUM_ITEMS") / tthread;
     }
     @Override
-    public void reloadInput(BufferedReader reader, Queue<Object> lostEvents) throws IOException {
+    public void reloadInput(BufferedReader reader, Queue<Object> lostEvents, long redoOffset) throws IOException {
+        while(redoOffset != 0) {
+            reader.readLine();
+            redoOffset --;
+        }
         String txn = reader.readLine();
         int[] p_bids = new int[tthread];
         while (txn != null) {

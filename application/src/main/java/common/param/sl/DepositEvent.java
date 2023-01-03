@@ -88,6 +88,8 @@ public class DepositEvent extends TxnEvent {
     }
 
     public DepositEvent cloneEvent() {
-        return new DepositEvent((int) bid, pid, Arrays.toString(bid_array), Arrays.toString(partition_indexs), number_of_partitions, accountId, bookEntryId, accountTransfer, bookEntryTransfer);
+        DepositEvent event = new DepositEvent((int) bid, pid, Arrays.toString(bid_array), Arrays.toString(partition_indexs), number_of_partitions, accountId, bookEntryId, accountTransfer, bookEntryTransfer);
+        event.setTimestamp(this.timestamp);
+        return event;
     }
 }

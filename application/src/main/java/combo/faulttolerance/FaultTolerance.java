@@ -9,6 +9,6 @@ public interface FaultTolerance {
 
     boolean input_store(long currentOffset) throws IOException;
 
-    boolean input_reload(long recoveryOffset) throws IOException;
+    boolean input_reload(long snapshotOffset, long redoOffset) throws IOException;
     boolean recoverData() throws IOException, ExecutionException, InterruptedException;
 }

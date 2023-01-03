@@ -174,7 +174,6 @@ public abstract class executorThread extends Thread {
     }
 
     void Ready(Logger LOG) {
-        //LOG.DEBUG("BasicBoltBatchExecutor:" + executor.getExecutorID() + " is set to ready");
         ready = true;
     }
 

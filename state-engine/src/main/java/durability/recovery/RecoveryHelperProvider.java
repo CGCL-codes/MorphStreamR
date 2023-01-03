@@ -2,9 +2,11 @@ package durability.recovery;
 
 import common.io.LocalFS.LocalDataInputStream;
 import common.tools.Deserialize;
+import durability.logging.LoggingResult.LoggingCommitInformation;
 import durability.snapshot.SnapshotResult.SnapshotCommitInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import utils.lib.ConcurrentHashMap;
 
 import java.io.DataInputStream;
 import java.io.EOFException;
@@ -33,5 +35,20 @@ public class RecoveryHelperProvider {
             dataInputStream.close();
         }
         return commitInformation.get(commitInformation.size() - 1);
+    }
+    public static void getCommittedLogMetaData(File recoveryFile, List<LoggingCommitInformation> committedMetaData) throws IOException {
+        LocalDataInputStream inputStream = new LocalDataInputStream(recoveryFile);
+        try (DataInputStream dataInputStream = new DataInputStream(inputStream)) {
+            while (true) {
+                int len = dataInputStream.readInt();
+                byte[] metaDataBytes = new byte[len];
+                dataInputStream.readFully(metaDataBytes);
+                LoggingCommitInformation loggingCommitInformation = (LoggingCommitInformation) Deserialize.Deserialize(metaDataBytes);
+                assert loggingCommitInformation != null;
+                committedMetaData.add(loggingCommitInformation);
+            }
+        } catch (EOFException e) {
+            LOG.info("finish read the current.log");
+        }
     }
 }
