@@ -30,6 +30,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class WalManager extends FTManager {
     private final Logger LOG = LoggerFactory.getLogger(FTManager.class);
     private int parallelNum;
+    //Call if write-ahead log persist complete
+    private ConcurrentHashMap<Long, List<FaultToleranceStatus>> callPersist = new ConcurrentHashMap<>();
+    //Call if all tuples in this group committed
     private ConcurrentHashMap<Long, List<FaultToleranceStatus>> callCommit = new ConcurrentHashMap<>();
     private ConcurrentHashMap<Long, LoggingCommitInformation> registerCommit = new ConcurrentHashMap<>();
     private String walMetaPath;
@@ -64,7 +67,8 @@ public class WalManager extends FTManager {
             return false;
         } else {
             this.registerCommit.put(groupId, new LoggingCommitInformation(groupId));
-            callCommit.put(groupId, initCallCommit());
+            callPersist.put(groupId, initCall());
+            callCommit.put(groupId, initCall());
             this.uncommittedId.add(groupId);
             LOG.info("Register group with offset: " + groupId + "; pending group: " + uncommittedId.size());
             return true;
@@ -91,25 +95,28 @@ public class WalManager extends FTManager {
     @Override
     public boolean boltRegister(int partitionId, FaultToleranceStatus status, persistResult result) {
         LoggingResult loggingResult = (LoggingResult) result;
-        this.registerCommit.get(loggingResult.groupId).loggingResults.put(loggingResult.partitionId, loggingResult);
-        this.callCommit.get(loggingResult.groupId).set(partitionId, FaultToleranceStatus.Persist);
+        if (status.equals(FaultToleranceStatus.Persist)) {
+            this.registerCommit.get(loggingResult.groupId).loggingResults.put(loggingResult.partitionId, loggingResult);
+            this.callPersist.get(loggingResult.groupId).set(partitionId, status);
+        } else if (status.equals(FaultToleranceStatus.Commit)) {
+            this.callCommit.get(loggingResult.groupId).set(partitionId, status);
+        }
+
         return true;
     }
 
     @Override
     public void Listener() throws IOException {
         while (running) {
-            if (all_register_commit()) {
-                if (callCommit.get(pendingId).contains(FaultToleranceStatus.Persist)) {
-                    LOG.info("WalManager received all register and commit log");
-                    logComplete(pendingId);
-                    if (uncommittedId.size() != 0) {
-                        this.pendingId = uncommittedId.poll();
-                    } else {
-                        this.pendingId = 0;
-                    }
-                    LOG.info("Pending commit: " + uncommittedId.size());
+            if (all_register()) {
+                LOG.info("WalManager received all register and commit log");
+                logComplete(pendingId);
+                if (uncommittedId.size() != 0) {
+                    this.pendingId = uncommittedId.poll();
+                } else {
+                    this.pendingId = 0;
                 }
+                LOG.info("Pending commit: " + uncommittedId.size());
             }
         }
     }
@@ -127,6 +134,25 @@ public class WalManager extends FTManager {
             LOG.info("WalManager stops");
         }
     }
+    private List<FaultToleranceStatus> initCall() {
+        List<FaultToleranceStatus> statuses = new Vector<>();
+        for (int i = 0; i < parallelNum; i++) {
+            statuses.add(FaultToleranceStatus.NULL);
+        }
+        return statuses;
+    }
+    private boolean all_register() {
+        if (pendingId == 0) {
+            if (uncommittedId.size() != 0) {
+                pendingId = uncommittedId.poll();
+                return !this.callPersist.get(pendingId).contains(FaultToleranceStatus.NULL) && !this.callCommit.get(pendingId).contains(FaultToleranceStatus.NULL);
+            } else {
+                return false;
+            }
+        } else {
+            return !this.callPersist.get(pendingId).contains(FaultToleranceStatus.NULL) && !this.callCommit.get(pendingId).contains(FaultToleranceStatus.NULL);
+        }
+    }
 
 
     private void logComplete(long pendingId) throws IOException {
@@ -140,25 +166,5 @@ public class WalManager extends FTManager {
         dataOutputStream.close();
         this.registerCommit.remove(pendingId);
         LOG.info("WalManager commit the wal to the current.log");
-    }
-
-    private List<FaultToleranceStatus> initCallCommit() {
-        List<FaultToleranceStatus> statuses = new Vector<>();
-        for (int i = 0; i < parallelNum; i++) {
-            statuses.add(FaultToleranceStatus.NULL);
-        }
-        return statuses;
-    }
-    private boolean all_register_commit() {
-        if (pendingId == 0) {
-            if (uncommittedId.size() != 0) {
-                pendingId = uncommittedId.poll();
-                return !this.callCommit.get(pendingId).contains(FaultToleranceStatus.NULL);
-            } else {
-                return false;
-            }
-        } else {
-            return !this.callCommit.get(pendingId).contains(FaultToleranceStatus.NULL);
-        }
     }
 }

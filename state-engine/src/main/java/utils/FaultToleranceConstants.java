@@ -7,7 +7,7 @@ public class FaultToleranceConstants {
         None, FloatMult, BaseDelta, Dictionary, RLE
     }
      public enum FaultToleranceStatus {
-         NULL,Undo,Persist,Recovery,Snapshot
+         NULL,Undo,Persist,Commit,Snapshot
      }
      public enum Vote{
         Abort, Commit

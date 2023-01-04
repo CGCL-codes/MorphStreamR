@@ -30,6 +30,9 @@ import static utils.FaultToleranceConstants.*;
 public class CheckpointManager extends FTManager {
     private final Logger LOG = LoggerFactory.getLogger(CheckpointManager.class);
     private int parallelNum;
+    //Call if state snapshot complete
+    private ConcurrentHashMap<Long, List<FaultToleranceStatus>> callSnapshot = new ConcurrentHashMap<>();
+    //Call if all tuples in this epoch committed
     private ConcurrentHashMap<Long, List<FaultToleranceStatus>> callCommit = new ConcurrentHashMap<>();
     //<snapshotId, SnapshotCommitInformation>
     private ConcurrentHashMap<Long, SnapshotCommitInformation> registerSnapshot = new ConcurrentHashMap<>();
@@ -76,7 +79,8 @@ public class CheckpointManager extends FTManager {
             return false;
         } else {
             this.registerSnapshot.put(snapshotId, new SnapshotCommitInformation(snapshotId, path));
-            callCommit.put(snapshotId, initCallCommit());
+            callSnapshot.put(snapshotId, initCall());
+            callCommit.put(snapshotId, initCall());
             this.uncommittedId.add(snapshotId);
             LOG.info("Register snapshot with offset: " + snapshotId + "; pending snapshot: " + uncommittedId.size());
             return true;
@@ -96,8 +100,12 @@ public class CheckpointManager extends FTManager {
     @Override
     public boolean boltRegister(int partitionId, FaultToleranceStatus status, persistResult result) {
         SnapshotResult snapshotResult = (SnapshotResult) result;
-        this.registerSnapshot.get(snapshotResult.snapshotId).snapshotResults.put(snapshotResult.partitionId, snapshotResult);
-        this.callCommit.get(snapshotResult.snapshotId).set(partitionId, FaultToleranceStatus.Snapshot);
+        if (status.equals(FaultToleranceStatus.Snapshot)) {
+            this.registerSnapshot.get(snapshotResult.snapshotId).snapshotResults.put(snapshotResult.partitionId, snapshotResult);
+            this.callSnapshot.get(snapshotResult.snapshotId).set(partitionId, status);
+        } else if (status.equals(FaultToleranceStatus.Commit)) {
+            this.callCommit.get(((SnapshotResult) result).snapshotId).set(partitionId, status);
+        }
         return true;
     }
 
@@ -105,16 +113,14 @@ public class CheckpointManager extends FTManager {
     public void Listener() throws IOException {
         while (running) {
             if (all_register()) {
-                if (callCommit.get(pendingSnapshotId).contains(FaultToleranceStatus.Snapshot)) {
-                    LOG.info("CheckpointManager received all register and commit snapshot");
-                    snapshotComplete(pendingSnapshotId);
-                    if (uncommittedId.size() != 0) {
-                        this.pendingSnapshotId = uncommittedId.poll();
-                    } else {
-                        this.pendingSnapshotId = 0;
-                    }
-                    LOG.info("Pending snapshot: " + uncommittedId.size());
+                LOG.info("CheckpointManager received all register and commit snapshot");
+                snapshotComplete(pendingSnapshotId);
+                if (uncommittedId.size() != 0) {
+                    this.pendingSnapshotId = uncommittedId.poll();
+                } else {
+                    this.pendingSnapshotId = 0;
                 }
+                LOG.info("Pending snapshot: " + uncommittedId.size());
             }
         }
     }
@@ -141,16 +147,16 @@ public class CheckpointManager extends FTManager {
         if (pendingSnapshotId == 0) {
             if (uncommittedId.size() != 0) {
                 pendingSnapshotId = uncommittedId.poll();
-                return !this.callCommit.get(pendingSnapshotId).contains(FaultToleranceStatus.NULL);
+                return !this.callSnapshot.get(pendingSnapshotId).contains(FaultToleranceStatus.NULL) && !this.callCommit.get(pendingSnapshotId).contains(FaultToleranceStatus.NULL);
             } else {
                 return false;
             }
         } else {
-            return !this.callCommit.get(pendingSnapshotId).contains(FaultToleranceStatus.NULL);
+            return !this.callSnapshot.get(pendingSnapshotId).contains(FaultToleranceStatus.NULL) && !this.callCommit.get(pendingSnapshotId).contains(FaultToleranceStatus.NULL);
         }
     }
 
-    private List<FaultToleranceStatus> initCallCommit() {
+    private List<FaultToleranceStatus> initCall() {
         List<FaultToleranceStatus> statuses = new Vector<>();
         for (int i = 0; i < parallelNum; i++) {
             statuses.add(FaultToleranceStatus.NULL);

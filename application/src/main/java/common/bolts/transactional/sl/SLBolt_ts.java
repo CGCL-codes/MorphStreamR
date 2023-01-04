@@ -6,6 +6,8 @@ import common.param.sl.DepositEvent;
 import common.param.sl.TransactionEvent;
 import components.context.TopologyContext;
 import db.DatabaseException;
+import durability.logging.LoggingResult.LoggingResult;
+import durability.snapshot.SnapshotResult.SnapshotResult;
 import execution.ExecutionGraph;
 import execution.runtime.collector.OutputCollector;
 import execution.runtime.tuple.impl.Tuple;
@@ -18,6 +20,7 @@ import transaction.function.Condition;
 import transaction.function.DEC;
 import transaction.function.INC;
 import transaction.impl.ordered.TxnManagerTStream;
+import utils.FaultToleranceConstants;
 
 import java.io.IOException;
 import java.util.ArrayDeque;
@@ -95,6 +98,14 @@ public class SLBolt_ts extends SLBolt {
                     DEPOSITE_REQUEST_POST();
                 }
                 END_POST_TIME_MEASURE_ACC(thread_Id);
+                if (Objects.equals(in.getMarker().getMessage(), "snapshot")) {
+                    this.ftManager.boltRegister(this.thread_Id, FaultToleranceConstants.FaultToleranceStatus.Commit, new SnapshotResult(in.getMarker().getSnapshotId(), this.thread_Id, null));
+                } else if (Objects.equals(in.getMarker().getMessage(), "commit")){
+                    this.loggingManager.boltRegister(this.thread_Id, FaultToleranceConstants.FaultToleranceStatus.Commit, new LoggingResult(in.getMarker().getSnapshotId(), this.thread_Id, null));
+                } else if (Objects.equals(in.getMarker().getMessage(), "commit_snapshot")){
+                    this.ftManager.boltRegister(this.thread_Id, FaultToleranceConstants.FaultToleranceStatus.Commit, new SnapshotResult(in.getMarker().getSnapshotId(), this.thread_Id, null));
+                    this.loggingManager.boltRegister(this.thread_Id, FaultToleranceConstants.FaultToleranceStatus.Commit, new LoggingResult(in.getMarker().getSnapshotId(), this.thread_Id, null));
+                }
                 //all tuples in the holder is finished.
                 transactionEvents.clear();
                 depositEvents.clear();

@@ -82,7 +82,6 @@ public class MorphStreamRunner extends Runner {
                 case 0:
                     this.platform = new HUAWEI_Machine();
                     break;
-
                 case 1:
                     this.platform = new HP_Machine();
                     break;
