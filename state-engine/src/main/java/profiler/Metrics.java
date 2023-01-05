@@ -104,7 +104,6 @@ public class Metrics {
     }
 
     public static void COMPUTE_START_LOCK_TIME(int thread_id) {
-
         TxnRuntime.LockStart[thread_id] = System.nanoTime();
     }
 
@@ -447,5 +446,26 @@ public class Metrics {
             long UsedMemory = (java.lang.Runtime.getRuntime().totalMemory() - java.lang.Runtime.getRuntime().freeMemory()) / gb;
             usedMemory.addValue(UsedMemory);
         }
+    }
+    public static class RuntimePerformance {
+        public static DescriptiveStatistics[] Latency = new DescriptiveStatistics[kMaxThreadNum];
+        public static DescriptiveStatistics[] Throughput = new DescriptiveStatistics[kMaxThreadNum];
+        public static long[] count = new long[kMaxThreadNum];
+        public static String directory;
+        public static void Initialize() {
+            for (int i = 0; i < kMaxThreadNum; i++) {
+               Latency[i] = new DescriptiveStatistics();
+               Throughput[i] = new DescriptiveStatistics();
+               count[i] = 0;
+            }
+        }
+    }
+    public static void COMPUTE_THROUGHPUT(int thread_id, long count, double interval) {
+        double throughput = (count - RuntimePerformance.count[thread_id]) / interval;// k tuples per second
+        RuntimePerformance.count[thread_id] = count;
+        RuntimePerformance.Throughput[thread_id].addValue(throughput);
+    }
+    public static void COMPUTE_LATENCY(int thread_id, double latency) {
+        RuntimePerformance.Latency[thread_id].addValue(latency);
     }
 }

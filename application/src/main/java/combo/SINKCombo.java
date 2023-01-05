@@ -16,6 +16,7 @@ public class SINKCombo extends MeasureSink {
         if (!start_measure) {//only once.
             helper.StartMeasurement();
             start_measure = true;
+            previous_measure_time = System.nanoTime();
         }
     }
 

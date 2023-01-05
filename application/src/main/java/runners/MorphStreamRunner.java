@@ -44,6 +44,7 @@ import static content.SStoreContentImpl.SSTORE_CONTENT;
 import static content.TStreamContentImpl.T_STREAMCONTENT;
 import static content.common.ContentCommon.content_type;
 import static profiler.MeasureTools.METRICS_REPORT;
+import static profiler.MeasureTools.METRICS_REPORT_WITH_FAILURE;
 import static profiler.Metrics.timer;
 
 public class MorphStreamRunner extends Runner {
@@ -181,6 +182,7 @@ public class MorphStreamRunner extends Runner {
             int failureTime = conf.getInt("failureTime"); // Emulate system failure after (ms)
             sinkThread.join(failureTime);
             if (enable_log) log.info("System failure after " + failureTime / 1E3 + "s.");
+            METRICS_REPORT_WITH_FAILURE(conf.getInt("tthread"));
             System.exit(0);
         }
         sinkThread.join((long) (30 * 1E3 * 60));//sync_ratio for sink thread to stop. Maximally sync_ratio for 10 mins
@@ -244,7 +246,6 @@ public class MorphStreamRunner extends Runner {
                     if (lock != null)
                         log.info("Partition" + lock + " being locked:\t" + lock.count + "\t times");
                 }
-
                 // decide the output path of metrics.
                 String statsFolderPattern = OsUtils.osWrapperPostFix(rootPath)
                         + OsUtils.osWrapperPostFix("stats")

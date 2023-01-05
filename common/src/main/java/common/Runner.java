@@ -212,6 +212,8 @@ public abstract class Runner implements IRunner {
     public Integer isFailure = 0;
     @Parameter(names = {"--failureTime"}, description = "When to emulate system failure (in ms)")
     public Integer failureTime = 3000;
+    @Parameter(names = {"--measureInterval"}, description = "Interval to compute throughput, default to be 100ms")
+    public Double measureInterval = 100.0;
 
     public Runner() {
         CFG_PATH = "/config/%s.properties";
@@ -370,6 +372,7 @@ public abstract class Runner implements IRunner {
         config.put("snapshotInterval", snapshotInterval);
         config.put("arrivalRate", arrivalRate);
         config.put("failureTime", failureTime);
+        config.put("measureInterval", measureInterval);
         if (arrivalControl == 0) {
             config.put("arrivalControl", false);
         } else {

@@ -27,6 +27,7 @@ public class MeasureTools {
         Metrics.Total_Record.Initialize();
         Metrics.Transaction_Record.Initialize();
         Metrics.Scheduler_Record.Initialize();
+        Metrics.RuntimePerformance.Initialize();
     }
 
     public static void SCHEDULE_TIME_RECORD(int threadId, int num_events) {
@@ -272,6 +273,19 @@ public class MeasureTools {
             COMPUTE_NOTIFY(thread_id);
     }
 
+    public static void THROUGHPUT_MEASURE(int thread_id, long count, double interval) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            COMPUTE_THROUGHPUT(thread_id, count, interval);
+    }
+    public static void LATENCY_MEASURE(int thread_id, double latency) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            COMPUTE_LATENCY(thread_id, latency);
+    }
+    public static void setPerformanceDirectory(String directory) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            RuntimePerformance.directory = directory;
+    }
+
     private static void AverageTotalTimeBreakdownReport(File file, int tthread) {
         try {
             BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
@@ -465,16 +479,46 @@ public class MeasureTools {
             e.printStackTrace();
         }
     }
+    public static void WriteRuntimePerformance(int tthread) {
+        try {
+            File file = null;
+            file = new File(RuntimePerformance.directory);
+            BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
+            fileWriter.write("throughput\t latency\n");
+            List<double[]> latencys = new ArrayList<>();
+            List<double[]> throughputs = new ArrayList<>();
+            for (int i = 0; i < tthread; i++) {
+                latencys.add(RuntimePerformance.Latency[i].getValues());
+                throughputs.add(RuntimePerformance.Throughput[i].getValues());
+            }
+            for (int i = 0; i < latencys.get(0).length; i++) {
+                double throughput = 0;
+                double latency = 0;
+                for (int j = 0; j < tthread; j++) {
+                    throughput = throughput + throughputs.get(j)[i];
+                    latency = latency + latencys.get(j)[i];
+                }
+                fileWriter.write(throughput + "\t" + latency / tthread + "\n");
+            }
+            fileWriter.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public static void METRICS_REPORT(int ccOption, File file, int tthread, double throughput, int phase, int shiftRate) {
         WriteThroughputReport(file, throughput);
         AverageTotalTimeBreakdownReport(file, tthread);
         WriteThroughputReportRuntime(file, tthread, phase, shiftRate);
         WriteMemoryConsumption(file);
+        WriteRuntimePerformance(tthread);
         if (ccOption == CCOption_MorphStream) {//extra info
             SchedulerTimeBreakdownReport(file, tthread);
         } else {
             TransactionBreakdownRatioReport(ccOption, file, tthread);
         }
+    }
+    public static void METRICS_REPORT_WITH_FAILURE(int tthread) {
+        WriteRuntimePerformance(tthread);
     }
 }
