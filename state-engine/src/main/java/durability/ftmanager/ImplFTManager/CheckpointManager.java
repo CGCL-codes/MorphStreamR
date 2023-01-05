@@ -43,6 +43,7 @@ public class CheckpointManager extends FTManager {
     private long pendingSnapshotId;
     /** Used during recovery */
     private boolean isRecovery;
+    private boolean isFailure;
     private SnapshotCommitInformation latestSnapshotCommitInformation;
     @Override
     public void initialize(Configuration config) throws IOException {
@@ -51,6 +52,7 @@ public class CheckpointManager extends FTManager {
         metaPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("snapshot") + OsUtils.OS_wrapper("metaData.log");
         inputStoreRootPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("inputStore");
         isRecovery = config.getBoolean("isRecovery");
+        isFailure = config.getBoolean("isFailure");
         File file = new File(this.basePath);
         if (!file.exists()) {
             file.mkdirs();
@@ -133,7 +135,7 @@ public class CheckpointManager extends FTManager {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-            if (isRecovery) {
+            if (!isFailure) {
                 File file = new File(this.basePath);
                 FileSystem.deleteFile(file);
                 file = new File(this.inputStoreRootPath);

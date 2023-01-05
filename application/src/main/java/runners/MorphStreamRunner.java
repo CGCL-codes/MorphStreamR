@@ -177,6 +177,12 @@ public class MorphStreamRunner extends Runner {
         }
         executorThread sinkThread = submitter.getOM().getEM().getSinkThread();
         long start = System.currentTimeMillis();
+        if (conf.getBoolean("isFailure")) {
+            int failureTime = conf.getInt("failureTime"); // Emulate system failure after (ms)
+            sinkThread.join(failureTime);
+            if (enable_log) log.info("System failure after " + failureTime / 1E3 + "s.");
+            System.exit(0);
+        }
         sinkThread.join((long) (30 * 1E3 * 60));//sync_ratio for sink thread to stop. Maximally sync_ratio for 10 mins
         long time_elapsed = (long) ((System.currentTimeMillis() - start) / 1E3 / 60);//in mins
         if (time_elapsed > 20) {

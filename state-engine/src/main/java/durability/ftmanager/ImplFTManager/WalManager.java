@@ -41,6 +41,7 @@ public class WalManager extends FTManager {
     private long pendingId;
     /** Used during recovery */
     private boolean isRecovery;
+    private boolean isFailure;
     private List<LoggingCommitInformation> LoggingCommitInformation = new Vector<>();
     @Override
     public void initialize(Configuration config) throws IOException {
@@ -48,6 +49,7 @@ public class WalManager extends FTManager {
         walPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("logging");
         walMetaPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("logging") + OsUtils.OS_wrapper("metaData.log");
         isRecovery = config.getBoolean("isRecovery");
+        isFailure = config.getBoolean("isFailure");
         File walFile = new File(walPath);
         if (!walFile.exists()) {
             walFile.mkdirs();
@@ -127,7 +129,7 @@ public class WalManager extends FTManager {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-            if (isRecovery) {
+            if (!isFailure) {
                 File file = new File(this.walPath);
                 FileSystem.deleteFile(file);
             }

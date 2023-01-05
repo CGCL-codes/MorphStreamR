@@ -206,8 +206,12 @@ public abstract class Runner implements IRunner {
     public Integer arrivalRate = 200;
     @Parameter(names = {"--arrivalControl"}, description = "Arrival control of event ")
     public Integer arrivalControl = 0;
-    @Parameter(names = {"--isRecovery"}, description = "First run or recovery")
+    @Parameter(names = {"--isRecovery"}, description = "Whether to recover or not")
     public Integer isRecovery = 0;
+    @Parameter(names = {"--isFailure"}, description = "Whether to emulate system failure ")
+    public Integer isFailure = 0;
+    @Parameter(names = {"--failureTime"}, description = "When to emulate system failure (in ms)")
+    public Integer failureTime = 3000;
 
     public Runner() {
         CFG_PATH = "/config/%s.properties";
@@ -365,6 +369,7 @@ public abstract class Runner implements IRunner {
         config.put("compressionAlg", compressionAlg);
         config.put("snapshotInterval", snapshotInterval);
         config.put("arrivalRate", arrivalRate);
+        config.put("failureTime", failureTime);
         if (arrivalControl == 0) {
             config.put("arrivalControl", false);
         } else {
@@ -374,6 +379,11 @@ public abstract class Runner implements IRunner {
             config.put("isRecovery", false);
         } else {
             config.put("isRecovery", true);
+        }
+        if (isFailure == 0) {
+            config.put("isFailure", false);
+        } else {
+            config.put("isFailure", true);
         }
 
         System.setProperty("my.log", metric_path);
