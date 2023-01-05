@@ -72,7 +72,9 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
                     recoverData();
                     return;
                 }
-                input_store(counter);
+                if (ftOption == FTOption_ISC || ftOption == FTOption_WSC) {
+                    input_store(counter);
+                }
             }
             if (counter < num_events_per_thread) {
                 Object event;
