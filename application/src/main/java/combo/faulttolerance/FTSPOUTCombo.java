@@ -66,6 +66,8 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
                 if (taskId == 0) {
                     sink.start();
                 }
+                this.systemStartTime = System.nanoTime();
+                sink.previous_measure_time = System.nanoTime();
                 if (isRecovery) {
                     recoverData();
                     return;
@@ -83,7 +85,7 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
                 if (CONTROL.enable_latency_measurement){
                     long time;
                     if (arrivalControl) {
-                        time = DataHolder.SystemStartTime + ((TxnEvent) event).getTimestamp();
+                        time = this.systemStartTime + ((TxnEvent) event).getTimestamp() - remainTime;
                     } else {
                         time = System.nanoTime();
                     }
@@ -169,6 +171,9 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
         inputStoreRootPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("inputStore");
         inputStoreCurrentPath = inputStoreRootPath + OsUtils.OS_wrapper(Integer.toString(counter));
         isRecovery = config.getBoolean("isRecovery");
+        if (isRecovery) {
+            remainTime = (long) (config.getInt("failureTime") * 1E6);
+        }
         // setup the checkpoint interval for measurement
         sink.punctuation_interval = punctuation_interval;
 
@@ -194,7 +199,6 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
         } else {
             global_cnt = (the_end - CONTROL.MeasureStart) * tthread;
         }
-        if (taskId == 0) DataHolder.SystemStartTime = System.nanoTime();
     }
     @Override
     public boolean snapshot(int counter) throws InterruptedException, BrokenBarrierException {
@@ -228,6 +232,7 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
                 counter = (int) redoLogResult.lastedGroupId;
             } else {
                 input_reload(snapshotResult.snapshotId, 0);
+                counter = (int) snapshotResult.snapshotId;
             }
         } else if (ftOption == FTOption_ISC) {
             input_reload(snapshotResult.snapshotId, 0);

@@ -105,6 +105,6 @@ public class InMemorySnapshotStrategy implements SnapshotStrategy<InMemoryFullSn
                 recordNum --;
             }
         }
-        LOG.info("Reload Database complete");
+        LOG.info("Reload Database complete: " + snapshotResult.partitionId);
     }
 }

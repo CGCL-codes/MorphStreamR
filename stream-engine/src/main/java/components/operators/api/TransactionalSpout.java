@@ -15,6 +15,8 @@ public abstract class TransactionalSpout extends AbstractSpout implements Checkp
     public int punctuation_interval;
     public int snapshot_interval;
     public boolean arrivalControl;
+    public long systemStartTime;
+    public long remainTime = 0;
     public String inputStoreRootPath;
     public String inputStoreCurrentPath;
     public volatile int control = 0;//control how many elements in each epoch.
@@ -27,7 +29,6 @@ public abstract class TransactionalSpout extends AbstractSpout implements Checkp
     public long bid = 0;//local bid.
     public int empty = 0;//execute without emit.
     public boolean isRecovery = false;
-    public boolean stopRecovery = false;
     public InputReload inputReload;
     public Queue<Object> recoveryInput = new ArrayDeque<>();
 
