@@ -75,7 +75,7 @@ function runApplication() {
     --shiftRate $shiftRate \
     --workloadType $workloadType \
     --schedulerPool $schedulerPool \
-    -snapshotInterval $snapshotInterval \
+    --snapshotInterval $snapshotInterval \
     --arrivalControl $arrivalControl \
     --arrivalRate $arrivalRate \
     --FTOption $FTOption \
@@ -90,3 +90,4 @@ function application_runner() { # multi-batch exp
  app=StreamLedger
  runApplication
 }
+application_runner

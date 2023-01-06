@@ -72,6 +72,7 @@ public class MeasureSink extends BaseSink {
                 + OsUtils.osWrapperPostFix("stats")
                 + OsUtils.osWrapperPostFix("%s")
                 + OsUtils.osWrapperPostFix("%s")
+                + OsUtils.osWrapperPostFix("FTOption = %d")
                 + OsUtils.osWrapperPostFix("threads = %d")
                 + OsUtils.osWrapperPostFix("totalEvents = %d")
                 + OsUtils.osWrapperPostFix("%d_%d_%d_%d_%d_%d_%s_%d.runtimePerformance");
@@ -83,7 +84,9 @@ public class MeasureSink extends BaseSink {
         // TODO: to be refactored
         if (config.getString("common").equals("StreamLedger")) {
             directory = String.format(statsFolderPattern,
-                    config.getString("common"), scheduler, tthread, totalEvents,
+                    config.getString("common"), scheduler,
+                    config.getInt("FTOption"),
+                    tthread, totalEvents,
                     config.getInt("NUM_ITEMS"),
                     config.getInt("Ratio_Of_Deposit"),
                     config.getInt("State_Access_Skewness"),
@@ -94,7 +97,9 @@ public class MeasureSink extends BaseSink {
                     config.getInt("complexity"));
         } else if (config.getString("common").equals("GrepSum")) {
             directory = String.format(statsFolderPattern,
-                    config.getString("common"), scheduler, tthread, totalEvents,
+                    config.getString("common"), scheduler,
+                    config.getInt("FTOption"),
+                    tthread, totalEvents,
                     config.getInt("NUM_ITEMS"),
                     config.getInt("NUM_ACCESS"),
                     config.getInt("State_Access_Skewness"),
@@ -105,7 +110,9 @@ public class MeasureSink extends BaseSink {
                     config.getInt("complexity"));
         } else if (config.getString("common").equals("OnlineBiding")){
             directory = String.format(statsFolderPattern,
-                    config.getString("common"), scheduler, tthread, totalEvents,
+                    config.getString("common"), scheduler,
+                    config.getInt("FTOption"),
+                    tthread, totalEvents,
                     config.getInt("NUM_ITEMS"),
                     config.getInt("NUM_ACCESS"),
                     config.getInt("State_Access_Skewness"),
@@ -116,7 +123,9 @@ public class MeasureSink extends BaseSink {
                     config.getInt("complexity"));
         } else if (config.getString("common").equals("TollProcessing")){
             directory = String.format(statsFolderPattern,
-                    config.getString("common"), scheduler, tthread, totalEvents,
+                    config.getString("common"), scheduler,
+                    config.getInt("FTOption"),
+                    tthread, totalEvents,
                     config.getInt("NUM_ITEMS"),
                     config.getInt("NUM_ACCESS"),
                     config.getInt("State_Access_Skewness"),

@@ -23,7 +23,7 @@ function ResetParameters() {
   snapshotInterval=2
   arrivalControl=1
   arrivalRate=200
-  FTOption=1
+  FTOption=0
   isRecovery=0
   isFailure=0
   failureTime=3000
@@ -75,7 +75,7 @@ function runApplication() {
     --shiftRate $shiftRate \
     --workloadType $workloadType \
     --schedulerPool $schedulerPool \
-    -snapshotInterval $snapshotInterval \
+    --snapshotInterval $snapshotInterval \
     --arrivalControl $arrivalControl \
     --arrivalRate $arrivalRate \
     --FTOption $FTOption \
@@ -85,9 +85,12 @@ function runApplication() {
     --measureInterval $measureInterval
 }
 
-function application_runner() { # multi-batch exp
+function application_runner() {
  ResetParameters
  app=StreamLedger
+ for FTOption in 0 1 2
+ do
  runApplication
+ done
 }
 application_runner

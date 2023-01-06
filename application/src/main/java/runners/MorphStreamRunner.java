@@ -251,6 +251,7 @@ public class MorphStreamRunner extends Runner {
                         + OsUtils.osWrapperPostFix("stats")
                         + OsUtils.osWrapperPostFix("%s")
                         + OsUtils.osWrapperPostFix("%s")
+                        + OsUtils.osWrapperPostFix("FTOption = %d")
                         + OsUtils.osWrapperPostFix("threads = %d")
                         + OsUtils.osWrapperPostFix("totalEvents = %d")
                         + OsUtils.osWrapperPostFix("%d_%d_%d_%d_%d_%d_%s_%d");
@@ -262,7 +263,9 @@ public class MorphStreamRunner extends Runner {
                 String statsFolderPath;
                 if (config.getString("common").equals("StreamLedger")) {
                     statsFolderPath = String.format(statsFolderPattern,
-                            config.getString("common"), scheduler, tthread, totalEvents,
+                            config.getString("common"), scheduler,
+                            config.getInt("FTOption"),
+                            tthread, totalEvents,
                             config.getInt("NUM_ITEMS"),
                             config.getInt("Ratio_Of_Deposit"),
                             config.getInt("State_Access_Skewness"),
@@ -273,7 +276,9 @@ public class MorphStreamRunner extends Runner {
                             config.getInt("complexity"));
                 } else if (config.getString("common").equals("GrepSum")) {
                     statsFolderPath = String.format(statsFolderPattern,
-                            config.getString("common"), scheduler, tthread, totalEvents,
+                            config.getString("common"), scheduler,
+                            config.getInt("FTOption"),
+                            tthread, totalEvents,
                             config.getInt("NUM_ITEMS"),
                             config.getInt("Ratio_of_Multiple_State_Access"),
                             config.getInt("State_Access_Skewness"),
@@ -284,7 +289,9 @@ public class MorphStreamRunner extends Runner {
                             config.getInt("complexity"));
                 } else if (config.getString("common").equals("OnlineBiding")){
                     statsFolderPath = String.format(statsFolderPattern,
-                            config.getString("common"), scheduler, tthread, totalEvents,
+                            config.getString("common"), scheduler,
+                            config.getInt("FTOption"),
+                            tthread, totalEvents,
                             config.getInt("NUM_ITEMS"),
                             config.getInt("NUM_ACCESS"),
                             config.getInt("State_Access_Skewness"),
@@ -295,7 +302,9 @@ public class MorphStreamRunner extends Runner {
                             config.getInt("complexity"));
                 } else if (config.getString("common").equals("TollProcessing")){
                     statsFolderPath = String.format(statsFolderPattern,
-                            config.getString("common"), scheduler, tthread, totalEvents,
+                            config.getString("common"), scheduler,
+                            config.getInt("FTOption"),
+                            tthread, totalEvents,
                             config.getInt("NUM_ITEMS"),
                             config.getInt("NUM_ACCESS"),
                             config.getInt("State_Access_Skewness"),
