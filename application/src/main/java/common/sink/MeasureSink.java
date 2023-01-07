@@ -26,7 +26,6 @@ public class MeasureSink extends BaseSink {
     private static final Logger LOG = LoggerFactory.getLogger(MeasureSink.class);
     private DescriptiveStatistics latency = new DescriptiveStatistics();
     private static final long serialVersionUID = 6249684803036342603L;
-    protected static String directory;
     protected final ArrayDeque<Long> latency_map = new ArrayDeque();
     public int punctuation_interval;
     protected stable_sink_helper helper;
@@ -38,6 +37,8 @@ public class MeasureSink extends BaseSink {
     public double interval;
     public long previous_measure_time;
     public boolean isRecovery;
+    public boolean isFailure;
+    public long remainTime = 0;
 
     public MeasureSink() {
         super(new HashMap<>());
@@ -56,6 +57,10 @@ public class MeasureSink extends BaseSink {
         int size = graph.getSink().operator.getExecutorList().size();
         interval = config.getDouble("measureInterval");
         isRecovery = config.getBoolean("isRecovery");
+        isFailure = config.getBoolean("isFailure");
+        if (isRecovery) {
+            remainTime = (long) (config.getInt("failureTime") * 1E6);
+        }
         ccOption = config.getInt("CCOption", 0);
         String path = config.getString("metrics.output");
         helper = new stable_sink_helper(LOG
@@ -67,7 +72,72 @@ public class MeasureSink extends BaseSink {
                 , config.getBoolean("measure", false));
         totalEvents = config.getInt("totalEvents");
         tthread = config.getInt("tthread");
+        if (thisTaskId == 0)
+            setMetricDirectory(config);
+        SINK_CONTROL.getInstance().config();
+        if (enable_log) LOG.info("expected last events = " + totalEvents);
+    }
 
+    @Override
+    public void execute(Tuple input) throws InterruptedException {
+        check(cnt, input);
+        cnt ++;
+    }
+
+    protected void latency_measure(Tuple input) {
+        cnt ++;
+        if (enable_latency_measurement) {
+            this.latency.addValue(System.nanoTime() - input.getLong(1));
+            long interval = System.nanoTime() - previous_measure_time;
+            if (interval / 1E6 >= this.interval) {
+                MeasureTools.THROUGHPUT_MEASURE(this.thisTaskId, cnt, interval / 1E6);
+                MeasureTools.LATENCY_MEASURE(this.thisTaskId, this.latency.getMean() / 1E6);
+                this.latency = new DescriptiveStatistics();
+                previous_measure_time = System.nanoTime();
+            }
+        }
+    }
+
+    protected void check(int cnt, Tuple input) {
+        if (cnt == 0) {
+            helper.StartMeasurement();
+        } else if (cnt == (totalEvents - 40 * 10 - 1)) {
+            double results = helper.EndMeasurement(cnt);
+            this.setResults(results);
+            if (!enable_engine)//performance measure for TStream is different.
+                if (enable_log) LOG.info("Received:" + cnt + " throughput:" + results);
+            if (thisTaskId == graph.getSink().getExecutorID()) {
+                measure_end(results);
+            }
+        }
+    }
+
+    /**
+     * Only one sink will do the measure_end.
+     * @param results
+     */
+    protected void measure_end(double results) {
+        if (enable_log) LOG.info(Thread.currentThread().getName() + " obtains lock");
+        SINK_CONTROL.getInstance().throughput = results;
+        if (enable_log) LOG.info("Thread:" + thisTaskId + " is going to stop all threads sequentially");
+        context.Sequential_stopAll();
+        SINK_CONTROL.getInstance().unlock();
+    }
+
+    @Override
+    protected Logger getLogger() {
+        return LOG;
+    }
+
+    public void setMetricDirectory(Configuration config) {
+        String fileName;
+        if (isRecovery) {
+            fileName = "_recovery";
+        } else if (isFailure) {
+            fileName = "_failure";
+        } else {
+            fileName = "";
+        }
         String statsFolderPattern = OsUtils.osWrapperPostFix(config.getString("rootFilePath"))
                 + OsUtils.osWrapperPostFix("stats")
                 + OsUtils.osWrapperPostFix("%s")
@@ -75,12 +145,13 @@ public class MeasureSink extends BaseSink {
                 + OsUtils.osWrapperPostFix("FTOption = %d")
                 + OsUtils.osWrapperPostFix("threads = %d")
                 + OsUtils.osWrapperPostFix("totalEvents = %d")
-                + OsUtils.osWrapperPostFix("%d_%d_%d_%d_%d_%d_%s_%d.runtimePerformance");
+                + ("%d_%d_%d_%d_%d_%d_%s_%d");
 
         String scheduler = config.getString("scheduler");
         if (config.getInt("CCOption") == CCOption_SStore) {
             scheduler = "PAT";
         }
+        String directory;
         // TODO: to be refactored
         if (config.getString("common").equals("StreamLedger")) {
             directory = String.format(statsFolderPattern,
@@ -137,9 +208,9 @@ public class MeasureSink extends BaseSink {
         } else {
             throw new UnsupportedOperationException();
         }
-        File file = new File(directory);
+        File file = new File(directory + fileName + ".runtime");
         file.mkdirs();
-        if (file.exists() && !isRecovery) {
+        if (file.exists()) {
             try {
                 file.delete();
                 file.createNewFile();
@@ -147,99 +218,7 @@ public class MeasureSink extends BaseSink {
                 e.printStackTrace();
             }
         }
-        MeasureTools.setPerformanceDirectory(directory);
-        SINK_CONTROL.getInstance().config();
-        tthread = this.config.getInt("tthread");
-        totalEvents = config.getInt("totalEvents");
-        if (enable_log) LOG.info("expected last events = " + totalEvents);
+        MeasureTools.setMetricDirectory(directory);
+        MeasureTools.setMetricFileNameSuffix(fileName);
     }
-
-    @Override
-    public void execute(Tuple input) throws InterruptedException {
-        check(cnt, input);
-        cnt ++;
-    }
-
-    protected void latency_measure(Tuple input) {
-        cnt ++;
-        if (enable_latency_measurement) {
-            this.latency.addValue(System.nanoTime() - input.getLong(1));
-            long interval = System.nanoTime() - previous_measure_time;
-            if (interval / 1E6 >= this.interval) {
-                MeasureTools.THROUGHPUT_MEASURE(this.thisTaskId, cnt, interval / 1E6);
-                MeasureTools.LATENCY_MEASURE(this.thisTaskId, this.latency.getMean() / 1E6);
-                this.latency = new DescriptiveStatistics();
-                previous_measure_time = System.nanoTime();
-            }
-        }
-    }
-
-    protected void check(int cnt, Tuple input) {
-        if (cnt == 0) {
-            helper.StartMeasurement();
-        } else if (cnt == (totalEvents - 40 * 10 - 1)) {
-            double results = helper.EndMeasurement(cnt);
-            this.setResults(results);
-            if (!enable_engine)//performance measure for TStream is different.
-                if (enable_log) LOG.info("Received:" + cnt + " throughput:" + results);
-            if (thisTaskId == graph.getSink().getExecutorID()) {
-                measure_end(results);
-            }
-        }
-    }
-
-    /**
-     * Only one sink will do the measure_end.
-     * @param results
-     */
-    protected void measure_end(double results) {
-        if (enable_log) LOG.info(Thread.currentThread().getName() + " obtains lock");
-//        if (enable_latency_measurement) {
-//            StringBuilder sb = new StringBuilder();
-//            for (Long entry : latency_map) {
-//                latency.addValue((entry / 1E6));
-//            }
-//            try {
-//                FileWriter f = null;
-//                f = new FileWriter(new File(directory));
-//                Writer w = new BufferedWriter(f);
-//                for (double lat : latency.getValues()){
-//                    w.write(lat + "\n");
-//                }
-//                sb.append("=======Details=======");
-//                sb.append("\n" + latency.toString() + "\n");
-//                sb.append("===99th===" + "\n");
-//                sb.append(latency.getPercentile(99) + "\n");
-//                w.write(sb.toString());
-//                w.write("Percentile\t Latency\n");
-//                w.write(String.format("%f\t" +
-//                                "%-10.4f\t"
-//                        , 0.5,latency.getPercentile(0.5)) + "\n");
-//                for (double i = 20; i < 100; i += 20){
-//                    String output = String.format("%f\t" +
-//                                    "%-10.4f\t"
-//                            , i,latency.getPercentile(i));
-//                    w.write(output + "\n");
-//                }
-//                w.write(String.format("%d\t" +
-//                                "%-10.4f\t"
-//                        , 99,latency.getPercentile(99)));
-//                w.close();
-//                f.close();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//            if (enable_log) LOG.info(sb.toString());
-//        }
-        SINK_CONTROL.getInstance().throughput = results;
-        if (enable_log) LOG.info("Thread:" + thisTaskId + " is going to stop all threads sequentially");
-        context.Sequential_stopAll();
-        SINK_CONTROL.getInstance().unlock();
-    }
-
-    @Override
-    protected Logger getLogger() {
-        return LOG;
-    }
-
 }

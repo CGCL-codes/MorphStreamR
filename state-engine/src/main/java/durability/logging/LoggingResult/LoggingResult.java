@@ -8,6 +8,7 @@ public class LoggingResult implements Serializable, persistResult {
     public final String path;
     public final long groupId;
     public final int partitionId;
+    public transient int size;// in MB
 
 
     public LoggingResult(long groupId, int partitionId, String path) {

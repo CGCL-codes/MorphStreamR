@@ -13,6 +13,7 @@ import durability.recovery.RedoLogResult;
 import durability.struct.Result.persistResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import profiler.MeasureTools;
 import utils.FaultToleranceConstants.FaultToleranceStatus;
 import utils.lib.ConcurrentHashMap;
 
@@ -100,6 +101,7 @@ public class WalManager extends FTManager {
         if (status.equals(FaultToleranceStatus.Persist)) {
             this.registerCommit.get(loggingResult.groupId).loggingResults.put(loggingResult.partitionId, loggingResult);
             this.callPersist.get(loggingResult.groupId).set(partitionId, status);
+            MeasureTools.setWriteAheadLog(loggingResult.partitionId, loggingResult.size);
         } else if (status.equals(FaultToleranceStatus.Commit)) {
             this.callCommit.get(loggingResult.groupId).set(partitionId, status);
         }

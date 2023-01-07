@@ -15,6 +15,8 @@ import static common.CONTROL.*;
 import static common.IRunner.CCOption_MorphStream;
 import static java.nio.file.StandardOpenOption.APPEND;
 import static profiler.Metrics.*;
+import static utils.FaultToleranceConstants.FTOption_ISC;
+import static utils.FaultToleranceConstants.FTOption_WSC;
 
 public class MeasureTools {
     private static final Logger log = LoggerFactory.getLogger(MeasureTools.class);
@@ -281,13 +283,44 @@ public class MeasureTools {
         if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
             COMPUTE_LATENCY(thread_id, latency);
     }
-    public static void setPerformanceDirectory(String directory) {
+    public static void setMetricDirectory(String directory) {
         if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
-            RuntimePerformance.directory = directory;
+            Metrics.directory = directory;
     }
-
-    private static void AverageTotalTimeBreakdownReport(File file, int tthread) {
+    public static void setMetricFileNameSuffix(String suffix) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            fileNameSuffix = suffix;
+    }
+    public static void setSnapshotSize(int thread_id, int size) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            RuntimePerformance.SnapshotSize[thread_id].addValue(size);
+    }
+    public static void setWriteAheadLog(int thread_id, int size) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            RuntimePerformance.WriteAheadLogSize[thread_id].addValue(size);
+    }
+    private static void WriteThroughputReport(double throughput) {
         try {
+            File file = new File(directory + fileNameSuffix + ".overall");
+            file.mkdirs();
+            if (file.exists()) {
+                try {
+                    file.delete();
+                    file.createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
+            fileWriter.write("Throughput: " + throughput + "\n");
+            fileWriter.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    private static void AverageTotalTimeBreakdownReport(int tthread) {
+        try {
+            File file = new File(directory + fileNameSuffix + ".overall");
             BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
             fileWriter.write("AverageTotalTimeBreakdownReport\n");
             if (enable_log) log.info("===Average Total Time Breakdown Report===");
@@ -327,38 +360,70 @@ public class MeasureTools {
             e.printStackTrace();
         }
     }
-
-    private static void TransactionBreakdownRatioReport(int ccOption, File file, int tthread) {
+    private static void WriteThroughputPerPhase(int tthread, int phase, int shiftRate) {
         try {
+            double[] tr = new double[Metrics.Runtime.ThroughputPerPhase.get(0).size()];
+            //every punctuation
+            for (int i = 0; i < tr.length; i++) {
+                tr[i] = 0;
+                for (int j = 0; j < tthread; j++){
+                    tr[i] = tr[i] + Metrics.Runtime.ThroughputPerPhase.get(j).get(i) * 1E6;//
+                }
+            }
+            //every phase
+            double[] tr_p = new double[tr.length / shiftRate];
+            for (int i = 0; i < tr_p.length; i++) {
+                tr_p[i] = 0;
+                for (int j = i * shiftRate; j < (i + 1) * shiftRate; j++) {
+                    tr_p[i] = tr_p[i] + tr[j];
+                }
+                tr_p[i] = tr_p[i] / shiftRate;
+            }
+            StringBuilder stringBuilder = new StringBuilder();
+            File file = new File(directory + fileNameSuffix + ".overall");
             BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
-            fileWriter.write("TransactionBreakdownRatioReport\n");
-            if (enable_log) log.info("===TXN BREAKDOWN===");
-            fileWriter.write("thread_id\t index_ratio\t useful_ratio\t sync_ratio\t lock_ratio\n");
-            if (enable_log) log.info("thread_id\t index_ratio\t useful_ratio\t sync_ratio\t lock_ratio");
-            for (int threadId = 0; threadId < tthread; threadId++) {
+            fileWriter.write("phase_id\t throughput\n");
+            for (int i = 0; i < tr_p.length; i++){
                 String output = String.format("%d\t" +
-                                "%-10.2f\t" +
-                                "%-10.2f\t" +
-                                "%-10.2f\t" +
-                                "%-10.2f\t"
-                        , threadId
-                        , Transaction_Record.index_ratio[threadId].getMean()
-                        , Transaction_Record.useful_ratio[threadId].getMean()
-                        , Transaction_Record.sync_ratio[threadId].getMean()
-                        , ccOption == CCOption_MorphStream ? 0 : Transaction_Record.lock_ratio[threadId].getMean()
+                                "%-10.4f\t"
+                        , i,tr_p[i]
                 );
+                stringBuilder.append(output);
                 fileWriter.write(output + "\n");
-                if (enable_log) log.info(output);
             }
             fileWriter.close();
+            if (enable_log) log.info(String.valueOf(stringBuilder));
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
-    private static void SchedulerTimeBreakdownReport(File file, int tthread) {
+    public static void WritePersistFileSize(int ftOption, int tthread) {
+        try {
+            File file = new File(directory + fileNameSuffix + ".overall");
+            BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
+            if (ftOption == FTOption_ISC || ftOption == FTOption_WSC) {
+                fileWriter.write("SnapshotSize: " + "\n");
+                fileWriter.write("thread_id" + "\t" + "size" + "\n");
+                for (int i = 0; i < tthread; i ++) {
+                    fileWriter.write(i + "\t" + RuntimePerformance.SnapshotSize[i].getMean() + "\n");
+                }
+            }
+            if (ftOption == FTOption_WSC) {
+                fileWriter.write("WriteAheadLogSize: " + "\n");
+                fileWriter.write("thread_id" + "\t" + "size" + "\n");
+                for (int i = 0; i < tthread; i ++) {
+                    fileWriter.write(i + "\t"+ RuntimePerformance.WriteAheadLogSize[i].getMean() + "\n");
+                }
+            }
+            fileWriter.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    private static void SchedulerTimeBreakdownReport(int tthread) {
         try {
             if (enable_debug) log.info("++++++ counter: " + counter);
+            File file = new File(directory + fileNameSuffix + ".overall");
             BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
             fileWriter.write("SchedulerTimeBreakdownReport\n");
             if (enable_log) log.info("===OGScheduler Time Breakdown Report===");
@@ -411,79 +476,47 @@ public class MeasureTools {
             e.printStackTrace();
         }
     }
-
-    public static void WriteMemoryConsumption(File file) {
-        if (enable_memory_measurement) {
-            timer.cancel();
-            try {
-                FileWriter f = null;
-                f = new FileWriter(new File(file.getPath() + ".txt"));
-                Writer w = new BufferedWriter(f);
-                w.write("UsedMemory\n");
-                for (int i = 0; i < usedMemory.getValues().length; i ++){
-                    String output = String.format("%f\t" +
-                                    "%-10.4f\t"
-                            , (float) i ,usedMemory.getValues()[i]);
-                    w.write(output + "\n");
-                }
-                w.close();
-                f.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private static void WriteThroughputReport(File file, double throughput) {
+    private static void TransactionBreakdownRatioReport(int ccOption, int tthread) {
         try {
+            File file = new File(directory + fileNameSuffix + ".overall");
             BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
-            fileWriter.write("Throughput: " + throughput + "\n");
-            fileWriter.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-    private static void WriteThroughputReportRuntime(File file, int tthread, int phase, int shiftRate) {
-        try {
-            double[] tr = new double[Metrics.Runtime.ThroughputPerPhase.get(0).size()];
-            //every punctuation
-            for (int i = 0; i < tr.length; i++) {
-                tr[i] = 0;
-                for (int j = 0; j < tthread; j++){
-                    tr[i] = tr[i] + Metrics.Runtime.ThroughputPerPhase.get(j).get(i) * 1E6;//
-                }
-            }
-            //every phase
-            double[] tr_p = new double[tr.length / shiftRate];
-            for (int i = 0; i < tr_p.length; i++) {
-                tr_p[i] = 0;
-                for (int j = i * shiftRate; j < (i + 1) * shiftRate; j++) {
-                    tr_p[i] = tr_p[i] + tr[j];
-                }
-                tr_p[i] = tr_p[i] / shiftRate;
-            }
-            StringBuilder stringBuilder = new StringBuilder();
-            BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
-            fileWriter.write("phase_id\t throughput\n");
-            for (int i = 0; i < tr_p.length; i++){
+            fileWriter.write("TransactionBreakdownRatioReport\n");
+            if (enable_log) log.info("===TXN BREAKDOWN===");
+            fileWriter.write("thread_id\t index_ratio\t useful_ratio\t sync_ratio\t lock_ratio\n");
+            if (enable_log) log.info("thread_id\t index_ratio\t useful_ratio\t sync_ratio\t lock_ratio");
+            for (int threadId = 0; threadId < tthread; threadId++) {
                 String output = String.format("%d\t" +
-                                "%-10.4f\t"
-                        , i,tr_p[i]
+                                "%-10.2f\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t"
+                        , threadId
+                        , Transaction_Record.index_ratio[threadId].getMean()
+                        , Transaction_Record.useful_ratio[threadId].getMean()
+                        , Transaction_Record.sync_ratio[threadId].getMean()
+                        , ccOption == CCOption_MorphStream ? 0 : Transaction_Record.lock_ratio[threadId].getMean()
                 );
-                stringBuilder.append(output);
                 fileWriter.write(output + "\n");
+                if (enable_log) log.info(output);
             }
             fileWriter.close();
-            if (enable_log) log.info(String.valueOf(stringBuilder));
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
     public static void WriteRuntimePerformance(int tthread) {
         try {
-            File file = null;
-            file = new File(RuntimePerformance.directory);
-            BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
+            File file = new File(directory + fileNameSuffix + ".runtime");
+            file.mkdirs();
+            if (file.exists()) {
+                try {
+                    file.delete();
+                    file.createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()));
             fileWriter.write("throughput\t latency\n");
             List<double[]> latencys = new ArrayList<>();
             List<double[]> throughputs = new ArrayList<>();
@@ -505,20 +538,67 @@ public class MeasureTools {
             throw new RuntimeException(e);
         }
     }
-
-    public static void METRICS_REPORT(int ccOption, File file, int tthread, double throughput, int phase, int shiftRate) {
-        WriteThroughputReport(file, throughput);
-        AverageTotalTimeBreakdownReport(file, tthread);
-        WriteThroughputReportRuntime(file, tthread, phase, shiftRate);
-        WriteMemoryConsumption(file);
-        WriteRuntimePerformance(tthread);
-        if (ccOption == CCOption_MorphStream) {//extra info
-            SchedulerTimeBreakdownReport(file, tthread);
-        } else {
-            TransactionBreakdownRatioReport(ccOption, file, tthread);
+    public static void WriteMemoryConsumption() {
+        if (enable_memory_measurement) {
+            timer.cancel();
+            try {
+                File file = new File(directory + fileNameSuffix + ".memory");
+                file.mkdirs();
+                if (file.exists()) {
+                    try {
+                        file.delete();
+                        file.createNewFile();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                BufferedWriter w = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
+                w.write("UsedMemory\n");
+                for (int i = 0; i < usedMemory.getValues().length; i ++){
+                    String output = String.format("%f\t" +
+                                    "%-10.4f\t"
+                            , (float) i ,usedMemory.getValues()[i]);
+                    w.write(output + "\n");
+                }
+                w.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
-    public static void METRICS_REPORT_WITH_FAILURE(int tthread) {
+    public static void METRICS_REPORT(int ccOption, int FTOption, int tthread, double throughput, int phase, int shiftRate) {
+        WriteThroughputReport(throughput);
+        AverageTotalTimeBreakdownReport(tthread);
+        WritePersistFileSize(FTOption, tthread);
+        //WriteThroughputPerPhase(tthread, phase, shiftRate);
+        if (ccOption == CCOption_MorphStream) {//extra info
+            SchedulerTimeBreakdownReport(tthread);
+        } else {
+            TransactionBreakdownRatioReport(ccOption, tthread);
+        }
         WriteRuntimePerformance(tthread);
+        WriteMemoryConsumption();
+    }
+    public static void METRICS_REPORT_WITH_FAILURE(int ccOption, int FTOption, int tthread) {
+        File file = new File(directory + fileNameSuffix + ".overall");
+        file.mkdirs();
+        if (file.exists()) {
+            try {
+                file.delete();
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        AverageTotalTimeBreakdownReport(tthread);
+        WritePersistFileSize(FTOption, tthread);
+        WriteRuntimePerformance(tthread);
+        if (ccOption == CCOption_MorphStream) {//extra info
+            SchedulerTimeBreakdownReport(tthread);
+        } else {
+            TransactionBreakdownRatioReport(ccOption, tthread);
+        }
+        WriteRuntimePerformance(tthread);
+        WriteMemoryConsumption();
     }
 }

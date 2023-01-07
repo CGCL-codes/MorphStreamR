@@ -15,6 +15,8 @@ public class Metrics {
     public static int H2_SIZE;
     public static Timer timer = new Timer();
     public static final DescriptiveStatistics usedMemory = new DescriptiveStatistics();
+    public static String directory;
+    public static String fileNameSuffix;
 
     public static void RESET_COUNTERS(int thread_id) {
         //reset accumulative counters.
@@ -450,12 +452,15 @@ public class Metrics {
     public static class RuntimePerformance {
         public static DescriptiveStatistics[] Latency = new DescriptiveStatistics[kMaxThreadNum];
         public static DescriptiveStatistics[] Throughput = new DescriptiveStatistics[kMaxThreadNum];
+        public static DescriptiveStatistics[] SnapshotSize = new DescriptiveStatistics[kMaxThreadNum];
+        public static DescriptiveStatistics[] WriteAheadLogSize = new DescriptiveStatistics[kMaxThreadNum];
         public static long[] count = new long[kMaxThreadNum];
-        public static String directory;
         public static void Initialize() {
             for (int i = 0; i < kMaxThreadNum; i++) {
                Latency[i] = new DescriptiveStatistics();
                Throughput[i] = new DescriptiveStatistics();
+               SnapshotSize[i] = new DescriptiveStatistics();
+               WriteAheadLogSize[i] = new DescriptiveStatistics();
                count[i] = 0;
             }
         }

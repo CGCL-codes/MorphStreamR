@@ -20,11 +20,8 @@ public class SINKCombo extends MeasureSink {
     }
 
     public void end(int global_cnt) {
-        double results = helper.EndMeasurement(global_cnt);
-//        SINK_CONTROL.getInstance().lock();
-//        if (proceed) {
+        double results = helper.EndMeasurement(global_cnt, remainTime);
         measure_end(results);
-//        }
     }
 
     @Override

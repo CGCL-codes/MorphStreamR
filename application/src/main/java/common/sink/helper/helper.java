@@ -83,6 +83,11 @@ public abstract class helper {
         long time_elapsed = end - start;
         return ((double) (cnt) * 1E6 / time_elapsed);//count/ns * 1E6 --> EVENTS/ms
     }
+    public double EndMeasurement(long cnt, long remainTime) {
+        end = System.nanoTime();
+        long time_elapsed = end - start + remainTime;
+        return ((double) (cnt) * 1E6 / time_elapsed);//count/ns * 1E6 --> EVENTS/ms
+    }
 
     double Measurement(String sourceComponent, long bid) {
         local_index_e++;

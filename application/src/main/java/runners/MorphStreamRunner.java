@@ -182,7 +182,7 @@ public class MorphStreamRunner extends Runner {
             int failureTime = conf.getInt("failureTime"); // Emulate system failure after (ms)
             sinkThread.join(failureTime);
             if (enable_log) log.info("System failure after " + failureTime / 1E3 + "s.");
-            METRICS_REPORT_WITH_FAILURE(conf.getInt("tthread"));
+            METRICS_REPORT_WITH_FAILURE(conf.getInt("CCOption", 0), conf.getInt("FTOption", 0), conf.getInt("tthread"));
             System.exit(0);
         }
         sinkThread.join((long) (30 * 1E3 * 60));//sync_ratio for sink thread to stop. Maximally sync_ratio for 10 mins
@@ -246,88 +246,7 @@ public class MorphStreamRunner extends Runner {
                     if (lock != null)
                         log.info("Partition" + lock + " being locked:\t" + lock.count + "\t times");
                 }
-                // decide the output path of metrics.
-                String statsFolderPattern = OsUtils.osWrapperPostFix(rootPath)
-                        + OsUtils.osWrapperPostFix("stats")
-                        + OsUtils.osWrapperPostFix("%s")
-                        + OsUtils.osWrapperPostFix("%s")
-                        + OsUtils.osWrapperPostFix("FTOption = %d")
-                        + OsUtils.osWrapperPostFix("threads = %d")
-                        + OsUtils.osWrapperPostFix("totalEvents = %d")
-                        + OsUtils.osWrapperPostFix("%d_%d_%d_%d_%d_%d_%s_%d");
-
-                if (config.getInt("CCOption") == CCOption_SStore) {
-                    scheduler = "PAT";
-                }
-
-                String statsFolderPath;
-                if (config.getString("common").equals("StreamLedger")) {
-                    statsFolderPath = String.format(statsFolderPattern,
-                            config.getString("common"), scheduler,
-                            config.getInt("FTOption"),
-                            tthread, totalEvents,
-                            config.getInt("NUM_ITEMS"),
-                            config.getInt("Ratio_Of_Deposit"),
-                            config.getInt("State_Access_Skewness"),
-                            config.getInt("Ratio_of_Overlapped_Keys"),
-                            config.getInt("Ratio_of_Transaction_Aborts"),
-                            config.getInt("Transaction_Length"),
-                            AppConfig.isCyclic,
-                            config.getInt("complexity"));
-                } else if (config.getString("common").equals("GrepSum")) {
-                    statsFolderPath = String.format(statsFolderPattern,
-                            config.getString("common"), scheduler,
-                            config.getInt("FTOption"),
-                            tthread, totalEvents,
-                            config.getInt("NUM_ITEMS"),
-                            config.getInt("Ratio_of_Multiple_State_Access"),
-                            config.getInt("State_Access_Skewness"),
-                            config.getInt("Ratio_of_Overlapped_Keys"),
-                            config.getInt("Ratio_of_Transaction_Aborts"),
-                            config.getInt("Transaction_Length"),
-                            AppConfig.isCyclic,
-                            config.getInt("complexity"));
-                } else if (config.getString("common").equals("OnlineBiding")){
-                    statsFolderPath = String.format(statsFolderPattern,
-                            config.getString("common"), scheduler,
-                            config.getInt("FTOption"),
-                            tthread, totalEvents,
-                            config.getInt("NUM_ITEMS"),
-                            config.getInt("NUM_ACCESS"),
-                            config.getInt("State_Access_Skewness"),
-                            config.getInt("Ratio_of_Overlapped_Keys"),
-                            config.getInt("Ratio_of_Transaction_Aborts"),
-                            config.getInt("Transaction_Length"),
-                            AppConfig.isCyclic,
-                            config.getInt("complexity"));
-                } else if (config.getString("common").equals("TollProcessing")){
-                    statsFolderPath = String.format(statsFolderPattern,
-                            config.getString("common"), scheduler,
-                            config.getInt("FTOption"),
-                            tthread, totalEvents,
-                            config.getInt("NUM_ITEMS"),
-                            config.getInt("NUM_ACCESS"),
-                            config.getInt("State_Access_Skewness"),
-                            config.getInt("Ratio_of_Overlapped_Keys"),
-                            config.getInt("Ratio_of_Transaction_Aborts"),
-                            config.getInt("Transaction_Length"),
-                            AppConfig.isCyclic,
-                            config.getInt("complexity"));
-                } else
-                    throw new UnsupportedOperationException();
-                File file = new File(statsFolderPath);
-                log.info("Dumping stats to...");
-                log.info(String.valueOf(file.getAbsoluteFile()));
-                file.mkdirs();
-
-                if (file.exists())
-                    file.delete();
-                try {
-                    file.createNewFile();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                METRICS_REPORT(config.getInt("CCOption", 0), file, tthread, rt, config.getInt("phaseNum"), config.getInt("shiftRate"));
+                METRICS_REPORT(config.getInt("CCOption", 0), config.getInt("FTOption", 0), tthread, rt, config.getInt("phaseNum"), config.getInt("shiftRate"));
             }
         }//end of profile.
     }

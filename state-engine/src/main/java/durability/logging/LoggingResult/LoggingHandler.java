@@ -12,6 +12,7 @@ public class LoggingHandler implements CompletionHandler<Integer, Attachment> {
     public void completed(Integer result, Attachment attach) {
         try {
             LoggingResult loggingResult = attach.getLoggingResult();
+            loggingResult.size = result / (1024 * 1024);
             attach.ftManager.boltRegister(attach.partitionId,
                     FaultToleranceConstants.FaultToleranceStatus.Persist, loggingResult);
             attach.asyncChannel.close();

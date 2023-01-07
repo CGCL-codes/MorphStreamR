@@ -12,6 +12,7 @@ import durability.snapshot.SnapshotResult.SnapshotResult;
 import durability.struct.Result.persistResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import profiler.MeasureTools;
 
 import java.io.DataOutputStream;
 import java.io.File;
@@ -105,6 +106,7 @@ public class CheckpointManager extends FTManager {
         if (status.equals(FaultToleranceStatus.Snapshot)) {
             this.registerSnapshot.get(snapshotResult.snapshotId).snapshotResults.put(snapshotResult.partitionId, snapshotResult);
             this.callSnapshot.get(snapshotResult.snapshotId).set(partitionId, status);
+            MeasureTools.setSnapshotSize(snapshotResult.partitionId, snapshotResult.size);
         } else if (status.equals(FaultToleranceStatus.Commit)) {
             this.callCommit.get(((SnapshotResult) result).snapshotId).set(partitionId, status);
         }
