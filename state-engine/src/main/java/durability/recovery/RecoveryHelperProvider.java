@@ -24,7 +24,7 @@ public class RecoveryHelperProvider {
         try{
             while(true){
                 int len = dataInputStream.readInt();
-                byte[] lastSnapResultBytes=new byte[len];
+                byte[] lastSnapResultBytes = new byte[len];
                 dataInputStream.readFully(lastSnapResultBytes);
                 SnapshotCommitInformation SnapshotCommitInformation = (SnapshotCommitInformation) Deserialize.Deserialize(lastSnapResultBytes);
                 commitInformation.add(SnapshotCommitInformation);

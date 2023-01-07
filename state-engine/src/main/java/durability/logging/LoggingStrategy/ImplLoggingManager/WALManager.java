@@ -108,6 +108,7 @@ public class WALManager implements LoggingManager {
                     int bid = Integer.parseInt(values[0]);
                     SchemaRecord schemaRecord = AbstractRecoveryManager.getRecord(metaInfo.recordSchema, values[1]);
                     this.tables.get(metaInfo.tableName).SelectKeyRecord(schemaRecord.GetPrimaryKey()).content_.updateMultiValues(bid, 0L, false, schemaRecord);
+                    recordNum --;
                 }
             }
         }

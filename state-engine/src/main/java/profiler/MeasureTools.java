@@ -299,6 +299,14 @@ public class MeasureTools {
         if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
             RuntimePerformance.WriteAheadLogSize[thread_id].addValue(size);
     }
+    public static void BEGIN_RECOVERY_TIME_MEASURE(int thread_id) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            COMPUTE_RECOVERY_START(thread_id);
+    }
+    public static void END_RECOVERY_TIME_MEASURE(int thread_id) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            COMPUTE_RECOVERY(thread_id);
+    }
     private static void WriteThroughputReport(double throughput) {
         try {
             File file = new File(directory + fileNameSuffix + ".overall");
@@ -426,6 +434,20 @@ public class MeasureTools {
             throw new RuntimeException(e);
         }
     }
+    public static void WriteRecoveryTime(int tthread) {
+        try {
+            File file = new File(directory + fileNameSuffix + ".overall");
+            BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
+            fileWriter.write("Recovery Time: " + "\n");
+            fileWriter.write("thread_id" + "\t" + "time (ms)" + "\n");
+            for (int i = 0; i < tthread; i++) {
+                fileWriter.write(i + "\t" + RuntimePerformance.RecoveryTime[i].getMean() + "\n");
+            }
+            fileWriter.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
     private static void SchedulerTimeBreakdownReport(int tthread) {
         try {
             if (enable_debug) log.info("++++++ counter: " + counter);
@@ -530,10 +552,13 @@ public class MeasureTools {
                 latencys.add(RuntimePerformance.Latency[i].getValues());
                 throughputs.add(RuntimePerformance.Throughput[i].getValues());
             }
-            for (int i = 0; i < latencys.get(0).length; i++) {
+            loop: for (int i = 0; i < latencys.get(0).length; i++) {
                 double throughput = 0;
                 double latency = 0;
                 for (int j = 0; j < tthread; j++) {
+                    if (i >= throughputs.get(j).length || i >= latencys.get(j).length) {
+                        break loop;
+                    }
                     throughput = throughput + throughputs.get(j)[i];
                     latency = latency + latencys.get(j)[i];
                 }
@@ -577,6 +602,9 @@ public class MeasureTools {
         AverageTotalTimeBreakdownReport(tthread);
         WritePersistFileSize(FTOption, tthread);
         //WriteThroughputPerPhase(tthread, phase, shiftRate);
+        if (fileNameSuffix.equals("_recovery")) {
+            WriteRecoveryTime(tthread);
+        }
         if (ccOption == CCOption_MorphStream) {//extra info
             SchedulerTimeBreakdownReport(tthread);
         } else {

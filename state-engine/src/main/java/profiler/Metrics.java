@@ -454,6 +454,8 @@ public class Metrics {
         public static DescriptiveStatistics[] Throughput = new DescriptiveStatistics[kMaxThreadNum];
         public static DescriptiveStatistics[] SnapshotSize = new DescriptiveStatistics[kMaxThreadNum];
         public static DescriptiveStatistics[] WriteAheadLogSize = new DescriptiveStatistics[kMaxThreadNum];
+        public static DescriptiveStatistics[] RecoveryTime = new DescriptiveStatistics[kMaxThreadNum];
+        public static long[] startRecoveryTime = new long[kMaxThreadNum];
         public static long[] count = new long[kMaxThreadNum];
         public static void Initialize() {
             for (int i = 0; i < kMaxThreadNum; i++) {
@@ -461,6 +463,8 @@ public class Metrics {
                Throughput[i] = new DescriptiveStatistics();
                SnapshotSize[i] = new DescriptiveStatistics();
                WriteAheadLogSize[i] = new DescriptiveStatistics();
+               RecoveryTime[i] = new DescriptiveStatistics();
+               startRecoveryTime[i] = 0;
                count[i] = 0;
             }
         }
@@ -472,5 +476,11 @@ public class Metrics {
     }
     public static void COMPUTE_LATENCY(int thread_id, double latency) {
         RuntimePerformance.Latency[thread_id].addValue(latency);
+    }
+    public static void COMPUTE_RECOVERY_START(int thread_id) {
+        RuntimePerformance.startRecoveryTime[thread_id] = System.nanoTime();
+    }
+    public static void COMPUTE_RECOVERY(int thread_id) {
+        RuntimePerformance.RecoveryTime[thread_id].addValue((System.nanoTime() - RuntimePerformance.startRecoveryTime[thread_id]) / 1E6);
     }
 }

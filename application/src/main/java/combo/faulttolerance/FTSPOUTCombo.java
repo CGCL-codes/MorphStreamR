@@ -18,6 +18,7 @@ import execution.runtime.tuple.impl.Marker;
 import execution.runtime.tuple.impl.Tuple;
 import execution.runtime.tuple.impl.msgs.GeneralMsg;
 import org.slf4j.Logger;
+import profiler.MeasureTools;
 import utils.SOURCE_CONTROL;
 
 import java.io.*;
@@ -69,7 +70,9 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
                 this.systemStartTime = System.nanoTime();
                 sink.previous_measure_time = System.nanoTime();
                 if (isRecovery) {
+                    MeasureTools.BEGIN_RECOVERY_TIME_MEASURE(this.taskId);
                     recoverData();
+                    MeasureTools.END_RECOVERY_TIME_MEASURE(this.taskId);
                     return;
                 }
                 if (ftOption == FTOption_ISC || ftOption == FTOption_WSC) {
