@@ -75,7 +75,7 @@ function runApplication() {
     --shiftRate $shiftRate \
     --workloadType $workloadType \
     --schedulerPool $schedulerPool \
-    -snapshotInterval $snapshotInterval \
+    --snapshotInterval $snapshotInterval \
     --arrivalControl $arrivalControl \
     --arrivalRate $arrivalRate \
     --FTOption $FTOption \
@@ -86,16 +86,19 @@ function runApplication() {
 }
 
 function withRecovery() {
-    ResetParameters
-    app=StreamLedger
     isFailure=1
+    isRecovery=0
     runApplication
-    ResetParameters
-    app=StreamLedger
+    isFailure=0
     isRecovery=1
     runApplication
 }
 
-function application_runner() { # multi-batch exp
+function application_runner() {
+ ResetParameters
+ for FTOption in 1 2
+ do
  withRecovery
+ done
 }
+application_runner
