@@ -10,7 +10,7 @@ public class SnapshotHandler implements CompletionHandler<Integer, Attachment> {
     public void completed(Integer result, Attachment attach) {
         try {
             SnapshotResult snapshotResult = attach.getSnapshotResult();
-            snapshotResult.size = result / (1024 * 1024);
+            snapshotResult.size = result / 1024;
             attach.ftManager.boltRegister(attach.partitionId,
                     FaultToleranceConstants.FaultToleranceStatus.Snapshot,
                     snapshotResult);

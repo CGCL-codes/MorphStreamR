@@ -75,7 +75,7 @@ function runApplication() {
     --shiftRate $shiftRate \
     --workloadType $workloadType \
     --schedulerPool $schedulerPool \
-    -snapshotInterval $snapshotInterval \
+    --snapshotInterval $snapshotInterval \
     --arrivalControl $arrivalControl \
     --arrivalRate $arrivalRate \
     --FTOption $FTOption \

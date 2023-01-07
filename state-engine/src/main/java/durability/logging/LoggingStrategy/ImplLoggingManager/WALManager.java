@@ -40,10 +40,10 @@ public class WALManager implements LoggingManager {
     //<TableName, <PartitionId, LogRecords>>
     @Nonnull protected Map<String, Map<Integer, ConcurrentSkipListSet<LogRecord>>> pendingEntries;
     @Nonnull protected String walPath;
-    @Nonnull protected int parallelNum;
+    protected int parallelNum;
     @Nonnull protected ConcurrentHashMap<String, WriteAheadLogTableInfo> metaInformation;
-    @Nonnull protected final int num_items;
-    @Nonnull protected final int delta;
+    protected final int num_items;
+    protected final int delta;
     @Nonnull protected Map<String, BaseTable> tables;
     public WALManager(Map<String, BaseTable> tables, Configuration configuration) {
         this.tables = tables;

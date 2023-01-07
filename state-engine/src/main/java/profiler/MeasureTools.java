@@ -291,11 +291,11 @@ public class MeasureTools {
         if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
             fileNameSuffix = suffix;
     }
-    public static void setSnapshotSize(int thread_id, int size) {
+    public static void setSnapshotSize(int thread_id, double size) {
         if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
             RuntimePerformance.SnapshotSize[thread_id].addValue(size);
     }
-    public static void setWriteAheadLog(int thread_id, int size) {
+    public static void setWriteAheadLog(int thread_id, double size) {
         if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
             RuntimePerformance.WriteAheadLogSize[thread_id].addValue(size);
     }
@@ -403,17 +403,23 @@ public class MeasureTools {
             BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
             if (ftOption == FTOption_ISC || ftOption == FTOption_WSC) {
                 fileWriter.write("SnapshotSize: " + "\n");
-                fileWriter.write("thread_id" + "\t" + "size" + "\n");
+                fileWriter.write("thread_id" + "\t" + "size (KB)" + "\n");
+                double totalSize = 0;
                 for (int i = 0; i < tthread; i ++) {
+                    totalSize = totalSize + RuntimePerformance.SnapshotSize[i].getMean();
                     fileWriter.write(i + "\t" + RuntimePerformance.SnapshotSize[i].getMean() + "\n");
                 }
+                fileWriter.write("SnapshotTotalSize (KB): " + totalSize + "\n");
             }
             if (ftOption == FTOption_WSC) {
                 fileWriter.write("WriteAheadLogSize: " + "\n");
-                fileWriter.write("thread_id" + "\t" + "size" + "\n");
+                fileWriter.write("thread_id" + "\t" + "size (KB)" + "\n");
+                double totalSize = 0;
                 for (int i = 0; i < tthread; i ++) {
+                    totalSize = totalSize + RuntimePerformance.WriteAheadLogSize[i].getMean();
                     fileWriter.write(i + "\t"+ RuntimePerformance.WriteAheadLogSize[i].getMean() + "\n");
                 }
+                fileWriter.write("WriteAheadLogTotalSize (KB): " + totalSize + "\n");
             }
             fileWriter.close();
         } catch (IOException e) {
