@@ -86,6 +86,7 @@ public class FTSLCombo extends FTSPOUTCombo{
         //Load Transfer Events.
         for (int index = taskId; index < DataHolder.events.size(); ) {
             TxnEvent event = DataHolder.events.get(index).cloneEvent();
+            //TxnEvent event = DataHolder.events.get(index);
             mybids[storageIndex] = event.getBid();
             myevents[storageIndex ++] = event;
             if (storageIndex == num_events_per_thread)

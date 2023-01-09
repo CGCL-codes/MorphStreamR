@@ -228,7 +228,9 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
     @Override
     public boolean recoverData() throws IOException, ExecutionException, InterruptedException {
         SnapshotResult snapshotResult = (SnapshotResult) this.ftManager.spoutAskRecovery(this.taskId, 0L);
-        this.bolt.db.syncReloadDB(snapshotResult);
+        if (snapshotResult != null) {
+            this.bolt.db.syncReloadDB(snapshotResult);
+        }
         if (ftOption == FTOption_WSC) {
             RedoLogResult redoLogResult = (RedoLogResult) this.loggingManager.spoutAskRecovery(this.taskId, snapshotResult.snapshotId);
             if (redoLogResult.redoLogPaths.size() != 0) {
