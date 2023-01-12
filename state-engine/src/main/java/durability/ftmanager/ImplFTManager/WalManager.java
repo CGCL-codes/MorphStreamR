@@ -91,6 +91,11 @@ public class WalManager extends FTManager {
     }
 
     @Override
+    public long sinkAskLastTask(int taskId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean sinkRegister(long snapshot) {
         return false;
     }

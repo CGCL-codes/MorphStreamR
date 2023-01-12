@@ -1,6 +1,8 @@
 package profiler;
 
 import common.CONTROL;
+import common.collections.OsUtils;
+import common.io.LocalFS.LocalDataOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -569,6 +571,28 @@ public class MeasureTools {
             throw new RuntimeException(e);
         }
     }
+    public static void WriteLastTasks(String rootFile, int tthread) {
+        try {
+            for (int i = 0; i < tthread; i ++) {
+                File file = new File(rootFile + OsUtils.OS_wrapper("outputStore") + OsUtils.OS_wrapper(i + ".output"));
+                file.mkdirs();
+                if (file.exists()) {
+                    try {
+                        file.delete();
+                        file.createNewFile();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                LocalDataOutputStream outputStream = new LocalDataOutputStream(file);
+                DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
+                dataOutputStream.writeLong(RuntimePerformance.lastTasks[i]);
+                dataOutputStream.close();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
     public static void WriteMemoryConsumption() {
         if (enable_memory_measurement) {
             timer.cancel();
@@ -613,7 +637,7 @@ public class MeasureTools {
         WriteRuntimePerformance(tthread);
         WriteMemoryConsumption();
     }
-    public static void METRICS_REPORT_WITH_FAILURE(int ccOption, int FTOption, int tthread) {
+    public static void METRICS_REPORT_WITH_FAILURE(int ccOption, int FTOption, int tthread, String rootFile) {
         File file = new File(directory + fileNameSuffix + ".overall");
         file.mkdirs();
         if (file.exists()) {
@@ -634,5 +658,6 @@ public class MeasureTools {
         }
         WriteRuntimePerformance(tthread);
         WriteMemoryConsumption();
+        WriteLastTasks(rootFile, tthread);
     }
 }

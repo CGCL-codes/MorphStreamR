@@ -89,6 +89,7 @@ function withRecovery() {
     isFailure=1
     isRecovery=0
     runApplication
+    sleep 2s
     isFailure=0
     isRecovery=1
     runApplication

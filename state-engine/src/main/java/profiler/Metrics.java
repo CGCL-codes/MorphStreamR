@@ -457,6 +457,8 @@ public class Metrics {
         public static DescriptiveStatistics[] RecoveryTime = new DescriptiveStatistics[kMaxThreadNum];
         public static long[] startRecoveryTime = new long[kMaxThreadNum];
         public static long[] count = new long[kMaxThreadNum];
+        public static long[] lastTasks = new long[kMaxThreadNum];
+
         public static void Initialize() {
             for (int i = 0; i < kMaxThreadNum; i++) {
                Latency[i] = new DescriptiveStatistics();
@@ -466,6 +468,7 @@ public class Metrics {
                RecoveryTime[i] = new DescriptiveStatistics();
                startRecoveryTime[i] = 0;
                count[i] = 0;
+               lastTasks[i] = 0;
             }
         }
     }

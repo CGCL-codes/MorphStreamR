@@ -46,7 +46,7 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
     public Tuple marker;
     public GeneralMsg generalMsg;
     public int tthread;
-    public SINKCombo sink = new SINKCombo();
+    public FTSINKCombo sink = new FTSINKCombo();
     protected int totalEventsPerBatch = 0;
     protected TransactionalBolt bolt;//compose the bolt here.
     int start_measure;
@@ -245,6 +245,7 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
             input_reload(snapshotResult.snapshotId, 0);
             counter = (int) snapshotResult.snapshotId;
         }
+        this.sink.lastTask = this.ftManager.sinkAskLastTask(this.taskId);
         return true;
     }
     @Override

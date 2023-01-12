@@ -1,5 +1,6 @@
 package common.sink;
 
+import com.yammer.metrics.core.Metric;
 import common.Constants;
 import common.collections.Configuration;
 import common.collections.OsUtils;

@@ -1,5 +1,6 @@
 package durability.recovery;
 
+import common.collections.OsUtils;
 import common.io.LocalFS.LocalDataInputStream;
 import common.tools.Deserialize;
 import durability.logging.LoggingResult.LoggingCommitInformation;
@@ -49,6 +50,14 @@ public class RecoveryHelperProvider {
             }
         } catch (EOFException e) {
             LOG.info("finish read the current.log");
+        }
+    }
+    public static void getLastTask(long[] lastTasks, String outputStoreRootPath) throws IOException {
+        for (int i = 0; i < lastTasks.length; i ++) {
+            File file = new File(outputStoreRootPath + OsUtils.OS_wrapper(i + ".output"));
+            LocalDataInputStream inputStream = new LocalDataInputStream(file);
+            DataInputStream dataInputStream = new DataInputStream(inputStream);
+            lastTasks[i] = dataInputStream.readLong();
         }
     }
 }

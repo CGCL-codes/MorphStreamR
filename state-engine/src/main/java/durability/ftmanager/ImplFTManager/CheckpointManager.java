@@ -40,6 +40,8 @@ public class CheckpointManager extends FTManager {
     private String metaPath;
     private String basePath;
     private String inputStoreRootPath;
+    private String outputStoreRootPath;
+    private long lastTask[];
     private Queue<Long> uncommittedId = new ConcurrentLinkedQueue<>();
     private long pendingSnapshotId;
     /** Used during recovery */
@@ -52,14 +54,17 @@ public class CheckpointManager extends FTManager {
         basePath = config.getString("rootFilePath") + OsUtils.OS_wrapper("snapshot");
         metaPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("snapshot") + OsUtils.OS_wrapper("metaData.log");
         inputStoreRootPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("inputStore");
+        outputStoreRootPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("outputStore");
         isRecovery = config.getBoolean("isRecovery");
         isFailure = config.getBoolean("isFailure");
+        lastTask = new long[parallelNum];
         File file = new File(this.basePath);
         if (!file.exists()) {
             file.mkdirs();
         }
         if (isRecovery) {
             latestSnapshotCommitInformation = RecoveryHelperProvider.getLatestCommitSnapshotCommitInformation(new File(metaPath));
+            RecoveryHelperProvider.getLastTask(lastTask, outputStoreRootPath);
         } else {
             SnapshotCommitInformation snapshotCommitInformation = new SnapshotCommitInformation(0L, config.getString("rootFilePath") + OsUtils.OS_wrapper("inputStore") + OsUtils.OS_wrapper("inputStore"));
             byte[] result = Serialize.serializeObject(snapshotCommitInformation);
@@ -93,6 +98,11 @@ public class CheckpointManager extends FTManager {
     @Override
     public persistResult spoutAskRecovery(int taskId, long snapshotOffset) {
         return latestSnapshotCommitInformation.snapshotResults.get(taskId);
+    }
+
+    @Override
+    public long sinkAskLastTask(int taskId) {
+        return this.lastTask[taskId];
     }
 
     @Override
@@ -141,6 +151,8 @@ public class CheckpointManager extends FTManager {
                 File file = new File(this.basePath);
                 FileSystem.deleteFile(file);
                 file = new File(this.inputStoreRootPath);
+                FileSystem.deleteFile(file);
+                file = new File(this.outputStoreRootPath);
                 FileSystem.deleteFile(file);
             }
             LOG.info("CheckpointManager stops");

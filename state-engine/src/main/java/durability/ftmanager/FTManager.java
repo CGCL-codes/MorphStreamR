@@ -16,6 +16,7 @@ public abstract class FTManager extends Thread{
      */
     public abstract boolean spoutRegister(long snapshotId, String path);
     public abstract persistResult spoutAskRecovery(int taskId, long snapshotOffset);
+    public abstract long sinkAskLastTask(int taskId);
     public abstract boolean sinkRegister(long snapshot);
     /**
      * @param partitionId
