@@ -38,14 +38,24 @@ public class Metrics {
         double first_explore_time = Scheduler.FirstExplore[thread_id] / (double) num_events;
         double caching_time = Scheduler.Caching[thread_id] / (double) num_events;
         double switch_time = Scheduler.SchedulerSwitch[thread_id] / (double) num_events;
-        Scheduler_Record.Explore[thread_id].addValue(explore_time);
-        Scheduler_Record.Next[thread_id].addValue(next_time);
-        Scheduler_Record.Useful[thread_id].addValue(useful_time);
-        Scheduler_Record.Construct[thread_id].addValue(construct_time);
-        Scheduler_Record.Noitfy[thread_id].addValue(notify_time);
-        Scheduler_Record.FirstExplore[thread_id].addValue(first_explore_time);
-        Scheduler_Record.Caching[thread_id].addValue(caching_time);
-        Scheduler_Record.SchedulerSwitch[thread_id].addValue(switch_time);
+        if (!RecoveryPerformance.stopRecovery) {
+            RecoveryPerformance.Explore[thread_id] = RecoveryPerformance.Explore[thread_id] + Scheduler.Explore[thread_id] - Scheduler.Useful[thread_id];
+            RecoveryPerformance.Next[thread_id] = RecoveryPerformance.Next[thread_id] + Scheduler.Next[thread_id];
+            RecoveryPerformance.Useful[thread_id] = RecoveryPerformance.Useful[thread_id] + Scheduler.Useful[thread_id];
+            RecoveryPerformance.Construct[thread_id] = RecoveryPerformance.Construct[thread_id] + Scheduler.Construct[thread_id];
+            RecoveryPerformance.FirstExplore[thread_id] = RecoveryPerformance.FirstExplore[thread_id] + Scheduler.FirstExplore[thread_id];
+            RecoveryPerformance.Caching[thread_id] = RecoveryPerformance.Caching[thread_id] + Scheduler.Caching[thread_id];
+            RecoveryPerformance.SchedulerSwitch[thread_id] = RecoveryPerformance.SchedulerSwitch[thread_id] + Scheduler.SchedulerSwitch[thread_id];
+        } else {
+            Scheduler_Record.Explore[thread_id].addValue(explore_time);
+            Scheduler_Record.Next[thread_id].addValue(next_time);
+            Scheduler_Record.Useful[thread_id].addValue(useful_time);
+            Scheduler_Record.Construct[thread_id].addValue(construct_time);
+            Scheduler_Record.Notify[thread_id].addValue(notify_time);
+            Scheduler_Record.FirstExplore[thread_id].addValue(first_explore_time);
+            Scheduler_Record.Caching[thread_id].addValue(caching_time);
+            Scheduler_Record.SchedulerSwitch[thread_id].addValue(switch_time);
+        }
         Scheduler.Initialize(thread_id);
     }
 
@@ -425,7 +435,7 @@ public class Metrics {
         public static DescriptiveStatistics[] Explore = new DescriptiveStatistics[kMaxThreadNum];//EXPLORE.
         public static DescriptiveStatistics[] Useful = new DescriptiveStatistics[kMaxThreadNum];//useful_work time.
         public static DescriptiveStatistics[] Construct = new DescriptiveStatistics[kMaxThreadNum];//useful_work time.
-        public static DescriptiveStatistics[] Noitfy = new DescriptiveStatistics[kMaxThreadNum];//useful_work time.
+        public static DescriptiveStatistics[] Notify = new DescriptiveStatistics[kMaxThreadNum];//useful_work time.
         public static DescriptiveStatistics[] FirstExplore = new DescriptiveStatistics[kMaxThreadNum];//useful_work time.
         public static DescriptiveStatistics[] Caching = new DescriptiveStatistics[kMaxThreadNum];//useful_work time.
         public static DescriptiveStatistics[] SchedulerSwitch = new DescriptiveStatistics[kMaxThreadNum];//SchedulerSwitch time.
@@ -437,7 +447,7 @@ public class Metrics {
                 Explore[i] = new DescriptiveStatistics();
                 Useful[i] = new DescriptiveStatistics();
                 Construct[i] = new DescriptiveStatistics();
-                Noitfy[i] = new DescriptiveStatistics();
+                Notify[i] = new DescriptiveStatistics();
                 FirstExplore[i] = new DescriptiveStatistics();
                 Caching[i] = new DescriptiveStatistics();
                 SchedulerSwitch[i] = new DescriptiveStatistics();
@@ -486,14 +496,25 @@ public class Metrics {
     }
 
     public static class RecoveryPerformance {
+        public static boolean stopRecovery = true;
         public static long[] startRecoveryTime = new long[kMaxThreadNum];
         public static long[] startReloadDatabaseTime = new long[kMaxThreadNum];
         public static long[] startRedoWriteAheadLogTime = new long[kMaxThreadNum];
         public static long[] startReloadInputTime = new long[kMaxThreadNum];
+        //in ms.
         public static DescriptiveStatistics[] RecoveryTime = new DescriptiveStatistics[kMaxThreadNum];
         public static DescriptiveStatistics[] ReloadDatabaseTime = new DescriptiveStatistics[kMaxThreadNum];
         public static DescriptiveStatistics[] RedoWriteAheadLogTime = new DescriptiveStatistics[kMaxThreadNum];
         public static DescriptiveStatistics[] ReloadInputTime = new DescriptiveStatistics[kMaxThreadNum];
+        //in ns.
+        public static long[] Next = new long[kMaxThreadNum];//Next.
+        public static long[] Explore = new long[kMaxThreadNum];//Explore.
+        public static long[] Useful = new long[kMaxThreadNum];//Useful_work.
+        public static long[] Construct = new long[kMaxThreadNum];//Construction.
+        public static long[] Notify = new long[kMaxThreadNum];//Notify.
+        public static long[] FirstExplore = new long[kMaxThreadNum];//First explore.
+        public static long[] Caching = new long[kMaxThreadNum];//Caching.
+        public static long[] SchedulerSwitch = new long[kMaxThreadNum];//Scheduler switch.
 
         public static void Initialize() {
             for (int i = 0; i < kMaxThreadNum; i++) {
@@ -505,13 +526,23 @@ public class Metrics {
                 ReloadDatabaseTime[i] = new DescriptiveStatistics();
                 RedoWriteAheadLogTime[i] = new DescriptiveStatistics();
                 ReloadInputTime[i] = new DescriptiveStatistics();
+                Next[i] = 0;
+                Explore[i] = 0;
+                Useful[i] = 0;
+                Construct[i] = 0;
+                Notify[i] = 0;
+                FirstExplore[i] = 0;
+                Caching[i] = 0;
+                SchedulerSwitch[i] = 0;
             }
         }
         public static void COMPUTE_RECOVERY_START(int thread_id) {
             startRecoveryTime[thread_id] = System.nanoTime();
+            stopRecovery = false;
         }
         public static void COMPUTE_RECOVERY(int thread_id) {
             RecoveryTime[thread_id].addValue((System.nanoTime() - startRecoveryTime[thread_id]) / 1E6);
+            stopRecovery = true;
         }
         public static void COMPUTE_RELOAD_DATABASE_START(int thread_id) {
             startReloadDatabaseTime[thread_id] = System.nanoTime();

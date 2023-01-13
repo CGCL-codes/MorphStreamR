@@ -501,7 +501,7 @@ public class MeasureTools {
                         , Scheduler_Record.Explore[threadId].getMean()
                         , Scheduler_Record.Next[threadId].getMean()
                         , Scheduler_Record.Useful[threadId].getMean()
-                        , Scheduler_Record.Noitfy[threadId].getMean()
+                        , Scheduler_Record.Notify[threadId].getMean()
                         , Scheduler_Record.Construct[threadId].getMean()
                         , Scheduler_Record.FirstExplore[threadId].getMean()
                         , Scheduler_Record.SchedulerSwitch[threadId].getMean()
@@ -521,7 +521,7 @@ public class MeasureTools {
                             , Scheduler_Record.Explore[threadId].getValues()[i]
                             , Scheduler_Record.Next[threadId].getValues()[i]
                             , Scheduler_Record.Useful[threadId].getValues()[i]
-                            , Scheduler_Record.Noitfy[threadId].getValues()[i]
+                            , Scheduler_Record.Notify[threadId].getValues()[i]
                             , Scheduler_Record.Construct[threadId].getValues()[i]
                             , Scheduler_Record.FirstExplore[threadId].getValues()[i]
                             , Scheduler_Record.SchedulerSwitch[threadId].getValues()[i]
