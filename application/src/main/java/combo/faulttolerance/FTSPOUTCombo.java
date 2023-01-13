@@ -228,12 +228,16 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
     public boolean recoverData() throws IOException, ExecutionException, InterruptedException {
         SnapshotResult snapshotResult = (SnapshotResult) this.ftManager.spoutAskRecovery(this.taskId, 0L);
         if (snapshotResult != null) {
+            MeasureTools.BEGIN_RELOAD_DATABASE_MEASURE(this.taskId);
             this.bolt.db.syncReloadDB(snapshotResult);
+            MeasureTools.END_RELOAD_DATABASE_MEASURE(this.taskId);
         }
         if (ftOption == FTOption_WSC) {
             RedoLogResult redoLogResult = (RedoLogResult) this.loggingManager.spoutAskRecovery(this.taskId, snapshotResult.snapshotId);
             if (redoLogResult.redoLogPaths.size() != 0) {
+                MeasureTools.BEGIN_REDO_WAL_MEASURE(this.taskId);
                 this.db.syncRedoWriteAheadLog(redoLogResult);
+                MeasureTools.END_REDO_WAL_MEASURE(this.taskId);
                 input_reload(snapshotResult.snapshotId, redoLogResult.lastedGroupId);
                 counter = (int) redoLogResult.lastedGroupId;
             } else {
@@ -249,9 +253,11 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
     }
     @Override
     public boolean input_reload(long snapshotOffset, long redoOffset) throws IOException {
+        MeasureTools.BEGIN_RELOAD_INPUT_MEASURE(this.taskId);
         File file = new File(inputStoreRootPath + OsUtils.OS_wrapper(Long.toString(snapshotOffset)) + OsUtils.OS_wrapper(taskId + ".input"));
         BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
         inputReload.reloadInput(reader, recoveryInput, redoOffset);
+        MeasureTools.END_RELOAD_INPUT_MEASURE(this.taskId);
         return true;
     }
 }

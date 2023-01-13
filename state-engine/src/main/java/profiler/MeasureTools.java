@@ -32,6 +32,7 @@ public class MeasureTools {
         Metrics.Transaction_Record.Initialize();
         Metrics.Scheduler_Record.Initialize();
         Metrics.RuntimePerformance.Initialize();
+        Metrics.RecoveryPerformance.Initialize();
     }
 
     public static void SCHEDULE_TIME_RECORD(int threadId, int num_events) {
@@ -293,6 +294,7 @@ public class MeasureTools {
         if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
             fileNameSuffix = suffix;
     }
+    // Fault Tolerance Specific.
     public static void setSnapshotSize(int thread_id, double size) {
         if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
             RuntimePerformance.SnapshotSize[thread_id].addValue(size);
@@ -301,14 +303,40 @@ public class MeasureTools {
         if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
             RuntimePerformance.WriteAheadLogSize[thread_id].addValue(size);
     }
+    // Recovery Time Specific.
     public static void BEGIN_RECOVERY_TIME_MEASURE(int thread_id) {
         if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
-            COMPUTE_RECOVERY_START(thread_id);
+            RecoveryPerformance.COMPUTE_RECOVERY_START(thread_id);
     }
     public static void END_RECOVERY_TIME_MEASURE(int thread_id) {
         if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
-            COMPUTE_RECOVERY(thread_id);
+            RecoveryPerformance.COMPUTE_RECOVERY(thread_id);
     }
+    public static void BEGIN_RELOAD_DATABASE_MEASURE(int thread_id) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            RecoveryPerformance.COMPUTE_RELOAD_DATABASE_START(thread_id);
+    }
+    public static void END_RELOAD_DATABASE_MEASURE(int thread_id) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            RecoveryPerformance.COMPUTE_RELOAD_DATABASE(thread_id);
+    }
+    public static void BEGIN_REDO_WAL_MEASURE(int thread_id) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            RecoveryPerformance.COMPUTE_REDO_START(thread_id);
+    }
+    public static void END_REDO_WAL_MEASURE(int thread_id) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            RecoveryPerformance.COMPUTE_REDO(thread_id);
+    }
+    public static void BEGIN_RELOAD_INPUT_MEASURE(int thread_id) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            RecoveryPerformance.COMPUTE_RELOAD_INPUT_START(thread_id);
+    }
+    public static void END_RELOAD_INPUT_MEASURE(int thread_id) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            RecoveryPerformance.COMPUTE_RELOAD_INPUT(thread_id);
+    }
+
     private static void WriteThroughputReport(double throughput) {
         try {
             File file = new File(directory + fileNameSuffix + ".overall");
@@ -443,7 +471,7 @@ public class MeasureTools {
             fileWriter.write("Recovery Time: " + "\n");
             fileWriter.write("thread_id" + "\t" + "time (ms)" + "\n");
             for (int i = 0; i < tthread; i++) {
-                fileWriter.write(i + "\t" + RuntimePerformance.RecoveryTime[i].getMean() + "\n");
+                fileWriter.write(i + "\t" + RecoveryPerformance.RecoveryTime[i].getMean() + "\n");
             }
             fileWriter.close();
         } catch (IOException e) {

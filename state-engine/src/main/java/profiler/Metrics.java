@@ -66,7 +66,7 @@ public class Metrics {
         Total_Record.txn_total[thread_id].addValue(txn_total);
         Total_Record.overhead_total[thread_id].addValue(total_time - stream_total - txn_total);
         Runtime.ThroughputPerPhase.get(thread_id).add(1 / total_time);
-        Runtime.Start[thread_id]=0;
+        Runtime.Start[thread_id] = 0;
     }
 
     public static void COMPUTE_PRE_EXE_START_TIME(int thread_id) {
@@ -224,6 +224,7 @@ public class Metrics {
     public static void COMPUTE_CONSTRUCT(int thread_id) {
         Scheduler.Construct[thread_id] += System.nanoTime() - Scheduler.ConstructStart[thread_id];
     }
+
     public static void COMPUTE_SWITCH_START(int thread_id) {
         Scheduler.SchedulerSwitchStart[thread_id] = System.nanoTime();
     }
@@ -282,6 +283,7 @@ public class Metrics {
                 Abort[i] = 0;
             }
         }
+
         public static void Initialize(int i) {
             IndexStart[i] = 0;
             Index[i] = 0;
@@ -305,7 +307,7 @@ public class Metrics {
         public static long[] TxnStart = new long[kMaxThreadNum];
         public static long[] Txn = new long[kMaxThreadNum];
         //Runtime throughput per phase
-        public static HashMap<Integer, List<Double>> ThroughputPerPhase =new HashMap<>();
+        public static HashMap<Integer, List<Double>> ThroughputPerPhase = new HashMap<>();
         //USED ONLY BY TStream
         public static long[] PreTxnStart = new long[kMaxThreadNum];
         public static long[] PreTxn = new long[kMaxThreadNum];
@@ -321,7 +323,7 @@ public class Metrics {
                 Txn[i] = 0;
                 PreTxnStart[i] = 0;
                 PreTxn[i] = 0;
-                ThroughputPerPhase.put(i,new ArrayList<>());
+                ThroughputPerPhase.put(i, new ArrayList<>());
             }
         }
     }
@@ -397,6 +399,7 @@ public class Metrics {
                 SchedulerSwitch[i] = 0;
             }
         }
+
         public static void Initialize(int i) {
             NextStart[i] = 0;
             Next[i] = 0;
@@ -441,49 +444,92 @@ public class Metrics {
             }
         }
     }
+
     public static class RuntimeMemory extends TimerTask {
         int gb = 1024 * 1024 * 1024;
+
         @Override
         public void run() {
             long UsedMemory = (java.lang.Runtime.getRuntime().totalMemory() - java.lang.Runtime.getRuntime().freeMemory()) / gb;
             usedMemory.addValue(UsedMemory);
         }
     }
+
     public static class RuntimePerformance {
         public static DescriptiveStatistics[] Latency = new DescriptiveStatistics[kMaxThreadNum];
         public static DescriptiveStatistics[] Throughput = new DescriptiveStatistics[kMaxThreadNum];
         public static DescriptiveStatistics[] SnapshotSize = new DescriptiveStatistics[kMaxThreadNum];
         public static DescriptiveStatistics[] WriteAheadLogSize = new DescriptiveStatistics[kMaxThreadNum];
-        public static DescriptiveStatistics[] RecoveryTime = new DescriptiveStatistics[kMaxThreadNum];
-        public static long[] startRecoveryTime = new long[kMaxThreadNum];
         public static long[] count = new long[kMaxThreadNum];
         public static long[] lastTasks = new long[kMaxThreadNum];
 
         public static void Initialize() {
             for (int i = 0; i < kMaxThreadNum; i++) {
-               Latency[i] = new DescriptiveStatistics();
-               Throughput[i] = new DescriptiveStatistics();
-               SnapshotSize[i] = new DescriptiveStatistics();
-               WriteAheadLogSize[i] = new DescriptiveStatistics();
-               RecoveryTime[i] = new DescriptiveStatistics();
-               startRecoveryTime[i] = 0;
-               count[i] = 0;
-               lastTasks[i] = 0;
+                Latency[i] = new DescriptiveStatistics();
+                Throughput[i] = new DescriptiveStatistics();
+                SnapshotSize[i] = new DescriptiveStatistics();
+                WriteAheadLogSize[i] = new DescriptiveStatistics();
+                count[i] = 0;
+                lastTasks[i] = 0;
             }
         }
     }
+
     public static void COMPUTE_THROUGHPUT(int thread_id, long count, double interval) {
         double throughput = (count - RuntimePerformance.count[thread_id]) / interval;// k tuples per second
         RuntimePerformance.count[thread_id] = count;
         RuntimePerformance.Throughput[thread_id].addValue(throughput);
     }
+
     public static void COMPUTE_LATENCY(int thread_id, double latency) {
         RuntimePerformance.Latency[thread_id].addValue(latency);
     }
-    public static void COMPUTE_RECOVERY_START(int thread_id) {
-        RuntimePerformance.startRecoveryTime[thread_id] = System.nanoTime();
-    }
-    public static void COMPUTE_RECOVERY(int thread_id) {
-        RuntimePerformance.RecoveryTime[thread_id].addValue((System.nanoTime() - RuntimePerformance.startRecoveryTime[thread_id]) / 1E6);
+
+    public static class RecoveryPerformance {
+        public static long[] startRecoveryTime = new long[kMaxThreadNum];
+        public static long[] startReloadDatabaseTime = new long[kMaxThreadNum];
+        public static long[] startRedoWriteAheadLogTime = new long[kMaxThreadNum];
+        public static long[] startReloadInputTime = new long[kMaxThreadNum];
+        public static DescriptiveStatistics[] RecoveryTime = new DescriptiveStatistics[kMaxThreadNum];
+        public static DescriptiveStatistics[] ReloadDatabaseTime = new DescriptiveStatistics[kMaxThreadNum];
+        public static DescriptiveStatistics[] RedoWriteAheadLogTime = new DescriptiveStatistics[kMaxThreadNum];
+        public static DescriptiveStatistics[] ReloadInputTime = new DescriptiveStatistics[kMaxThreadNum];
+
+        public static void Initialize() {
+            for (int i = 0; i < kMaxThreadNum; i++) {
+                startRecoveryTime[i] = 0;
+                startReloadDatabaseTime[i] = 0;
+                startRedoWriteAheadLogTime[i] = 0;
+                startReloadInputTime[i] = 0;
+                RecoveryTime[i] = new DescriptiveStatistics();
+                ReloadDatabaseTime[i] = new DescriptiveStatistics();
+                RedoWriteAheadLogTime[i] = new DescriptiveStatistics();
+                ReloadInputTime[i] = new DescriptiveStatistics();
+            }
+        }
+        public static void COMPUTE_RECOVERY_START(int thread_id) {
+            startRecoveryTime[thread_id] = System.nanoTime();
+        }
+        public static void COMPUTE_RECOVERY(int thread_id) {
+            RecoveryTime[thread_id].addValue((System.nanoTime() - startRecoveryTime[thread_id]) / 1E6);
+        }
+        public static void COMPUTE_RELOAD_DATABASE_START(int thread_id) {
+            startReloadDatabaseTime[thread_id] = System.nanoTime();
+        }
+        public static void COMPUTE_RELOAD_DATABASE(int thread_id) {
+            ReloadDatabaseTime[thread_id].addValue((System.nanoTime() - startReloadDatabaseTime[thread_id]) / 1E6);
+        }
+        public static void COMPUTE_REDO_START(int thread_id) {
+            startRedoWriteAheadLogTime[thread_id] = System.nanoTime();
+        }
+        public static void COMPUTE_REDO(int thread_id) {
+            RedoWriteAheadLogTime[thread_id].addValue((System.nanoTime() - startRedoWriteAheadLogTime[thread_id]) / 1E6);
+        }
+        public static void COMPUTE_RELOAD_INPUT_START(int thread_id) {
+            startReloadInputTime[thread_id] = System.nanoTime();
+        }
+        public static void COMPUTE_RELOAD_INPUT(int thread_id) {
+            ReloadInputTime[thread_id].addValue((System.nanoTime() - startReloadInputTime[thread_id]) / 1E6);
+        }
     }
 }
