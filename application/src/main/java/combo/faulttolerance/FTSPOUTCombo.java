@@ -72,6 +72,7 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
                 if (isRecovery) {
                     MeasureTools.BEGIN_RECOVERY_TIME_MEASURE(this.taskId);
                     recoverData();
+                    MeasureTools.BEGIN_REPLAY_MEASURE(this.taskId);
                     return;
                 }
                 if (ftOption == FTOption_ISC || ftOption == FTOption_WSC) {

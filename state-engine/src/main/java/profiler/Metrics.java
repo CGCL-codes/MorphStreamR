@@ -512,11 +512,13 @@ public class Metrics {
         public static long[] startReloadDatabaseTime = new long[kMaxThreadNum];
         public static long[] startRedoWriteAheadLogTime = new long[kMaxThreadNum];
         public static long[] startReloadInputTime = new long[kMaxThreadNum];
+        public static long[] startReplayTime = new long[kMaxThreadNum];
         //in ms.
         public static DescriptiveStatistics[] RecoveryTime = new DescriptiveStatistics[kMaxThreadNum];
         public static DescriptiveStatistics[] ReloadDatabaseTime = new DescriptiveStatistics[kMaxThreadNum];
         public static DescriptiveStatistics[] RedoWriteAheadLogTime = new DescriptiveStatistics[kMaxThreadNum];
         public static DescriptiveStatistics[] ReloadInputTime = new DescriptiveStatistics[kMaxThreadNum];
+        public static DescriptiveStatistics[] ReplayTime = new DescriptiveStatistics[kMaxThreadNum];
         public static long[] txn_total = new long[kMaxThreadNum];
         public static long[] stream_total = new long[kMaxThreadNum];
         public static long[] total_time = new long[kMaxThreadNum];
@@ -537,10 +539,12 @@ public class Metrics {
                 startReloadDatabaseTime[i] = 0;
                 startRedoWriteAheadLogTime[i] = 0;
                 startReloadInputTime[i] = 0;
+                startReplayTime[i] = 0;
                 RecoveryTime[i] = new DescriptiveStatistics();
                 ReloadDatabaseTime[i] = new DescriptiveStatistics();
                 RedoWriteAheadLogTime[i] = new DescriptiveStatistics();
                 ReloadInputTime[i] = new DescriptiveStatistics();
+                ReplayTime[i] = new DescriptiveStatistics();
                 txn_total[i] = 0;
                 stream_total[i] = 0;
                 total_time[i] = 0;
@@ -580,6 +584,12 @@ public class Metrics {
         }
         public static void COMPUTE_RELOAD_INPUT(int thread_id) {
             ReloadInputTime[thread_id].addValue((System.nanoTime() - startReloadInputTime[thread_id]) / 1E6);
+        }
+        public static void COMPUTE_REPLAY_START(int thread_id) {
+            startReplayTime[thread_id] = System.nanoTime();
+        }
+        public static void COMPUTE_REPLAY(int thread_id) {
+            ReplayTime[thread_id].addValue((System.nanoTime() - startReplayTime[thread_id]) / 1E6);
         }
     }
 }

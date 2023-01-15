@@ -336,6 +336,14 @@ public class MeasureTools {
         if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
             RecoveryPerformance.COMPUTE_RELOAD_INPUT(thread_id);
     }
+    public static void BEGIN_REPLAY_MEASURE(int thread_id) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            RecoveryPerformance.COMPUTE_REPLAY_START(thread_id);
+    }
+    public static void END_REPLAY_MEASURE(int thread_id) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            RecoveryPerformance.COMPUTE_REPLAY(thread_id);
+    }
 
     private static void WriteThroughputReport(double throughput) {
         try {
@@ -472,6 +480,90 @@ public class MeasureTools {
             fileWriter.write("thread_id" + "\t" + "time (ms)" + "\n");
             for (int i = 0; i < tthread; i++) {
                 fileWriter.write(i + "\t" + RecoveryPerformance.RecoveryTime[i].getMean() + "\n");
+            }
+            fileWriter.close();
+            WriteRecoveryTimeBreakDown(tthread);
+            WriteReplayTimeBreakDown(tthread);
+            WriteRecoverySchedulerTimeBreakdownReport(tthread);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public static void WriteRecoveryTimeBreakDown(int tthread) {
+        try {
+            File file = new File(directory + fileNameSuffix + ".overall");
+            BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
+            fileWriter.write("RecoveryTimeBreakDownReport (ms): " + "\n");
+            fileWriter.write("thread_id\t reloadDatabaseTime\t redoWriteAheadLogTime\t reloadInputTime\t replayTime\n");
+            for (int threadId = 0; threadId < tthread; threadId++) {
+                String output = String.format("%d\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t"
+                        , threadId
+                        , RecoveryPerformance.ReloadDatabaseTime[threadId].getMean()
+                        , RecoveryPerformance.RedoWriteAheadLogTime[threadId].getMean()
+                        , RecoveryPerformance.ReloadInputTime[threadId].getMean()
+                        , RecoveryPerformance.ReplayTime[threadId].getMean()
+                );
+                fileWriter.write(output + "\n");
+            }
+            fileWriter.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public static void WriteReplayTimeBreakDown(int tthread) {
+        try {
+            File file = new File(directory + fileNameSuffix + ".overall");
+            BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
+            fileWriter.write("ReplayTimeBreakDownReport (ms): " + "\n");
+            fileWriter.write("thread_id\t total_time\t stream_process\t txn_process\t overheads\n");
+            for (int threadId = 0; threadId < tthread; threadId++) {
+                String output = String.format("%d\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t"
+                        , threadId
+                        , RecoveryPerformance.txn_total[threadId] / 1E6
+                        , RecoveryPerformance.stream_total[threadId] / 1E6
+                        , RecoveryPerformance.txn_total[threadId] / 1E6
+                        , RecoveryPerformance.overhead_total[threadId] / 1E6
+                );
+                fileWriter.write(output + "\n");
+            }
+            fileWriter.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public static void WriteRecoverySchedulerTimeBreakdownReport(int tthread) {
+        try {
+            File file = new File(directory + fileNameSuffix + ".overall");
+            BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
+            fileWriter.write("RecoverySchedulerTimeBreakdownReport (ms): " + "\n");
+            fileWriter.write("thread_id\t explore_time\t next_time\t useful_time\t notify_time\t construct_time\t first_explore_time\t scheduler_switch\n");
+            for (int threadId = 0; threadId < tthread; threadId++) {
+                String output = String.format("%d\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t"
+                        , threadId
+                        , RecoveryPerformance.Explore[threadId] / 1E6
+                        , RecoveryPerformance.Next[threadId] / 1E6
+                        , RecoveryPerformance.Useful[threadId] / 1E6
+                        , RecoveryPerformance.Notify[threadId] / 1E6
+                        , RecoveryPerformance.Construct[threadId] / 1E6
+                        , RecoveryPerformance.FirstExplore[threadId] / 1E6
+                        , RecoveryPerformance.SchedulerSwitch[threadId] / 1E6
+                );
+                fileWriter.write(output + "\n");
             }
             fileWriter.close();
         } catch (IOException e) {
