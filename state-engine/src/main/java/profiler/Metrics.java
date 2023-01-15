@@ -68,14 +68,25 @@ public class Metrics {
     }
 
     public static void RECORD_TIME(int thread_id, int number_events) {
-        double total_time = (System.nanoTime() - Runtime.Start[thread_id]) / (double) number_events;
-        double stream_total = (Runtime.Prepare[thread_id] + Runtime.Post[thread_id] + Runtime.PreTxn[thread_id]) / (double) number_events;
-        double txn_total = Runtime.Txn[thread_id] / (double) number_events;
-        Total_Record.totalProcessTimePerEvent[thread_id].addValue(total_time);
-        Total_Record.stream_total[thread_id].addValue(stream_total);
-        Total_Record.txn_total[thread_id].addValue(txn_total);
-        Total_Record.overhead_total[thread_id].addValue(total_time - stream_total - txn_total);
-        Runtime.ThroughputPerPhase.get(thread_id).add(1 / total_time);
+        if (!RecoveryPerformance.stopRecovery) {
+            long total_time = System.nanoTime() - Runtime.Start[thread_id];
+            long txn_total = Runtime.Txn[thread_id];
+            long stream_total = Runtime.Prepare[thread_id] + Runtime.Post[thread_id] + Runtime.PreTxn[thread_id];
+            long overhead_total = total_time - txn_total - stream_total;
+            RecoveryPerformance.total_time[thread_id] = RecoveryPerformance.total_time[thread_id] + total_time;
+            RecoveryPerformance.txn_total[thread_id] = RecoveryPerformance.txn_total[thread_id] + txn_total;
+            RecoveryPerformance.stream_total[thread_id] = RecoveryPerformance.stream_total[thread_id] + stream_total;
+            RecoveryPerformance.overhead_total[thread_id] = RecoveryPerformance.overhead_total[thread_id] + overhead_total;
+        } else {
+            double total_time = (System.nanoTime() - Runtime.Start[thread_id]) / (double) number_events;
+            double stream_total = (Runtime.Prepare[thread_id] + Runtime.Post[thread_id] + Runtime.PreTxn[thread_id]) / (double) number_events;
+            double txn_total = Runtime.Txn[thread_id] / (double) number_events;
+            Total_Record.totalProcessTimePerEvent[thread_id].addValue(total_time);
+            Total_Record.stream_total[thread_id].addValue(stream_total);
+            Total_Record.txn_total[thread_id].addValue(txn_total);
+            Total_Record.overhead_total[thread_id].addValue(total_time - stream_total - txn_total);
+            Runtime.ThroughputPerPhase.get(thread_id).add(1 / total_time);
+        }
         Runtime.Start[thread_id] = 0;
     }
 
@@ -506,6 +517,10 @@ public class Metrics {
         public static DescriptiveStatistics[] ReloadDatabaseTime = new DescriptiveStatistics[kMaxThreadNum];
         public static DescriptiveStatistics[] RedoWriteAheadLogTime = new DescriptiveStatistics[kMaxThreadNum];
         public static DescriptiveStatistics[] ReloadInputTime = new DescriptiveStatistics[kMaxThreadNum];
+        public static long[] txn_total = new long[kMaxThreadNum];
+        public static long[] stream_total = new long[kMaxThreadNum];
+        public static long[] total_time = new long[kMaxThreadNum];
+        public static long[] overhead_total = new long[kMaxThreadNum];
         //in ns.
         public static long[] Next = new long[kMaxThreadNum];//Next.
         public static long[] Explore = new long[kMaxThreadNum];//Explore.
@@ -526,6 +541,10 @@ public class Metrics {
                 ReloadDatabaseTime[i] = new DescriptiveStatistics();
                 RedoWriteAheadLogTime[i] = new DescriptiveStatistics();
                 ReloadInputTime[i] = new DescriptiveStatistics();
+                txn_total[i] = 0;
+                stream_total[i] = 0;
+                total_time[i] = 0;
+                overhead_total[i] = 0;
                 Next[i] = 0;
                 Explore[i] = 0;
                 Useful[i] = 0;
