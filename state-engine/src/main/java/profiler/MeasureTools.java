@@ -527,7 +527,7 @@ public class MeasureTools {
                                 "%-10.2f\t" +
                                 "%-10.2f\t"
                         , threadId
-                        , RecoveryPerformance.txn_total[threadId] / 1E6
+                        , RecoveryPerformance.total_time[threadId] / 1E6
                         , RecoveryPerformance.stream_total[threadId] / 1E6
                         , RecoveryPerformance.txn_total[threadId] / 1E6
                         , RecoveryPerformance.overhead_total[threadId] / 1E6

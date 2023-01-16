@@ -43,6 +43,7 @@ public class Metrics {
             RecoveryPerformance.Next[thread_id] = RecoveryPerformance.Next[thread_id] + Scheduler.Next[thread_id];
             RecoveryPerformance.Useful[thread_id] = RecoveryPerformance.Useful[thread_id] + Scheduler.Useful[thread_id];
             RecoveryPerformance.Construct[thread_id] = RecoveryPerformance.Construct[thread_id] + Scheduler.Construct[thread_id];
+            RecoveryPerformance.Notify[thread_id] = RecoveryPerformance.Notify[thread_id] + Scheduler.Notify[thread_id];
             RecoveryPerformance.FirstExplore[thread_id] = RecoveryPerformance.FirstExplore[thread_id] + Scheduler.FirstExplore[thread_id];
             RecoveryPerformance.Caching[thread_id] = RecoveryPerformance.Caching[thread_id] + Scheduler.Caching[thread_id];
             RecoveryPerformance.SchedulerSwitch[thread_id] = RecoveryPerformance.SchedulerSwitch[thread_id] + Scheduler.SchedulerSwitch[thread_id];
