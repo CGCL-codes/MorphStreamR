@@ -38,7 +38,7 @@ public class Metrics {
         double first_explore_time = Scheduler.FirstExplore[thread_id] / (double) num_events;
         double caching_time = Scheduler.Caching[thread_id] / (double) num_events;
         double switch_time = Scheduler.SchedulerSwitch[thread_id] / (double) num_events;
-        if (!RecoveryPerformance.stopRecovery) {
+        if (!RecoveryPerformance.stopRecovery[thread_id]) {
             RecoveryPerformance.Explore[thread_id] = RecoveryPerformance.Explore[thread_id] + Scheduler.Explore[thread_id] - Scheduler.Useful[thread_id];
             RecoveryPerformance.Next[thread_id] = RecoveryPerformance.Next[thread_id] + Scheduler.Next[thread_id];
             RecoveryPerformance.Useful[thread_id] = RecoveryPerformance.Useful[thread_id] + Scheduler.Useful[thread_id];
@@ -68,7 +68,7 @@ public class Metrics {
     }
 
     public static void RECORD_TIME(int thread_id, int number_events) {
-        if (!RecoveryPerformance.stopRecovery) {
+        if (!RecoveryPerformance.stopRecovery[thread_id]) {
             long total_time = System.nanoTime() - Runtime.Start[thread_id];
             long txn_total = Runtime.Txn[thread_id];
             long stream_total = Runtime.Prepare[thread_id] + Runtime.Post[thread_id] + Runtime.PreTxn[thread_id];
@@ -507,7 +507,7 @@ public class Metrics {
     }
 
     public static class RecoveryPerformance {
-        public static boolean stopRecovery = true;
+        public static boolean stopRecovery[] = new boolean[kMaxThreadNum];
         public static long[] startRecoveryTime = new long[kMaxThreadNum];
         public static long[] startReloadDatabaseTime = new long[kMaxThreadNum];
         public static long[] startRedoWriteAheadLogTime = new long[kMaxThreadNum];
@@ -535,6 +535,7 @@ public class Metrics {
 
         public static void Initialize() {
             for (int i = 0; i < kMaxThreadNum; i++) {
+                stopRecovery[i] = true;
                 startRecoveryTime[i] = 0;
                 startReloadDatabaseTime[i] = 0;
                 startRedoWriteAheadLogTime[i] = 0;
@@ -561,11 +562,10 @@ public class Metrics {
         }
         public static void COMPUTE_RECOVERY_START(int thread_id) {
             startRecoveryTime[thread_id] = System.nanoTime();
-            stopRecovery = false;
+            stopRecovery[thread_id] = false;
         }
         public static void COMPUTE_RECOVERY(int thread_id) {
             RecoveryTime[thread_id].addValue((System.nanoTime() - startRecoveryTime[thread_id]) / 1E6);
-            stopRecovery = true;
         }
         public static void COMPUTE_RELOAD_DATABASE_START(int thread_id) {
             startReloadDatabaseTime[thread_id] = System.nanoTime();

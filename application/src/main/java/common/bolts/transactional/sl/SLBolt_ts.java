@@ -14,6 +14,7 @@ import execution.runtime.tuple.impl.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import profiler.MeasureTools;
+import profiler.Metrics;
 import storage.SchemaRecord;
 import transaction.context.TxnContext;
 import transaction.function.Condition;
@@ -111,6 +112,9 @@ public class SLBolt_ts extends SLBolt {
                 depositEvents.clear();
             }
             MeasureTools.END_TOTAL_TIME_MEASURE_TS(thread_Id, num_events);
+            if (this.sink.stopRecovery) {
+                Metrics.RecoveryPerformance.stopRecovery[thread_Id] = true;
+            }
         } else {
             execute_ts_normal(in);
         }

@@ -19,6 +19,7 @@ import execution.runtime.tuple.impl.Tuple;
 import execution.runtime.tuple.impl.msgs.GeneralMsg;
 import org.slf4j.Logger;
 import profiler.MeasureTools;
+import profiler.Metrics;
 import utils.SOURCE_CONTROL;
 
 import java.io.*;
@@ -71,8 +72,17 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
                 sink.previous_measure_time = System.nanoTime();
                 if (isRecovery) {
                     MeasureTools.BEGIN_RECOVERY_TIME_MEASURE(this.taskId);
-                    recoverData();
-                    MeasureTools.BEGIN_REPLAY_MEASURE(this.taskId);
+                    boolean needReplay = recoverData();
+                    if (needReplay) {
+                        MeasureTools.BEGIN_REPLAY_MEASURE(this.taskId);
+                    } else {
+                        MeasureTools.END_RECOVERY_TIME_MEASURE(this.taskId);
+                        this.sink.stopRecovery = true;
+                        Metrics.RecoveryPerformance.stopRecovery[this.taskId] = true;
+                        if ((ftOption == FTOption_ISC || ftOption == FTOption_WSC) && counter != the_end && Metrics.RecoveryPerformance.stopRecovery[this.taskId]) {
+                            input_store(counter);
+                        }
+                    }
                     return;
                 }
                 if (ftOption == FTOption_ISC || ftOption == FTOption_WSC) {
@@ -128,7 +138,7 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
                             marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration));
                         }
                         bolt.execute(marker);
-                        if ((ftOption == FTOption_ISC || ftOption == FTOption_WSC) && counter != the_end) {
+                        if ((ftOption == FTOption_ISC || ftOption == FTOption_WSC) && counter != the_end && Metrics.RecoveryPerformance.stopRecovery[this.taskId]) {
                             input_store(counter);
                         }
                     }
@@ -233,32 +243,38 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
             this.bolt.db.syncReloadDB(snapshotResult);
             MeasureTools.END_RELOAD_DATABASE_MEASURE(this.taskId);
         }
+        boolean needReplay = false;
         if (ftOption == FTOption_WSC) {
             RedoLogResult redoLogResult = (RedoLogResult) this.loggingManager.spoutAskRecovery(this.taskId, snapshotResult.snapshotId);
             if (redoLogResult.redoLogPaths.size() != 0) {
                 MeasureTools.BEGIN_REDO_WAL_MEASURE(this.taskId);
                 this.db.syncRedoWriteAheadLog(redoLogResult);
                 MeasureTools.END_REDO_WAL_MEASURE(this.taskId);
-                input_reload(snapshotResult.snapshotId, redoLogResult.lastedGroupId);
+                needReplay = input_reload(snapshotResult.snapshotId, redoLogResult.lastedGroupId);
                 counter = (int) redoLogResult.lastedGroupId;
             } else {
-                input_reload(snapshotResult.snapshotId, 0);
+                needReplay = input_reload(snapshotResult.snapshotId, 0);
                 counter = (int) snapshotResult.snapshotId;
             }
         } else if (ftOption == FTOption_ISC) {
-            input_reload(snapshotResult.snapshotId, 0);
+            needReplay = input_reload(snapshotResult.snapshotId, 0);
             counter = (int) snapshotResult.snapshotId;
         }
         this.sink.lastTask = this.ftManager.sinkAskLastTask(this.taskId);
-        return true;
+        return needReplay;
     }
     @Override
     public boolean input_reload(long snapshotOffset, long redoOffset) throws IOException {
         MeasureTools.BEGIN_RELOAD_INPUT_MEASURE(this.taskId);
         File file = new File(inputStoreRootPath + OsUtils.OS_wrapper(Long.toString(snapshotOffset)) + OsUtils.OS_wrapper(taskId + ".input"));
-        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
-        inputReload.reloadInput(reader, recoveryInput, redoOffset);
-        MeasureTools.END_RELOAD_INPUT_MEASURE(this.taskId);
-        return true;
+        if(file.exists()) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+            inputReload.reloadInput(reader, recoveryInput, redoOffset);
+            MeasureTools.END_RELOAD_INPUT_MEASURE(this.taskId);
+            return true;
+        } else {
+            MeasureTools.END_RELOAD_INPUT_MEASURE(this.taskId);
+            return false;
+        }
     }
 }
