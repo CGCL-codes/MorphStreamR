@@ -448,8 +448,8 @@ public class MeasureTools {
             File file = new File(directory + fileNameSuffix + ".overall");
             BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
             if (ftOption == FTOption_ISC || ftOption == FTOption_WSC) {
-                fileWriter.write("SnapshotSize: " + "\n");
-                fileWriter.write("thread_id" + "\t" + "size (KB)" + "\n");
+                fileWriter.write("SnapshotSizeReport (KB): " + "\n");
+                fileWriter.write("thread_id" + "\t" + "size" + "\n");
                 double totalSize = 0;
                 for (int i = 0; i < tthread; i ++) {
                     totalSize = totalSize + RuntimePerformance.SnapshotSize[i].getMean();
@@ -476,8 +476,8 @@ public class MeasureTools {
         try {
             File file = new File(directory + fileNameSuffix + ".overall");
             BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
-            fileWriter.write("Recovery Time: " + "\n");
-            fileWriter.write("thread_id" + "\t" + "time (ms)" + "\n");
+            fileWriter.write("RecoveryTimeReport (ms): " + "\n");
+            fileWriter.write("thread_id" + "\t" + "time" + "\n");
             for (int i = 0; i < tthread; i++) {
                 fileWriter.write(i + "\t" + RecoveryPerformance.RecoveryTime[i].getMean() + "\n");
             }
@@ -575,7 +575,7 @@ public class MeasureTools {
             if (enable_debug) log.info("++++++ counter: " + counter);
             File file = new File(directory + fileNameSuffix + ".overall");
             BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
-            fileWriter.write("SchedulerTimeBreakdownReport\n");
+            fileWriter.write("SchedulerTimeBreakdownReport (ns)\n");
             if (enable_log) log.info("===OGScheduler Time Breakdown Report===");
             fileWriter.write("thread_id\t explore_time\t next_time\t useful_time\t notify_time\t construct_time\t first_explore_time\t scheduler_switch\n");
             if (enable_log)
@@ -630,7 +630,7 @@ public class MeasureTools {
         try {
             File file = new File(directory + fileNameSuffix + ".overall");
             BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
-            fileWriter.write("TransactionBreakdownRatioReport\n");
+            fileWriter.write("TransactionBreakdownRatioReport (ns)\n");
             if (enable_log) log.info("===TXN BREAKDOWN===");
             fileWriter.write("thread_id\t index_ratio\t useful_ratio\t sync_ratio\t lock_ratio\n");
             if (enable_log) log.info("thread_id\t index_ratio\t useful_ratio\t sync_ratio\t lock_ratio");
