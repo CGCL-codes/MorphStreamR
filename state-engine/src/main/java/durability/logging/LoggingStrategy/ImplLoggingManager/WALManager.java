@@ -3,7 +3,8 @@ package durability.logging.LoggingStrategy.ImplLoggingManager;
 import common.collections.Configuration;
 import common.collections.OsUtils;
 import common.io.ByteIO.DataInputView;
-import common.io.ByteIO.InputWithDecompression.NativeDataInputView;
+import common.io.ByteIO.InputWithDecompression.*;
+import common.io.Compressor.RLECompressor;
 import common.tools.Deserialize;
 import durability.ftmanager.AbstractRecoveryManager;
 import durability.logging.LoggingResource.WalMetaInfoSnapshot;
@@ -15,6 +16,7 @@ import durability.logging.LoggingEntry.LogRecord;
 import durability.logging.LoggingResource.ImplLoggingResources.PartitionWalResources;
 import durability.logging.LoggingStream.ImplLoggingStreamFactory.NIOWalStreamFactory;
 import durability.recovery.RedoLogResult;
+import durability.snapshot.LoggingOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import storage.SchemaRecord;
@@ -34,6 +36,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.Future;
 
 import static java.nio.file.StandardOpenOption.READ;
+import static utils.FaultToleranceConstants.CompressionType.RLE;
 
 public class WALManager implements LoggingManager {
     private static final Logger LOG = LoggerFactory.getLogger(WALManager.class);
@@ -41,6 +44,7 @@ public class WALManager implements LoggingManager {
     @Nonnull protected Map<String, Map<Integer, ConcurrentSkipListSet<LogRecord>>> pendingEntries;
     @Nonnull protected String walPath;
     protected int parallelNum;
+    @Nonnull protected LoggingOptions loggingOptions;
     @Nonnull protected ConcurrentHashMap<String, WriteAheadLogTableInfo> metaInformation;
     protected final int num_items;
     protected final int delta;
@@ -53,6 +57,7 @@ public class WALManager implements LoggingManager {
         delta = num_items / parallelNum;
         metaInformation = new ConcurrentHashMap<>();
         pendingEntries = new ConcurrentHashMap<>();
+        loggingOptions = new LoggingOptions(parallelNum, configuration.getString("compressionAlg"));
     }
 
     @Override
@@ -79,7 +84,7 @@ public class WALManager implements LoggingManager {
         PartitionWalResources partitionWalResources = syncPrepareResource(groupId, partitionId);
         AsynchronousFileChannel afc = nioWalStreamFactory.createLoggingStream();
         Attachment attachment = new Attachment(nioWalStreamFactory.getWalPath(), groupId, partitionId, afc, ftManager);
-        ByteBuffer dataBuffer = partitionWalResources.createWriteBuffer();
+        ByteBuffer dataBuffer = partitionWalResources.createWriteBuffer(loggingOptions);
         afc.write(dataBuffer, 0, attachment, new LoggingHandler());
     }
 
@@ -91,8 +96,26 @@ public class WALManager implements LoggingManager {
             int fileSize = (int) afc.size();
             ByteBuffer dataBuffer = ByteBuffer.allocate(fileSize);
             Future<Integer> result = afc.read(dataBuffer, 0);
-            //TODO:implementation compressionAlg, Different compressionAlg -> different dataInputView
-            DataInputView inputView = new NativeDataInputView(dataBuffer);
+            DataInputView inputView;
+            switch (loggingOptions.getCompressionAlg()) {
+                case None:
+                    inputView = new NativeDataInputView(dataBuffer);
+                    break;
+                case Snappy:
+                    inputView = new SnappyDataInputView(dataBuffer);
+                    break;
+                case XOR:
+                    inputView = new XORDataInputView(dataBuffer);
+                    break;
+                case LZ4:
+                    inputView = new LZ4DataInputView(dataBuffer);
+                    break;
+                case RLE:
+                    inputView = new RLEDataInputView(dataBuffer);
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + loggingOptions.getCompressionAlg());
+            }
             int walMetaInfoSize = inputView.readInt();
             WalMetaInfoSnapshot[] walMetaInfoSnapshots = new WalMetaInfoSnapshot[walMetaInfoSize];
             for (int i = 0; i < walMetaInfoSize; i ++) {
@@ -103,7 +126,13 @@ public class WALManager implements LoggingManager {
                 int recordNum = metaInfo.logRecordNumber;
                 while (recordNum != 0) {
                     byte[] objects = inputView.readFullyDecompression();
-                    String logRecord = new String(objects, "UTF-8");
+                    String logRecord;
+                    if (loggingOptions.getCompressionAlg() == RLE) {
+                        String compressedString = new String(objects, "UTF-8");
+                        logRecord = RLECompressor.decode(compressedString);
+                    } else {
+                        logRecord = new String(objects, "UTF-8");
+                    }
                     String[] values = logRecord.split(";");
                     int bid = Integer.parseInt(values[0]);
                     SchemaRecord schemaRecord = AbstractRecoveryManager.getRecord(metaInfo.recordSchema, values[1]);

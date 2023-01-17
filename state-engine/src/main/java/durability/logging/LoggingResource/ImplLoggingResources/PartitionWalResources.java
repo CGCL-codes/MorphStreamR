@@ -1,12 +1,14 @@
 package durability.logging.LoggingResource.ImplLoggingResources;
 
 import common.io.ByteIO.DataOutputView;
-import common.io.ByteIO.OutputWithCompression.NativeDataOutputView;
+import common.io.ByteIO.OutputWithCompression.*;
+import common.io.Compressor.RLECompressor;
 import common.tools.Serialize;
 import durability.logging.LoggingEntry.LogRecord;
 import durability.logging.LoggingStrategy.ImplLoggingManager.WALManager;
 import durability.logging.LoggingResource.WalMetaInfoSnapshot;
 import durability.logging.LoggingResource.LoggingResources;
+import durability.snapshot.LoggingOptions;
 import scheduler.struct.MetaTypes;
 
 import java.io.IOException;
@@ -43,9 +45,27 @@ public class PartitionWalResources implements LoggingResources {
             this.logResources.put(entry.getKey(), entry.getValue().get(this.partitionId));
         }
     }
-    public ByteBuffer createWriteBuffer() throws IOException {
-        //TODO:implementation compressionAlg, Different compressionAlg -> different dataOutputView
-        DataOutputView dataOutputView = new NativeDataOutputView();
+    public ByteBuffer createWriteBuffer(LoggingOptions loggingOptions) throws IOException {
+        DataOutputView dataOutputView;
+        switch (loggingOptions.getCompressionAlg()) {
+            case None:
+                dataOutputView = new NativeDataOutputView();
+                break;
+            case Snappy:
+                dataOutputView = new SnappyDataOutputView();
+                break;
+            case XOR:
+                dataOutputView = new XORDataOutputView();
+                break;
+            case LZ4:
+                dataOutputView = new LZ4DataOutputView();
+                break;
+            case RLE:
+                dataOutputView = new RLEDataOutputView();
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + loggingOptions.getCompressionAlg());
+        }
         writeLogMetaData(dataOutputView);
         writeLogRecord(dataOutputView);
         return ByteBuffer.wrap(dataOutputView.getByteArray());
@@ -69,7 +89,12 @@ public class PartitionWalResources implements LoggingResources {
             while(recordIterator.hasNext()) {
                 LogRecord logRecord = recordIterator.next();
                 if (logRecord.vote != MetaTypes.OperationStateType.ABORTED && logRecord.update != null) {
-                    String str = logRecord.toString();
+                    String str;
+                    if (dataOutputView instanceof RLEDataOutputView) {
+                        str = RLECompressor.encode(logRecord.toString());
+                    } else {
+                        str = logRecord.toString();
+                    }
                     dataOutputView.writeCompression(str.getBytes(StandardCharsets.UTF_8));
                 }
             }

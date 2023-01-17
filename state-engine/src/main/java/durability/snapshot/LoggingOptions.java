@@ -2,15 +2,15 @@ package durability.snapshot;
 
 import utils.FaultToleranceConstants;
 
-public class SnapshotOptions {
+public class LoggingOptions {
     private int parallelNum;
     private FaultToleranceConstants.CompressionType compressionAlg;
-    public SnapshotOptions() {
+    public LoggingOptions() {
         parallelNum = 1;
         compressionAlg = FaultToleranceConstants.CompressionType.None;
     }
 
-    public SnapshotOptions(int parallelNum, String compressionAlg) {
+    public LoggingOptions(int parallelNum, String compressionAlg) {
         this.parallelNum = parallelNum;
         switch(compressionAlg) {
             case "None":

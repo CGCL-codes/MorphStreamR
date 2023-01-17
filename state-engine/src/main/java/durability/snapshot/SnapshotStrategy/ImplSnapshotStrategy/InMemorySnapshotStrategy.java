@@ -1,7 +1,9 @@
 package durability.snapshot.SnapshotStrategy.ImplSnapshotStrategy;
 
 import common.io.ByteIO.DataInputView;
-import common.io.ByteIO.InputWithDecompression.NativeDataInputView;
+import common.io.ByteIO.InputWithDecompression.*;
+import common.io.ByteIO.OutputWithCompression.*;
+import common.io.Compressor.RLECompressor;
 import common.tools.Deserialize;
 import durability.ftmanager.AbstractRecoveryManager;
 import durability.ftmanager.FTManager;
@@ -18,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import storage.SchemaRecord;
 import storage.table.BaseTable;
 import storage.table.RecordSchema;
+import utils.FaultToleranceConstants;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -32,6 +35,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import static java.nio.file.StandardOpenOption.READ;
+import static utils.FaultToleranceConstants.CompressionType.RLE;
 
 public class InMemorySnapshotStrategy implements SnapshotStrategy<InMemoryFullSnapshotResources> {
     private static final Logger LOG = LoggerFactory.getLogger(InMemorySnapshotStrategy.class);
@@ -89,7 +93,26 @@ public class InMemorySnapshotStrategy implements SnapshotStrategy<InMemoryFullSn
         Future<Integer> result = afc.read(dataBuffer, 0);
         int readBytes = result.get();
         //TODO:implementation compressionAlg, Different compressionAlg -> different dataInputView
-        DataInputView inputView = new NativeDataInputView(dataBuffer);
+        DataInputView inputView;
+        switch (snapshotOptions.getCompressionAlg()) {
+            case None:
+                inputView = new NativeDataInputView(dataBuffer);
+                break;
+            case Snappy:
+                inputView = new SnappyDataInputView(dataBuffer);
+                break;
+            case XOR:
+                inputView = new XORDataInputView(dataBuffer);
+                break;
+            case LZ4:
+                inputView = new LZ4DataInputView(dataBuffer);
+                break;
+            case RLE:
+                inputView = new RLEDataInputView(dataBuffer);
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + snapshotOptions.getCompressionAlg());
+        }
         int stateMetaInfoSize = inputView.readInt();
         StateMetaInfoSnapshot[] stateMetaInfoSnapshots = new StateMetaInfoSnapshot[stateMetaInfoSize];
         for (int i = 0; i < stateMetaInfoSize; i++) {
@@ -100,7 +123,13 @@ public class InMemorySnapshotStrategy implements SnapshotStrategy<InMemoryFullSn
             int recordNum = stateMetaInfoSnapshot.recordNum;
             while(recordNum != 0) {
                 byte[] objects = inputView.readFullyDecompression();
-                SchemaRecord schemaRecord = AbstractRecoveryManager.getRecord(stateMetaInfoSnapshot.recordSchema, objects);
+                SchemaRecord schemaRecord;
+                if (snapshotOptions.getCompressionAlg() == RLE) {
+                    String compressedString = new String(objects, "UTF-8");
+                    schemaRecord = AbstractRecoveryManager.getRecord(stateMetaInfoSnapshot.recordSchema, RLECompressor.decode(compressedString));
+                } else {
+                    schemaRecord = AbstractRecoveryManager.getRecord(stateMetaInfoSnapshot.recordSchema, objects);
+                }
                 this.tables.get(stateMetaInfoSnapshot.tableName).SelectKeyRecord(schemaRecord.GetPrimaryKey()).content_.updateMultiValues(snapshotResult.snapshotId, 0L, false, schemaRecord);
                 recordNum --;
             }
