@@ -3,7 +3,9 @@ package durability.snapshot;
 import common.io.ByteIO.DataInputView;
 import common.io.ByteIO.DataOutputView;
 import common.io.ByteIO.InputWithDecompression.SnappyDataInputView;
+import common.io.ByteIO.InputWithDecompression.XORDataInputView;
 import common.io.ByteIO.OutputWithCompression.SnappyDataOutputView;
+import common.io.ByteIO.OutputWithCompression.XORDataOutputView;
 import common.tools.Deserialize;
 
 import java.io.*;
@@ -20,10 +22,10 @@ import static java.nio.file.StandardOpenOption.*;
 
 public class TextNIOFileWrite {
     public static void main(String[] args) throws Exception {
-       writeNio();
+       readNioFuture();
     }
     public static void writeNio() throws IOException, InterruptedException {
-        Path path = Paths.get("/Users/curryzjj/hair-loss/SC/MorphStreamDR/snapshot/text.txt");
+        Path path = Paths.get("/Users/curryzjj/hair-loss/SC/MorphStreamDR/Benchmark/text.txt");
         AsynchronousFileChannel afc = AsynchronousFileChannel.open(path, WRITE,
                 CREATE);
         WriteHandler handler = new WriteHandler();
@@ -50,13 +52,13 @@ public class TextNIOFileWrite {
         Thread.sleep(5000);
     }
     public static void readNioFuture() throws IOException, ClassNotFoundException, ExecutionException, InterruptedException {
-        Path path = Paths.get("/Users/curryzjj/hair-loss/SC/MorphStreamDR/snapshot/text.txt");
+        Path path = Paths.get("/Users/curryzjj/hair-loss/SC/MorphStreamDR/Benchmark/text.txt");
         AsynchronousFileChannel afc = AsynchronousFileChannel.open(path, READ);
         int fileSize = (int) afc.size();
         ByteBuffer dataBuffer = ByteBuffer.allocate(fileSize);
         Future<Integer> result = afc.read(dataBuffer, 0);
         int readBytes = result.get();
-        DataInputView inputView = new SnappyDataInputView(dataBuffer);
+        DataInputView inputView = new XORDataInputView(dataBuffer);
         byte[] object = inputView.readFullyDecompression();
         Object t = Deserialize.Deserialize(object);
         Test tt = (Test) t;
@@ -92,7 +94,7 @@ public class TextNIOFileWrite {
         oos.writeObject(test);
         oos.flush();
         object = baos.toByteArray();
-        DataOutputView dataOutputView = new SnappyDataOutputView();
+        DataOutputView dataOutputView = new XORDataOutputView();
         dataOutputView.writeCompression(object);
         dataOutputView.writeBoolean(true);
         dataOutputView.writeLong(90L);
