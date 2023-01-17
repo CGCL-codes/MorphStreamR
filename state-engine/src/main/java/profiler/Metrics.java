@@ -1,7 +1,9 @@
 package profiler;
 
+import common.io.LocalFS.FileSystem;
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 
+import java.io.File;
 import java.util.*;
 
 import static content.common.CommonMetaTypes.kMaxThreadNum;
@@ -15,6 +17,8 @@ public class Metrics {
     public static int H2_SIZE;
     public static Timer timer = new Timer();
     public static final DescriptiveStatistics usedMemory = new DescriptiveStatistics();
+    public static final DescriptiveStatistics SSDBandwidth = new DescriptiveStatistics();
+    public static final DescriptiveStatistics usedFileSize = new DescriptiveStatistics();
     public static String directory;
     public static String fileNameSuffix;
 
@@ -467,13 +471,32 @@ public class Metrics {
         }
     }
 
-    public static class RuntimeMemory extends TimerTask {
+    public static class RuntimeHardware extends TimerTask {
         int gb = 1024 * 1024 * 1024;
-
+        int mb = 1024 * 1024;
+        int kb = 1024;
+        long pFileSize = 0L;
+        String rootFilePath;
         @Override
         public void run() {
             long UsedMemory = (java.lang.Runtime.getRuntime().totalMemory() - java.lang.Runtime.getRuntime().freeMemory()) / gb;
             usedMemory.addValue(UsedMemory);
+            long FileSize = 0;
+            try {
+                FileSize = FileSystem.getFileSize(new File(rootFilePath));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            if (pFileSize == 0L){
+                pFileSize = FileSize;
+            } else {
+                usedFileSize.addValue((FileSize - pFileSize) / kb);
+                SSDBandwidth.addValue((FileSize - pFileSize) * 1E3 / ( kb * 10 ));// kb / s
+                pFileSize = FileSize;
+            }
+        }
+        public RuntimeHardware(String rootFilePath) {
+            this.rootFilePath = rootFilePath;
         }
     }
 

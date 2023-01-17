@@ -18,4 +18,29 @@ public class FileSystem {
         file.delete();
         return true;
     }
+
+    /**
+     *
+     * @param file
+     * @return File Size
+     * @throws Exception
+     */
+    public static long getFileSize(File file) throws Exception {
+        long size = 0;
+        if (file.isFile()) {
+            if (file.exists()) {
+                size = file.length();
+            }
+        } else {
+            final File[] children = file.listFiles();
+            if (children != null && children.length > 0) {
+                for (final File child : children) {
+                    size += getFileSize(child);
+                }
+            }
+
+        }
+        return size;
+    }
+
 }

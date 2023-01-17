@@ -4,7 +4,6 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
 import common.Runner;
 import common.collections.Configuration;
-import common.collections.OsUtils;
 import common.constants.BaseConstants;
 import common.constants.GrepSumConstants;
 import common.platform.HP_Machine;
@@ -27,10 +26,8 @@ import profiler.MeasureTools;
 import profiler.Metrics;
 import scheduler.struct.OperationChainCommon;
 import topology.TopologySubmitter;
-import utils.AppConfig;
 import utils.SINK_CONTROL;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
 
@@ -168,7 +165,7 @@ public class MorphStreamRunner extends Runner {
 
     private static double runTopologyLocally(Topology topology, Configuration conf) throws InterruptedException {
         if (enable_memory_measurement) {
-            timer.scheduleAtFixedRate(new Metrics.RuntimeMemory(),0,  500);
+            timer.scheduleAtFixedRate(new Metrics.RuntimeHardware(conf.getString("rootFilePath")),0,  10);
         }
         TopologySubmitter submitter = new TopologySubmitter();
         try {

@@ -741,6 +741,56 @@ public class MeasureTools {
             }
         }
     }
+    public static void WriteSSDConsumption() {
+        try {
+            File file = new File(directory + fileNameSuffix + ".ssd");
+            file.mkdirs();
+            if (file.exists()) {
+                try {
+                    file.delete();
+                    file.createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            BufferedWriter w = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
+            w.write("IncreaseFileSize (KB):\n");
+            for (int i = 0; i < usedFileSize.getValues().length; i ++){
+                String output = String.format("%f\t" +
+                                "%-10.4f\t"
+                        , (float) i ,usedFileSize.getValues()[i]);
+                w.write(output + "\n");
+            }
+            w.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public static void WriteSSDBandwidth() {
+        try {
+            File file = new File(directory + fileNameSuffix + ".bandwidth");
+            file.mkdirs();
+            if (file.exists()) {
+                try {
+                    file.delete();
+                    file.createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            BufferedWriter w = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
+            w.write("Bandwidth (kb/s):\n");
+            for (int i = 0; i < SSDBandwidth.getValues().length; i ++){
+                String output = String.format("%f\t" +
+                                "%-10.4f\t"
+                        , (float) i ,SSDBandwidth.getValues()[i]);
+                w.write(output + "\n");
+            }
+            w.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     public static void METRICS_REPORT(int ccOption, int FTOption, int tthread, double throughput, int phase, int shiftRate) {
         WriteThroughputReport(throughput);
         AverageTotalTimeBreakdownReport(tthread);
@@ -756,6 +806,8 @@ public class MeasureTools {
         }
         WriteRuntimePerformance(tthread);
         WriteMemoryConsumption();
+        WriteSSDConsumption();
+        WriteSSDBandwidth();
     }
     public static void METRICS_REPORT_WITH_FAILURE(int ccOption, int FTOption, int tthread, String rootFile) {
         File file = new File(directory + fileNameSuffix + ".overall");
@@ -778,6 +830,8 @@ public class MeasureTools {
         }
         WriteRuntimePerformance(tthread);
         WriteMemoryConsumption();
+        WriteSSDConsumption();
+        WriteSSDBandwidth();
         WriteLastTasks(rootFile, tthread);
     }
 }

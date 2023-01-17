@@ -1,7 +1,5 @@
 package combo.faulttolerance;
 
-import benchmark.DataHolder;
-import combo.SINKCombo;
 import common.CONTROL;
 import common.collections.Configuration;
 import common.collections.OsUtils;
