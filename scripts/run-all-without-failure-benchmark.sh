@@ -14,13 +14,13 @@ function ResetParameters() {
 
   isCyclic=0
   isDynamic=1
-  workloadType="default,unchanging,unchanging,unchanging,Up_skew,Up_skew,Up_skew,Up_PD,Up_PD,Up_PD,Up_abort,Up_abort,Up_abort"
+  workloadType="default,unchanging,unchanging,unchanging,unchanging,unchanging,unchanging,unchanging,unchanging,unchanging,unchanging,unchanging"
   schedulerPool="OG_BFS_A,OG_NS_A,OP_NS_A,OP_NS"
   rootFilePath="${RSTDIR}"
   shiftRate=1
-  totalEvents=`expr $checkpointInterval \* $tthread \* 13 \* $shiftRate`
+  totalEvents=`expr $checkpointInterval \* $tthread \* 12 \* $shiftRate`
 
-  snapshotInterval=2
+  snapshotInterval=3
   arrivalControl=1
   arrivalRate=200
   FTOption=0
