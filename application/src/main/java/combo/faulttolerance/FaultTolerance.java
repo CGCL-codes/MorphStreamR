@@ -7,7 +7,7 @@ import java.util.concurrent.ExecutionException;
 public interface FaultTolerance {
     boolean snapshot(int counter) throws InterruptedException, BrokenBarrierException;
 
-    boolean input_store(long currentOffset) throws IOException;
+    boolean input_store(long currentOffset) throws IOException, ExecutionException, InterruptedException;
 
     boolean input_reload(long snapshotOffset, long redoOffset) throws IOException;
     boolean recoverData() throws IOException, ExecutionException, InterruptedException;

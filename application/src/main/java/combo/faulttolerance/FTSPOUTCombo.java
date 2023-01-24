@@ -3,6 +3,12 @@ package combo.faulttolerance;
 import common.CONTROL;
 import common.collections.Configuration;
 import common.collections.OsUtils;
+import common.io.ByteIO.DataOutputView;
+import common.io.ByteIO.OutputWithCompression.*;
+import common.io.Compressor.NativeCompressor;
+import common.io.Compressor.RLECompressor;
+import common.io.Compressor.SnappyCompressor;
+import common.io.Compressor.XORCompressor;
 import common.param.TxnEvent;
 import components.context.TopologyContext;
 import components.operators.api.TransactionalBolt;
@@ -16,19 +22,29 @@ import execution.runtime.tuple.impl.Marker;
 import execution.runtime.tuple.impl.Tuple;
 import execution.runtime.tuple.impl.msgs.GeneralMsg;
 import org.slf4j.Logger;
+import org.xerial.snappy.Snappy;
+import org.xerial.snappy.SnappyOutputStream;
 import profiler.MeasureTools;
 import profiler.Metrics;
+import utils.FaultToleranceConstants;
 import utils.SOURCE_CONTROL;
 
 import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.AsynchronousFileChannel;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.Random;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import static common.CONTROL.enable_log;
 import static common.Constants.DEFAULT_STREAM_ID;
 import static content.Content.CCOption_SStore;
 import static content.Content.CCOption_TStream;
+import static java.nio.file.StandardOpenOption.WRITE;
+import static java.nio.file.StandardOpenOption.APPEND;
 import static utils.FaultToleranceConstants.FTOption_ISC;
 import static utils.FaultToleranceConstants.FTOption_WSC;
 
@@ -183,6 +199,24 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
         arrivalControl = config.getBoolean("arrivalControl");
         inputStoreRootPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("inputStore");
         inputStoreCurrentPath = inputStoreRootPath + OsUtils.OS_wrapper(Integer.toString(counter));
+        switch(config.getString("compressionAlg")) {
+            case "None":
+                this.compressionType = FaultToleranceConstants.CompressionType.None;
+                this.inputCompressor = new NativeCompressor();
+                break;
+            case "Snappy":
+                this.compressionType = FaultToleranceConstants.CompressionType.Snappy;
+                this.inputCompressor = new SnappyCompressor();
+                break;
+            case "XOR":
+                this.compressionType = FaultToleranceConstants.CompressionType.XOR;
+                this.inputCompressor = new XORCompressor();
+                break;
+            case "RLE":
+                this.compressionType = FaultToleranceConstants.CompressionType.RLE;
+                this.inputCompressor = new RLECompressor();
+                break;
+        }
         isRecovery = config.getBoolean("isRecovery");
         if (isRecovery) {
             remainTime = (long) (config.getInt("failureTime") * 1E6);
@@ -218,7 +252,7 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
         return (counter % snapshot_interval == 0);
     }
     @Override
-    public boolean input_store(long currentOffset) throws IOException {
+    public boolean input_store(long currentOffset) throws IOException, ExecutionException, InterruptedException {
         File file = new File(inputStoreCurrentPath);
         if (!file.exists()) {
             file.mkdirs();
@@ -228,7 +262,7 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
             file.createNewFile();
         BufferedWriter EventBufferedWriter = new BufferedWriter(new FileWriter(file, true));
         for (int i = (int) currentOffset; i < currentOffset + punctuation_interval; i ++) {
-            EventBufferedWriter.write( this.myevents[i] + "\n");
+            EventBufferedWriter.write( inputCompressor.compress(this.myevents[i].toString())+ "\n");
         }
         EventBufferedWriter.close();
         return true;

@@ -3,7 +3,7 @@ package common.io.Compressor;
 import java.text.NumberFormat;
 import java.text.ParseException;
 
-public class RLECompressor {
+public class RLECompressor implements Compressor {
     public static String encode(String in) {
         String outString = "";
         char c = in.charAt(0);
@@ -37,5 +37,15 @@ public class RLECompressor {
             in = in.substring(step+1);
         }
         return outString;
+    }
+
+    @Override
+    public String compress(String in) {
+        return encode(in);
+    }
+
+    @Override
+    public String uncompress(String in) {
+        return decode(in);
     }
 }

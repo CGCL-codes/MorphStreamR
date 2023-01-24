@@ -100,7 +100,7 @@ public class FTSLCombo extends FTSPOUTCombo{
     public void initialize(int thread_Id, int thisTaskId, ExecutionGraph graph) {
 
         super.initialize(thread_Id, thisTaskId, graph);
-        this.inputReload = new SLInputReload(config);
+        this.inputReload = new SLInputReload(config, this.inputCompressor);
         sink.configPrefix = this.getConfigPrefix();
         sink.prepare(config, context, collector);
         _combo_bid_size = combo_bid_size;

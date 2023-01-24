@@ -2,6 +2,7 @@ package common.faulttolerance.inputReload;
 
 import benchmark.DataHolder;
 import common.collections.Configuration;
+import common.io.Compressor.Compressor;
 import common.param.sl.DepositEvent;
 import common.param.sl.TransactionEvent;
 import durability.inputStore.InputReload;
@@ -15,9 +16,10 @@ import java.util.Queue;
 import static common.CONTROL.enable_log;
 
 public class SLInputReload extends InputReload {
-    public SLInputReload(Configuration configuration) {
+    public SLInputReload(Configuration configuration, Compressor inputCompressor) {
         this.tthread = configuration.getInt("tthread");
         this.partitionOffset = configuration.getInt("NUM_ITEMS") / tthread;
+        this.inputCompressor = inputCompressor;
     }
     @Override
     public void reloadInput(BufferedReader reader, Queue<Object> lostEvents, long redoOffset) throws IOException {
@@ -25,7 +27,7 @@ public class SLInputReload extends InputReload {
             reader.readLine();
             redoOffset --;
         }
-        String txn = reader.readLine();
+        String txn = inputCompressor.uncompress(reader.readLine());
         int[] p_bids = new int[tthread];
         while (txn != null) {
             String[] split = txn.split(",");

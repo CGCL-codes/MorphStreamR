@@ -22,12 +22,11 @@ import static java.nio.file.StandardOpenOption.*;
 
 public class TextNIOFileWrite {
     public static void main(String[] args) throws Exception {
-       readNioFuture();
+       writeNio();
     }
     public static void writeNio() throws IOException, InterruptedException {
         Path path = Paths.get("/Users/curryzjj/hair-loss/SC/MorphStreamDR/Benchmark/text.txt");
-        AsynchronousFileChannel afc = AsynchronousFileChannel.open(path, WRITE,
-                CREATE);
+        AsynchronousFileChannel afc = AsynchronousFileChannel.open(path, WRITE, APPEND);
         WriteHandler handler = new WriteHandler();
         ByteBuffer dataBuffer = getDataBuffer();
         Attachment attach = new Attachment();

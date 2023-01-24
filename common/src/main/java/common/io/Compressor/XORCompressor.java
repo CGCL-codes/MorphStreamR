@@ -6,17 +6,16 @@ package common.io.Compressor;
  * 使用场景：
  *   1. 两个变量的互换（不借助第三个变量）
  *   2. 数据的简单加密解密
- * Created by Song on 2017/2/22.
  */
-public class XORCompressor {
+public class XORCompressor implements Compressor {
+    private int key = 0x12;
     /**
      * 固定key方式加解密
      * @param data 原字符串
      * @param key
      * @return
      */
-    public static String encrypt(String data,int key) {
-
+    public static String encrypt(String data, int key) {
         byte[] dataBytes = data.getBytes();
         int length = dataBytes.length;
         for (int i = 0; i < length; i++) {
@@ -24,35 +23,24 @@ public class XORCompressor {
         }
         return new String(dataBytes);
     }
-
-    /**
-     * 不固定key方式加密
-     * @param bytes 原字节数组
-     * @return
-     */
-    public byte[] encrypt(byte[] bytes) {
-        int len = bytes.length;
-        int key = 0x12;
-        for (int i = 0; i < len; i++) {
-            bytes[i] = (byte) (bytes[i] ^ key);
-            key = bytes[i];
+    public static String decrypt(String data, int key) {
+        byte[] dataBytes = data.getBytes();
+        for (int i = dataBytes.length - 1; i > 0; i--) {
+            dataBytes[i] = (byte) (dataBytes[i] ^ dataBytes[i - 1]);
         }
-        return bytes;
+        dataBytes[0] = (byte) (dataBytes[0] ^ key);
+        return new String(dataBytes);
     }
 
-    /**
-     * 不固定key方式解密
-     * @param bytes 原字节数组
-     * @return
-     */
-    public byte[] decrypt(byte[] bytes) {
-        int len = bytes.length;
-        int key = 0x12;
-        for (int i = len - 1; i > 0; i--) {
-            bytes[i] = (byte) (bytes[i] ^ bytes[i - 1]);
-        }
-        bytes[0] = (byte) (bytes[0] ^ key);
-        return bytes;
+
+    @Override
+    public String compress(String in) {
+        return encrypt(in, key);
+    }
+
+    @Override
+    public String uncompress(String in) {
+        return decrypt(in, key);
     }
 }
 

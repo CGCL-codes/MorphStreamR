@@ -57,9 +57,6 @@ public class PartitionWalResources implements LoggingResources {
             case XOR:
                 dataOutputView = new XORDataOutputView();
                 break;
-            case LZ4:
-                dataOutputView = new LZ4DataOutputView();
-                break;
             case RLE:
                 dataOutputView = new RLEDataOutputView();
                 break;

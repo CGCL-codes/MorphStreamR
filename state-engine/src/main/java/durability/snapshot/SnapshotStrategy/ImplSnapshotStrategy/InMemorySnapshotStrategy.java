@@ -92,7 +92,6 @@ public class InMemorySnapshotStrategy implements SnapshotStrategy<InMemoryFullSn
         ByteBuffer dataBuffer = ByteBuffer.allocate(fileSize);
         Future<Integer> result = afc.read(dataBuffer, 0);
         int readBytes = result.get();
-        //TODO:implementation compressionAlg, Different compressionAlg -> different dataInputView
         DataInputView inputView;
         switch (snapshotOptions.getCompressionAlg()) {
             case None:
@@ -103,9 +102,6 @@ public class InMemorySnapshotStrategy implements SnapshotStrategy<InMemoryFullSn
                 break;
             case XOR:
                 inputView = new XORDataInputView(dataBuffer);
-                break;
-            case LZ4:
-                inputView = new LZ4DataInputView(dataBuffer);
                 break;
             case RLE:
                 inputView = new RLEDataInputView(dataBuffer);

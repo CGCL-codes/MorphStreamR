@@ -22,14 +22,10 @@ public class SnapshotOptions {
             case "XOR":
                 this.compressionAlg = FaultToleranceConstants.CompressionType.XOR;
                 break;
-            case "LZ4":
-                this.compressionAlg = FaultToleranceConstants.CompressionType.LZ4;
-                break;
             case "RLE":
                 this.compressionAlg = FaultToleranceConstants.CompressionType.RLE;
                 break;
         }
-
     }
     public int getParallelNum() {
         return parallelNum;

@@ -107,9 +107,6 @@ public class WALManager implements LoggingManager {
                 case XOR:
                     inputView = new XORDataInputView(dataBuffer);
                     break;
-                case LZ4:
-                    inputView = new LZ4DataInputView(dataBuffer);
-                    break;
                 case RLE:
                     inputView = new RLEDataInputView(dataBuffer);
                     break;

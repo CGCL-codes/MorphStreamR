@@ -1,8 +1,10 @@
 package components.operators.api;
 
+import common.io.Compressor.Compressor;
 import durability.inputStore.InputReload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import utils.FaultToleranceConstants;
 
 import java.io.BufferedWriter;
 import java.util.ArrayDeque;
@@ -19,6 +21,8 @@ public abstract class TransactionalSpout extends AbstractSpout implements Checkp
     public long remainTime = 0;
     public String inputStoreRootPath;
     public String inputStoreCurrentPath;
+    public FaultToleranceConstants.CompressionType compressionType;
+    public Compressor inputCompressor;
     public volatile int control = 0;//control how many elements in each epoch.
     public int _combo_bid_size = 1;
     public int counter = 0;
