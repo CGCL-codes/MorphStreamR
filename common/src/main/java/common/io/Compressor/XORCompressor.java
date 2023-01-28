@@ -16,22 +16,23 @@ public class XORCompressor implements Compressor {
      * @return
      */
     public static String encrypt(String data, int key) {
-        byte[] dataBytes = data.getBytes();
-        int length = dataBytes.length;
+        byte[] in = data.getBytes();
+        int length = in.length;
         for (int i = 0; i < length; i++) {
-            dataBytes[i] ^= key;
+            in[i] = (byte) (in[i] ^ key);
+            key = in[i];
         }
-        return new String(dataBytes);
+        return new String(in);
     }
     public static String decrypt(String data, int key) {
-        byte[] dataBytes = data.getBytes();
-        for (int i = dataBytes.length - 1; i > 0; i--) {
-            dataBytes[i] = (byte) (dataBytes[i] ^ dataBytes[i - 1]);
+        byte[] in = data.getBytes();
+        int len = in.length;
+        for (int i = len - 1; i > 0; i--) {
+            in[i] = (byte) (in[i] ^ in[i - 1]);
         }
-        dataBytes[0] = (byte) (dataBytes[0] ^ key);
-        return new String(dataBytes);
+        in[0] = (byte) (in[0] ^ key);
+        return new String(in);
     }
-
 
     @Override
     public String compress(String in) {

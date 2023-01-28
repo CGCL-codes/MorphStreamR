@@ -34,7 +34,7 @@ public class RLECompressor implements Compressor {
             char c = in.charAt(step);
 
             for(int x = 0; x < i; x++ ) { outString += c;}
-            in = in.substring(step+1);
+            in = in.substring(step + 1);
         }
         return outString;
     }
