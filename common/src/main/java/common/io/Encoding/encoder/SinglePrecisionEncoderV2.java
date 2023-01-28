@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream;
 
 import static common.io.Utils.FileConfig.GORILLA_ENCODING_ENDING_FLOAT;
 
-public class SinglePrecisionEncoderV2 extends GorillaEncoderV2{
+public class SinglePrecisionEncoderV2 extends IntGorillaEncoder{
     @Override
     public final void encode(float value, ByteArrayOutputStream out) {
         encode(Float.floatToRawIntBits(value), out);
