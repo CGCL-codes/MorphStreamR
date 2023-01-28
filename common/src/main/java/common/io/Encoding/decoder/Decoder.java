@@ -23,7 +23,85 @@ public abstract class Decoder {
         return type;
     }
     public static Decoder getDecoderByType(Encoding encoding, DataType dataType) {
-        return null;
+        switch (encoding) {
+            case PLAIN:
+                return new PlainDecoder();
+            case RLE:
+                switch (dataType) {
+                    case BOOLEAN:
+                    case INT32:
+                        return new IntRleDecoder();
+                    case INT64:
+                    case VECTOR:
+                        return new LongRleDecoder();
+                    case FLOAT:
+                    case DOUBLE:
+                        return new FloatDecoder(Encoding.valueOf(encoding.toString()), dataType);
+                    default:
+                        throw new DecodingException(String.format(ERROR_MSG, encoding, dataType));
+                }
+            case TS_2DIFF:
+                switch (dataType) {
+                    case INT32:
+                        return new DeltaBinaryDecoder.IntDeltaDecoder();
+                    case INT64:
+                    case VECTOR:
+                        return new DeltaBinaryDecoder.LongDeltaDecoder();
+                    case FLOAT:
+                    case DOUBLE:
+                        return new FloatDecoder(Encoding.valueOf(encoding.toString()), dataType);
+                    default:
+                        throw new DecodingException(String.format(ERROR_MSG, encoding, dataType));
+                }
+            case GORILLA_V1:
+                switch (dataType) {
+                    case FLOAT:
+                        return new SinglePrecisionDecoderV1();
+                    case DOUBLE:
+                        return new DoublePrecisionDecoderV1();
+                    default:
+                        throw new DecodingException(String.format(ERROR_MSG, encoding, dataType));
+                }
+            case REGULAR:
+                switch (dataType) {
+                    case INT32:
+                        return new RegularDataDecoder.IntRegularDecoder();
+                    case INT64:
+                    case VECTOR:
+                        return new RegularDataDecoder.LongRegularDecoder();
+                    default:
+                        throw new DecodingException(String.format(ERROR_MSG, encoding, dataType));
+                }
+            case GORILLA:
+                switch (dataType) {
+                    case FLOAT:
+                        return new SinglePrecisionDecoderV2();
+                    case DOUBLE:
+                        return new DoublePrecisionDecoderV2();
+                    case INT32:
+                        return new IntGorillaDecoder();
+                    case INT64:
+                    case VECTOR:
+                        return new LongGorillaDecoder();
+                    default:
+                        throw new DecodingException(String.format(ERROR_MSG, encoding, dataType));
+                }
+            case DICTIONARY:
+                return new DictionaryDecoder();
+            case ZIGZAG:
+                switch (dataType) {
+                    case INT32:
+                        return new IntZigzagDecoder();
+                    case INT64:
+                        return new LongZigzagDecoder();
+                    default:
+                        throw new DecodingException(String.format(ERROR_MSG, encoding, dataType));
+                }
+            case FREQ:
+                return new FreqDecoder();
+            default:
+                throw new DecodingException(String.format(ERROR_MSG, encoding, dataType));
+        }
     }
     public int readInt(ByteBuffer buffer) {
         throw new DecodingException("Method readInt is not supported by Decoder");
