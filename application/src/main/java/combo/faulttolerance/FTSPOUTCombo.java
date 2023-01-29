@@ -200,21 +200,23 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
         inputStoreRootPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("inputStore");
         inputStoreCurrentPath = inputStoreRootPath + OsUtils.OS_wrapper(Integer.toString(counter));
         switch(config.getString("compressionAlg")) {
+            // XOR GorillaV2
+            // Delta-Delta GorillaV1
+            // Delta DeltaBinary
+            // Rle Rle
+            // Dictionary Dictionary
+            // Zigzag Zigzag
             case "None":
                 this.compressionType = FaultToleranceConstants.CompressionType.None;
-                this.inputCompressor = new NativeCompressor();
                 break;
             case "Snappy":
                 this.compressionType = FaultToleranceConstants.CompressionType.Snappy;
-                this.inputCompressor = new SnappyCompressor();
                 break;
             case "XOR":
                 this.compressionType = FaultToleranceConstants.CompressionType.XOR;
-                this.inputCompressor = new XORCompressor();
                 break;
             case "RLE":
                 this.compressionType = FaultToleranceConstants.CompressionType.RLE;
-                this.inputCompressor = new RLECompressor();
                 break;
         }
         isRecovery = config.getBoolean("isRecovery");
@@ -262,7 +264,7 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
             file.createNewFile();
         BufferedWriter EventBufferedWriter = new BufferedWriter(new FileWriter(file, true));
         for (int i = (int) currentOffset; i < currentOffset + punctuation_interval; i ++) {
-            EventBufferedWriter.write( inputCompressor.compress(this.myevents[i].toString())+ "\n");
+            EventBufferedWriter.write( this.myevents[i].toString() + "\n");
         }
         EventBufferedWriter.close();
         return true;

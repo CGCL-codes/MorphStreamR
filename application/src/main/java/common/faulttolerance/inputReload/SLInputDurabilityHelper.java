@@ -1,7 +1,8 @@
 package common.faulttolerance.inputReload;
 
 import common.collections.Configuration;
-import common.io.Compressor.Compressor;
+import common.io.Encoding.encoder.Encoder;
+import common.io.Enums.Encoding;
 import common.param.sl.DepositEvent;
 import common.param.sl.TransactionEvent;
 import durability.inputStore.InputDurabilityHelper;
@@ -13,10 +14,13 @@ import java.util.HashMap;
 import java.util.Queue;
 
 public class SLInputDurabilityHelper extends InputDurabilityHelper {
-    public SLInputDurabilityHelper(Configuration configuration, int taskId, Compressor inputCompressor) {
+    protected Encoder timestampEncoder;
+    protected Encoder valueEncoder;
+
+    public SLInputDurabilityHelper(Configuration configuration, int taskId, Encoding encodingType) {
         this.tthread = configuration.getInt("tthread");
         this.partitionOffset = configuration.getInt("NUM_ITEMS") / tthread;
-        this.inputCompressor = inputCompressor;
+        this.encodingType = encodingType;
     }
 
     @Override
@@ -30,7 +34,7 @@ public class SLInputDurabilityHelper extends InputDurabilityHelper {
             reader.readLine();
             redoOffset --;
         }
-        String txn = inputCompressor.uncompress(reader.readLine());
+        String txn = reader.readLine();
         int[] p_bids = new int[tthread];
         while (txn != null) {
             String[] split = txn.split(",");
