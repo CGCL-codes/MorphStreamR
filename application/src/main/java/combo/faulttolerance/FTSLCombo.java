@@ -3,8 +3,7 @@ package combo.faulttolerance;
 import benchmark.DataHolder;
 import common.bolts.transactional.sl.*;
 import common.collections.Configuration;
-import common.collections.OsUtils;
-import common.faulttolerance.inputReload.SLInputReload;
+import common.faulttolerance.inputReload.SLInputDurabilityHelper;
 import common.param.TxnEvent;
 import common.param.sl.DepositEvent;
 import common.param.sl.TransactionEvent;
@@ -14,7 +13,6 @@ import execution.runtime.collector.OutputCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
 import java.util.ArrayDeque;
 
 import static common.CONTROL.combo_bid_size;
@@ -100,7 +98,7 @@ public class FTSLCombo extends FTSPOUTCombo{
     public void initialize(int thread_Id, int thisTaskId, ExecutionGraph graph) {
 
         super.initialize(thread_Id, thisTaskId, graph);
-        this.inputReload = new SLInputReload(config, this.inputCompressor);
+        this.inputReload = new SLInputDurabilityHelper(config, thisTaskId,this.inputCompressor);
         sink.configPrefix = this.getConfigPrefix();
         sink.prepare(config, context, collector);
         _combo_bid_size = combo_bid_size;

@@ -1,11 +1,10 @@
 package common.faulttolerance.inputReload;
 
-import benchmark.DataHolder;
 import common.collections.Configuration;
 import common.io.Compressor.Compressor;
 import common.param.sl.DepositEvent;
 import common.param.sl.TransactionEvent;
-import durability.inputStore.InputReload;
+import durability.inputStore.InputDurabilityHelper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,14 +12,18 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Queue;
 
-import static common.CONTROL.enable_log;
-
-public class SLInputReload extends InputReload {
-    public SLInputReload(Configuration configuration, Compressor inputCompressor) {
+public class SLInputDurabilityHelper extends InputDurabilityHelper {
+    public SLInputDurabilityHelper(Configuration configuration, int taskId, Compressor inputCompressor) {
         this.tthread = configuration.getInt("tthread");
         this.partitionOffset = configuration.getInt("NUM_ITEMS") / tthread;
         this.inputCompressor = inputCompressor;
     }
+
+    @Override
+    public void storeInput(Object[] myevents, long currentOffset, int interval, String inputStoreCurrentPath) {
+
+    }
+
     @Override
     public void reloadInput(BufferedReader reader, Queue<Object> lostEvents, long redoOffset) throws IOException {
         while(redoOffset != 0) {

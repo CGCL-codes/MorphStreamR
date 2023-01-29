@@ -1,7 +1,7 @@
 package components.operators.api;
 
 import common.io.Compressor.Compressor;
-import durability.inputStore.InputReload;
+import durability.inputStore.InputDurabilityHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.FaultToleranceConstants;
@@ -9,7 +9,6 @@ import utils.FaultToleranceConstants;
 import java.io.BufferedWriter;
 import java.util.ArrayDeque;
 import java.util.Queue;
-import java.util.concurrent.BrokenBarrierException;
 
 public abstract class TransactionalSpout extends AbstractSpout implements Checkpointable {
     private static final Logger LOG = LoggerFactory.getLogger(TransactionalSpout.class);
@@ -33,7 +32,7 @@ public abstract class TransactionalSpout extends AbstractSpout implements Checkp
     public long bid = 0;//local bid.
     public int empty = 0;//execute without emit.
     public boolean isRecovery = false;
-    public InputReload inputReload;
+    public InputDurabilityHelper inputReload;
     public Queue<Object> recoveryInput = new ArrayDeque<>();
 
     protected TransactionalSpout(Logger log, int fid) {
