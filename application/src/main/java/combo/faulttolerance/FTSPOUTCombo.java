@@ -284,7 +284,7 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
         return needReplay;
     }
     @Override
-    public boolean input_reload(long snapshotOffset, long redoOffset) throws IOException {
+    public boolean input_reload(long snapshotOffset, long redoOffset) throws IOException, ExecutionException, InterruptedException {
         MeasureTools.BEGIN_RELOAD_INPUT_MEASURE(this.taskId);
         File file = new File(inputStoreRootPath + OsUtils.OS_wrapper(Long.toString(snapshotOffset)) + OsUtils.OS_wrapper(taskId + ".input"));
         if(file.exists()) {
