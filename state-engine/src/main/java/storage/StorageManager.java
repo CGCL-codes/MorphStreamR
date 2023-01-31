@@ -28,7 +28,7 @@ public class StorageManager {
     public StorageManager(Configuration configuration) {
         tables = new ConcurrentHashMap<>();
         snapshotStrategy = new InMemorySnapshotStrategy(tables,
-                new SnapshotOptions(configuration.getInt("parallelNum"), configuration.getString("compressionAlg")),
+                new SnapshotOptions(configuration.getInt("parallelNum"), "None"),
                 configuration.getString("rootFilePath") + OsUtils.OS_wrapper("snapshot"));
     }
 

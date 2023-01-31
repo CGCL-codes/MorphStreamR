@@ -158,12 +158,12 @@ public class SLInputDurabilityHelper extends InputDurabilityHelper {
             //Type Compression
             for (int i = (int) currentOffset; i < currentOffset + interval; i ++) {
                 if (myevents[i] instanceof TransactionEvent) {
-                    this.longEncoder.encode(0, baos);
+                    this.intEncoder.encode(0, baos);
                 } else {
-                    this.longEncoder.encode(1, baos);
+                    this.intEncoder.encode(1, baos);
                 }
             }
-            this.longEncoder.flush(baos);
+            this.intEncoder.flush(baos);
             ByteBuffer byteBuffer0 = ByteBuffer.wrap(baos.toByteArray());
             int position0 = baos.size();
             baos.reset();
@@ -173,7 +173,7 @@ public class SLInputDurabilityHelper extends InputDurabilityHelper {
             }
             this.timestampEncoder.flush(baos);
             ByteBuffer byteBuffer1 = ByteBuffer.wrap(baos.toByteArray());
-            int position1 = baos.size();
+            int position1 = baos.size() + position0;
             baos.reset();
             //Bid Compression
             for (int i = (int) currentOffset; i < currentOffset + interval; i ++) {
@@ -181,7 +181,7 @@ public class SLInputDurabilityHelper extends InputDurabilityHelper {
             }
             this.longEncoder.flush(baos);
             ByteBuffer byteBuffer2 = ByteBuffer.wrap(baos.toByteArray());
-            int position2 = baos.size();
+            int position2 = baos.size() + position1;
             baos.reset();
             //sourceAccountId Compression
             for (int i = (int) currentOffset; i < currentOffset + interval; i ++) {
@@ -193,7 +193,7 @@ public class SLInputDurabilityHelper extends InputDurabilityHelper {
             }
             this.intEncoder.flush(baos);
             ByteBuffer byteBuffer3 = ByteBuffer.wrap(baos.toByteArray());
-            int position3 = baos.size();
+            int position3 = baos.size() + position2;
             baos.reset();
             //sourceAssetId Compression
             for (int i = (int) currentOffset; i < currentOffset + interval; i ++) {
@@ -205,7 +205,7 @@ public class SLInputDurabilityHelper extends InputDurabilityHelper {
             }
             this.intEncoder.flush(baos);
             ByteBuffer byteBuffer4 = ByteBuffer.wrap(baos.toByteArray());
-            int position4 = baos.size();
+            int position4 = baos.size() + position3;
             baos.reset();
             //accountValue Compression
             for (int i = (int) currentOffset; i < currentOffset + interval; i ++) {
@@ -217,7 +217,7 @@ public class SLInputDurabilityHelper extends InputDurabilityHelper {
             }
             this.longEncoder.flush(baos);
             ByteBuffer byteBuffer5 = ByteBuffer.wrap(baos.toByteArray());
-            int position5 = baos.size();
+            int position5 = baos.size() + position4;
             baos.reset();
             //bookEntryValue Compression
             for (int i = (int) currentOffset; i < currentOffset + interval; i ++) {
@@ -229,7 +229,7 @@ public class SLInputDurabilityHelper extends InputDurabilityHelper {
             }
             this.longEncoder.flush(baos);
             ByteBuffer byteBuffer6 = ByteBuffer.wrap(baos.toByteArray());
-            int position6 = baos.size();
+            int position6 = baos.size() + position5;
             baos.reset();
             //destinationAccountId Compression only for Transfer event
             for (int i = (int) currentOffset; i < currentOffset + interval; i ++) {
@@ -239,9 +239,8 @@ public class SLInputDurabilityHelper extends InputDurabilityHelper {
             }
             this.intEncoder.flush(baos);
             ByteBuffer byteBuffer7 = ByteBuffer.wrap(baos.toByteArray());
-            int position7 = baos.size();
+            int position7 = baos.size() + position6;
             baos.reset();
-
             //destinationAssetId Compression only for Transfer event
             for (int i = (int) currentOffset; i < currentOffset + interval; i ++) {
                 if (myevents[i] instanceof TransactionEvent) {
@@ -250,7 +249,7 @@ public class SLInputDurabilityHelper extends InputDurabilityHelper {
             }
             this.intEncoder.flush(baos);
             ByteBuffer byteBuffer8 = ByteBuffer.wrap(baos.toByteArray());
-            int position8 = baos.size();
+            int position8 = baos.size() + position7;
             baos.reset();
             SyncFileAppender appender = new SyncFileAppender(true, path);
             ByteBuffer metaBuffer = ByteBuffer.allocate(4 * 10);
