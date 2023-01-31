@@ -3,12 +3,6 @@ package combo.faulttolerance;
 import common.CONTROL;
 import common.collections.Configuration;
 import common.collections.OsUtils;
-import common.io.ByteIO.DataOutputView;
-import common.io.ByteIO.OutputWithCompression.*;
-import common.io.Compressor.NativeCompressor;
-import common.io.Compressor.RLECompressor;
-import common.io.Compressor.SnappyCompressor;
-import common.io.Compressor.XORCompressor;
 import common.param.TxnEvent;
 import components.context.TopologyContext;
 import components.operators.api.TransactionalBolt;
@@ -22,29 +16,20 @@ import execution.runtime.tuple.impl.Marker;
 import execution.runtime.tuple.impl.Tuple;
 import execution.runtime.tuple.impl.msgs.GeneralMsg;
 import org.slf4j.Logger;
-import org.xerial.snappy.Snappy;
-import org.xerial.snappy.SnappyOutputStream;
 import profiler.MeasureTools;
 import profiler.Metrics;
 import utils.FaultToleranceConstants;
 import utils.SOURCE_CONTROL;
 
 import java.io.*;
-import java.nio.ByteBuffer;
-import java.nio.channels.AsynchronousFileChannel;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import java.util.Random;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 import static common.CONTROL.enable_log;
 import static common.Constants.DEFAULT_STREAM_ID;
 import static content.Content.CCOption_SStore;
 import static content.Content.CCOption_TStream;
-import static java.nio.file.StandardOpenOption.WRITE;
-import static java.nio.file.StandardOpenOption.APPEND;
 import static utils.FaultToleranceConstants.FTOption_ISC;
 import static utils.FaultToleranceConstants.FTOption_WSC;
 
@@ -209,14 +194,26 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
             case "None":
                 this.compressionType = FaultToleranceConstants.CompressionType.None;
                 break;
-            case "Snappy":
-                this.compressionType = FaultToleranceConstants.CompressionType.Snappy;
-                break;
             case "XOR":
                 this.compressionType = FaultToleranceConstants.CompressionType.XOR;
                 break;
+            case "Delta2Delta":
+                this.compressionType = FaultToleranceConstants.CompressionType.Delta2Delta;
+                break;
+            case "Delta":
+                this.compressionType = FaultToleranceConstants.CompressionType.Delta;
+                break;
             case "RLE":
                 this.compressionType = FaultToleranceConstants.CompressionType.RLE;
+                break;
+            case "Dictionary":
+                this.compressionType = FaultToleranceConstants.CompressionType.Dictionary;
+                break;
+            case "Snappy":
+                this.compressionType = FaultToleranceConstants.CompressionType.Snappy;
+                break;
+            case "Zigzag":
+                this.compressionType = FaultToleranceConstants.CompressionType.Zigzag;
                 break;
         }
         isRecovery = config.getBoolean("isRecovery");
@@ -255,18 +252,7 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
     }
     @Override
     public boolean input_store(long currentOffset) throws IOException, ExecutionException, InterruptedException {
-        File file = new File(inputStoreCurrentPath);
-        if (!file.exists()) {
-            file.mkdirs();
-        }
-        file = new File(inputStoreCurrentPath + OsUtils.OS_wrapper(taskId + ".input"));
-        if (!file.exists())
-            file.createNewFile();
-        BufferedWriter EventBufferedWriter = new BufferedWriter(new FileWriter(file, true));
-        for (int i = (int) currentOffset; i < currentOffset + punctuation_interval; i ++) {
-            EventBufferedWriter.write( this.myevents[i].toString() + "\n");
-        }
-        EventBufferedWriter.close();
+        this.inputDurabilityHelper.storeInput(this.myevents, currentOffset, punctuation_interval, inputStoreCurrentPath);
         return true;
     }
     @Override
@@ -302,8 +288,7 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
         MeasureTools.BEGIN_RELOAD_INPUT_MEASURE(this.taskId);
         File file = new File(inputStoreRootPath + OsUtils.OS_wrapper(Long.toString(snapshotOffset)) + OsUtils.OS_wrapper(taskId + ".input"));
         if(file.exists()) {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
-            inputReload.reloadInput(reader, recoveryInput, redoOffset);
+            inputDurabilityHelper.reloadInput(file, recoveryInput, redoOffset);
             MeasureTools.END_RELOAD_INPUT_MEASURE(this.taskId);
             return true;
         } else {

@@ -1,7 +1,5 @@
 package components.operators.api;
 
-import common.io.Compressor.Compressor;
-import common.io.Enums.Encoding;
 import durability.inputStore.InputDurabilityHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +20,6 @@ public abstract class TransactionalSpout extends AbstractSpout implements Checkp
     public String inputStoreRootPath;
     public String inputStoreCurrentPath;
     public FaultToleranceConstants.CompressionType compressionType;
-    public Encoding encodingType;
     public volatile int control = 0;//control how many elements in each epoch.
     public int _combo_bid_size = 1;
     public int counter = 0;
@@ -33,7 +30,7 @@ public abstract class TransactionalSpout extends AbstractSpout implements Checkp
     public long bid = 0;//local bid.
     public int empty = 0;//execute without emit.
     public boolean isRecovery = false;
-    public InputDurabilityHelper inputReload;
+    public InputDurabilityHelper inputDurabilityHelper;
     public Queue<Object> recoveryInput = new ArrayDeque<>();
 
     protected TransactionalSpout(Logger log, int fid) {

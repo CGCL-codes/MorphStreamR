@@ -12,7 +12,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousFileChannel;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -21,8 +20,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import static java.nio.file.StandardOpenOption.READ;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class InputDecoderTest {
     public class InputTest{
