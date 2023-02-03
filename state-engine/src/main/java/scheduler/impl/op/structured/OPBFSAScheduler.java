@@ -43,6 +43,8 @@ public class OPBFSAScheduler<Context extends OPSAContext> extends OPBFSScheduler
             SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
             //all threads come to the current level.
             if (needAbortHandling.get()) {
+                //TODO: if need abort, then the time spent on following level is abort time(for eager abort handling)
+                //TODO: also we can tracking abort bid here
                 if (enable_log) LOG.debug("check abort: " + context.thisThreadId + " | " + needAbortHandling.get());
                 abortHandling(context);
             }

@@ -72,6 +72,7 @@ public class OGSContext extends OGSchedulerContext {
         int localMaxDLevel = 0;
         int dependencyLevel;
         for (OperationChain oc : ocs) {
+            //TODO: we can track bid for different layer here
             if (oc.getOperations().isEmpty()) {
                 continue;
             }
