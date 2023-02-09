@@ -54,6 +54,8 @@ public class OPNSScheduler<Context extends OPNSContext> extends OPScheduler<Cont
         } while (!FINISHED(context));
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
         if (needAbortHandling) {
+            //TODO: if need abort, then following time is abort time(for lazy abort handling)
+            //TODO: also we can tracking abort bid here
             if (enable_log) {
                 log.info("need abort handling, rollback and redo");
             }

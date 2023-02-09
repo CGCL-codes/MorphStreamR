@@ -64,6 +64,7 @@ public class PartitionStateManagerWithAbort implements OperationStateListener, R
 
     public void handleStateTransitions() {
 //        inTransition.compareAndSet(false, true);
+        //TODO:How to measure abort time
         OperationSignal signal = opSignalQueue.poll();
         while (signal != null) {
             Operation operation = signal.getTargetOperation();
