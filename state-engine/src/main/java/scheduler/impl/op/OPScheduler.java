@@ -84,10 +84,9 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
      * @param clean
      */
     public void execute(Operation operation, long mark_ID, boolean clean) {
-//        log.trace("++++++execute: " + operation);
         // if the operation is in state aborted or committable or committed, we can bypass the execution
         if (operation.getOperationState().equals(MetaTypes.OperationStateType.ABORTED) || operation.isFailed) {
-            //otherwise, skip (those +already been tagged as aborted).
+            //otherwise, skip (those already been tagged as aborted).
             return;
         }
         int success;
@@ -137,7 +136,7 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
         } else if (operation.accessType.equals(READ_WRITE_COND_READN)) {
             success = operation.success[0];
             GrepSum_Fun(operation, mark_ID, clean);
-            // check whether needs to return a read results of the operation
+            // check whether it needs to return a read results of the operation
             if (operation.record_ref != null) {
                 operation.record_ref.setRecord(operation.d_record.content_.readPreValues(operation.bid));//read the resulting tuple.
             }

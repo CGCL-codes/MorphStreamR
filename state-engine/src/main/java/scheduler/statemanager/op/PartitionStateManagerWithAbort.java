@@ -2,6 +2,7 @@ package scheduler.statemanager.op;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import profiler.MeasureTools;
 import scheduler.impl.op.nonstructured.OPNSAScheduler;
 import scheduler.struct.MetaTypes.DependencyType;
 import scheduler.struct.MetaTypes.OperationStateType;
@@ -14,7 +15,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import static common.CONTROL.enable_log;
 
 /**
- * Local to every TPGscheduler context.
+ * Local to every TPG scheduler context.
  */
 public class PartitionStateManagerWithAbort implements OperationStateListener, Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(PartitionStateManagerWithAbort.class);
@@ -63,7 +64,6 @@ public class PartitionStateManagerWithAbort implements OperationStateListener, R
     }
 
     public void handleStateTransitions() {
-//        inTransition.compareAndSet(false, true);
         //TODO:How to measure abort time
         OperationSignal signal = opSignalQueue.poll();
         while (signal != null) {
@@ -73,11 +73,17 @@ public class PartitionStateManagerWithAbort implements OperationStateListener, R
             } else if (signal instanceof OnParentUpdatedSignal) {
                 onParentExecutedTransition(operation, (OnParentUpdatedSignal) signal);
             } else if (signal instanceof OnHeaderStartAbortHandlingSignal) {
+                MeasureTools.BEGIN_SCHEDULE_ABORT_TIME_MEASURE(operation.context.thisThreadId);
                 onHeaderStartAbortHandlingTransition(operation);
+                MeasureTools.END_SCHEDULE_ABORT_TIME_MEASURE(operation.context.thisThreadId);
             } else if (signal instanceof OnNeedAbortHandlingSignal) {
+                MeasureTools.BEGIN_SCHEDULE_ABORT_TIME_MEASURE(operation.context.thisThreadId);
                 onAbortHandlingTransition(operation, (OnNeedAbortHandlingSignal) signal);
+                MeasureTools.END_SCHEDULE_ABORT_TIME_MEASURE(operation.context.thisThreadId);
             } else if (signal instanceof OnRollbackAndRedoSignal) {
+                MeasureTools.BEGIN_SCHEDULE_ABORT_TIME_MEASURE(operation.context.thisThreadId);
                 onRollbackAndRedoTransition(operation, (OnRollbackAndRedoSignal) signal);
+                MeasureTools.END_SCHEDULE_ABORT_TIME_MEASURE(operation.context.thisThreadId);
             }else if (signal instanceof OnRootSignal) {
                 onRootTransition(operation);
             }
@@ -154,6 +160,7 @@ public class PartitionStateManagerWithAbort implements OperationStateListener, R
             // READY -> READY, must, do nothing
             // ABORTED -> ABORTED, do nothing
             if (operation.getOperationState().equals(OperationStateType.EXECUTED)) {
+                MeasureTools.SCHEDULE_REDO_COUNT_MEASURE(operation.context.thisThreadId);
                 operation.stateTransition(OperationStateType.READY);
                 readyAction(operation);
                 executableTaskListener.onOPRollbacked(operation);
@@ -177,6 +184,7 @@ public class PartitionStateManagerWithAbort implements OperationStateListener, R
             operation.updateDependencies(dependencyType, parentState);
             operation.stateTransition(OperationStateType.BLOCKED);
             if (operation.getOperationState().equals(OperationStateType.EXECUTED)) {
+                MeasureTools.SCHEDULE_REDO_COUNT_MEASURE(operation.context.thisThreadId);
                 executableTaskListener.onOPRollbacked(operation);
                 // notify its children to rollback, otherwise just rollback its own state
                 notifyChildrenRollbackAndRedo(operation, OperationStateType.BLOCKED, OperationStateType.EXECUTED);
@@ -198,7 +206,7 @@ public class PartitionStateManagerWithAbort implements OperationStateListener, R
     }
 
     private void executedAction(Operation operation) {
-        // put child to the targeting state manager state transitiion queue.
+        // put child to the targeting state manager state transition queue.
         notifyChildrenExecuted(operation);
         executableTaskListener.onOPFinalized(operation);
     }

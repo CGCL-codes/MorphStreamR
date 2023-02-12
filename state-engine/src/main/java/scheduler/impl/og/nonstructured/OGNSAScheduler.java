@@ -17,7 +17,6 @@ public class OGNSAScheduler extends AbstractOGNSScheduler<OGNSAContext> {
 
     @Override
     public void INITIALIZE(OGNSAContext context) {
-//        tpg.constructTPG(context);
         tpg.firstTimeExploreTPG(context);
         context.partitionStateManager.initialize(executableTaskListener);
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);

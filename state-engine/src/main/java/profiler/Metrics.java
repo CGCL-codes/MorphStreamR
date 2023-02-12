@@ -33,19 +33,20 @@ public class Metrics {
     }
 
     public static void RECORD_SCHEDULE_TIME(int thread_id, int num_events) {
-        double explore_time = (Scheduler.Explore[thread_id] - Scheduler.Useful[thread_id]) / (double) num_events;
-//        double explore_time = (Scheduler.Explore[thread_id]) / (double) num_events;
+        double explore_time = (Scheduler.Explore[thread_id] - Scheduler.Useful[thread_id] - Scheduler.Abort[thread_id]) / (double) num_events;
+        double useful_time = (Scheduler.Useful[thread_id] * (Scheduler.UsefulCount[thread_id] - Scheduler.RedoCount[thread_id]) / (double) Scheduler.UsefulCount[thread_id]) / (double) num_events;
+        double abort_time = (Scheduler.Abort[thread_id] + Scheduler.Useful[thread_id] * Scheduler.RedoCount[thread_id] / (double) Scheduler.UsefulCount[thread_id]) / (double) num_events;
         double next_time = Scheduler.Next[thread_id] / (double) num_events;
-        double useful_time = Scheduler.Useful[thread_id] / (double) num_events;
         double construct_time = Scheduler.Construct[thread_id] / (double) num_events;
         double notify_time = Scheduler.Notify[thread_id] / (double) num_events;
         double first_explore_time = Scheduler.FirstExplore[thread_id] / (double) num_events;
         double caching_time = Scheduler.Caching[thread_id] / (double) num_events;
         double switch_time = Scheduler.SchedulerSwitch[thread_id] / (double) num_events;
         if (!RecoveryPerformance.stopRecovery[thread_id]) {
-            RecoveryPerformance.Explore[thread_id] = RecoveryPerformance.Explore[thread_id] + Scheduler.Explore[thread_id] - Scheduler.Useful[thread_id];
+            RecoveryPerformance.Explore[thread_id] = RecoveryPerformance.Explore[thread_id] + Scheduler.Explore[thread_id] - Scheduler.Useful[thread_id] - Scheduler.Abort[thread_id];
             RecoveryPerformance.Next[thread_id] = RecoveryPerformance.Next[thread_id] + Scheduler.Next[thread_id];
-            RecoveryPerformance.Useful[thread_id] = RecoveryPerformance.Useful[thread_id] + Scheduler.Useful[thread_id];
+            RecoveryPerformance.Useful[thread_id] = RecoveryPerformance.Useful[thread_id] + (Scheduler.Useful[thread_id] * (Scheduler.UsefulCount[thread_id] - Scheduler.RedoCount[thread_id]) / Scheduler.UsefulCount[thread_id]);
+            RecoveryPerformance.Abort[thread_id] = RecoveryPerformance.Abort[thread_id] + (Scheduler.Abort[thread_id] + Scheduler.Useful[thread_id] * Scheduler.RedoCount[thread_id] / Scheduler.UsefulCount[thread_id]);
             RecoveryPerformance.Construct[thread_id] = RecoveryPerformance.Construct[thread_id] + Scheduler.Construct[thread_id];
             RecoveryPerformance.Notify[thread_id] = RecoveryPerformance.Notify[thread_id] + Scheduler.Notify[thread_id];
             RecoveryPerformance.FirstExplore[thread_id] = RecoveryPerformance.FirstExplore[thread_id] + Scheduler.FirstExplore[thread_id];
@@ -55,6 +56,7 @@ public class Metrics {
             Scheduler_Record.Explore[thread_id].addValue(explore_time);
             Scheduler_Record.Next[thread_id].addValue(next_time);
             Scheduler_Record.Useful[thread_id].addValue(useful_time);
+            Scheduler_Record.Abort[thread_id].addValue(abort_time);
             Scheduler_Record.Construct[thread_id].addValue(construct_time);
             Scheduler_Record.Notify[thread_id].addValue(notify_time);
             Scheduler_Record.FirstExplore[thread_id].addValue(first_explore_time);
@@ -153,7 +155,6 @@ public class Metrics {
     }
 
     public static void COMPUTE_ABORT_START_TIME(int thread_id) {
-
         TxnRuntime.AbortStart[thread_id] = System.nanoTime();
     }
 
@@ -241,6 +242,22 @@ public class Metrics {
 
     public static void COMPUTE_SCHEDULE_USEFUL(int thread_id) {
         Scheduler.Useful[thread_id] += System.nanoTime() - Scheduler.UsefulStart[thread_id];
+        Scheduler.UsefulCount[thread_id] ++;
+    }
+
+    public static void COMPUTE_SCHEDULE_ABORT_START(int thread_id) {
+        Scheduler.isAbort[thread_id] = true;
+        Scheduler.AbortStart[thread_id] = System.nanoTime();
+    }
+
+    public static void COMPUTE_SCHEDULE_ABORT(int thread_id) {
+        if (Scheduler.isAbort[thread_id]) {
+            Scheduler.Abort[thread_id] += System.nanoTime() - Scheduler.AbortStart[thread_id];
+            Scheduler.isAbort[thread_id] = false;
+        }
+    }
+    public static void COMPUTE_SCHEDULE_REDO_COUNT(int thread_id) {
+        Scheduler.RedoCount[thread_id] ++;
     }
 
     public static void COMPUTE_CONSTRUCT_START(int thread_id) {
@@ -283,7 +300,7 @@ public class Metrics {
         Scheduler.Notify[thread_id] += System.nanoTime() - Scheduler.NotifyStart[thread_id];
     }
 
-    static class TxnRuntime {
+    static class  TxnRuntime {
         public static long[] IndexStart = new long[kMaxThreadNum];
         public static long[] Index = new long[kMaxThreadNum];
         public static long[] WaitStart = new long[kMaxThreadNum];
@@ -391,6 +408,10 @@ public class Metrics {
         public static long[] Next = new long[kMaxThreadNum];
         public static long[] UsefulStart = new long[kMaxThreadNum];
         public static long[] Useful = new long[kMaxThreadNum];
+        public static int[] UsefulCount = new int[kMaxThreadNum];//Used to measure abort for non-structured scheduler(OPNSA, OGNSA)
+        public static long[] AbortStart = new long[kMaxThreadNum];
+        public static long[] Abort = new long[kMaxThreadNum];
+        public static int[] RedoCount = new int[kMaxThreadNum];//Used to measure abort for non-structured scheduler(OPNSA, OGNSA)
         public static long[] Explore = new long[kMaxThreadNum];
         public static long[] ExploreStart = new long[kMaxThreadNum];
         public static long[] ConstructStart = new long[kMaxThreadNum];
@@ -403,6 +424,7 @@ public class Metrics {
         public static long[] Caching = new long[kMaxThreadNum];
         public static long[] SchedulerSwitchStart = new long[kMaxThreadNum];
         public static long[] SchedulerSwitch = new long[kMaxThreadNum];
+        public static boolean[] isAbort = new boolean[kMaxThreadNum];
 
 
         public static void Initialize() {
@@ -411,6 +433,8 @@ public class Metrics {
                 Next[i] = 0;
                 UsefulStart[i] = 0;
                 Useful[i] = 0;
+                AbortStart[i] = 0;
+                Abort[i] = 0;
                 ExploreStart[i] = 0;
                 Explore[i] = 0;
                 ConstructStart[i] = 0;
@@ -423,6 +447,9 @@ public class Metrics {
                 Caching[i] = 0;
                 SchedulerSwitchStart[i] = 0;
                 SchedulerSwitch[i] = 0;
+                isAbort[i] = false;
+                UsefulCount[i] = 0;
+                RedoCount[i] = 0;
             }
         }
 
@@ -431,6 +458,8 @@ public class Metrics {
             Next[i] = 0;
             UsefulStart[i] = 0;
             Useful[i] = 0;
+            AbortStart[i] = 0;
+            Abort[i] = 0;
             ExploreStart[i] = 0;
             Explore[i] = 0;
             ConstructStart[i] = 0;
@@ -443,18 +472,22 @@ public class Metrics {
             Caching[i] = 0;
             SchedulerSwitchStart[i] = 0;
             SchedulerSwitch[i] = 0;
+            isAbort[i] = false;
+            UsefulCount[i] = 0;
+            RedoCount[i] = 0;
         }
     }
 
     static class Scheduler_Record {
-        public static DescriptiveStatistics[] Next = new DescriptiveStatistics[kMaxThreadNum];//NEXT.
-        public static DescriptiveStatistics[] Explore = new DescriptiveStatistics[kMaxThreadNum];//EXPLORE.
-        public static DescriptiveStatistics[] Useful = new DescriptiveStatistics[kMaxThreadNum];//useful_work time.
-        public static DescriptiveStatistics[] Construct = new DescriptiveStatistics[kMaxThreadNum];//useful_work time.
-        public static DescriptiveStatistics[] Notify = new DescriptiveStatistics[kMaxThreadNum];//useful_work time.
-        public static DescriptiveStatistics[] FirstExplore = new DescriptiveStatistics[kMaxThreadNum];//useful_work time.
-        public static DescriptiveStatistics[] Caching = new DescriptiveStatistics[kMaxThreadNum];//useful_work time.
-        public static DescriptiveStatistics[] SchedulerSwitch = new DescriptiveStatistics[kMaxThreadNum];//SchedulerSwitch time.
+        public static DescriptiveStatistics[] Next = new DescriptiveStatistics[kMaxThreadNum];//Next time.
+        public static DescriptiveStatistics[] Explore = new DescriptiveStatistics[kMaxThreadNum];//Explore time.
+        public static DescriptiveStatistics[] Useful = new DescriptiveStatistics[kMaxThreadNum];//Useful_work time.
+        public static DescriptiveStatistics[] Abort = new DescriptiveStatistics[kMaxThreadNum];//Abort time.
+        public static DescriptiveStatistics[] Construct = new DescriptiveStatistics[kMaxThreadNum];//Construction time.
+        public static DescriptiveStatistics[] Notify = new DescriptiveStatistics[kMaxThreadNum];//Notify time.
+        public static DescriptiveStatistics[] FirstExplore = new DescriptiveStatistics[kMaxThreadNum];//First explore time.
+        public static DescriptiveStatistics[] Caching = new DescriptiveStatistics[kMaxThreadNum];//Caching time.
+        public static DescriptiveStatistics[] SchedulerSwitch = new DescriptiveStatistics[kMaxThreadNum];//Scheduler-switch time.
 
 
         public static void Initialize() {
@@ -462,6 +495,7 @@ public class Metrics {
                 Next[i] = new DescriptiveStatistics();
                 Explore[i] = new DescriptiveStatistics();
                 Useful[i] = new DescriptiveStatistics();
+                Abort[i] = new DescriptiveStatistics();
                 Construct[i] = new DescriptiveStatistics();
                 Notify[i] = new DescriptiveStatistics();
                 FirstExplore[i] = new DescriptiveStatistics();
@@ -551,6 +585,7 @@ public class Metrics {
         public static long[] Next = new long[kMaxThreadNum];//Next.
         public static long[] Explore = new long[kMaxThreadNum];//Explore.
         public static long[] Useful = new long[kMaxThreadNum];//Useful_work.
+        public static long[] Abort = new long[kMaxThreadNum];//Abort.
         public static long[] Construct = new long[kMaxThreadNum];//Construction.
         public static long[] Notify = new long[kMaxThreadNum];//Notify.
         public static long[] FirstExplore = new long[kMaxThreadNum];//First explore.
@@ -577,6 +612,7 @@ public class Metrics {
                 Next[i] = 0;
                 Explore[i] = 0;
                 Useful[i] = 0;
+                Abort[i] = 0;
                 Construct[i] = 0;
                 Notify[i] = 0;
                 FirstExplore[i] = 0;

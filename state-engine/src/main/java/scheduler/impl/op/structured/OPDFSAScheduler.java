@@ -15,6 +15,8 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static common.CONTROL.enable_log;
+import static profiler.MeasureTools.BEGIN_SCHEDULE_ABORT_TIME_MEASURE;
+import static profiler.MeasureTools.END_SCHEDULE_ABORT_TIME_MEASURE;
 
 public class OPDFSAScheduler<Context extends OPSAContext> extends OPDFSScheduler<Context> {
     private static final Logger LOG = LoggerFactory.getLogger(OPDFSAScheduler.class);
@@ -40,7 +42,9 @@ public class OPDFSAScheduler<Context extends OPSAContext> extends OPDFSScheduler
         Operation op = Next(context);
         while (op == null) {
             // current thread finishes the current level
+            END_SCHEDULE_ABORT_TIME_MEASURE(context.thisThreadId);
             if (needAbortHandling.get()) {
+                BEGIN_SCHEDULE_ABORT_TIME_MEASURE(context.thisThreadId);
                 abortHandling(context);
             }
             if (context.finished())

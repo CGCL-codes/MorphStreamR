@@ -55,7 +55,6 @@ public class PartitionStateManager implements OperationStateListener, Runnable {
     }
 
     public void handleStateTransitions() {
-//        inTransition.compareAndSet(false, true);
         //TODO: log the operations to notify during exploration
         OperationSignal signal = opSignalQueue.poll();
         while (signal != null) {

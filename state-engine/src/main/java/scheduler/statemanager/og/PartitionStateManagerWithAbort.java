@@ -1,5 +1,6 @@
 package scheduler.statemanager.og;
 
+import profiler.MeasureTools;
 import scheduler.context.og.OGNSAContext;
 import scheduler.impl.og.nonstructured.OGNSAScheduler;
 import scheduler.signal.oc.*;
@@ -68,11 +69,17 @@ public class PartitionStateManagerWithAbort implements Runnable, OperationChainS
             } else if (ocSignal instanceof OnParentExecutedSignal) {
                 ocParentExecutedTransition(operationChain);
             } else if (ocSignal instanceof OnNeedAbortHandlingSignal) {
+                MeasureTools.BEGIN_SCHEDULE_ABORT_TIME_MEASURE(operationChain.context.thisThreadId);
                 ocAbortHandlingTransition(operationChain, ((OnNeedAbortHandlingSignal) ocSignal).getOperation());
+                MeasureTools.END_SCHEDULE_ABORT_TIME_MEASURE(operationChain.context.thisThreadId);
             } else if (ocSignal instanceof OnRollbackAndRedoSignal) {
+                MeasureTools.BEGIN_SCHEDULE_ABORT_TIME_MEASURE(operationChain.context.thisThreadId);
                 ocRollbackAndRedoTransition(operationChain);
+                MeasureTools.END_SCHEDULE_ABORT_TIME_MEASURE(operationChain.context.thisThreadId);
             } else if (ocSignal instanceof OnHeaderStartAbortHandlingSignal) {
+                MeasureTools.BEGIN_SCHEDULE_ABORT_TIME_MEASURE(operationChain.context.thisThreadId);
                 ocHeaderStartAbortHandlingTransition(operationChain, ((OnHeaderStartAbortHandlingSignal) ocSignal).getOperation());
+                MeasureTools.END_SCHEDULE_ABORT_TIME_MEASURE(operationChain.context.thisThreadId);
             }
             ocSignal = ocSignalQueue.poll();
         }
@@ -123,7 +130,6 @@ public class PartitionStateManagerWithAbort implements Runnable, OperationChainS
         abortedOp.stateTransition(OperationStateType.ABORTED);
         assert operationChain.getOperations().contains(abortedOp);
         if (!abortedOp.isFailed) {
-//            System.out.println(abortedOp);
             for (Operation operation : operationChain.getOperations()) {
                 if (!operation.getOperationState().equals(OperationStateType.ABORTED)) {
                     operation.stateTransition(OperationStateType.BLOCKED);
@@ -162,6 +168,8 @@ public class PartitionStateManagerWithAbort implements Runnable, OperationChainS
         for (Operation operation : operationChain.getOperations()) {
             if (!operation.getOperationState().equals(OperationStateType.ABORTED))
                 operation.stateTransition(OperationStateType.BLOCKED);
+            if (operation.getOperationState().equals(OperationStateType.EXECUTED))
+                MeasureTools.SCHEDULE_REDO_COUNT_MEASURE(operation.context.thisThreadId);
         }
         if (operationChain.isExecuted) {
             operationChain.isExecuted = false;

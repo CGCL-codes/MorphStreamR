@@ -15,6 +15,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static common.CONTROL.enable_log;
 import static java.lang.Integer.min;
+import static profiler.MeasureTools.BEGIN_SCHEDULE_ABORT_TIME_MEASURE;
+import static profiler.MeasureTools.END_SCHEDULE_ABORT_TIME_MEASURE;
 
 public class OPBFSAScheduler<Context extends OPSAContext> extends OPBFSScheduler<Context> {
     private static final Logger LOG = LoggerFactory.getLogger(OPBFSAScheduler.class);
@@ -41,10 +43,10 @@ public class OPBFSAScheduler<Context extends OPSAContext> extends OPBFSScheduler
         Operation next = Next(context);
         while (next == null && !context.finished()) {
             SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
-            //all threads come to the current level.
+            END_SCHEDULE_ABORT_TIME_MEASURE(context.thisThreadId);//if it needs abort, then the time spent on following level is abort time
             if (needAbortHandling.get()) {
-                //TODO: if need abort, then the time spent on following level is abort time(for eager abort handling)
                 //TODO: also we can tracking abort bid here
+                BEGIN_SCHEDULE_ABORT_TIME_MEASURE(context.thisThreadId);
                 if (enable_log) LOG.debug("check abort: " + context.thisThreadId + " | " + needAbortHandling.get());
                 abortHandling(context);
             }
@@ -54,7 +56,9 @@ public class OPBFSAScheduler<Context extends OPSAContext> extends OPBFSScheduler
         }
         if (context.finished()) {
             SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
+            END_SCHEDULE_ABORT_TIME_MEASURE(context.thisThreadId);//if it needs abort, then the time spent on following level is abort time
             if (needAbortHandling.get()) {
+                BEGIN_SCHEDULE_ABORT_TIME_MEASURE(context.thisThreadId);
                 if (enable_log)
                     LOG.debug("aborted after all ocs explored: " + context.thisThreadId + " | " + needAbortHandling.get());
                 abortHandling(context);
@@ -86,8 +90,6 @@ public class OPBFSAScheduler<Context extends OPSAContext> extends OPBFSScheduler
             }
         } while (true);
         MeasureTools.END_SCHEDULE_NEXT_TIME_MEASURE(threadId);
-
-//        MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(threadId);
         for (Operation operation : context.batchedOperations) {
             MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(threadId);
             execute(operation, mark_ID, false);
@@ -101,7 +103,6 @@ public class OPBFSAScheduler<Context extends OPSAContext> extends OPBFSScheduler
             MeasureTools.END_NOTIFY_TIME_MEASURE(threadId);
             checkTransactionAbort(remove);
         }
-//        MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(threadId);
     }
 
     protected void checkTransactionAbort(Operation operation) {

@@ -13,6 +13,8 @@ import utils.SOURCE_CONTROL;
 import java.util.ArrayList;
 
 import static common.CONTROL.enable_log;
+import static profiler.MeasureTools.BEGIN_SCHEDULE_ABORT_TIME_MEASURE;
+import static profiler.MeasureTools.END_SCHEDULE_ABORT_TIME_MEASURE;
 
 public abstract class OGSScheduler<Context extends OGSContext> extends OGScheduler<Context> {
     private static final Logger log = LoggerFactory.getLogger(OGSScheduler.class);
@@ -79,7 +81,7 @@ public abstract class OGSScheduler<Context extends OGSContext> extends OGSchedul
         } while (!FINISHED(context));
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
         if (needAbortHandling) {
-            //TODO: if need abort, then following time is abort time(for lazy abort handling)
+            BEGIN_SCHEDULE_ABORT_TIME_MEASURE(context.thisThreadId);
             //TODO: also we can tracking abort bid here
             if (enable_log) {
                 log.info("need abort handling, rollback and redo");
@@ -89,6 +91,7 @@ public abstract class OGSScheduler<Context extends OGSContext> extends OGSchedul
                 EXPLORE(context);
                 PROCESS(context, mark_ID);
             } while (!FINISHED(context));
+            END_SCHEDULE_ABORT_TIME_MEASURE(context.thisThreadId);
         }
         RESET(context);
     }

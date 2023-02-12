@@ -15,6 +15,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static common.CONTROL.enable_log;
 import static java.lang.Integer.min;
+import static profiler.MeasureTools.BEGIN_SCHEDULE_ABORT_TIME_MEASURE;
+import static profiler.MeasureTools.END_SCHEDULE_ABORT_TIME_MEASURE;
 
 /**
  * The scheduler based on TPG, this is to be invoked when the queue is empty of each thread, it works as follows:
@@ -38,9 +40,10 @@ public class OGBFSAScheduler extends AbstractOGBFSScheduler<OGSAContext> {
         OperationChain next = Next(context);
         while (next == null && !context.exploreFinished()) {
             SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
+            END_SCHEDULE_ABORT_TIME_MEASURE(context.thisThreadId);
             //all threads come to the current level.
             if (needAbortHandling.get()) {
-                //TODO: if need abort, then the time spent on following level is abort time(for eager abort handling)
+                BEGIN_SCHEDULE_ABORT_TIME_MEASURE(context.thisThreadId);//if it needs abort, then the time spent on following level is abort time(for eager abort handling)
                 //TODO: also we can tracking abort bid here
                 if (enable_log) LOG.debug("check abort: " + context.thisThreadId + " | " + needAbortHandling.get());
                 abortHandling(context);
@@ -58,7 +61,9 @@ public class OGBFSAScheduler extends AbstractOGBFSScheduler<OGSAContext> {
 //        }
         if (context.exploreFinished()) {
             SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
+            END_SCHEDULE_ABORT_TIME_MEASURE(context.thisThreadId);
             if (needAbortHandling.get()) {
+                BEGIN_SCHEDULE_ABORT_TIME_MEASURE(context.thisThreadId);//if it needs abort, then the time spent on following level is abort time(for eager abort handling)
                 context.busyWaitQueue.clear();
                 if (enable_log)
                     LOG.debug("aborted after all ocs explored: " + context.thisThreadId + " | " + needAbortHandling.get());

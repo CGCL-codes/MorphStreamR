@@ -27,25 +27,4 @@ public class OGBFSScheduler extends AbstractOGBFSScheduler<OGSContext> {
         }
         DISTRIBUTE(next, context);
     }
-
-//    /**
-//     * Used by OGNSScheduler.
-//     *  @param context
-//     * @param operationChain
-//     * @param mark_ID
-//     * @return
-//     */
-//    @Override
-//    public boolean executeWithBusyWait(OGSContext context, OperationChain operationChain, long mark_ID) {
-//        MyList<Operation> operation_chain_list = operationChain.getOperations();
-//        for (Operation operation : operation_chain_list) {
-//            if (operation.getOperationState().equals(MetaTypes.OperationStateType.EXECUTED)) continue;
-//            if (isConflicted(context, operationChain, operation)) return false; // did not completed
-//            execute(operation, mark_ID, false);
-//            if (!operation.isFailed) {
-//                operation.stateTransition(MetaTypes.OperationStateType.EXECUTED);
-//            }
-//        }
-//        return true;
-//    }
 }

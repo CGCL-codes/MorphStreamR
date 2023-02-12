@@ -12,6 +12,8 @@ import utils.SOURCE_CONTROL;
 import java.util.ArrayList;
 
 import static common.CONTROL.enable_log;
+import static profiler.MeasureTools.BEGIN_SCHEDULE_ABORT_TIME_MEASURE;
+import static profiler.MeasureTools.END_SCHEDULE_ABORT_TIME_MEASURE;
 
 public class OPSScheduler<Context extends OPSContext> extends OPScheduler<Context, Operation> {
     private static final Logger log = LoggerFactory.getLogger(OPSScheduler.class);
@@ -46,7 +48,7 @@ public class OPSScheduler<Context extends OPSContext> extends OPScheduler<Contex
         } while (!FINISHED(context));
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
         if (needAbortHandling) {
-            //TODO: if need abort, then following time is abort time(for lazy abort handling)
+            BEGIN_SCHEDULE_ABORT_TIME_MEASURE(context.thisThreadId);
             //TODO: also we can tracking abort bid here
             if (enable_log) {
                 log.info("need abort handling, rollback and redo");
@@ -59,6 +61,7 @@ public class OPSScheduler<Context extends OPSContext> extends OPScheduler<Contex
                 MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(threadId);
                 PROCESS(context, mark_ID);
             } while (!FINISHED(context));
+            END_SCHEDULE_ABORT_TIME_MEASURE(context.thisThreadId);
         }
         RESET(context);
     }

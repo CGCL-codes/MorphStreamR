@@ -220,13 +220,28 @@ public class MeasureTools {
 
     public static void BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(int thread_id) {
         if (enable_debug) counter.incrementAndGet();
-        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted() && !Metrics.Scheduler.isAbort[thread_id])
             COMPUTE_SCHEDULE_USEFUL_START(thread_id);
     }
 
     public static void END_SCHEDULE_USEFUL_TIME_MEASURE(int thread_id) {
-        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted() && !Metrics.Scheduler.isAbort[thread_id])
             COMPUTE_SCHEDULE_USEFUL(thread_id);
+    }
+
+    public static void BEGIN_SCHEDULE_ABORT_TIME_MEASURE(int thread_id) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            COMPUTE_SCHEDULE_ABORT_START(thread_id);
+    }
+
+    public static void END_SCHEDULE_ABORT_TIME_MEASURE(int thread_id) {
+        if (enable_profile && !Thread.currentThread().isInterrupted())
+            COMPUTE_SCHEDULE_ABORT(thread_id);
+    }
+
+    public static void SCHEDULE_REDO_COUNT_MEASURE(int thread_id) {
+        if (enable_profile && !Thread.currentThread().isInterrupted())
+            COMPUTE_SCHEDULE_REDO_COUNT(thread_id);
     }
 
     public static void BEGIN_TPG_CONSTRUCTION_TIME_MEASURE(int thread_id) {
@@ -544,9 +559,10 @@ public class MeasureTools {
             File file = new File(directory + fileNameSuffix + ".overall");
             BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
             fileWriter.write("RecoverySchedulerTimeBreakdownReport (ms): " + "\n");
-            fileWriter.write("thread_id\t explore_time\t next_time\t useful_time\t notify_time\t construct_time\t first_explore_time\t scheduler_switch\n");
+            fileWriter.write("thread_id\t explore_time\t next_time\t useful_time\t abort_time\t notify_time\t construct_time\t first_explore_time\t scheduler_switch\n");
             for (int threadId = 0; threadId < tthread; threadId++) {
                 String output = String.format("%d\t" +
+                                "%-10.2f\t" +
                                 "%-10.2f\t" +
                                 "%-10.2f\t" +
                                 "%-10.2f\t" +
@@ -558,6 +574,7 @@ public class MeasureTools {
                         , RecoveryPerformance.Explore[threadId] / 1E6
                         , RecoveryPerformance.Next[threadId] / 1E6
                         , RecoveryPerformance.Useful[threadId] / 1E6
+                        , RecoveryPerformance.Abort[threadId] / 1E6
                         , RecoveryPerformance.Notify[threadId] / 1E6
                         , RecoveryPerformance.Construct[threadId] / 1E6
                         , RecoveryPerformance.FirstExplore[threadId] / 1E6
@@ -579,9 +596,10 @@ public class MeasureTools {
             if (enable_log) log.info("===OGScheduler Time Breakdown Report===");
             fileWriter.write("thread_id\t explore_time\t next_time\t useful_time\t notify_time\t construct_time\t first_explore_time\t scheduler_switch\n");
             if (enable_log)
-                log.info("thread_id\t explore_time\t next_time\t useful_time\t notify_time\t construct_time\t first_explore_time\t scheduler_switch");
+                log.info("thread_id\t explore_time\t next_time\t useful_time\t abort_time\t notify_time\t construct_time\t first_explore_time\t scheduler_switch");
             for (int threadId = 0; threadId < tthread; threadId++) {
                 String output = String.format("%d\t" +
+                                "%-10.2f\t" +
                                 "%-10.2f\t" +
                                 "%-10.2f\t" +
                                 "%-10.2f\t" +
@@ -593,6 +611,7 @@ public class MeasureTools {
                         , Scheduler_Record.Explore[threadId].getMean()
                         , Scheduler_Record.Next[threadId].getMean()
                         , Scheduler_Record.Useful[threadId].getMean()
+                        , Scheduler_Record.Abort[threadId].getMean()
                         , Scheduler_Record.Notify[threadId].getMean()
                         , Scheduler_Record.Construct[threadId].getMean()
                         , Scheduler_Record.FirstExplore[threadId].getMean()
@@ -608,11 +627,13 @@ public class MeasureTools {
                                     "%-10.2f\t" +
                                     "%-10.2f\t" +
                                     "%-10.2f\t" +
+                                    "%-10.2f\t" +
                                     "%-10.2f\t"
                             , i
                             , Scheduler_Record.Explore[threadId].getValues()[i]
                             , Scheduler_Record.Next[threadId].getValues()[i]
                             , Scheduler_Record.Useful[threadId].getValues()[i]
+                            , Scheduler_Record.Abort[threadId].getValues()[i]
                             , Scheduler_Record.Notify[threadId].getValues()[i]
                             , Scheduler_Record.Construct[threadId].getValues()[i]
                             , Scheduler_Record.FirstExplore[threadId].getValues()[i]

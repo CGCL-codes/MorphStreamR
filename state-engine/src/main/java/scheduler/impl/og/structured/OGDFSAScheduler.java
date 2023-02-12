@@ -15,6 +15,8 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static common.CONTROL.enable_log;
+import static profiler.MeasureTools.BEGIN_SCHEDULE_ABORT_TIME_MEASURE;
+import static profiler.MeasureTools.END_SCHEDULE_ABORT_TIME_MEASURE;
 
 /**
  * The scheduler based on TPG, this is to be invoked when the queue is empty of each thread, it works as follows:
@@ -37,8 +39,10 @@ public class OGDFSAScheduler extends AbstractOGDFSScheduler<OGSAContext> {
     public void EXPLORE(OGSAContext context) {
         OperationChain oc = Next(context);
         while (oc == null) {
+            END_SCHEDULE_ABORT_TIME_MEASURE(context.thisThreadId);//if it needs abort, then the time spent on following level is abort time
             // current thread finishes the current level
             if (needAbortHandling.get()) {
+                BEGIN_SCHEDULE_ABORT_TIME_MEASURE(context.thisThreadId);
                 abortHandling(context);
             }
             if (context.exploreFinished())

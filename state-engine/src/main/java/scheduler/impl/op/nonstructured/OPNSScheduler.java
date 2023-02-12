@@ -10,6 +10,8 @@ import scheduler.struct.op.Operation;
 import utils.SOURCE_CONTROL;
 
 import static common.CONTROL.enable_log;
+import static profiler.MeasureTools.BEGIN_SCHEDULE_ABORT_TIME_MEASURE;
+import static profiler.MeasureTools.END_SCHEDULE_ABORT_TIME_MEASURE;
 
 public class OPNSScheduler<Context extends OPNSContext> extends OPScheduler<Context, Operation> {
     private static final Logger log = LoggerFactory.getLogger(OPNSScheduler.class);
@@ -41,39 +43,28 @@ public class OPNSScheduler<Context extends OPNSContext> extends OPScheduler<Cont
         int threadId = context.thisThreadId;
 
         INITIALIZE(context);
-//        System.out.println(threadId + " first explore tpg complete, start to process");
-
         do {
-//            MeasureTools.BEGIN_SCHEDULE_EXPLORE_TIME_MEASURE(threadId);
             EXPLORE(context);
-//            MeasureTools.END_SCHEDULE_EXPLORE_TIME_MEASURE(threadId);
-//            MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(threadId);
             PROCESS(context, mark_ID);
-//            MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(threadId);
-//            MeasureTools.END_SCHEDULE_EXPLORE_TIME_MEASURE(threadId);
         } while (!FINISHED(context));
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
         if (needAbortHandling) {
-            //TODO: if need abort, then following time is abort time(for lazy abort handling)
+            BEGIN_SCHEDULE_ABORT_TIME_MEASURE(threadId);
             //TODO: also we can tracking abort bid here
             if (enable_log) {
                 log.info("need abort handling, rollback and redo");
             }
-            // identify all aborted operations and transit the state to aborted.
+            // identify all aborted operations and transit the state to abort(for lazy approach).
             REINITIALIZE(context);
             // rollback to the starting point and redo.
             do {
-//                MeasureTools.BEGIN_SCHEDULE_EXPLORE_TIME_MEASURE(threadId);
                 EXPLORE(context);
-//                MeasureTools.END_SCHEDULE_EXPLORE_TIME_MEASURE(threadId);
                 MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(threadId);
                 PROCESS(context, mark_ID);
-//                MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(threadId);
-//                MeasureTools.END_SCHEDULE_EXPLORE_TIME_MEASURE(threadId);
             } while (!FINISHED(context));
+            END_SCHEDULE_ABORT_TIME_MEASURE(threadId);
         }
-        RESET(context);//
-//        MeasureTools.SCHEDULE_TIME_RECORD(threadId, num_events);
+        RESET(context);
     }
 
     /**
