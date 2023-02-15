@@ -122,10 +122,6 @@ public class OPBFSAScheduler<Context extends OPSAContext> extends OPBFSScheduler
 
         RollbackToCorrectLayerForRedo(context);
         ResumeExecution(context);
-        SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
-        if (needAbortHandling.compareAndSet(true, false)) {
-            failedOperations.clear();
-        }
     }
 
     //TODO: mark operations of aborted transaction to be aborted.
@@ -187,6 +183,11 @@ public class OPBFSAScheduler<Context extends OPSAContext> extends OPBFSScheduler
     protected void ResumeExecution(Context context) {
         context.rollbackLevel = -1;
         context.isRollbacked = false;
+
+        SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
+        if (needAbortHandling.compareAndSet(true, false)) {
+            failedOperations.clear();
+        }
     }
 
     protected void RollbackToCorrectLayerForRedo(Context context) {

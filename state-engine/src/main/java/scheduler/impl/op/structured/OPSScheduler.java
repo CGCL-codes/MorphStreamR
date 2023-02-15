@@ -18,7 +18,7 @@ import static profiler.MeasureTools.END_SCHEDULE_ABORT_TIME_MEASURE;
 
 public class OPSScheduler<Context extends OPSContext> extends OPScheduler<Context, Operation> {
     private static final Logger log = LoggerFactory.getLogger(OPSScheduler.class);
-    public final AtomicBoolean needAbortHandling = new AtomicBoolean(false);
+    public  boolean needAbortHandling = false;
 
     public OPSScheduler(int totalThreads, int NUM_ITEMS, int app) {
         super(totalThreads, NUM_ITEMS, app);
@@ -26,15 +26,14 @@ public class OPSScheduler<Context extends OPSContext> extends OPScheduler<Contex
 
     @Override
     public void INITIALIZE(Context context) {
-        needAbortHandling.compareAndSet(true, false);
+        needAbortHandling = false;
         tpg.firstTimeExploreTPG(context);
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
     }
 
     public void REINITIALIZE(Context context) {
         tpg.secondTimeExploreTPG(context);
-        SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
-        needAbortHandling.compareAndSet(true, false);//There is no need for a fence here because for lazy approaches, there is no transaction to be aborted during the second scheduling
+        SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);//Do not need to reset needAbortHandling here, as lazy approach only handles abort once for one batch.
     }
 
     @Override
@@ -48,7 +47,7 @@ public class OPSScheduler<Context extends OPSContext> extends OPScheduler<Contex
             PROCESS(context, mark_ID);
         } while (!FINISHED(context));
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
-        if (needAbortHandling.get()) {
+        if (needAbortHandling) {
             BEGIN_SCHEDULE_ABORT_TIME_MEASURE(context.thisThreadId);
             log.info("need abort handling, rollback and redo");
             // identify all aborted operations and transit the state to abort.
@@ -133,7 +132,7 @@ public class OPSScheduler<Context extends OPSContext> extends OPScheduler<Contex
             Operation remove = context.batchedOperations.remove();
             MeasureTools.BEGIN_NOTIFY_TIME_MEASURE(threadId);
             if (remove.isFailed && !remove.getOperationState().equals(MetaTypes.OperationStateType.ABORTED)) {
-                needAbortHandling.compareAndSet(false, true);
+                needAbortHandling = true;
             }
             NOTIFY(remove, context);
             MeasureTools.END_NOTIFY_TIME_MEASURE(threadId);

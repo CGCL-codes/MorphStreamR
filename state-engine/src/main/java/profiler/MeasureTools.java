@@ -400,7 +400,6 @@ public class MeasureTools {
                         , Total_Record.overhead_total[threadId].getMean()
                 );
                 fileWriter.write(output + "\n");
-                if (enable_log) log.info(output);
                 for (int i = 0; i < Total_Record.totalProcessTimePerEvent[threadId].getValues().length; i++) {
                     output = String.format("%d\t" +
                                     "%-10.2f\t" +
@@ -618,7 +617,6 @@ public class MeasureTools {
                         , Scheduler_Record.SchedulerSwitch[threadId].getMean()
                 );
                 fileWriter.write(output + "\n");
-                if (enable_log) log.info(output);
                 for (int i = 0; i < Scheduler_Record.Construct[threadId].getValues().length; i++) {
                     output = String.format("%d\t" +
                                     "%-10.2f\t" +

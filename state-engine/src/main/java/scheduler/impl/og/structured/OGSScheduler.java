@@ -19,7 +19,7 @@ import static profiler.MeasureTools.END_SCHEDULE_ABORT_TIME_MEASURE;
 
 public abstract class OGSScheduler<Context extends OGSContext> extends OGScheduler<Context> {
     private static final Logger log = LoggerFactory.getLogger(OGSScheduler.class);
-    public AtomicBoolean needAbortHandling = new AtomicBoolean(false);
+    public boolean needAbortHandling = false;
 
     public OGSScheduler(int totalThreads, int NUM_ITEMS, int app) {
         super(totalThreads, NUM_ITEMS, app);
@@ -27,16 +27,15 @@ public abstract class OGSScheduler<Context extends OGSContext> extends OGSchedul
 
     @Override
     public void INITIALIZE(Context context) {
-        needAbortHandling.compareAndSet(true, false);
+        needAbortHandling = false;
         int threadId = context.thisThreadId;
         tpg.firstTimeExploreTPG(context);
         SOURCE_CONTROL.getInstance().exploreTPGBarrier(threadId);//sync for all threads to come to this line to ensure chains are constructed for the current batch.
     }
 
     public void REINITIALIZE(Context context) {
-        tpg.secondTimeExploreTPG(context);
+        tpg.secondTimeExploreTPG(context);//Do not need to reset needAbortHandling here, as lazy approach only handles abort once for one batch.
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
-        needAbortHandling.compareAndSet(true, false);//There is no need for a fence here because for lazy approaches, there is no transaction to be aborted during the second scheduling
     }
 
     protected void ProcessedToNextLevel(Context context) {
@@ -79,7 +78,7 @@ public abstract class OGSScheduler<Context extends OGSContext> extends OGSchedul
             PROCESS(context, mark_ID);
         } while (!FINISHED(context));
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
-        if (needAbortHandling.get()) {
+        if (needAbortHandling) {
             BEGIN_SCHEDULE_ABORT_TIME_MEASURE(context.thisThreadId);
             //TODO: also we can tracking abort bid here
             if (enable_log) {
@@ -100,7 +99,7 @@ public abstract class OGSScheduler<Context extends OGSContext> extends OGSchedul
         // in coarse-grained algorithms, we will not handle transaction abort gracefully, just update the state of the operation
         operation.stateTransition(MetaTypes.OperationStateType.ABORTED);
         // save the abort information and redo the batch.
-        needAbortHandling.compareAndSet(false, true);
+        needAbortHandling = true;
     }
 
     /**
