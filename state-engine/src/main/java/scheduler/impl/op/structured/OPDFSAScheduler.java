@@ -53,6 +53,7 @@ public class OPDFSAScheduler<Context extends OPSAContext> extends OPDFSScheduler
             op = Next(context);
         }
         while (op != null && op.hasParents()) {
+            // TODO: why dead loop here
             // Busy-Wait for dependency resolution
             if (needAbortHandling.get()) {
                 return; // skip this busy wait when abort happens
@@ -81,7 +82,6 @@ public class OPDFSAScheduler<Context extends OPSAContext> extends OPDFSScheduler
         } while (true);
         MeasureTools.END_SCHEDULE_NEXT_TIME_MEASURE(threadId);
 
-//        MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(threadId);
         for (Operation operation : context.batchedOperations) {
             MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(threadId);
             execute(operation, mark_ID, false);
@@ -97,7 +97,6 @@ public class OPDFSAScheduler<Context extends OPSAContext> extends OPDFSScheduler
             }
             checkTransactionAbort(remove);
         }
-//        MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(threadId);
     }
 
     protected void checkTransactionAbort(Operation operation) {
@@ -136,7 +135,7 @@ public class OPDFSAScheduler<Context extends OPSAContext> extends OPDFSScheduler
             context.rollbackLevel = context.currentLevel;
         }
         context.isRollbacked = true;
-        if (enable_log) LOG.debug("++++++ rollback at level: " + context.thisThreadId + " | " + context.rollbackLevel);
+        if (enable_log) LOG.info("++++++ rollback at level: " + context.thisThreadId + " | " + context.rollbackLevel);
     }
 
     /**
@@ -168,7 +167,7 @@ public class OPDFSAScheduler<Context extends OPSAContext> extends OPDFSScheduler
         needAbortHandling.compareAndSet(true, false);
         failedOperations.clear();
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
-        if (enable_log) LOG.debug("resume: " + context.thisThreadId);
+        if (enable_log) LOG.info("resume: " + context.thisThreadId);
     }
 
     protected void RollbackToCorrectLayerForRedo(Context context) {
@@ -177,7 +176,7 @@ public class OPDFSAScheduler<Context extends OPSAContext> extends OPDFSScheduler
             context.scheduledOPs -= getNumOPsByLevel(context, level);
         }
         context.currentLevelIndex = 0;
-        // it needs to rollback to the level -1, because aborthandling has immediately followed up with ProcessedToNextLevel
+        // it needs to rollback to the level -1, because abort handling has immediately followed up with ProcessedToNextLevel
         context.currentLevel = context.rollbackLevel - 1;
     }
 

@@ -8,6 +8,8 @@ import scheduler.struct.og.Operation;
 import scheduler.struct.og.OperationChain;
 import utils.SOURCE_CONTROL;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import static common.CONTROL.enable_log;
 import static profiler.MeasureTools.BEGIN_SCHEDULE_ABORT_TIME_MEASURE;
 import static profiler.MeasureTools.END_SCHEDULE_ABORT_TIME_MEASURE;
@@ -17,7 +19,7 @@ public class OGNSScheduler extends AbstractOGNSScheduler<OGNSContext> {
 
     public ExecutableTaskListener executableTaskListener = new ExecutableTaskListener();
 
-    public boolean needAbortHandling = false;
+    public AtomicBoolean needAbortHandling = new AtomicBoolean(false);
 
     public OGNSScheduler(int totalThreads, int NUM_ITEMS, int app) {
         super(totalThreads, NUM_ITEMS, app);
@@ -25,16 +27,16 @@ public class OGNSScheduler extends AbstractOGNSScheduler<OGNSContext> {
 
     @Override
     public void INITIALIZE(OGNSContext context) {
-        needAbortHandling = false;
+        needAbortHandling.compareAndSet(true, false);
         tpg.firstTimeExploreTPG(context);
         context.partitionStateManager.initialize(executableTaskListener);
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
     }
 
     public void REINITIALIZE(OGNSContext context) {
-        needAbortHandling = false;
         tpg.secondTimeExploreTPG(context);
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
+        needAbortHandling.compareAndSet(true, false);
     }
 
     @Override
@@ -45,7 +47,7 @@ public class OGNSScheduler extends AbstractOGNSScheduler<OGNSContext> {
             PROCESS(context, mark_ID);
         } while (!FINISHED(context));
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
-        if (needAbortHandling) {
+        if (needAbortHandling.get()) {
             BEGIN_SCHEDULE_ABORT_TIME_MEASURE(context.thisThreadId);
             if (enable_log) {
                 log.info("need abort handling, rollback and redo");
@@ -80,7 +82,7 @@ public class OGNSScheduler extends AbstractOGNSScheduler<OGNSContext> {
         // in coarse-grained algorithms, we will not handle transaction abort gracefully, just update the state of the operation
         operation.stateTransition(MetaTypes.OperationStateType.ABORTED);
         // save the abort information and redo the batch.
-        needAbortHandling = true;
+        needAbortHandling.compareAndSet(false, true);
     }
 
 

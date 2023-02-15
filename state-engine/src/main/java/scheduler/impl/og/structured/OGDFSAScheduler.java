@@ -182,7 +182,7 @@ public class OGDFSAScheduler extends AbstractOGDFSScheduler<OGSAContext> {
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
         needAbortHandling.compareAndSet(true, false);
         failedOperations.clear();
-        LOG.debug("resume: " + context.thisThreadId);
+        if (enable_log) LOG.debug("resume: " + context.thisThreadId);
     }
 
     protected void RollbackToCorrectLayerForRedo(OGSAContext context) {

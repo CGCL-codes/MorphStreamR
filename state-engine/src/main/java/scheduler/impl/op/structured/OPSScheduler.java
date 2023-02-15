@@ -10,6 +10,7 @@ import scheduler.struct.op.Operation;
 import utils.SOURCE_CONTROL;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static common.CONTROL.enable_log;
 import static profiler.MeasureTools.BEGIN_SCHEDULE_ABORT_TIME_MEASURE;
@@ -17,8 +18,7 @@ import static profiler.MeasureTools.END_SCHEDULE_ABORT_TIME_MEASURE;
 
 public class OPSScheduler<Context extends OPSContext> extends OPScheduler<Context, Operation> {
     private static final Logger log = LoggerFactory.getLogger(OPSScheduler.class);
-
-    public boolean needAbortHandling = false;
+    public final AtomicBoolean needAbortHandling = new AtomicBoolean(false);
 
     public OPSScheduler(int totalThreads, int NUM_ITEMS, int app) {
         super(totalThreads, NUM_ITEMS, app);
@@ -26,14 +26,15 @@ public class OPSScheduler<Context extends OPSContext> extends OPScheduler<Contex
 
     @Override
     public void INITIALIZE(Context context) {
+        needAbortHandling.compareAndSet(true, false);
         tpg.firstTimeExploreTPG(context);
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
     }
 
     public void REINITIALIZE(Context context) {
-        needAbortHandling = false;
         tpg.secondTimeExploreTPG(context);
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
+        needAbortHandling.compareAndSet(true, false);//There is no need for a fence here because for lazy approaches, there is no transaction to be aborted during the second scheduling
     }
 
     @Override
@@ -47,13 +48,11 @@ public class OPSScheduler<Context extends OPSContext> extends OPScheduler<Contex
             PROCESS(context, mark_ID);
         } while (!FINISHED(context));
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
-        if (needAbortHandling) {
+        if (needAbortHandling.get()) {
             BEGIN_SCHEDULE_ABORT_TIME_MEASURE(context.thisThreadId);
+            log.info("need abort handling, rollback and redo");
+            // identify all aborted operations and transit the state to abort.
             //TODO: also we can tracking abort bid here
-            if (enable_log) {
-                log.info("need abort handling, rollback and redo");
-            }
-            // identify all aborted operations and transit the state to aborted.
             REINITIALIZE(context);
             // rollback to the starting point and redo.
             do {
@@ -134,7 +133,7 @@ public class OPSScheduler<Context extends OPSContext> extends OPScheduler<Contex
             Operation remove = context.batchedOperations.remove();
             MeasureTools.BEGIN_NOTIFY_TIME_MEASURE(threadId);
             if (remove.isFailed && !remove.getOperationState().equals(MetaTypes.OperationStateType.ABORTED)) {
-                needAbortHandling = true;
+                needAbortHandling.compareAndSet(false, true);
             }
             NOTIFY(remove, context);
             MeasureTools.END_NOTIFY_TIME_MEASURE(threadId);

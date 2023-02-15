@@ -9,6 +9,8 @@ import scheduler.struct.MetaTypes.OperationStateType;
 import scheduler.struct.op.Operation;
 import utils.SOURCE_CONTROL;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import static common.CONTROL.enable_log;
 import static profiler.MeasureTools.BEGIN_SCHEDULE_ABORT_TIME_MEASURE;
 import static profiler.MeasureTools.END_SCHEDULE_ABORT_TIME_MEASURE;
@@ -17,8 +19,7 @@ public class OPNSScheduler<Context extends OPNSContext> extends OPScheduler<Cont
     private static final Logger log = LoggerFactory.getLogger(OPNSScheduler.class);
 
     public ExecutableTaskListener executableTaskListener = new ExecutableTaskListener();
-
-    public boolean needAbortHandling = false;
+    public AtomicBoolean needAbortHandling = new AtomicBoolean(false);
 
     public OPNSScheduler(int totalThreads, int NUM_ITEMS, int app) {
         super(totalThreads, NUM_ITEMS, app);
@@ -26,16 +27,16 @@ public class OPNSScheduler<Context extends OPNSContext> extends OPScheduler<Cont
 
     @Override
     public void INITIALIZE(Context context) {
-        needAbortHandling = false;
+        needAbortHandling.compareAndSet(true, false);
         tpg.firstTimeExploreTPG(context);
         context.partitionStateManager.initialize(executableTaskListener);
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
     }
 
     public void REINITIALIZE(Context context) {
-        needAbortHandling = false;
         tpg.secondTimeExploreTPG(context);
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
+        needAbortHandling.compareAndSet(true, false);//There is no need for a fence here because for lazy approaches, there is no transaction to be aborted during the second scheduling
     }
 
     @Override
@@ -48,7 +49,7 @@ public class OPNSScheduler<Context extends OPNSContext> extends OPScheduler<Cont
             PROCESS(context, mark_ID);
         } while (!FINISHED(context));
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
-        if (needAbortHandling) {
+        if (needAbortHandling.get()) {
             BEGIN_SCHEDULE_ABORT_TIME_MEASURE(threadId);
             //TODO: also we can tracking abort bid here
             if (enable_log) {
@@ -121,7 +122,7 @@ public class OPNSScheduler<Context extends OPNSContext> extends OPScheduler<Cont
             Operation remove = context.batchedOperations.remove();
             MeasureTools.BEGIN_NOTIFY_TIME_MEASURE(threadId);
             if (remove.isFailed && !remove.getOperationState().equals(OperationStateType.ABORTED)) {
-                needAbortHandling = true;
+                needAbortHandling.compareAndSet(false, true);
             }
             NOTIFY(remove, context);
             MeasureTools.END_NOTIFY_TIME_MEASURE(threadId);
