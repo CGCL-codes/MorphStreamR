@@ -98,6 +98,7 @@ public abstract class OGSScheduler<Context extends OGSContext> extends OGSchedul
     protected void checkTransactionAbort(Operation operation, OperationChain operationChain) {
         // in coarse-grained algorithms, we will not handle transaction abort gracefully, just update the state of the operation
         operation.stateTransition(MetaTypes.OperationStateType.ABORTED);
+        this.threadToPathRecord.get(operationChain.context.thisThreadId).addAbortBid(operation.bid);
         // save the abort information and redo the batch.
         needAbortHandling = true;
     }

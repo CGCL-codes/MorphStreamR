@@ -11,7 +11,7 @@ import static scheduler.struct.OperationChainCommon.cleanUp;
 
 /**
  * We still call it OperationChain in TPG but with different representation
- * The operationchain only tries to maintain a data structure for the ease of temporal dependencies construction.
+ * The operationchain only tries to maintain a data structure for the ease of temporal dependencies' construction.
  */
 public class OperationChain implements Comparable<OperationChain> {
     private final String tableName;

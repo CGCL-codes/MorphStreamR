@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static common.CONTROL.enable_log;
 import static profiler.MeasureTools.BEGIN_SCHEDULE_ABORT_TIME_MEASURE;
 import static profiler.MeasureTools.END_SCHEDULE_ABORT_TIME_MEASURE;
+import static utils.FaultToleranceConstants.LOGOption_path;
 
 /**
  * The scheduler based on TPG, this is to be invoked when the queue is empty of each thread, it works as follows:
@@ -165,10 +166,11 @@ public class OGDFSAScheduler extends AbstractOGDFSScheduler<OGSAContext> {
     private boolean _MarkOperationsToAbort(OGSAContext context, Operation operation) {
         long bid = operation.bid;
         boolean markAny = false;
-        //identify bids to be aborted.
         for (Operation failedOp : failedOperations) {
-            if (bid == failedOp.bid) {
+            if (bid == failedOp.bid) {//identify bids to be aborted.
                 operation.stateTransition(MetaTypes.OperationStateType.ABORTED);
+                if (this.isLogging == LOGOption_path)
+                    this.threadToPathRecord.get(context.thisThreadId).addAbortBid(operation.bid);
                 markAny = true;
             }
         }

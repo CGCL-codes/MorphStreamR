@@ -1,6 +1,5 @@
 package scheduler.struct.og;
 
-import scheduler.context.og.AbstractOGNSContext;
 import scheduler.context.og.OGSchedulerContext;
 import transaction.impl.ordered.MyList;
 import utils.lib.ConcurrentHashMap;
@@ -13,7 +12,7 @@ import static scheduler.struct.OperationChainCommon.cleanUp;
 
 /**
  * We still call it OperationChain in TPG but with different representation
- * The OperationChain only tries to maintain a data structure for the ease of temporal dependencies construction.
+ * The OperationChain only tries to maintain a data structure for the ease of temporal dependencies' construction.
  */
 public class OperationChain implements Comparable<OperationChain> {
     public final String tableName;

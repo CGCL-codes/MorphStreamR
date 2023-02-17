@@ -17,6 +17,7 @@ import static common.CONTROL.enable_log;
 import static java.lang.Integer.min;
 import static profiler.MeasureTools.BEGIN_SCHEDULE_ABORT_TIME_MEASURE;
 import static profiler.MeasureTools.END_SCHEDULE_ABORT_TIME_MEASURE;
+import static utils.FaultToleranceConstants.LOGOption_path;
 
 public class OPBFSAScheduler<Context extends OPSAContext> extends OPBFSScheduler<Context> {
     private static final Logger LOG = LoggerFactory.getLogger(OPBFSAScheduler.class);
@@ -156,10 +157,11 @@ public class OPBFSAScheduler<Context extends OPSAContext> extends OPBFSScheduler
     private boolean _MarkOperationsToAbort(Context context, Operation operation) {
         long bid = operation.bid;
         boolean markAny = false;
-        //identify bids to be aborted.
         for (Operation failedOp : failedOperations) {
-            if (bid == failedOp.bid) {
+            if (bid == failedOp.bid) { //identify bids to be aborted (abort operation in one state transaction).
                 operation.stateTransition(MetaTypes.OperationStateType.ABORTED);
+                if (this.isLogging == LOGOption_path)
+                    this.threadToPathRecord.get(context.thisThreadId).addAbortBid(operation.bid);
                 markAny = true;
             }
         }

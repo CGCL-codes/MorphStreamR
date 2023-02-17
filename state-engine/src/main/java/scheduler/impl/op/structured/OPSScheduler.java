@@ -10,11 +10,9 @@ import scheduler.struct.op.Operation;
 import utils.SOURCE_CONTROL;
 
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import static common.CONTROL.enable_log;
 import static profiler.MeasureTools.BEGIN_SCHEDULE_ABORT_TIME_MEASURE;
 import static profiler.MeasureTools.END_SCHEDULE_ABORT_TIME_MEASURE;
+import static utils.FaultToleranceConstants.LOGOption_path;
 
 public class OPSScheduler<Context extends OPSContext> extends OPScheduler<Context, Operation> {
     private static final Logger log = LoggerFactory.getLogger(OPSScheduler.class);
@@ -51,7 +49,6 @@ public class OPSScheduler<Context extends OPSContext> extends OPScheduler<Contex
             BEGIN_SCHEDULE_ABORT_TIME_MEASURE(context.thisThreadId);
             log.info("need abort handling, rollback and redo");
             // identify all aborted operations and transit the state to abort.
-            //TODO: also we can tracking abort bid here
             REINITIALIZE(context);
             // rollback to the starting point and redo.
             do {
@@ -121,7 +118,6 @@ public class OPSScheduler<Context extends OPSContext> extends OPScheduler<Contex
         } while (true);
         MeasureTools.END_SCHEDULE_NEXT_TIME_MEASURE(threadId);
 
-//        MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(threadId);
         for (Operation operation : context.batchedOperations) {
             MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(threadId);
             execute(operation, mark_ID, false);
@@ -133,11 +129,12 @@ public class OPSScheduler<Context extends OPSContext> extends OPScheduler<Contex
             MeasureTools.BEGIN_NOTIFY_TIME_MEASURE(threadId);
             if (remove.isFailed && !remove.getOperationState().equals(MetaTypes.OperationStateType.ABORTED)) {
                 needAbortHandling = true;
+                if (isLogging == LOGOption_path)
+                    this.threadToPathRecord.get(context.thisThreadId).addAbortBid(remove.bid);
             }
             NOTIFY(remove, context);
             MeasureTools.END_NOTIFY_TIME_MEASURE(threadId);
         }
-//        MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(threadId);
     }
 
     @Override

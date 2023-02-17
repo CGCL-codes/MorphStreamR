@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static common.CONTROL.enable_log;
 import static profiler.MeasureTools.BEGIN_SCHEDULE_ABORT_TIME_MEASURE;
 import static profiler.MeasureTools.END_SCHEDULE_ABORT_TIME_MEASURE;
+import static utils.FaultToleranceConstants.LOGOption_path;
 
 public class OPNSScheduler<Context extends OPNSContext> extends OPScheduler<Context, Operation> {
     private static final Logger log = LoggerFactory.getLogger(OPNSScheduler.class);
@@ -122,6 +123,8 @@ public class OPNSScheduler<Context extends OPNSContext> extends OPScheduler<Cont
             MeasureTools.BEGIN_NOTIFY_TIME_MEASURE(threadId);
             if (remove.isFailed && !remove.getOperationState().equals(OperationStateType.ABORTED)) {
                 needAbortHandling = false;
+                if (isLogging == LOGOption_path)
+                    this.threadToPathRecord.get(context.thisThreadId).addAbortBid(remove.bid);
             }
             NOTIFY(remove, context);
             MeasureTools.END_NOTIFY_TIME_MEASURE(threadId);

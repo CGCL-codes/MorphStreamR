@@ -1,6 +1,9 @@
 package scheduler.impl.op;
 
 
+import durability.logging.LoggingEntry.PathRecord;
+import durability.logging.LoggingStrategy.ImplLoggingManager.PathLoggingManager;
+import durability.logging.LoggingStrategy.ImplLoggingManager.WALManager;
 import durability.logging.LoggingStrategy.LoggingManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,18 +26,22 @@ import transaction.function.INC;
 import transaction.function.SUM;
 import utils.AppConfig;
 import utils.SOURCE_CONTROL;
+import utils.lib.ConcurrentHashMap;
 
 import java.util.HashSet;
 import java.util.List;
 
 import static content.common.CommonMetaTypes.AccessType.*;
+import static utils.FaultToleranceConstants.*;
 
 public abstract class OPScheduler<Context extends OPSchedulerContext, Task> implements IScheduler<Context> {
     private static final Logger log = LoggerFactory.getLogger(OPScheduler.class);
     public final int delta;//range of each partition. depends on the number of op in the stage.
     public final TaskPrecedenceGraph<Context> tpg; // TPG to be maintained in this global instance.
     public LoggingManager loggingManager; // Used by fault tolerance
-    public boolean isLogging = false;// Used by fault tolerance
+    public int isLogging;// Used by fault tolerance
+    public ConcurrentHashMap<Integer, PathRecord> threadToPathRecord;
+
     public OPScheduler(int totalThreads, int NUM_ITEMS, int app) {
         delta = (int) Math.ceil(NUM_ITEMS / (double) totalThreads); // Check id generation in DateGenerator.
         this.tpg = new TaskPrecedenceGraph<>(totalThreads, delta, NUM_ITEMS, app);
@@ -47,7 +54,16 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
     @Override
     public void setLoggingManager(LoggingManager loggingManager) {
         this.loggingManager = loggingManager;
-        this.isLogging = true;
+        if (loggingManager instanceof WALManager) {
+            isLogging = LOGOption_wal;
+        } else if (loggingManager instanceof PathLoggingManager) {
+            isLogging = LOGOption_path;
+            for (int i = 0; i < tpg.totalThreads; i ++) {
+                this.threadToPathRecord.put(i, new PathRecord());
+            }
+        } else {
+            isLogging = LOGOption_no;
+        }
     }
 
     /**
@@ -170,7 +186,7 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
         } else {
             throw new UnsupportedOperationException();
         }
-        if (isLogging) {
+        if (isLogging == LOGOption_wal) {
             operation.logRecord.addUpdate(operation.d_record.content_.readPreValues(operation.bid));
             this.loggingManager.addLogRecord(operation.logRecord);
         }

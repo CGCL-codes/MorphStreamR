@@ -22,7 +22,6 @@ public abstract class Database {
         return eventManager;
     }
     public LoggingManager getLoggingManager() { return loggingManager;}
-//	public transient TxnParam param;
 
     /**
      * Close this database.

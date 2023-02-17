@@ -1,5 +1,6 @@
 package scheduler.statemanager.op;
 
+import durability.logging.LoggingEntry.PathRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import profiler.MeasureTools;
@@ -8,7 +9,9 @@ import scheduler.struct.MetaTypes.DependencyType;
 import scheduler.struct.MetaTypes.OperationStateType;
 import scheduler.struct.op.Operation;
 import scheduler.signal.op.*;
+import utils.lib.ConcurrentHashMap;
 
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -59,12 +62,11 @@ public class PartitionStateManagerWithAbort implements OperationStateListener, R
 
     public void run() {
         while (!Thread.interrupted()) {
-            handleStateTransitions();
+           handleStateTransitions();
         }
     }
 
     public void handleStateTransitions() {
-        //TODO:How to measure abort time
         OperationSignal signal = opSignalQueue.poll();
         while (signal != null) {
             Operation operation = signal.getTargetOperation();
@@ -75,6 +77,38 @@ public class PartitionStateManagerWithAbort implements OperationStateListener, R
             } else if (signal instanceof OnHeaderStartAbortHandlingSignal) {
                 MeasureTools.BEGIN_SCHEDULE_ABORT_TIME_MEASURE(operation.context.thisThreadId);
                 onHeaderStartAbortHandlingTransition(operation);
+                MeasureTools.END_SCHEDULE_ABORT_TIME_MEASURE(operation.context.thisThreadId);
+            } else if (signal instanceof OnNeedAbortHandlingSignal) {
+                MeasureTools.BEGIN_SCHEDULE_ABORT_TIME_MEASURE(operation.context.thisThreadId);
+                onAbortHandlingTransition(operation, (OnNeedAbortHandlingSignal) signal);
+                MeasureTools.END_SCHEDULE_ABORT_TIME_MEASURE(operation.context.thisThreadId);
+            } else if (signal instanceof OnRollbackAndRedoSignal) {
+                MeasureTools.BEGIN_SCHEDULE_ABORT_TIME_MEASURE(operation.context.thisThreadId);
+                onRollbackAndRedoTransition(operation, (OnRollbackAndRedoSignal) signal);
+                MeasureTools.END_SCHEDULE_ABORT_TIME_MEASURE(operation.context.thisThreadId);
+            }else if (signal instanceof OnRootSignal) {
+                onRootTransition(operation);
+            }
+            signal = opSignalQueue.poll();
+        }
+    }
+
+    /**
+     * Tracking abort bid for non-structure eager approach
+     * @param pathRecord
+     */
+    public void handleStateTransitionsWithAbortTracking(PathRecord pathRecord) {
+        OperationSignal signal = opSignalQueue.poll();
+        while (signal != null) {
+            Operation operation = signal.getTargetOperation();
+            if (signal instanceof OnProcessedSignal) {
+                onProcessedTransition(operation, (OnProcessedSignal) signal);
+            } else if (signal instanceof OnParentUpdatedSignal) {
+                onParentExecutedTransition(operation, (OnParentUpdatedSignal) signal);
+            } else if (signal instanceof OnHeaderStartAbortHandlingSignal) {
+                MeasureTools.BEGIN_SCHEDULE_ABORT_TIME_MEASURE(operation.context.thisThreadId);
+                onHeaderStartAbortHandlingTransition(operation);
+                pathRecord.addAbortBid(operation.bid);
                 MeasureTools.END_SCHEDULE_ABORT_TIME_MEASURE(operation.context.thisThreadId);
             } else if (signal instanceof OnNeedAbortHandlingSignal) {
                 MeasureTools.BEGIN_SCHEDULE_ABORT_TIME_MEASURE(operation.context.thisThreadId);

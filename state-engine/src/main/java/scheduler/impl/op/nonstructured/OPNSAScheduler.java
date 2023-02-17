@@ -7,6 +7,8 @@ import scheduler.context.op.OPNSAContext;
 import scheduler.struct.op.Operation;
 import utils.SOURCE_CONTROL;
 
+import static utils.FaultToleranceConstants.LOGOption_path;
+
 // TODO: code clean, a lot...
 public class OPNSAScheduler<Context extends OPNSAContext> extends OPNSScheduler<Context> {
     private static final Logger log = LoggerFactory.getLogger(OPNSAScheduler.class);
@@ -35,7 +37,11 @@ public class OPNSAScheduler<Context extends OPNSAContext> extends OPNSScheduler<
      */
     @Override
     public void EXPLORE(Context context) {
-        context.partitionStateManager.handleStateTransitions();
+        if (isLogging == LOGOption_path) {
+            context.partitionStateManager.handleStateTransitionsWithAbortTracking(this.threadToPathRecord.get(context.thisThreadId));
+        } else {
+            context.partitionStateManager.handleStateTransitions();
+        }
     }
 
     @Override

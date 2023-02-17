@@ -16,6 +16,7 @@ import java.util.*;
 import java.util.concurrent.CyclicBarrier;
 
 import static common.CONTROL.enable_log;
+import static utils.FaultToleranceConstants.LOGOption_path;
 
 /**
  * TPG  -> Partition -> Key:OperationChain -> Operation-Operation-Operation...
@@ -45,33 +46,14 @@ public class TaskPrecedenceGraph<Context extends OPSchedulerContext> {
     public final ConcurrentHashMap<Integer, Deque<OperationChain>> threadToOCs;
     private int maxLevel = 0; // just for layered scheduling
 
-
     public void reset(Context context) {
-//        if (app == 0) {
-//            operationChains.get("MicroTable").threadOCsMap.get(context.thisThreadId).holder_v1.clear();
-//        } else if (app == 1) {
-//            operationChains.get("accounts").threadOCsMap.get(context.thisThreadId).holder_v1.clear();
-//            operationChains.get("bookEntries").threadOCsMap.get(context.thisThreadId).holder_v1.clear();
-//        } else if (app == 2) {
-//            operationChains.get("segment_speed").threadOCsMap.get(context.thisThreadId).holder_v1.clear();
-//            operationChains.get("segment_cnt").threadOCsMap.get(context.thisThreadId).holder_v1.clear();
-//        } else if (app == 3) {
-//            operationChains.get("goods").threadOCsMap.get(context.thisThreadId).holder_v1.clear();
-//        }
-//        threadToOCs.get(context.thisThreadId).clear();
-//        for (OperationChain oc : threadToOCs.get(context.thisThreadId)) {
-//            oc.clear();
-//        }
-//        this.setOCs(context); // TODO: the short cut should be reset, but will take some time.
+        //TODO: the short cut should be reset, but will take some time.
         for (OperationChain oc : threadToOCs.get(context.thisThreadId)) {
             oc.clear(); // only need to clear all operations from all ocs
         }
         if (context.thisThreadId == 0) log.info("===Clear current data for the next batch===");
     }
 
-    /**
-     * @param totalThreads
-     */
     public TaskPrecedenceGraph(int totalThreads, int delta, int NUM_ITEMS, int app) {
         barrier = new CyclicBarrier(totalThreads);
         this.totalThreads = totalThreads;
@@ -196,7 +178,6 @@ public class TaskPrecedenceGraph<Context extends OPSchedulerContext> {
             for (OperationChain oc : threadToOCs.get(context.thisThreadId)) {
                 if (!oc.getOperations().isEmpty()) {
                     oc.updateTDDependencies();
-//                    updateTDDependencies(oc);
                     Operation head = oc.getOperations().first();
                     if (head.isRoot()) {
                         roots.add(head);
@@ -217,7 +198,6 @@ public class TaskPrecedenceGraph<Context extends OPSchedulerContext> {
             SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
             ((OPSContext) context).maxLevel = maxLevel; // scatter
 
-//            ((OPSContext) context).buildBucketPerThread(threadToOCs.get(context.thisThreadId));
             if (enable_log) log.info("MaxLevel:" + (((OPSContext) context).maxLevel));
         } else if (context instanceof OPNSContext) {
             for (OperationChain oc : threadToOCs.get(context.thisThreadId)) {
@@ -234,7 +214,6 @@ public class TaskPrecedenceGraph<Context extends OPSchedulerContext> {
                     }
                 }
             }
-//            log.info("id: " + context.thisThreadId + " fd: " + context.fd);
         } else {
             throw new UnsupportedOperationException();
         }
@@ -309,12 +288,6 @@ public class TaskPrecedenceGraph<Context extends OPSchedulerContext> {
         for (Operation op : oc.getOperations()) {
             op.resetDependencies();
             op.stateTransition(MetaTypes.OperationStateType.BLOCKED);
-//            if (op.isFailed) { // transit state to aborted.
-//                op.stateTransition(MetaTypes.OperationStateType.ABORTED);
-//                for (Operation child : op.getHeader().getDescendants()) {
-//                    child.stateTransition(MetaTypes.OperationStateType.ABORTED);
-//                }
-//            }
         }
     }
 
