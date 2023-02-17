@@ -1,6 +1,7 @@
 package db;
 
 import durability.ftmanager.FTManager;
+import durability.logging.LoggingStrategy.ImplLoggingManager.WALManager;
 import durability.logging.LoggingStrategy.LoggingManager;
 import durability.recovery.RedoLogResult;
 import durability.snapshot.SnapshotResult.SnapshotResult;
@@ -46,7 +47,7 @@ public abstract class Database {
     public void createTable(RecordSchema tableSchema, String tableName, int partition_num, int num_items) {
         try {
             storageManager.createTable(tableSchema, tableName, partition_num, num_items);
-            if (loggingManager != null) {
+            if (loggingManager instanceof WALManager) {
                 loggingManager.registerTable(tableSchema, tableName);
             }
         } catch (DatabaseException e) {
