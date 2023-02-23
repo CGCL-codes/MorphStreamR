@@ -35,4 +35,8 @@ public class PathLoggingManager implements LoggingManager {
     public void syncRedoWriteAheadLog(RedoLogResult redoLogResult) throws IOException {
 
     }
+
+    public static Logger getLOG() {
+        return LOG;
+    }
 }
