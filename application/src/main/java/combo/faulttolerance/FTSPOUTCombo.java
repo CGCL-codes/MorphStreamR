@@ -191,6 +191,8 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
             // Rle Rle
             // Dictionary Dictionary
             // Zigzag Zigzag
+            // Snappy Snappy
+            // Optimize Scabbard
             case "None":
                 this.compressionType = FaultToleranceConstants.CompressionType.None;
                 break;
@@ -215,12 +217,15 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
             case "Zigzag":
                 this.compressionType = FaultToleranceConstants.CompressionType.Zigzag;
                 break;
+            case "Optimize":
+                this.compressionType = FaultToleranceConstants.CompressionType.Optimize;
+                break;
         }
         isRecovery = config.getBoolean("isRecovery");
         if (isRecovery) {
             remainTime = (long) (config.getInt("failureTime") * 1E6);
         }
-        // setup the checkpoint interval for measurement
+        // set up the checkpoint interval for measurement
         sink.punctuation_interval = punctuation_interval;
 
         target_Hz = (int) config.getDouble("targetHz", 10000000);

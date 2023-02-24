@@ -120,6 +120,18 @@ public class SLInputDurabilityHelper extends InputDurabilityHelper {
                     intDecoders[i] = new IntRleDecoder();
                 }
                 break;
+            case Optimize:
+                this.timestampEncoder = new LongRleEncoder();
+                this.timestampDecoder = new LongRleDecoder();
+                this.longEncoder = new LongGorillaEncoder();
+                for (int i = 0; i < longDecoders.length; i ++) {
+                    longDecoders[i] = new LongGorillaDecoder();
+                }
+                this.intEncoder = new IntRleEncoder();
+                for (int i = 0; i < intDecoders.length; i ++) {
+                    intDecoders[i] = new IntRleDecoder();
+                }
+                break;
         }
     }
     @Override

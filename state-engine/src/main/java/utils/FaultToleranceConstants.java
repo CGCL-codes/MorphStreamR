@@ -16,7 +16,7 @@ public class FaultToleranceConstants {
      * Zigzag Zigzag
      */
     public enum CompressionType {
-        None, XOR, Delta2Delta, Delta, RLE, Dictionary, Snappy, Zigzag
+        None, XOR, Delta2Delta, Delta, RLE, Dictionary, Snappy, Zigzag, Optimize
     }
      public enum FaultToleranceStatus {
          NULL,Undo,Persist,Commit,Snapshot
