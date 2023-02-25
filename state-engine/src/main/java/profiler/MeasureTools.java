@@ -197,6 +197,24 @@ public class MeasureTools {
             COMPUTE_PRE_TXN_TIME_ACC(thread_id);
     }
 
+    //Fault Tolerance Specific.
+    public static void BEGIN_COMPRESSION_TIME_MEASURE(int thread_id) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            COMPUTE_COMPRESSION_START_TIME(thread_id);
+    }
+    public static void END_COMPRESSION_TIME_MEASURE(int thread_id) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            COMPUTE_COMPRESSION_TIME(thread_id);
+    }
+    public static void BEGIN_PERSIST_TIME_MEASURE(int thread_id) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            COMPUTE_PERSIST_START_TIME(thread_id);
+    }
+    public static void END_PERSIST_TIME_MEASURE(int thread_id) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            COMPUTE_PERSIST_TIME(thread_id);
+    }
+
     // OGScheduler Specific.
     public static void BEGIN_SCHEDULE_NEXT_TIME_MEASURE(int thread_id) {
         if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
@@ -385,16 +403,20 @@ public class MeasureTools {
             BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
             fileWriter.write("AverageTotalTimeBreakdownReport\n");
             if (enable_log) log.info("===Average Total Time Breakdown Report===");
-            fileWriter.write("thread_id\t total_time\t stream_process\t txn_process\t overheads\n");
-            if (enable_log) log.info("thread_id\t total_time\t stream_process\t txn_process\t overheads");
+            fileWriter.write("thread_id\t total_time\t compression_time\t persist_time\t stream_process\t txn_process\t overheads\n");
+            if (enable_log) log.info("thread_id\t total_time\t compression_time\t persist_time\t stream_process\t txn_process\t overheads");
             for (int threadId = 0; threadId < tthread; threadId++) {
                 String output = String.format("%d\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t" +
                                 "%-10.2f\t" +
                                 "%-10.2f\t" +
                                 "%-10.2f\t" +
                                 "%-10.2f"
                         , threadId
                         , Total_Record.totalProcessTimePerEvent[threadId].getMean()
+                        , Total_Record.compression_total[threadId].getMean()
+                        , Total_Record.persist_total[threadId].getMean()
                         , Total_Record.stream_total[threadId].getMean()
                         , Total_Record.txn_total[threadId].getMean()
                         , Total_Record.overhead_total[threadId].getMean()
@@ -405,9 +427,13 @@ public class MeasureTools {
                                     "%-10.2f\t" +
                                     "%-10.2f\t" +
                                     "%-10.2f\t" +
+                                    "%-10.2f\t" +
+                                    "%-10.2f\t" +
                                     "%-10.2f"
                             , i
                             , Total_Record.totalProcessTimePerEvent[threadId].getValues()[i]
+                            , Total_Record.compression_total[threadId].getValues()[i]
+                            , Total_Record.persist_total[threadId].getValues()[i]
                             , Total_Record.stream_total[threadId].getValues()[i]
                             , Total_Record.txn_total[threadId].getValues()[i]
                             , Total_Record.overhead_total[threadId].getValues()[i]

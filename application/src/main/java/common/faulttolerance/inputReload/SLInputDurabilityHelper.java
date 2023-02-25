@@ -10,6 +10,7 @@ import common.param.TxnEvent;
 import common.param.sl.DepositEvent;
 import common.param.sl.TransactionEvent;
 import durability.inputStore.InputDurabilityHelper;
+import profiler.MeasureTools;
 import utils.FaultToleranceConstants;
 
 import java.io.*;
@@ -158,13 +159,16 @@ public class SLInputDurabilityHelper extends InputDurabilityHelper {
         }
     }
     private void storeInputWithoutCompression(Object[] myevents, long currentOffset, int interval, File inputFile) throws IOException, ExecutionException, InterruptedException {
+        MeasureTools.BEGIN_PERSIST_TIME_MEASURE(this.taskId);
         BufferedWriter EventBufferedWriter = new BufferedWriter(new FileWriter(inputFile, true));
         for (int i = (int) currentOffset; i < currentOffset + interval; i ++) {
             EventBufferedWriter.write( myevents[i].toString() + "\n");
         }
         EventBufferedWriter.close();
+        MeasureTools.END_PERSIST_TIME_MEASURE(this.taskId);
     }
     private void storeInputWithCompression(Object[] myevents, long currentOffset, int interval, File inputFile) throws IOException, ExecutionException, InterruptedException {
+        MeasureTools.BEGIN_COMPRESSION_TIME_MEASURE(this.taskId);
         Path path = Paths.get(inputFile.getPath());
         if (!isStringEncoded){
             //Type Compression
@@ -276,6 +280,8 @@ public class SLInputDurabilityHelper extends InputDurabilityHelper {
             metaBuffer.putInt((int) (position7 + appender.getPosition().get()));
             metaBuffer.putInt((int) (position8 + appender.getPosition().get()));
             metaBuffer.flip();
+            MeasureTools.END_COMPRESSION_TIME_MEASURE(this.taskId);
+            MeasureTools.BEGIN_PERSIST_TIME_MEASURE(this.taskId);
             appender.append(metaBuffer);
             appender.append(byteBuffer0);
             appender.append(byteBuffer1);
@@ -286,15 +292,20 @@ public class SLInputDurabilityHelper extends InputDurabilityHelper {
             appender.append(byteBuffer6);
             appender.append(byteBuffer7);
             appender.append(byteBuffer8);
+            MeasureTools.END_PERSIST_TIME_MEASURE(this.taskId);
         } else {
+            MeasureTools.BEGIN_COMPRESSION_TIME_MEASURE(this.taskId);
             for (int i = (int) currentOffset; i < currentOffset + interval; i ++) {
                 stringEncoder.encode(new Binary(myevents.toString()), baos);
             }
             stringEncoder.flush(baos);
             ByteBuffer out = ByteBuffer.wrap(baos.toByteArray());
             baos.reset();
+            MeasureTools.END_COMPRESSION_TIME_MEASURE(this.taskId);
+            MeasureTools.BEGIN_PERSIST_TIME_MEASURE(this.taskId);
             SyncFileAppender appender = new SyncFileAppender(true, path);
             appender.append(out);
+            MeasureTools.END_PERSIST_TIME_MEASURE(this.taskId);
         }
     }
     private void reloadInputWithCompression(File inputFile, Queue<Object> lostEvents, long redoOffset) throws IOException, ExecutionException, InterruptedException {

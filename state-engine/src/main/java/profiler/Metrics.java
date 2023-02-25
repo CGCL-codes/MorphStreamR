@@ -85,10 +85,14 @@ public class Metrics {
             RecoveryPerformance.stream_total[thread_id] = RecoveryPerformance.stream_total[thread_id] + stream_total;
             RecoveryPerformance.overhead_total[thread_id] = RecoveryPerformance.overhead_total[thread_id] + overhead_total;
         } else {
-            double total_time = (System.nanoTime() - Runtime.Start[thread_id]) / (double) number_events;
+            double total_time = (System.nanoTime() - Runtime.Start[thread_id] + Runtime.Compression[thread_id] + Runtime.Persist[thread_id]) / (double) number_events;
+            double compression_total = Runtime.Compression[thread_id] / (double) number_events;
+            double persist_total = Runtime.Persist[thread_id] / (double) number_events;
             double stream_total = (Runtime.Prepare[thread_id] + Runtime.Post[thread_id] + Runtime.PreTxn[thread_id]) / (double) number_events;
             double txn_total = Runtime.Txn[thread_id] / (double) number_events;
             Total_Record.totalProcessTimePerEvent[thread_id].addValue(total_time);
+            Total_Record.compression_total[thread_id].addValue(compression_total);
+            Total_Record.persist_total[thread_id].addValue(persist_total);
             Total_Record.stream_total[thread_id].addValue(stream_total);
             Total_Record.txn_total[thread_id].addValue(txn_total);
             Total_Record.overhead_total[thread_id].addValue(total_time - stream_total - txn_total);
@@ -163,7 +167,6 @@ public class Metrics {
     }
 
     public static void COMPUTE_START_ACCESS_TIME(int thread_id) {
-
         TxnRuntime.AccessStart[thread_id] = System.nanoTime();
     }
 
@@ -193,6 +196,19 @@ public class Metrics {
 
     public static void COMPUTE_PRE_TXN_TIME_ACC(int thread_id) {
         Runtime.PreTxn[thread_id] += System.nanoTime() - Runtime.PreTxnStart[thread_id];
+    }
+    //Fault Tolerance Specific
+    public static void COMPUTE_COMPRESSION_START_TIME(int thread_id) {
+        Runtime.CompressionStart[thread_id] = System.nanoTime();
+    }
+    public static void COMPUTE_COMPRESSION_TIME(int thread_id) {
+        Runtime.Compression[thread_id] = System.nanoTime() - Runtime.CompressionStart[thread_id];
+    }
+    public static void COMPUTE_PERSIST_START_TIME(int thread_id) {
+        Runtime.PersistStart[thread_id] = System.nanoTime();
+    }
+    public static void COMPUTE_PERSIST_TIME(int thread_id) {
+        Runtime.Persist[thread_id] = System.nanoTime() - Runtime.PersistStart[thread_id];
     }
 
     public static void RECORD_TXN_BREAKDOWN_RATIO(int thread_id) {
@@ -354,6 +370,11 @@ public class Metrics {
         //USED ONLY BY TStream
         public static long[] PreTxnStart = new long[kMaxThreadNum];
         public static long[] PreTxn = new long[kMaxThreadNum];
+        //USED ONLY BY FaultTolerant
+        public static long[] CompressionStart = new long[kMaxThreadNum];
+        public static long[] Compression = new long[kMaxThreadNum];
+        public static long[] PersistStart = new long[kMaxThreadNum];
+        public static long[] Persist = new long[kMaxThreadNum];
 
         public static void Initialize() {
             for (int i = 0; i < kMaxThreadNum; i++) {
@@ -366,6 +387,10 @@ public class Metrics {
                 Txn[i] = 0;
                 PreTxnStart[i] = 0;
                 PreTxn[i] = 0;
+                CompressionStart[i] = 0;
+                Compression[i] = 0;
+                PersistStart[i] = 0;
+                Persist[i] = 0;
                 ThroughputPerPhase.put(i, new ArrayList<>());
             }
         }
@@ -373,6 +398,8 @@ public class Metrics {
 
     static class Total_Record {
         public static DescriptiveStatistics[] totalProcessTimePerEvent = new DescriptiveStatistics[kMaxThreadNum];//total time spend for every input event.
+        public static DescriptiveStatistics[] compression_total = new DescriptiveStatistics[kMaxThreadNum];
+        public static DescriptiveStatistics[] persist_total = new DescriptiveStatistics[kMaxThreadNum];//total time spend in persist.
         public static DescriptiveStatistics[] txn_total = new DescriptiveStatistics[kMaxThreadNum];//total time spend in txn.
         public static DescriptiveStatistics[] stream_total = new DescriptiveStatistics[kMaxThreadNum];//total time spend in stream processing.
         public static DescriptiveStatistics[] overhead_total = new DescriptiveStatistics[kMaxThreadNum];//other overheads.
@@ -380,6 +407,8 @@ public class Metrics {
         public static void Initialize() {
             for (int i = 0; i < kMaxThreadNum; i++) {
                 totalProcessTimePerEvent[i] = new DescriptiveStatistics();
+                compression_total[i] = new DescriptiveStatistics();
+                persist_total[i] = new DescriptiveStatistics();
                 txn_total[i] = new DescriptiveStatistics();
                 stream_total[i] = new DescriptiveStatistics();
                 overhead_total[i] = new DescriptiveStatistics();
