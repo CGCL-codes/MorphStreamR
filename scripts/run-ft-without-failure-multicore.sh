@@ -3,17 +3,18 @@ source dir.sh || exit
 function ResetParameters() {
   app="StreamLedger"
   checkpointInterval=10240
-  tthread=20
+  tthread=24
   scheduler="OG_BFS_A"
   defaultScheduler="OG_BFS_A"
   CCOption=3 #TSTREAM
   complexity=10000
   NUM_ITEMS=491520
   deposit_ratio=95
+  abort_ratio=0
   key_skewness=0
   isCyclic=0
   isDynamic=1
-  workloadType="default,unchanging,unchanging,unchanging,unchanging,unchanging,unchanging,unchanging,unchanging,unchanging,unchanging,unchanging"
+  workloadType="default,unchanging,unchanging,unchanging,Up_skew,Up_skew,Up_abort,Down_abort,Up_PD,Up_PD,unchanging,unchanging"
   schedulerPool="OG_BFS_A,OG_NS_A,OP_NS_A,OP_NS"
   rootFilePath="${RSTDIR}"
   shiftRate=1
@@ -43,6 +44,7 @@ function runApplication() {
             --CCOption $CCOption \
             --complexity $complexity \
             --deposit_ratio $deposit_ratio \
+            --abort_ratio $abort_ratio \
             --key_skewness $key_skewness \
             --isCyclic $isCyclic \
             --rootFilePath $rootFilePath \
@@ -72,6 +74,7 @@ function runApplication() {
     --CCOption $CCOption \
     --complexity $complexity \
     --deposit_ratio $deposit_ratio \
+    --abort_ratio $abort_ratio \
     --key_skewness $key_skewness \
     --isCyclic $isCyclic \
     --rootFilePath $rootFilePath \

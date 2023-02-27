@@ -159,6 +159,8 @@ public class PartitionStateManagerWithAbort implements Runnable, OperationChainS
         assert operationChain.getOperations().contains(abortedOp);
         if (!abortedOp.isFailed) {
             for (Operation operation : operationChain.getOperations()) {
+                if (operation.getOperationState().equals(OperationStateType.EXECUTED))
+                    MeasureTools.SCHEDULE_REDO_COUNT_MEASURE(operation.context.thisThreadId);
                 if (!operation.getOperationState().equals(OperationStateType.ABORTED)) {
                     operation.stateTransition(OperationStateType.BLOCKED);
                 }
@@ -194,10 +196,10 @@ public class PartitionStateManagerWithAbort implements Runnable, OperationChainS
 
     private void ocRollbackAndRedoTransition(OperationChain operationChain) {
         for (Operation operation : operationChain.getOperations()) {
-            if (!operation.getOperationState().equals(OperationStateType.ABORTED))
-                operation.stateTransition(OperationStateType.BLOCKED);
             if (operation.getOperationState().equals(OperationStateType.EXECUTED))
                 MeasureTools.SCHEDULE_REDO_COUNT_MEASURE(operation.context.thisThreadId);
+            if (!operation.getOperationState().equals(OperationStateType.ABORTED))
+                operation.stateTransition(OperationStateType.BLOCKED);
         }
         if (operationChain.isExecuted) {
             operationChain.isExecuted = false;
