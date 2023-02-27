@@ -2,7 +2,7 @@
 source dir.sh || exit
 function ResetParameters() {
   app="StreamLedger"
-  checkpointInterval=10240
+  checkpointInterval=20480
   tthread=24
   scheduler="OG_BFS_A"
   defaultScheduler="OG_BFS_A"
@@ -14,13 +14,13 @@ function ResetParameters() {
   key_skewness=0
   isCyclic=0
   isDynamic=1
-  workloadType="default,unchanging,unchanging,unchanging,Up_skew,Up_skew,Up_abort,Down_abort,Up_PD,Up_PD,unchanging,unchanging"
+  workloadType="default,unchanging,unchanging,unchanging,Up_skew,Up_skew,Up_abort,Down_abort,Up_PD"
   schedulerPool="OG_BFS_A,OG_NS_A,OP_NS_A,OP_NS"
   rootFilePath="${RSTDIR}"
   shiftRate=1
   multicoreEvaluation=1
   maxThreads=24
-  totalEvents=`expr $checkpointInterval \* $tthread \* 12 \* $shiftRate`
+  totalEvents=`expr $checkpointInterval \* $tthread \* 9 \* $shiftRate`
 
   snapshotInterval=3
   arrivalControl=1
@@ -30,7 +30,7 @@ function ResetParameters() {
   isFailure=0
   failureTime=3000
   measureInterval=100
-  compressionAlg="RLE"
+  compressionAlg="Dictionary"
 }
 
 function runApplication() {
@@ -105,7 +105,7 @@ function multiCoreRunner() { # multi-batch exp
 function application_runner() {
  ResetParameters
  app=StreamLedger
- for FTOption in 0
+ for FTOption in 2
  do
  multiCoreRunner
  done
