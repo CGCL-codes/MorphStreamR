@@ -29,6 +29,7 @@ function ResetParameters() {
   isFailure=0
   failureTime=3000
   measureInterval=100
+  compressionAlg="RLE"
 }
 
 function runApplication() {
@@ -59,7 +60,8 @@ function runApplication() {
             --isRecovery $isRecovery \
             --isFailure $isFailure \
             --failureTime $failureTime \
-            --measureInterval $measureInterval"
+            --measureInterval $measureInterval \
+            --compressionAlg $compressionAlg"
   java -Xms300g -Xmx300g -Xss100M -XX:+PrintGCDetails -Xmn150g -XX:+UseG1GC -jar -d64 $JAR \
     --app $app \
     --NUM_ITEMS $NUM_ITEMS \
@@ -87,11 +89,12 @@ function runApplication() {
     --isRecovery $isRecovery \
     --isFailure $isFailure \
     --failureTime $failureTime \
-    --measureInterval $measureInterval
+    --measureInterval $measureInterval \
+    --compressionAlg $compressionAlg
 }
 
 function multiCoreRunner() { # multi-batch exp
- for tthread in 1 4 8 12 16 20 24
+ for tthread in 24
    do
       runApplication
    done
@@ -99,7 +102,7 @@ function multiCoreRunner() { # multi-batch exp
 function application_runner() {
  ResetParameters
  app=StreamLedger
- for FTOption in 1 2
+ for FTOption in 0
  do
  multiCoreRunner
  done
