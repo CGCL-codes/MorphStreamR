@@ -10,6 +10,7 @@ import durability.snapshot.SnapshotResources.StateMetaInfoSnapshot;
 import durability.snapshot.SnapshotStrategy.ImplSnapshotStrategy.InMemorySnapshotStrategy;
 import storage.TableRecord;
 import storage.table.BaseTable;
+import utils.FaultToleranceConstants;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -47,21 +48,10 @@ public class InMemoryFullSnapshotResources implements SnapshotResources {
 
     public ByteBuffer createWriteBuffer(SnapshotOptions snapshotOptions) throws IOException {
         DataOutputView dataOutputView;
-        switch (snapshotOptions.getCompressionAlg()) {
-            case None:
-                dataOutputView = new NativeDataOutputView();
-            break;
-            case Snappy:
-                dataOutputView = new SnappyDataOutputView();
-            break;
-            case XOR:
-                dataOutputView = new XORDataOutputView();
-            break;
-            case RLE:
-                dataOutputView = new RLEDataOutputView();
-            break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + snapshotOptions.getCompressionAlg());
+        if (snapshotOptions.getCompressionAlg() != FaultToleranceConstants.CompressionType.None) {
+            dataOutputView = new SnappyDataOutputView();//Default to use Snappy compression
+        } else {
+            dataOutputView = new NativeDataOutputView();
         }
         writeKVStateMetaData(dataOutputView);
         writeKVStateDate(dataOutputView);
@@ -85,12 +75,7 @@ public class InMemoryFullSnapshotResources implements SnapshotResources {
             Iterator<TableRecord> recordIterator = tables.values().iterator();
             while (recordIterator.hasNext()) {
                 TableRecord tableRecord = recordIterator.next();
-                String str;
-                if (dataOutputView instanceof RLEDataOutputView) {
-                    str = RLECompressor.encode(tableRecord.toSerializableString(this.snapshotId));
-                } else {
-                    str = tableRecord.toSerializableString(this.snapshotId);
-                }
+                String str = tableRecord.toSerializableString(this.snapshotId);
                 dataOutputView.writeCompression(str.getBytes(StandardCharsets.UTF_8));
             }
         }

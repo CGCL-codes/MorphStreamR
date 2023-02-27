@@ -214,6 +214,24 @@ public class MeasureTools {
         if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
             COMPUTE_PERSIST_TIME(thread_id);
     }
+    public static void BEGIN_SNAPSHOT_TIME_MEASURE(int thread_id) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            COMPUTE_SNAPSHOT_START_TIME(thread_id);
+    }
+    public static void END_SNAPSHOT_TIME_MEASURE(int thread_id) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            COMPUTE_SNAPSHOT_TIME(thread_id);
+    }
+    public static void BEGIN_LOGGING_TIME_MEASURE(int thread_id) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            COMPUTE_LOGGING_START_TIME(thread_id);
+    }
+    public static void END_LOGGING_TIME_MEASURE(int thread_id) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            COMPUTE_LOGGING_TIME(thread_id);
+    }
+
+
 
     // OGScheduler Specific.
     public static void BEGIN_SCHEDULE_NEXT_TIME_MEASURE(int thread_id) {
@@ -397,14 +415,14 @@ public class MeasureTools {
             e.printStackTrace();
         }
     }
-    private static void AverageTotalTimeBreakdownReport(int tthread) {
+    private static void AverageTotalTimeBreakdownReport(int tthread, int snapshotInterval) {
         try {
             File file = new File(directory + fileNameSuffix + ".overall");
             BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
             fileWriter.write("AverageTotalTimeBreakdownReport\n");
             if (enable_log) log.info("===Average Total Time Breakdown Report===");
-            fileWriter.write("thread_id\t total_time\t compression_time\t persist_time\t stream_process\t txn_process\t overheads\n");
-            if (enable_log) log.info("thread_id\t total_time\t compression_time\t persist_time\t stream_process\t txn_process\t overheads");
+            fileWriter.write("thread_id\t total_time\t serialize_time\t persist_time\t stream_process\t txn_process\t overheads\n");
+            if (enable_log) log.info("thread_id\t total_time\t serialize_time\t persist_time\t stream_process\t txn_process\t overheads");
             for (int threadId = 0; threadId < tthread; threadId++) {
                 String output = String.format("%d\t" +
                                 "%-10.2f\t" +
@@ -415,7 +433,7 @@ public class MeasureTools {
                                 "%-10.2f"
                         , threadId
                         , Total_Record.totalProcessTimePerEvent[threadId].getMean()
-                        , Total_Record.compression_total[threadId].getMean()
+                        , Total_Record.compression_total[threadId].getMean() + Total_Record.serialization_total[threadId].getMean() + Total_Record.snapshot_serialization_total[threadId].getMean() / snapshotInterval
                         , Total_Record.persist_total[threadId].getMean()
                         , Total_Record.stream_total[threadId].getMean()
                         , Total_Record.txn_total[threadId].getMean()
@@ -432,7 +450,7 @@ public class MeasureTools {
                                     "%-10.2f"
                             , i
                             , Total_Record.totalProcessTimePerEvent[threadId].getValues()[i]
-                            , Total_Record.compression_total[threadId].getValues()[i]
+                            , Total_Record.compression_total[threadId].getValues()[i] + Total_Record.serialization_total[threadId].getValues()[i] + Total_Record.snapshot_serialization_total[threadId].getValues()[i / snapshotInterval] / snapshotInterval
                             , Total_Record.persist_total[threadId].getValues()[i]
                             , Total_Record.stream_total[threadId].getValues()[i]
                             , Total_Record.txn_total[threadId].getValues()[i]
@@ -836,9 +854,9 @@ public class MeasureTools {
             e.printStackTrace();
         }
     }
-    public static void METRICS_REPORT(int ccOption, int FTOption, int tthread, double throughput, int phase, int shiftRate) {
+    public static void METRICS_REPORT(int ccOption, int FTOption, int tthread, double throughput, int phase, int shiftRate, int snapshotInterval) {
         WriteThroughputReport(throughput);
-        AverageTotalTimeBreakdownReport(tthread);
+        AverageTotalTimeBreakdownReport(tthread, snapshotInterval);
         WritePersistFileSize(FTOption, tthread);
         //WriteThroughputPerPhase(tthread, phase, shiftRate);
         if (fileNameSuffix.equals("_recovery")) {
@@ -854,7 +872,7 @@ public class MeasureTools {
         WriteSSDConsumption();
         WriteSSDBandwidth();
     }
-    public static void METRICS_REPORT_WITH_FAILURE(int ccOption, int FTOption, int tthread, String rootFile) {
+    public static void METRICS_REPORT_WITH_FAILURE(int ccOption, int FTOption, int tthread, String rootFile, int snapshotInterval) {
         File file = new File(directory + fileNameSuffix + ".overall");
         file.mkdirs();
         if (file.exists()) {
@@ -865,7 +883,7 @@ public class MeasureTools {
                 e.printStackTrace();
             }
         }
-        AverageTotalTimeBreakdownReport(tthread);
+        AverageTotalTimeBreakdownReport(tthread, snapshotInterval);
         WritePersistFileSize(FTOption, tthread);
         WriteRuntimePerformance(tthread);
         if (ccOption == CCOption_MorphStream) {//extra info

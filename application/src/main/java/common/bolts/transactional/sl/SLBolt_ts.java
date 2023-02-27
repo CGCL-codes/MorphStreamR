@@ -30,8 +30,7 @@ import java.util.Objects;
 import java.util.concurrent.BrokenBarrierException;
 
 import static common.CONTROL.*;
-import static profiler.MeasureTools.BEGIN_POST_TIME_MEASURE;
-import static profiler.MeasureTools.END_POST_TIME_MEASURE_ACC;
+import static profiler.MeasureTools.*;
 
 public class SLBolt_ts extends SLBolt {
     private static final Logger LOG = LoggerFactory.getLogger(SLBolt_ts.class);
@@ -83,12 +82,20 @@ public class SLBolt_ts extends SLBolt {
                 {
                     transactionManager.start_evaluate(thread_Id, in.getBID(), num_events);//start lazy evaluation in transaction manager.
                     if (Objects.equals(in.getMarker().getMessage(), "snapshot")) {
+                        MeasureTools.BEGIN_SNAPSHOT_TIME_MEASURE(this.thread_Id);
                         this.db.asyncSnapshot(in.getMarker().getSnapshotId(), this.thread_Id, this.ftManager);
+                        MeasureTools.END_SNAPSHOT_TIME_MEASURE(this.thread_Id);
                     } else if (Objects.equals(in.getMarker().getMessage(), "commit")){
+                        MeasureTools.BEGIN_LOGGING_TIME_MEASURE(this.thread_Id);
                         this.db.asyncCommit(in.getMarker().getSnapshotId(), this.thread_Id, this.loggingManager);
+                        MeasureTools.END_LOGGING_TIME_MEASURE(this.thread_Id);
                     } else if (Objects.equals(in.getMarker().getMessage(), "commit_snapshot")){
+                        MeasureTools.BEGIN_LOGGING_TIME_MEASURE(this.thread_Id);
                         this.db.asyncCommit(in.getMarker().getSnapshotId(), this.thread_Id, this.loggingManager);
+                        MeasureTools.END_LOGGING_TIME_MEASURE(this.thread_Id);
+                        BEGIN_SNAPSHOT_TIME_MEASURE(this.thread_Id);
                         this.db.asyncSnapshot(in.getMarker().getSnapshotId(), this.thread_Id, this.ftManager);
+                        MeasureTools.END_SNAPSHOT_TIME_MEASURE(this.thread_Id);
                     }
                     TRANSFER_REQUEST_CORE();
                 }

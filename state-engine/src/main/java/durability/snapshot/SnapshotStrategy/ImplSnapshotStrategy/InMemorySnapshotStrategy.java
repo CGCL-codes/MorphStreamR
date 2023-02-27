@@ -35,6 +35,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import static java.nio.file.StandardOpenOption.READ;
+import static utils.FaultToleranceConstants.CompressionType.None;
 import static utils.FaultToleranceConstants.CompressionType.RLE;
 
 public class InMemorySnapshotStrategy implements SnapshotStrategy<InMemoryFullSnapshotResources> {
@@ -93,21 +94,10 @@ public class InMemorySnapshotStrategy implements SnapshotStrategy<InMemoryFullSn
         Future<Integer> result = afc.read(dataBuffer, 0);
         int readBytes = result.get();
         DataInputView inputView;
-        switch (snapshotOptions.getCompressionAlg()) {
-            case None:
-                inputView = new NativeDataInputView(dataBuffer);
-                break;
-            case Snappy:
-                inputView = new SnappyDataInputView(dataBuffer);
-                break;
-            case XOR:
-                inputView = new XORDataInputView(dataBuffer);
-                break;
-            case RLE:
-                inputView = new RLEDataInputView(dataBuffer);
-                break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + snapshotOptions.getCompressionAlg());
+        if (snapshotOptions.getCompressionAlg() != None){
+            inputView = new SnappyDataInputView(dataBuffer);//Default to use Snappy compression
+        } else {
+            inputView = new NativeDataInputView(dataBuffer);
         }
         int stateMetaInfoSize = inputView.readInt();
         StateMetaInfoSnapshot[] stateMetaInfoSnapshots = new StateMetaInfoSnapshot[stateMetaInfoSize];
@@ -120,12 +110,7 @@ public class InMemorySnapshotStrategy implements SnapshotStrategy<InMemoryFullSn
             while(recordNum != 0) {
                 byte[] objects = inputView.readFullyDecompression();
                 SchemaRecord schemaRecord;
-                if (snapshotOptions.getCompressionAlg() == RLE) {
-                    String compressedString = new String(objects, "UTF-8");
-                    schemaRecord = AbstractRecoveryManager.getRecord(stateMetaInfoSnapshot.recordSchema, RLECompressor.decode(compressedString));
-                } else {
-                    schemaRecord = AbstractRecoveryManager.getRecord(stateMetaInfoSnapshot.recordSchema, objects);
-                }
+                schemaRecord = AbstractRecoveryManager.getRecord(stateMetaInfoSnapshot.recordSchema, objects);
                 this.tables.get(stateMetaInfoSnapshot.tableName).SelectKeyRecord(schemaRecord.GetPrimaryKey()).content_.updateMultiValues(snapshotResult.snapshotId, 0L, false, schemaRecord);
                 recordNum --;
             }

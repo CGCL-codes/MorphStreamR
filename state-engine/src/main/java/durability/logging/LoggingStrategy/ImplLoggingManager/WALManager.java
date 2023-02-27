@@ -36,6 +36,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.Future;
 
 import static java.nio.file.StandardOpenOption.READ;
+import static utils.FaultToleranceConstants.CompressionType.None;
 import static utils.FaultToleranceConstants.CompressionType.RLE;
 
 public class WALManager implements LoggingManager {
@@ -97,21 +98,10 @@ public class WALManager implements LoggingManager {
             ByteBuffer dataBuffer = ByteBuffer.allocate(fileSize);
             Future<Integer> result = afc.read(dataBuffer, 0);
             DataInputView inputView;
-            switch (loggingOptions.getCompressionAlg()) {
-                case None:
-                    inputView = new NativeDataInputView(dataBuffer);
-                    break;
-                case Snappy:
-                    inputView = new SnappyDataInputView(dataBuffer);
-                    break;
-                case XOR:
-                    inputView = new XORDataInputView(dataBuffer);
-                    break;
-                case RLE:
-                    inputView = new RLEDataInputView(dataBuffer);
-                    break;
-                default:
-                    throw new IllegalStateException("Unexpected value: " + loggingOptions.getCompressionAlg());
+            if (loggingOptions.getCompressionAlg() != None) {
+                inputView = new SnappyDataInputView(dataBuffer);//Default to use Snappy compression
+            } else {
+                inputView = new NativeDataInputView(dataBuffer);
             }
             int walMetaInfoSize = inputView.readInt();
             WalMetaInfoSnapshot[] walMetaInfoSnapshots = new WalMetaInfoSnapshot[walMetaInfoSize];
@@ -123,13 +113,7 @@ public class WALManager implements LoggingManager {
                 int recordNum = metaInfo.logRecordNumber;
                 while (recordNum != 0) {
                     byte[] objects = inputView.readFullyDecompression();
-                    String logRecord;
-                    if (loggingOptions.getCompressionAlg() == RLE) {
-                        String compressedString = new String(objects, "UTF-8");
-                        logRecord = RLECompressor.decode(compressedString);
-                    } else {
-                        logRecord = new String(objects, "UTF-8");
-                    }
+                    String logRecord = new String(objects, "UTF-8");
                     String[] values = logRecord.split(";");
                     int bid = Integer.parseInt(values[0]);
                     SchemaRecord schemaRecord = AbstractRecoveryManager.getRecord(metaInfo.recordSchema, values[1]);

@@ -10,6 +10,7 @@ import durability.logging.LoggingResource.WalMetaInfoSnapshot;
 import durability.logging.LoggingResource.LoggingResources;
 import durability.snapshot.LoggingOptions;
 import scheduler.struct.MetaTypes;
+import utils.FaultToleranceConstants;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -47,21 +48,10 @@ public class PartitionWalResources implements LoggingResources {
     }
     public ByteBuffer createWriteBuffer(LoggingOptions loggingOptions) throws IOException {
         DataOutputView dataOutputView;
-        switch (loggingOptions.getCompressionAlg()) {
-            case None:
-                dataOutputView = new NativeDataOutputView();
-                break;
-            case Snappy:
-                dataOutputView = new SnappyDataOutputView();
-                break;
-            case XOR:
-                dataOutputView = new XORDataOutputView();
-                break;
-            case RLE:
-                dataOutputView = new RLEDataOutputView();
-                break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + loggingOptions.getCompressionAlg());
+        if (loggingOptions.getCompressionAlg() != FaultToleranceConstants.CompressionType.None) {
+            dataOutputView = new SnappyDataOutputView();//Default to use Snappy compression
+        } else {
+            dataOutputView = new NativeDataOutputView();
         }
         writeLogMetaData(dataOutputView);
         writeLogRecord(dataOutputView);
@@ -86,12 +76,7 @@ public class PartitionWalResources implements LoggingResources {
             while(recordIterator.hasNext()) {
                 LogRecord logRecord = recordIterator.next();
                 if (logRecord.vote != MetaTypes.OperationStateType.ABORTED && logRecord.update != null) {
-                    String str;
-                    if (dataOutputView instanceof RLEDataOutputView) {
-                        str = RLECompressor.encode(logRecord.toString());
-                    } else {
-                        str = logRecord.toString();
-                    }
+                    String str = logRecord.toString();
                     dataOutputView.writeCompression(str.getBytes(StandardCharsets.UTF_8));
                 }
             }
