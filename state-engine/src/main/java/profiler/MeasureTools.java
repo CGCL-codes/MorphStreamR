@@ -421,44 +421,40 @@ public class MeasureTools {
             BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
             fileWriter.write("AverageTotalTimeBreakdownReport\n");
             if (enable_log) log.info("===Average Total Time Breakdown Report===");
-            fileWriter.write("thread_id\t total_time\t serialize_time\t persist_time\t stream_process\t txn_process\t overheads\n");
-            if (enable_log) log.info("thread_id\t total_time\t serialize_time\t persist_time\t stream_process\t txn_process\t overheads");
+            fileWriter.write("total_time\t serialize_time\t persist_time\t stream_process\t txn_process\t overheads\n");
+            if (enable_log) log.info("total_time\t serialize_time\t persist_time\t stream_process\t txn_process\t overheads");
+            double totalProcessTime = 0;
+            double totalSerializeTime = 0;
+            double totalPersistTime = 0;
+            double totalStreamProcessTime = 0;
+            double totalTxnProcessTime = 0;
+            double totalOverheads = 0;
             for (int threadId = 0; threadId < tthread; threadId++) {
-                String output = String.format("%d\t" +
-                                "%-10.2f\t" +
-                                "%-10.2f\t" +
-                                "%-10.2f\t" +
-                                "%-10.2f\t" +
-                                "%-10.2f\t" +
-                                "%-10.2f"
-                        , threadId
-                        , Total_Record.totalProcessTimePerEvent[threadId].getMean()
-                        , Total_Record.compression_total[threadId].getMean() + Total_Record.serialization_total[threadId].getMean() + Total_Record.snapshot_serialization_total[threadId].getMean() / snapshotInterval
-                        , Total_Record.persist_total[threadId].getMean()
-                        , Total_Record.stream_total[threadId].getMean()
-                        , Total_Record.txn_total[threadId].getMean()
-                        , Total_Record.overhead_total[threadId].getMean()
-                );
-                fileWriter.write(output + "\n");
-                for (int i = 0; i < Total_Record.totalProcessTimePerEvent[threadId].getValues().length; i++) {
-                    output = String.format("%d\t" +
-                                    "%-10.2f\t" +
-                                    "%-10.2f\t" +
-                                    "%-10.2f\t" +
-                                    "%-10.2f\t" +
-                                    "%-10.2f\t" +
-                                    "%-10.2f"
-                            , i
-                            , Total_Record.totalProcessTimePerEvent[threadId].getValues()[i]
-                            , Total_Record.compression_total[threadId].getValues()[i] + Total_Record.serialization_total[threadId].getValues()[i] + Total_Record.snapshot_serialization_total[threadId].getValues()[i / snapshotInterval] / snapshotInterval
-                            , Total_Record.persist_total[threadId].getValues()[i]
-                            , Total_Record.stream_total[threadId].getValues()[i]
-                            , Total_Record.txn_total[threadId].getValues()[i]
-                            , Total_Record.overhead_total[threadId].getValues()[i]
-                    );
-                    log.info(output);
+                totalProcessTime += Total_Record.totalProcessTimePerEvent[threadId].getMean();
+                if (Total_Record.compression_total[threadId].getN() > 0) {
+                    totalSerializeTime += Total_Record.compression_total[threadId].getMean() + Total_Record.serialization_total[threadId].getMean() + Total_Record.snapshot_serialization_total[threadId].getMean() / snapshotInterval;
                 }
+                totalPersistTime += Total_Record.persist_total[threadId].getMean();
+                totalStreamProcessTime += Total_Record.stream_total[threadId].getMean();
+                totalTxnProcessTime += Total_Record.txn_total[threadId].getMean();
+                totalOverheads += Total_Record.overhead_total[threadId].getMean();
             }
+            String output = String.format(
+                            "%-10.2f\t" +
+                            "%-10.2f\t" +
+                            "%-10.2f\t" +
+                            "%-10.2f\t" +
+                            "%-10.2f\t" +
+                            "%-10.2f"
+                    , totalProcessTime / tthread
+                    , totalSerializeTime / tthread
+                    , totalPersistTime / tthread
+                    , totalStreamProcessTime / tthread
+                    , totalTxnProcessTime / tthread
+                    , totalOverheads / tthread
+            );
+            fileWriter.write(output + "\n");
+            if (enable_log) log.info(output);
             fileWriter.close();
         } catch (Exception e) {
             e.printStackTrace();
@@ -637,53 +633,47 @@ public class MeasureTools {
             BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
             fileWriter.write("SchedulerTimeBreakdownReport (ns)\n");
             if (enable_log) log.info("===Scheduler Time Breakdown Report===");
-            fileWriter.write("thread_id\t explore_time\t next_time\t useful_time\t abort_time\t notify_time\t construct_time\t first_explore_time\t scheduler_switch\n");
+            fileWriter.write("explore_time\t useful_time\t abort_time\t construct_time\t first_explore_time\t next_time\t notify_time\t scheduler_switch\n");
             if (enable_log)
-                log.info("thread_id\t explore_time\t next_time\t useful_time\t abort_time\t notify_time\t construct_time\t first_explore_time\t scheduler_switch");
+                log.info("explore_time\t useful_time\t abort_time\t construct_time\t first_explore_time\t next_time\t notify_time\t scheduler_switch");
+            double explore_time = 0;
+            double useful_time = 0;
+            double abort_time = 0;
+            double construct_time = 0;
+            double first_explore_time = 0;
+            double next_time = 0;
+            double notify_time = 0;
+            double scheduler_switch = 0;
             for (int threadId = 0; threadId < tthread; threadId++) {
-                String output = String.format("%d\t" +
-                                "%-10.2f\t" +
-                                "%-10.2f\t" +
-                                "%-10.2f\t" +
-                                "%-10.2f\t" +
-                                "%-10.2f\t" +
-                                "%-10.2f\t" +
-                                "%-10.2f\t" +
-                                "%-10.2f\t"
-                        , threadId
-                        , Scheduler_Record.Explore[threadId].getMean()
-                        , Scheduler_Record.Next[threadId].getMean()
-                        , Scheduler_Record.Useful[threadId].getMean()
-                        , Scheduler_Record.Abort[threadId].getMean()
-                        , Scheduler_Record.Notify[threadId].getMean()
-                        , Scheduler_Record.Construct[threadId].getMean()
-                        , Scheduler_Record.FirstExplore[threadId].getMean()
-                        , Scheduler_Record.SchedulerSwitch[threadId].getMean()
-                );
-                fileWriter.write(output + "\n");
-                for (int i = 0; i < Scheduler_Record.Construct[threadId].getValues().length; i++) {
-                    output = String.format("%d\t" +
-                                    "%-10.2f\t" +
-                                    "%-10.2f\t" +
-                                    "%-10.2f\t" +
-                                    "%-10.2f\t" +
-                                    "%-10.2f\t" +
-                                    "%-10.2f\t" +
-                                    "%-10.2f\t" +
-                                    "%-10.2f\t"
-                            , i
-                            , Scheduler_Record.Explore[threadId].getValues()[i]
-                            , Scheduler_Record.Next[threadId].getValues()[i]
-                            , Scheduler_Record.Useful[threadId].getValues()[i]
-                            , Scheduler_Record.Abort[threadId].getValues()[i]
-                            , Scheduler_Record.Notify[threadId].getValues()[i]
-                            , Scheduler_Record.Construct[threadId].getValues()[i]
-                            , Scheduler_Record.FirstExplore[threadId].getValues()[i]
-                            , Scheduler_Record.SchedulerSwitch[threadId].getValues()[i]
-                    );
-                    log.info(output);
-                }
+                explore_time += Scheduler_Record.Explore[threadId].getMean();
+                useful_time += Scheduler_Record.Useful[threadId].getMean();
+                abort_time += Scheduler_Record.Abort[threadId].getMean();
+                construct_time += Scheduler_Record.Construct[threadId].getMean();
+                first_explore_time += Scheduler_Record.FirstExplore[threadId].getMean();
+                next_time += Scheduler_Record.Next[threadId].getMean();
+                notify_time += Scheduler_Record.Notify[threadId].getMean();
+                scheduler_switch += Scheduler_Record.SchedulerSwitch[threadId].getMean();
             }
+            String output = String.format(
+                            "%-10.2f\t" +
+                            "%-10.2f\t" +
+                            "%-10.2f\t" +
+                            "%-10.2f\t" +
+                            "%-10.2f\t" +
+                            "%-10.2f\t" +
+                            "%-10.2f\t" +
+                            "%-10.2f\t"
+                    , explore_time / tthread
+                    , useful_time / tthread
+                    , abort_time / tthread
+                    , construct_time / tthread
+                    , first_explore_time / tthread
+                    , next_time / tthread
+                    , notify_time / tthread
+                    , scheduler_switch / tthread
+            );
+            if (enable_log) log.info(output);
+            fileWriter.write(output + "\n");
             fileWriter.close();
         } catch (Exception e) {
             e.printStackTrace();
