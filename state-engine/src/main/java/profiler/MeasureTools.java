@@ -431,7 +431,7 @@ public class MeasureTools {
             double totalOverheads = 0;
             for (int threadId = 0; threadId < tthread; threadId++) {
                 totalProcessTime += Total_Record.totalProcessTimePerEvent[threadId].getMean();
-                if (Total_Record.compression_total[threadId].getN() > 0) {
+                if (snapshotInterval != 0) {
                     totalSerializeTime += Total_Record.compression_total[threadId].getMean() + Total_Record.serialization_total[threadId].getMean() + Total_Record.snapshot_serialization_total[threadId].getMean() / snapshotInterval;
                 }
                 totalPersistTime += Total_Record.persist_total[threadId].getMean();

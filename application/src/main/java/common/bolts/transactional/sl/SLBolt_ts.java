@@ -74,13 +74,10 @@ public class SLBolt_ts extends SLBolt {
             int transSize = transactionEvents.size();
             int depoSize = depositEvents.size();
             int num_events = transSize + depoSize;
-            /**
-             *  MeasureTools.BEGIN_TOTAL_TIME_MEASURE(thread_Id); at {@link #execute_ts_normal(Tuple)}}.
-             */
             {
-                MeasureTools.BEGIN_TXN_TIME_MEASURE(thread_Id);
                 {
                     transactionManager.start_evaluate(thread_Id, in.getBID(), num_events);//start lazy evaluation in transaction manager.
+                    MeasureTools.END_TXN_TIME_MEASURE(thread_Id);
                     if (Objects.equals(in.getMarker().getMessage(), "snapshot")) {
                         MeasureTools.BEGIN_SNAPSHOT_TIME_MEASURE(this.thread_Id);
                         this.db.asyncSnapshot(in.getMarker().getSnapshotId(), this.thread_Id, this.ftManager);
@@ -99,7 +96,6 @@ public class SLBolt_ts extends SLBolt {
                     }
                     TRANSFER_REQUEST_CORE();
                 }
-                MeasureTools.END_TXN_TIME_MEASURE(thread_Id);
                 BEGIN_POST_TIME_MEASURE(thread_Id);
                 {
                     TRANSFER_REQUEST_POST();
