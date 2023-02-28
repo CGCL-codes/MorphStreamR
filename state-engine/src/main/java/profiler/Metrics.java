@@ -88,21 +88,19 @@ public class Metrics {
             //FaultTolerance
             double compression_total = Runtime.Compression[thread_id] / (double) number_events;
             double persist_total = Runtime.Persist[thread_id] / (double) number_events;
-            double logging_total = (Runtime.Logging[thread_id]) / (double) number_events;
+            double logging_total = Runtime.Logging[thread_id] / (double) number_events;
+            double snapshot_total = Runtime.Snapshot[thread_id] / (double) number_events;
             Total_Record.compression_total[thread_id].addValue(compression_total);
             Total_Record.persist_total[thread_id].addValue(persist_total);
             Total_Record.serialization_total[thread_id].addValue(logging_total);
-            if (Runtime.Snapshot[thread_id] != 0) {
-                double snapshot_total = Runtime.Snapshot[thread_id] / (double) number_events;
-                logging_total = logging_total + snapshot_total;
-                Total_Record.snapshot_serialization_total[thread_id].addValue(snapshot_total);
-                Runtime.Snapshot[thread_id] = 0;
-            }
+            Total_Record.snapshot_serialization_total[thread_id].addValue(snapshot_total);
+            logging_total = logging_total + snapshot_total;
+            Runtime.Snapshot[thread_id] = 0;//Need to reset it to 0
             //Process
             double total_process_time = (System.nanoTime() - Runtime.Start[thread_id]) / (double) number_events;
             double stream_total = (Runtime.Prepare[thread_id] + Runtime.Post[thread_id] + Runtime.PreTxn[thread_id]) / (double) number_events;
             double txn_total = Runtime.Txn[thread_id] / (double) number_events;
-            Total_Record.totalProcessTimePerEvent[thread_id].addValue(total_process_time);
+            Total_Record.totalProcessTimePerEvent[thread_id].addValue(total_process_time - logging_total);
             Total_Record.stream_total[thread_id].addValue(stream_total);
             Total_Record.txn_total[thread_id].addValue(txn_total);
             Total_Record.overhead_total[thread_id].addValue(total_process_time - stream_total - txn_total - logging_total);

@@ -446,7 +446,7 @@ public class MeasureTools {
                             "%-10.2f\t" +
                             "%-10.2f\t" +
                             "%-10.2f"
-                    , totalProcessTime / tthread
+                    , (totalProcessTime + totalSerializeTime + totalPersistTime) / tthread
                     , totalSerializeTime / tthread
                     , totalPersistTime / tthread
                     , totalStreamProcessTime / tthread
