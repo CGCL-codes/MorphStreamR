@@ -66,6 +66,7 @@ public class TxnManagerTStream extends TxnManagerDedicatedAsy {
         }
         MeasureTools.END_SCHEDULE_EXPLORE_TIME_MEASURE(thread_Id);
         MeasureTools.SCHEDULE_TIME_RECORD(thread_Id, num_events);
+        MeasureTools.END_TXN_TIME_MEASURE(thread_Id);
         SOURCE_CONTROL.getInstance().postStateAccessBarrier(thread_Id);
         //Sync to switch scheduler(more overhead) decide by the mark_ID or runtime information
         MeasureTools.BEGIN_SCHEDULER_SWITCH_TIME_MEASURE(thread_Id);

@@ -77,7 +77,6 @@ public class SLBolt_ts extends SLBolt {
             {
                 {
                     transactionManager.start_evaluate(thread_Id, in.getBID(), num_events);//start lazy evaluation in transaction manager.
-                    MeasureTools.END_TXN_TIME_MEASURE(thread_Id);
                     if (Objects.equals(in.getMarker().getMessage(), "snapshot")) {
                         MeasureTools.BEGIN_SNAPSHOT_TIME_MEASURE(this.thread_Id);
                         this.db.asyncSnapshot(in.getMarker().getSnapshotId(), this.thread_Id, this.ftManager);
