@@ -94,6 +94,7 @@ public class Metrics {
             Total_Record.serialization_total[thread_id].addValue(logging_total);
             if (Runtime.Snapshot[thread_id] != 0) {
                 double snapshot_total = Runtime.Snapshot[thread_id] / (double) number_events;
+                logging_total = logging_total + snapshot_total;
                 Total_Record.snapshot_serialization_total[thread_id].addValue(snapshot_total);
                 Runtime.Snapshot[thread_id] = 0;
             }
@@ -104,7 +105,7 @@ public class Metrics {
             Total_Record.totalProcessTimePerEvent[thread_id].addValue(total_process_time);
             Total_Record.stream_total[thread_id].addValue(stream_total);
             Total_Record.txn_total[thread_id].addValue(txn_total);
-            Total_Record.overhead_total[thread_id].addValue(total_process_time - stream_total - txn_total);
+            Total_Record.overhead_total[thread_id].addValue(total_process_time - stream_total - txn_total - logging_total);
             Runtime.ThroughputPerPhase.get(thread_id).add(1 / total_process_time);
         }
         Runtime.Start[thread_id] = 0;
