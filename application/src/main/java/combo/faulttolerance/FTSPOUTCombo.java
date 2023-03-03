@@ -267,6 +267,8 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
             MeasureTools.BEGIN_RELOAD_DATABASE_MEASURE(this.taskId);
             this.bolt.db.syncReloadDB(snapshotResult);
             MeasureTools.END_RELOAD_DATABASE_MEASURE(this.taskId);
+        } else {
+            snapshotResult = new SnapshotResult(0L, this.taskId, null);
         }
         boolean needReplay = false;
         if (ftOption == FTOption_WSC) {

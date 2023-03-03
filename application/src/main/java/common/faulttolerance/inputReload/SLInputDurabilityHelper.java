@@ -296,7 +296,7 @@ public class SLInputDurabilityHelper extends InputDurabilityHelper {
         } else {
             MeasureTools.BEGIN_COMPRESSION_TIME_MEASURE(this.taskId);
             for (int i = (int) currentOffset; i < currentOffset + interval; i ++) {
-                stringEncoder.encode(new Binary(myevents.toString()), baos);
+                stringEncoder.encode(new Binary(myevents[i].toString()), baos);
             }
             stringEncoder.flush(baos);
             ByteBuffer out = ByteBuffer.wrap(baos.toByteArray());

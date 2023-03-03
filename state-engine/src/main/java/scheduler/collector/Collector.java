@@ -93,15 +93,15 @@ public class Collector {
         if(isCyclicDependency||TD<B_TD||PD>B_PD){
             flag=flag+2;
         }
-        if(isComputationComplexity||R_of_A<B_R_of_A){
-            flag=flag+1;
+        if(isComputationComplexity || R_of_A < B_R_of_A){
+            flag = flag + 1;
         }
         return schedulers[flag];
     }
 
     private String getDecisionFromConf(int threadId){
-        int workloadId=currentWorkload.get(threadId);
-        String para[]=workloadConfig.get(workloadId);
+        int workloadId = currentWorkload.get(threadId);
+        String para[] = workloadConfig.get(workloadId);
         double TD = Double.parseDouble(para[0]);
         double LD = Double.parseDouble(para[1]);
         double PD = Double.parseDouble(para[2]);
@@ -135,7 +135,7 @@ public class Collector {
         }else{
             int workloadId = this.currentWorkload.get(threadId);
             if (workloadId < workloadConfig.size() -1){
-                currentWorkload.put(threadId,workloadId+1);
+                currentWorkload.put(threadId, workloadId + 1);
                 return !getDecision(threadId).equals(currentScheduler);
             }else {
                 return false;

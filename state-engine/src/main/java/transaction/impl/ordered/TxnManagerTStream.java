@@ -72,7 +72,7 @@ public class TxnManagerTStream extends TxnManagerDedicatedAsy {
         MeasureTools.BEGIN_SCHEDULER_SWITCH_TIME_MEASURE(thread_Id);
         if (enableDynamic && collector.timeToSwitch(mark_ID,thread_Id,currentSchedulerType.get(thread_Id))){
             String schedulerType = collector.getDecision(thread_Id);
-            this.SwitchScheduler(schedulerType, thread_Id,mark_ID);
+            this.SwitchScheduler(schedulerType, thread_Id, mark_ID);
             this.switchContext(schedulerType);
             SOURCE_CONTROL.getInstance().waitForSchedulerSwitch(thread_Id);
         }

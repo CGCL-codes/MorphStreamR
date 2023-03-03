@@ -53,7 +53,6 @@ public class OPSScheduler<Context extends OPSContext> extends OPScheduler<Contex
             // rollback to the starting point and redo.
             do {
                 EXPLORE(context);
-                MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(threadId);
                 PROCESS(context, mark_ID);
             } while (!FINISHED(context));
             END_SCHEDULE_ABORT_TIME_MEASURE(context.thisThreadId);

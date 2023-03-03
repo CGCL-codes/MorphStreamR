@@ -22,7 +22,7 @@ function ResetParameters() {
 
   snapshotInterval=3
   arrivalControl=1
-  arrivalRate=200ruun
+  arrivalRate=300
   FTOption=0
   isRecovery=0
   isFailure=0
