@@ -4,8 +4,8 @@ function ResetParameters() {
   app="StreamLedger"
   checkpointInterval=20480
   tthread=24
-  scheduler="OG_BFS_A"
-  defaultScheduler="OG_BFS_A"
+  scheduler="OG_BFS"
+  defaultScheduler="OG_BFS"
   CCOption=3 #TSTREAM
   complexity=10000
   NUM_ITEMS=491520
@@ -15,7 +15,7 @@ function ResetParameters() {
   isCyclic=0
   isDynamic=1
   workloadType="default,unchanging,unchanging,unchanging,Up_skew,Up_skew,Up_abort,Down_abort,Up_PD"
-  schedulerPool="OG_BFS_A,OG_NS_A,OP_NS_A"
+  schedulerPool="OG_BFS,OG_BFS_A"
   rootFilePath="${RSTDIR}"
   shiftRate=1
   multicoreEvaluation=1
