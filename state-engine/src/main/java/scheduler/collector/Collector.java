@@ -38,14 +38,19 @@ public class Collector {
     private double B_R_of_A;
     private boolean isRuntime = true;
     private int threadCount;
-    private final List<String[]> workloadConfig=new ArrayList<>();
-    private final ConcurrentHashMap<Integer,Integer> currentWorkload=new ConcurrentHashMap<>();//<threadId,phase>
+    private int maxThreadCount;
+    private int delta = 0;
+    private final List<String[]> workloadConfig = new ArrayList<>();
+    private final ConcurrentHashMap<Integer,Integer> currentWorkload = new ConcurrentHashMap<>();//<threadId,phase>
+
     /**
      *  Init the collector
      */
-    public void InitCollector(int threadCount){
-        this.threadCount=threadCount;
-        for (int i=0;i<threadCount;i++){
+    public void InitCollector(int threadCount, int maxThreadCount){
+        this.threadCount = threadCount;
+        this.maxThreadCount = maxThreadCount;
+        this.delta = maxThreadCount / threadCount;
+        for (int i = 0; i < threadCount; i++){
             currentWorkload.put(i,0);
         }
     }
@@ -128,16 +133,16 @@ public class Collector {
         }
     }
 
-    public boolean timeToSwitch(long markId,int threadId,String currentScheduler){
+    public boolean timeToSwitch(long markId, int threadId, String currentScheduler){
         if(isRuntime){
             //TODO:collect information runtime
             return false;
         }else{
             int workloadId = this.currentWorkload.get(threadId);
-            if (workloadId < workloadConfig.size() -1){
+            if (workloadId % delta == 0 && workloadId / delta < workloadConfig.size() -1){
                 currentWorkload.put(threadId, workloadId + 1);
                 return !getDecision(threadId).equals(currentScheduler);
-            }else {
+            } else {
                 return false;
             }
         }

@@ -142,7 +142,7 @@ public abstract class TxnManager implements ITxnManager {
     /**
      * Configure the scheduler pool
      */
-    public static void initSchedulerPool(String defaultScheduler, String schedulerPool, int threadCount, int numberOfStates, int app) {
+    public static void initSchedulerPool(String defaultScheduler, String schedulerPool, int threadCount, int numberOfStates, int app, int maxThreads) {
         TxnManager.schedulerPool = new HashMap<>();
         String[] scheduler = schedulerPool.split(",");
         for (int i = 0; i < scheduler.length; i++) {
@@ -155,7 +155,7 @@ public abstract class TxnManager implements ITxnManager {
         for (int i = 0; i < threadCount; i++) {
             TxnManager.currentSchedulerType.put(i, defaultScheduler);
         }
-        collector.InitCollector(threadCount);
+        collector.InitCollector(threadCount, maxThreads);
         TxnManager.scheduler = TxnManager.schedulerPool.get(defaultScheduler);
         log.info("Current Scheduler is " + defaultScheduler + " markId: " + 0);
         enableDynamic = true;

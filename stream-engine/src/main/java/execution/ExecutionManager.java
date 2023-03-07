@@ -102,7 +102,7 @@ public class ExecutionManager {
                 TxnManager.loggingManager = db.getLoggingManager();
                 if (conf.getBoolean("isDynamic")) {
                     String schedulers=conf.getString("schedulersPool");
-                    TxnManager.initSchedulerPool(conf.getString("defaultScheduler"), schedulers, totalThread, numberOfStates, app);
+                    TxnManager.initSchedulerPool(conf.getString("defaultScheduler"), schedulers, totalThread, numberOfStates, app, conf.getInt("maxThreads"));
                     //Configure the bottom line for triggering scheduler switching in Collector(include the isRuntime and when to switch)
                     TxnManager.setBottomLine(conf.getString("bottomLine"));
                     if (!conf.getBoolean("isRuntime")) {

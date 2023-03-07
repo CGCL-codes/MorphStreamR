@@ -354,10 +354,11 @@ public abstract class Runner implements IRunner {
         /* Evaluation Configuration */
         if (multicoreEvaluation == 0) {
             config.put("multicoreEvaluation",false);
+            config.put("maxThreads",tthread);
         } else {
             config.put("multicoreEvaluation",true);
+            config.put("maxThreads",maxThreads);
         }
-        config.put("maxThreads",maxThreads);
 
         if (cleanUp == 0) {
             config.put("cleanUp",false);
