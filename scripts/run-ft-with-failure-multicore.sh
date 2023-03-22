@@ -3,28 +3,27 @@ source dir.sh || exit
 function ResetParameters() {
   app="StreamLedger"
   checkpointInterval=20480
-  tthread=20
+  tthread=24
   scheduler="OG_BFS"
   defaultScheduler="OG_BFS"
   CCOption=3 #TSTREAM
-  complexity=0
+  complexity=10000
   NUM_ITEMS=491520
   deposit_ratio=95
-  abort_ratio=2000
+  abort_ratio=0
   key_skewness=25
   isCyclic=0
   isDynamic=1
-  #workloadType="default,Up_abort,Down_abort,unchanging"
-  workloadType="default,unchanging,unchanging,unchanging,unchanging,unchanging,unchanging,unchanging"
-# workloadType="default,unchanging,unchanging,unchanging,Up_skew,Up_skew,Up_skew,Up_PD,Up_PD,Up_PD,Up_abort,Up_abort,Up_abort"
+  workloadType="default,unchanging,unchanging,unchanging,Up_abort,Down_abort,unchanging,unchanging"
+#  workloadType="default,unchanging,unchanging,unchanging,Up_skew,Up_skew,Up_skew,Up_PD,Up_PD,Up_PD,Up_abort,Up_abort,Up_abort"
   schedulerPool="OG_BFS_A,OG_BFS"
   rootFilePath="${RSTDIR}"
   shiftRate=1
   multicoreEvaluation=1
-  maxThreads=20
+  maxThreads=24
   totalEvents=`expr $checkpointInterval \* $maxThreads \* 8 \* $shiftRate`
 
-  snapshotInterval=2
+  snapshotInterval=4
   arrivalControl=1
   arrivalRate=300
   FTOption=0
@@ -32,7 +31,7 @@ function ResetParameters() {
   isFailure=0
   failureTime=12000
   measureInterval=100
-  compressionAlg="Dictionary"
+  compressionAlg="None"
 }
 
 function runApplication() {
@@ -99,15 +98,21 @@ function runApplication() {
 }
 
 function multiCoreRunner() { # multi-batch exp
- for tthread in 20
+ for tthread in 24
    do
-      runApplication
+       isFailure=1
+       isRecovery=0
+       runApplication
+       sleep 2s
+       isFailure=0
+       isRecovery=1
+       runApplication
    done
 }
 function application_runner() {
  ResetParameters
  app=StreamLedger
- for FTOption in 0
+ for FTOption in 1
  do
  multiCoreRunner
  done

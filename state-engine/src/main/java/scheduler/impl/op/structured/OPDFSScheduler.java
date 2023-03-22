@@ -32,12 +32,12 @@ public class OPDFSScheduler<Context extends OPSContext> extends OPSScheduler<Con
             ProcessedToNextLevel(context);
             op = Next(context);
         }
-        while (op != null && op.hasParents());
+        while (op != null && op.hasParents());//Busy wait
         DISTRIBUTE(op, context);
     }
 
     /**
-     * notify is handled by state manager of each thread
+     * Notify is handled by state manager of each thread
      *
      * @param operation
      * @param context
