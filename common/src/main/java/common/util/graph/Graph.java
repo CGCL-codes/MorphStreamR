@@ -10,7 +10,6 @@ public class Graph {
     private int[][] adjMatrix;
     public Graph(int nodeSize) {
         this.nodeSize = nodeSize;
-        this.adjMatrix = new int[nodeSize][nodeSize];
         this.nodeWeights = new int[nodeSize];
     }
 
@@ -27,12 +26,6 @@ public class Graph {
     }
     public void addEdge(int from, int to, int weight) {
         edges.add(new Edge(from, to, weight));
-        adjMatrix[from][to] = weight;
-        adjMatrix[to][from] = weight;
-    }
-
-    public int[][] getAdjMatrix() {
-        return adjMatrix;
     }
 
     public int[] getNodeWeights() {

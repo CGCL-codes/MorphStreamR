@@ -106,7 +106,7 @@ public class WalManager extends FTManager {
         if (status.equals(FaultToleranceStatus.Persist)) {
             this.registerCommit.get(loggingResult.groupId).loggingResults.put(loggingResult.partitionId, loggingResult);
             this.callPersist.get(loggingResult.groupId).set(partitionId, status);
-            MeasureTools.setWriteAheadLog(loggingResult.partitionId, loggingResult.size);
+            MeasureTools.setLogSize(loggingResult.partitionId, loggingResult.size);
         } else if (status.equals(FaultToleranceStatus.Commit)) {
             this.callCommit.get(loggingResult.groupId).set(partitionId, status);
         }

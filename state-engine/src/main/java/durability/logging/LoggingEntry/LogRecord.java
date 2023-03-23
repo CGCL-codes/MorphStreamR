@@ -1,12 +1,13 @@
 package durability.logging.LoggingEntry;
 
+import durability.struct.Logging.LoggingEntry;
 import scheduler.struct.MetaTypes.OperationStateType;
 import utils.FaultToleranceConstants;
 
 import java.io.Serializable;
 import java.util.Objects;
 
-public class LogRecord implements Serializable, Comparable {
+public class LogRecord implements LoggingEntry, Comparable {
     public String tableName;
     public long bid;
     public String key;

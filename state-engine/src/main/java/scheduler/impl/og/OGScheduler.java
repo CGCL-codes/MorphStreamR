@@ -60,9 +60,7 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
             isLogging = LOGOption_wal;
         } else if (loggingManager instanceof PathLoggingManager) {
             isLogging = LOGOption_path;
-            for (int i = 0; i < tpg.totalThreads; i ++) {
-                this.threadToPathRecord.put(i, new PathRecord());
-            }
+            this.threadToPathRecord = ((PathLoggingManager) loggingManager).threadToPathRecord;
         } else {
             isLogging = LOGOption_no;
         }
@@ -143,14 +141,16 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
             synchronized (operation.success) {
                 operation.success[0]++;
             }
+            if (isLogging == LOGOption_path) {
+                int threadID = operation.context.thisThreadId;
+                this.threadToPathRecord.get(threadID).addDependencyEdge(operation.pKey, operation.bid, true);
+            }
+        } else {
+            if (isLogging == LOGOption_path) {
+                int threadID = operation.context.thisThreadId;
+                this.threadToPathRecord.get(threadID).addDependencyEdge(operation.pKey, operation.bid, false);
+            }
         }
-//        else {
-//            if (enable_log) log.debug("++++++ operation failed: "
-//                    + sourceAccountBalance + "-" + operation.condition.arg1
-//                    + " : " + sourceAccountBalance + "-" + operation.condition.arg2
-////                    + " : " + sourceAssetValue + "-" + operation.condition.arg3
-//                    + " condition: " + operation.condition);
-//        }
     }
 
     /**

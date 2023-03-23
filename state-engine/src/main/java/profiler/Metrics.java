@@ -599,7 +599,7 @@ public class Metrics {
         public static DescriptiveStatistics[] Latency = new DescriptiveStatistics[kMaxThreadNum];
         public static DescriptiveStatistics[] Throughput = new DescriptiveStatistics[kMaxThreadNum];
         public static DescriptiveStatistics[] SnapshotSize = new DescriptiveStatistics[kMaxThreadNum];
-        public static DescriptiveStatistics[] WriteAheadLogSize = new DescriptiveStatistics[kMaxThreadNum];
+        public static DescriptiveStatistics[] LogSize = new DescriptiveStatistics[kMaxThreadNum];
         public static long[] count = new long[kMaxThreadNum];
         public static long[] lastTasks = new long[kMaxThreadNum];
 
@@ -608,7 +608,7 @@ public class Metrics {
                 Latency[i] = new DescriptiveStatistics();
                 Throughput[i] = new DescriptiveStatistics();
                 SnapshotSize[i] = new DescriptiveStatistics();
-                WriteAheadLogSize[i] = new DescriptiveStatistics();
+                LogSize[i] = new DescriptiveStatistics();
                 count[i] = 0;
                 lastTasks[i] = 0;
             }

@@ -29,7 +29,7 @@ public class CavaliaDatabase extends Database {
                 this.loggingManager = new WALManager(this.storageManager.tables, configuration);
                 break;
             case 3 :
-                this.loggingManager = new PathLoggingManager();
+                this.loggingManager = new PathLoggingManager(configuration);
                 break;
             default :
                 throw new UnsupportedOperationException("No such kind of FTOption");

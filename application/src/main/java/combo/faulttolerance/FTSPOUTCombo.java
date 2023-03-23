@@ -30,8 +30,7 @@ import static common.CONTROL.enable_log;
 import static common.Constants.DEFAULT_STREAM_ID;
 import static content.Content.CCOption_SStore;
 import static content.Content.CCOption_TStream;
-import static utils.FaultToleranceConstants.FTOption_ISC;
-import static utils.FaultToleranceConstants.FTOption_WSC;
+import static utils.FaultToleranceConstants.*;
 
 public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTolerance {
     private static Logger LOG;
@@ -120,7 +119,7 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
                             if (this.taskId == 0) {
                                 this.ftManager.spoutRegister(counter, inputStoreCurrentPath);
                             }
-                        } else if (ftOption == FTOption_WSC){
+                        } else if (ftOption == FTOption_WSC || ftOption == FTOption_PATH) {
                             if (snapshot(counter)) {
                                 inputStoreCurrentPath = inputStoreRootPath + OsUtils.OS_wrapper(Integer.toString(counter));
                                 marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration, "commit_snapshot", counter));
@@ -137,7 +136,7 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
                             marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration));
                         }
                         bolt.execute(marker);
-                        if ((ftOption == FTOption_ISC || ftOption == FTOption_WSC) && counter != the_end && Metrics.RecoveryPerformance.stopRecovery[this.taskId]) {
+                        if ((ftOption == FTOption_ISC || ftOption == FTOption_WSC || ftOption == FTOption_PATH) && counter != the_end && Metrics.RecoveryPerformance.stopRecovery[this.taskId]) {
                             input_store(counter);
                         }
                     }

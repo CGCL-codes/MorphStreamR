@@ -17,8 +17,7 @@ import static common.CONTROL.*;
 import static common.IRunner.CCOption_MorphStream;
 import static java.nio.file.StandardOpenOption.APPEND;
 import static profiler.Metrics.*;
-import static utils.FaultToleranceConstants.FTOption_ISC;
-import static utils.FaultToleranceConstants.FTOption_WSC;
+import static utils.FaultToleranceConstants.*;
 
 public class MeasureTools {
     private static final Logger log = LoggerFactory.getLogger(MeasureTools.class);
@@ -350,9 +349,9 @@ public class MeasureTools {
         if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
             RuntimePerformance.SnapshotSize[thread_id].addValue(size);
     }
-    public static void setWriteAheadLog(int thread_id, double size) {
+    public static void setLogSize(int thread_id, double size) {
         if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
-            RuntimePerformance.WriteAheadLogSize[thread_id].addValue(size);
+            RuntimePerformance.LogSize[thread_id].addValue(size);
     }
     // Recovery Time Specific.
     public static void BEGIN_RECOVERY_TIME_MEASURE(int thread_id) {
@@ -501,7 +500,7 @@ public class MeasureTools {
         try {
             File file = new File(directory + fileNameSuffix + ".overall");
             BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
-            if (ftOption == FTOption_ISC || ftOption == FTOption_WSC) {
+            if (ftOption == FTOption_ISC || ftOption == FTOption_WSC || ftOption == FTOption_PATH) {
                 fileWriter.write("SnapshotSizeReport (KB): " + "\n");
                 fileWriter.write("thread_id" + "\t" + "size" + "\n");
                 double totalSize = 0;
@@ -516,10 +515,20 @@ public class MeasureTools {
                 fileWriter.write("thread_id" + "\t" + "size (KB)" + "\n");
                 double totalSize = 0;
                 for (int i = 0; i < tthread; i ++) {
-                    totalSize = totalSize + RuntimePerformance.WriteAheadLogSize[i].getMean();
-                    fileWriter.write(i + "\t"+ RuntimePerformance.WriteAheadLogSize[i].getMean() + "\n");
+                    totalSize = totalSize + RuntimePerformance.LogSize[i].getMean();
+                    fileWriter.write(i + "\t"+ RuntimePerformance.LogSize[i].getMean() + "\n");
                 }
                 fileWriter.write("WriteAheadLogTotalSize (KB): " + totalSize + "\n");
+            }
+            if (ftOption == FTOption_PATH) {
+                fileWriter.write("PathLogSize: " + "\n");
+                fileWriter.write("thread_id" + "\t" + "size (KB)" + "\n");
+                double totalSize = 0;
+                for (int i = 0; i < tthread; i ++) {
+                    totalSize = totalSize + RuntimePerformance.LogSize[i].getMean();
+                    fileWriter.write(i + "\t"+ RuntimePerformance.LogSize[i].getMean() + "\n");
+                }
+                fileWriter.write("PathLogTotalSize (KB): " + totalSize + "\n");
             }
             fileWriter.close();
         } catch (IOException e) {

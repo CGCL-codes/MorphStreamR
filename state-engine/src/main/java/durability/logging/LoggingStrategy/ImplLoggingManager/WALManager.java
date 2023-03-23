@@ -4,7 +4,6 @@ import common.collections.Configuration;
 import common.collections.OsUtils;
 import common.io.ByteIO.DataInputView;
 import common.io.ByteIO.InputWithDecompression.*;
-import common.io.Compressor.RLECompressor;
 import common.tools.Deserialize;
 import durability.ftmanager.AbstractRecoveryManager;
 import durability.logging.LoggingResource.WalMetaInfoSnapshot;
@@ -17,6 +16,7 @@ import durability.logging.LoggingResource.ImplLoggingResources.PartitionWalResou
 import durability.logging.LoggingStream.ImplLoggingStreamFactory.NIOWalStreamFactory;
 import durability.recovery.RedoLogResult;
 import durability.snapshot.LoggingOptions;
+import durability.struct.Logging.LoggingEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import storage.SchemaRecord;
@@ -37,7 +37,6 @@ import java.util.concurrent.Future;
 
 import static java.nio.file.StandardOpenOption.READ;
 import static utils.FaultToleranceConstants.CompressionType.None;
-import static utils.FaultToleranceConstants.CompressionType.RLE;
 
 public class WALManager implements LoggingManager {
     private static final Logger LOG = LoggerFactory.getLogger(WALManager.class);
@@ -71,8 +70,8 @@ public class WALManager implements LoggingManager {
         pendingEntries.put(tableName, logs);
     }
     @Override
-    public void addLogRecord(LogRecord logRecord) {
-        this.pendingEntries.get(logRecord.tableName).get(getPartitionId(logRecord.key)).add(logRecord);
+    public void addLogRecord(LoggingEntry logRecord) {
+        this.pendingEntries.get(((LogRecord) logRecord).tableName).get(getPartitionId(((LogRecord) logRecord).key)).add((LogRecord) logRecord);
     }
 
     public PartitionWalResources syncPrepareResource(long groupId, int partitionId) {

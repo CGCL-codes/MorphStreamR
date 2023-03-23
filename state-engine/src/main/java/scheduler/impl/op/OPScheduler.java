@@ -59,9 +59,7 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
             isLogging = LOGOption_wal;
         } else if (loggingManager instanceof PathLoggingManager) {
             isLogging = LOGOption_path;
-            for (int i = 0; i < tpg.totalThreads; i ++) {
-                this.threadToPathRecord.put(i, new PathRecord());
-            }
+            this.threadToPathRecord = ((PathLoggingManager) loggingManager).threadToPathRecord;
         } else {
             isLogging = LOGOption_no;
         }

@@ -7,6 +7,7 @@ import controller.affinity.AffinityController;
 import db.Database;
 import durability.ftmanager.FTManager;
 import durability.ftmanager.ImplFTManager.CheckpointManager;
+import durability.ftmanager.ImplFTManager.PathManager;
 import durability.ftmanager.ImplFTManager.WalManager;
 import execution.runtime.boltThread;
 import execution.runtime.executorThread;
@@ -52,6 +53,12 @@ public class ExecutionManager {
                 case 2:
                     this.ftManager = new CheckpointManager();
                     this.loggingManager = new WalManager();
+                    this.ftManager.initialize(conf);
+                    this.loggingManager.initialize(conf);
+                    break;
+                case 3:
+                    this.ftManager = new CheckpointManager();
+                    this.loggingManager = new PathManager();
                     this.ftManager.initialize(conf);
                     this.loggingManager.initialize(conf);
                     break;
