@@ -13,6 +13,7 @@ public class GraphPartitioner {
     private int[][] benefits;  // the benefit to move node_i to partition_j int[i][j] Vi -> Pj
     List<List<Integer>> partitions = new ArrayList<>();// Partition
     private int partitionCount;  // Partition count
+    private int max_itr = 1000;  // Max iteration count
     public GraphPartitioner(List<Integer> vertices, int[] nodeWeights,List<Edge> edges, int partitionCount) {
         this.nodes = vertices;
         this.edges = edges;
@@ -28,13 +29,16 @@ public class GraphPartitioner {
 
     public List<List<Integer>> run() {
         initPartitions();
-        int[] selectedBenefit = this.findMaxBenefit();
-        int fromPartition = findPartition(selectedBenefit[0]);
-        int targetPartition = selectedBenefit[1];
-        if (benefits[fromPartition][targetPartition] > 0) {
-            moveNode(fromPartition, targetPartition, selectedBenefit[0]);
-            //calcWeight();
-            calcBenefit();
+        while (max_itr-- > 0) {
+            int[] selectedBenefit = this.findMaxBenefit();
+            int fromPartition = findPartition(selectedBenefit[0]);
+            int targetPartition = selectedBenefit[1];
+            if (benefits[fromPartition][targetPartition] > 0) {
+                moveNode(fromPartition, targetPartition, selectedBenefit[0]);
+                calcBenefit();
+            } else {
+                break;
+            }
         }
         return partitions;
     }
