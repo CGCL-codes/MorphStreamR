@@ -6,6 +6,7 @@ import utils.lib.ConcurrentHashMap;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static scheduler.struct.OperationChainCommon.cleanUp;
 
@@ -16,6 +17,7 @@ import static scheduler.struct.OperationChainCommon.cleanUp;
 public class OperationChain implements Comparable<OperationChain> {
     private final String tableName;
     private final String primaryKey;
+    private final ConcurrentHashMap<String, AtomicInteger> edgeWeight = new ConcurrentHashMap<>();
 
     private final ConcurrentLinkedQueue<PotentialDependencyInfo> potentialChldrenInfo = new ConcurrentLinkedQueue<>();
 
@@ -102,6 +104,7 @@ public class OperationChain implements Comparable<OperationChain> {
         for (PotentialDependencyInfo pChildInfo : potentialChldrenInfo) {
             if (newOp.bid < pChildInfo.op.bid) { // if bid is < dependents bid, therefore, it depends upon this operation
                 pChildInfo.potentialChildOC.addFDParent(pChildInfo.op, this);
+                this.updateEdgeWeight(pChildInfo.potentialChildOC.primaryKey);
                 processed.add(pChildInfo);
             }
         }
@@ -198,5 +201,12 @@ public class OperationChain implements Comparable<OperationChain> {
 
     public int getDependencyLevel() {
         return dependencyLevel;
+    }
+    public void updateEdgeWeight(String to) {
+        if (this.edgeWeight.contains(to)) {
+            this.edgeWeight.get(to).getAndIncrement();
+        } else {
+            this.edgeWeight.put(to, new AtomicInteger(1));
+        }
     }
 }

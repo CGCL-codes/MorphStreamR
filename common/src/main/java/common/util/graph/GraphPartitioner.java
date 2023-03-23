@@ -5,14 +5,14 @@ import java.util.*;
 // Greedy algorithm
 // The time complexity is O(n log n), where n is the number of nodes
 public class GraphPartitioner {
-    private List<Integer> nodes;  // 顶点集合
-    private List<Edge> edges;  // 边集合
-    int[] nodeWeights;  // 顶点权重
-    private final int[][] partitionEdgesWeight;
-    private int[] partitionWeights;  // 分区权重
-    private int[][] benefits;  // 移动顶点带来的收益 int[i][j] Vi -> Pj
-    List<List<Integer>> partitions = new ArrayList<>();
-    private int partitionCount;  // 分区数量
+    private List<Integer> nodes;  // Node
+    private List<Edge> edges;  // Edge
+    int[] nodeWeights;  // Node weight
+    private final int[][] partitionEdgesWeight;// Edge weight between partitions
+    private int[] partitionWeights;  // Partition weight
+    private int[][] benefits;  // the benefit to move node_i to partition_j int[i][j] Vi -> Pj
+    List<List<Integer>> partitions = new ArrayList<>();// Partition
+    private int partitionCount;  // Partition count
     public GraphPartitioner(List<Integer> vertices, int[] nodeWeights,List<Edge> edges, int partitionCount) {
         this.nodes = vertices;
         this.edges = edges;
@@ -70,7 +70,9 @@ public class GraphPartitioner {
         //calcWeight();
         calcBenefit();
     }
-    // 计算分区间边权重
+    /**
+     * Compute the edge weight between partitions
+     */
     private void calcWeight() {
         for (Edge edge : this.edges) {
             int v1 = edge.getFrom();
@@ -90,6 +92,9 @@ public class GraphPartitioner {
             }
         }
     }
+    /**
+     * Compute the benefit to move node_i to partition_j
+     */
     private void calcBenefit() {
         initBenefit();
         for (Edge edge : this.edges) {
@@ -105,7 +110,7 @@ public class GraphPartitioner {
                 if (i != partition1 && i != partition2) {
                     benefits[v1][i] -= edge.getWeight();
                 }
-                //Move V2 to P2
+                //Move V2 to Pi
                 if (i != partition2 && i == partition1) {
                     benefits[v2][i] += edge.getWeight();
                 }
@@ -115,7 +120,9 @@ public class GraphPartitioner {
             }
         }
     }
-    //找到benefit的最大值
+    /**
+     * Find the maximum benefit to move a node from one partition to another
+     */
     public int[] findMaxBenefit() {
         int[] maxIndex = new int[2];
         int max = Integer.MIN_VALUE;
@@ -130,13 +137,16 @@ public class GraphPartitioner {
         }
         return maxIndex;
     }
-
-    // 移动顶点
+    /**
+     * Move a node from one partition to another
+     */
     private void moveNode(int fromPartition, int targetPartition, int nodeId) {
         this.partitions.get(fromPartition).remove((Object) nodeId);
         this.partitions.get(targetPartition).add(nodeId);
     }
-    // 查找顶点所在的分区
+    /**
+     * Find the partition that a node belongs to
+     */
     private int findPartition(int vertex) {
         for (int i = 0; i < partitionCount; i++) {
             if (this.partitions.get(i).contains(vertex)) {

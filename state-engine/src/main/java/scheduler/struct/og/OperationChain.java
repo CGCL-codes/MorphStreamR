@@ -17,6 +17,7 @@ import static scheduler.struct.OperationChainCommon.cleanUp;
 public class OperationChain implements Comparable<OperationChain> {
     public final String tableName;
     public final String primaryKey;
+    private final ConcurrentHashMap<String, AtomicInteger> edgeWeight = new ConcurrentHashMap<>();
     public final long bid;
     protected final MyList<Operation> operations;
     public final AtomicInteger ocParentsCount;
@@ -148,58 +149,13 @@ public class OperationChain implements Comparable<OperationChain> {
         }
     }
 
-
-//    private void relaxDependencies(OperationChain oc, ArrayDeque<OperationChain> resolvedOC) {
-//        // remove all parents, update children set of its parents
-////        for (OperationChain parent : oc.ocParents.keySet()) {
-////            parent.ocChildren.remove(oc);
-////        }
-////        oc.ocParentsCount.set(0);
-////        oc.ocParents.clear();
-//        for (OperationChain child : oc.ocChildren.keySet()) {
-//            if (!resolvedOC.contains(child)) {
-//                resolvedOC.add(child);
-//                relaxDependencies(child, resolvedOC);
-//            }
-//        }
-//    }
-
-
-//    public boolean scanParentOCs(Collection<OperationChain> selectedOCs) {
-//        for (OperationChain oc : selectedOCs) {
-//            if (!oc.ocParents.isEmpty() && !scanedOCs.contains(oc)) {
-//                scanedOCs.add(oc);
-//                if (oc.ocParents.containsKey(this)) {
-//                    return true;
-//                }
-//                if (scanParentOCs(oc.ocParents.keySet())) {
-//                    return true;
-//                }
-//            }
-//        }
-//        return false;
-//    }
-
-//    public boolean checkConnectivity(Collection<OperationChain> selectedOCs) {
-//        if (selectedOCs.isEmpty()) {
-//            return true;
-//        }
-//        for (OperationChain oc : selectedOCs) {
-//            if (oc.ocParents.isEmpty()) {
-//                return true;
-//            } else {
-//                return checkConnectivity(oc.ocParents.keySet());
-//            }
-//        }
-//        return false;
-//    }
-
     public void checkPotentialFDChildrenOnNewArrival(Operation newOp) {
         List<PotentialChildrenInfo> processed = new ArrayList<>();
 
         for (PotentialChildrenInfo pChildInfo : potentialChldrenInfo) {
             if (newOp.bid < pChildInfo.childOp.bid) { // if bid is < dependents bid, therefore, it depends upon this operation
                 pChildInfo.potentialChildOC.addParent(pChildInfo.childOp, this);
+                this.updateEdgeWeight(pChildInfo.potentialChildOC.primaryKey);
                 processed.add(pChildInfo);
             }
         }
@@ -335,5 +291,12 @@ public class OperationChain implements Comparable<OperationChain> {
             }
         }
         isDependencyLevelCalculated = true;
+    }
+    public void updateEdgeWeight(String to) {
+        if (this.edgeWeight.contains(to)) {
+            this.edgeWeight.get(to).getAndIncrement();
+        } else {
+            this.edgeWeight.put(to, new AtomicInteger(1));
+        }
     }
 }

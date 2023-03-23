@@ -39,7 +39,6 @@ public class Graph {
 
     public void addEdge(Edge edge) {
         edges.add(edge);
-
     }
     public void addEdge(int from, int to, int weight) {
         edges.add(new Edge(from, to, weight));

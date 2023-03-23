@@ -1,5 +1,6 @@
 package scheduler.struct.op;
 
+import common.util.graph.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import profiler.MeasureTools;
@@ -35,6 +36,7 @@ import static utils.FaultToleranceConstants.LOGOption_path;
  */
 public class TaskPrecedenceGraph<Context extends OPSchedulerContext> {
     private static final Logger log = LoggerFactory.getLogger(TaskPrecedenceGraph.class);
+    private final Graph graph;
 
     public final int totalThreads;
     protected final int delta;//range of each partition. depends on the number of op in the stage.
@@ -59,6 +61,7 @@ public class TaskPrecedenceGraph<Context extends OPSchedulerContext> {
         this.totalThreads = totalThreads;
         this.delta = delta;
         this.NUM_ITEMS = NUM_ITEMS;
+        this.graph = new Graph(this.NUM_ITEMS);
         // all parameters in this class should be thread safe.
         threadToContextMap = new ConcurrentHashMap<>();
         threadToOCs = new ConcurrentHashMap<>();
@@ -330,6 +333,7 @@ public class TaskPrecedenceGraph<Context extends OPSchedulerContext> {
                 } else {
                     // All ops in transaction event involves writing to the states, therefore, we ignore edge case for read ops.
                     curOC.addFDParent(op, OCFromConditionSource); // record dependency
+                    OCFromConditionSource.updateEdgeWeight(key);
                 }
             }
             curOC.checkPotentialFDChildrenOnNewArrival(op);
