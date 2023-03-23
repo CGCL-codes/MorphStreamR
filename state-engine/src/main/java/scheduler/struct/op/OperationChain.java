@@ -17,7 +17,7 @@ import static scheduler.struct.OperationChainCommon.cleanUp;
 public class OperationChain implements Comparable<OperationChain> {
     private final String tableName;
     private final String primaryKey;
-    private final ConcurrentHashMap<String, AtomicInteger> edgeWeight = new ConcurrentHashMap<>();
+    public final ConcurrentHashMap<String, AtomicInteger> edgeWeight = new ConcurrentHashMap<>();
 
     private final ConcurrentLinkedQueue<PotentialDependencyInfo> potentialChldrenInfo = new ConcurrentLinkedQueue<>();
 
@@ -208,5 +208,8 @@ public class OperationChain implements Comparable<OperationChain> {
         } else {
             this.edgeWeight.put(to, new AtomicInteger(1));
         }
+    }
+    public int getWeight(){
+        return this.operations.size();
     }
 }

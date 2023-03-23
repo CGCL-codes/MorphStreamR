@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import profiler.MeasureTools;
 import scheduler.Request;
+import scheduler.context.op.OPSContext;
 import scheduler.impl.IScheduler;
 import scheduler.context.op.OPSchedulerContext;
 import scheduler.struct.AbstractOperation;
@@ -64,6 +65,7 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
         } else {
             isLogging = LOGOption_no;
         }
+        this.tpg.isLogging = this.isLogging;
     }
 
     /**
@@ -218,14 +220,16 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
             synchronized (operation.success) {
                 operation.success[0]++;
             }
+            if (isLogging == LOGOption_path) {
+                int threadID = ((Operation) operation).context.thisThreadId;
+                this.threadToPathRecord.get(threadID).addDependencyEdge(((Operation) operation).pKey, operation.bid, true);
+            }
+        } else {
+            if (isLogging == LOGOption_path) {
+                int threadID = ((Operation) operation).context.thisThreadId;
+                this.threadToPathRecord.get(threadID).addDependencyEdge(((Operation) operation).pKey, operation.bid, false);
+            }
         }
-//        else {
-//            log.info("++++++ operation failed: "
-//                    + sourceAccountBalance + "-" + operation.condition.arg1
-//                    + " : " + sourceAccountBalance + "-" + operation.condition.arg2
-////                    + " : " + sourceAssetValue + "-" + operation.condition.arg3
-//                    + " condition: " + operation.condition);
-//        }
     }
 
     protected void Depo_Fun(AbstractOperation operation, long mark_ID, boolean clean) {

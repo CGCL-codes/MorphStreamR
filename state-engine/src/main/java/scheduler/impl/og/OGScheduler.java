@@ -66,6 +66,7 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
         } else {
             isLogging = LOGOption_no;
         }
+        this.tpg.isLogging = this.isLogging;
     }
 
     /**

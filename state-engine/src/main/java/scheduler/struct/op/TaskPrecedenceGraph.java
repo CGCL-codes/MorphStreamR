@@ -15,8 +15,10 @@ import utils.lib.ConcurrentHashMap;
 
 import java.util.*;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static common.CONTROL.enable_log;
+import static utils.FaultToleranceConstants.LOGOption_no;
 import static utils.FaultToleranceConstants.LOGOption_path;
 
 /**
@@ -36,8 +38,6 @@ import static utils.FaultToleranceConstants.LOGOption_path;
  */
 public class TaskPrecedenceGraph<Context extends OPSchedulerContext> {
     private static final Logger log = LoggerFactory.getLogger(TaskPrecedenceGraph.class);
-    private final Graph graph;
-
     public final int totalThreads;
     protected final int delta;//range of each partition. depends on the number of op in the stage.
     private final int NUM_ITEMS;
@@ -46,12 +46,14 @@ public class TaskPrecedenceGraph<Context extends OPSchedulerContext> {
     public final ConcurrentHashMap<Integer, Context> threadToContextMap;
     private final ConcurrentHashMap<String, TableOCs> operationChains;//shared data structure.
     public final ConcurrentHashMap<Integer, Deque<OperationChain>> threadToOCs;
-    private int maxLevel = 0; // just for layered scheduling
+    private int maxLevel = 0;//just for layered scheduling
 
+    private final Graph graph;
+    public int isLogging = LOGOption_no;
     public void reset(Context context) {
         //TODO: the short cut should be reset, but will take some time.
         for (OperationChain oc : threadToOCs.get(context.thisThreadId)) {
-            oc.clear(); // only need to clear all operations from all ocs
+            oc.clear();// only need to clear all operations from all ocs
         }
         if (context.thisThreadId == 0) log.info("===Clear current data for the next batch===");
     }
@@ -206,10 +208,6 @@ public class TaskPrecedenceGraph<Context extends OPSchedulerContext> {
             for (OperationChain oc : threadToOCs.get(context.thisThreadId)) {
                 if (!oc.getOperations().isEmpty()) {
                     oc.updateTDDependencies();
-//                    updateTDDependencies(oc);
-//                    for (Operation op : oc.getOperations()) {
-//                        context.fd += op.fd_parents.size();
-//                    }
                     Operation head = oc.getOperations().first();
                     context.totalOsToSchedule += oc.getOperations().size();
                     if (head.isRoot()) {
@@ -337,6 +335,18 @@ public class TaskPrecedenceGraph<Context extends OPSchedulerContext> {
                 }
             }
             curOC.checkPotentialFDChildrenOnNewArrival(op);
+        }
+    }
+
+    private void graphPartition() {
+
+    }
+    private void updateGraph(int threadId) {
+        for (OperationChain oc : threadToOCs.get(threadId)) {
+            graph.addNode(Integer.parseInt(oc.getPrimaryKey()), oc.getWeight());
+            for (Map.Entry<String, AtomicInteger> edges:oc.edgeWeight.entrySet()){
+                this.graph.addEdge(Integer.parseInt(oc.getPrimaryKey()), Integer.parseInt(edges.getKey()), edges.getValue().get());
+            }
         }
     }
 

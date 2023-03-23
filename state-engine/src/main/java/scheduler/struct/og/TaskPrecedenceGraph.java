@@ -19,6 +19,7 @@ import java.util.*;
 import java.util.concurrent.CyclicBarrier;
 
 import static common.CONTROL.enable_log;
+import static utils.FaultToleranceConstants.LOGOption_no;
 
 /**
  * TPG  -> Partition -> Key:OperationChain -> Operation-Operation-Operation...
@@ -37,8 +38,6 @@ import static common.CONTROL.enable_log;
  */
 public class TaskPrecedenceGraph<Context extends OGSchedulerContext> {
     private static final Logger log = LoggerFactory.getLogger(TaskPrecedenceGraph.class);
-    private final Graph graph;
-
     // all parameters in this class should be thread safe.
     private static final Logger LOG = LoggerFactory.getLogger(TaskPrecedenceGraph.class);
     public final ConcurrentHashMap<Integer, Context> threadToContextMap;
@@ -50,6 +49,9 @@ public class TaskPrecedenceGraph<Context extends OGSchedulerContext> {
     CyclicBarrier barrier;
     private int maxLevel = 0; // just for layered scheduling
     private final int app;
+
+    private final Graph graph;
+    public int isLogging = LOGOption_no;
 
     public void reset(Context context) {
 //        //reset holder.

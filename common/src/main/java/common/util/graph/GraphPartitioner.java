@@ -5,7 +5,7 @@ import java.util.*;
 // Greedy algorithm
 // The time complexity is O(n log n), where n is the number of nodes
 public class GraphPartitioner {
-    private List<Integer> nodes;  // Node
+    private int nodeSize;  // Node
     private List<Edge> edges;  // Edge
     int[] nodeWeights;  // Node weight
     private final int[][] partitionEdgesWeight;// Edge weight between partitions
@@ -14,8 +14,8 @@ public class GraphPartitioner {
     List<List<Integer>> partitions = new ArrayList<>();// Partition
     private int partitionCount;  // Partition count
     private int max_itr = 1000;  // Max iteration count
-    public GraphPartitioner(List<Integer> vertices, int[] nodeWeights,List<Edge> edges, int partitionCount) {
-        this.nodes = vertices;
+    public GraphPartitioner(int nodeSize, int[] nodeWeights, List<Edge> edges, int partitionCount) {
+        this.nodeSize = nodeSize;
         this.edges = edges;
         this.nodeWeights = nodeWeights;
         this.partitionCount = partitionCount;
@@ -24,7 +24,7 @@ public class GraphPartitioner {
         for (int i = 0; i < partitionCount; i++) {
             partitions.add(new ArrayList<>());
         }
-        benefits = new int[nodes.size()][partitionCount];
+        benefits = new int[nodeSize][partitionCount];
     }
 
     public List<List<Integer>> run() {
@@ -44,8 +44,9 @@ public class GraphPartitioner {
     }
     private void initPartitions() {
         //Partition G into a set of sub-graphs {G1,G2,. . . ,Gn} with about the same weight according to the key range
+        //Workload-aware graph partitioning
         int averageWeight = 0;
-        for (int i = 0; i < nodes.size(); i++) {
+        for (int i = 0; i < nodeSize; i++) {
             partitions.get(i % partitionCount).add(i);
             partitionWeights[i % partitionCount] += nodeWeights[i];
             averageWeight += nodeWeights[i];
