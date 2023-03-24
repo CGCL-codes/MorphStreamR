@@ -81,9 +81,10 @@ public class WalManager extends FTManager {
     @Override
     public persistResult spoutAskRecovery(int taskId, long snapshotOffset) {
         RedoLogResult redoLogResult = new RedoLogResult();
+        redoLogResult.threadId = taskId;
         for (LoggingCommitInformation loggingCommitInformation : LoggingCommitInformation) {
             if (loggingCommitInformation.groupId > snapshotOffset) {
-                redoLogResult.addPath(loggingCommitInformation.loggingResults.get(taskId).path);
+                redoLogResult.addPath(loggingCommitInformation.loggingResults.get(taskId).path, loggingCommitInformation.groupId);
                 redoLogResult.setLastedGroupId(loggingCommitInformation.groupId);
             }
         }

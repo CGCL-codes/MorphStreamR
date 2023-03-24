@@ -62,7 +62,7 @@ public class CavaliaDatabase extends Database {
     }
 
     @Override
-    public void syncRedoWriteAheadLog(RedoLogResult redoLogResult) throws IOException {
-        this.loggingManager.syncRedoWriteAheadLog(redoLogResult);
+    public void syncRetrieveLogs(RedoLogResult redoLogResult) throws IOException, ExecutionException, InterruptedException {
+        this.loggingManager.syncRetrieveLogs(redoLogResult);
     }
 }

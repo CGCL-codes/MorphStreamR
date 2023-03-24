@@ -2,6 +2,9 @@ package durability.logging.LoggingStrategy.ImplLoggingManager;
 
 import common.collections.Configuration;
 import common.collections.OsUtils;
+import common.io.ByteIO.DataInputView;
+import common.io.ByteIO.InputWithDecompression.NativeDataInputView;
+import common.io.ByteIO.InputWithDecompression.SnappyDataInputView;
 import durability.ftmanager.FTManager;
 import durability.logging.LoggingEntry.PathRecord;
 import durability.logging.LoggingResource.ImplLoggingResources.DependencyMaintainResources;
@@ -10,6 +13,7 @@ import durability.logging.LoggingResult.LoggingHandler;
 import durability.logging.LoggingStrategy.LoggingManager;
 import durability.logging.LoggingStream.ImplLoggingStreamFactory.NIOPathStreamFactory;
 import durability.recovery.RedoLogResult;
+import durability.recovery.histroyviews.HistoryViews;
 import durability.snapshot.LoggingOptions;
 import durability.struct.Logging.LoggingEntry;
 import org.slf4j.Logger;
@@ -21,6 +25,14 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousFileChannel;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
+import static java.nio.file.StandardOpenOption.READ;
+import static utils.FaultToleranceConstants.CompressionType.None;
 
 public class PathLoggingManager implements LoggingManager {
     private static final Logger LOG = LoggerFactory.getLogger(PathLoggingManager.class);
@@ -28,6 +40,7 @@ public class PathLoggingManager implements LoggingManager {
     @Nonnull protected LoggingOptions loggingOptions;
     protected int parallelNum;
     public ConcurrentHashMap<Integer, PathRecord> threadToPathRecord = new ConcurrentHashMap<>();
+    public HistoryViews historyViews = new HistoryViews();//Used when recovery
     public PathLoggingManager(Configuration configuration) {
         loggingPath = configuration.getString("rootFilePath") + OsUtils.OS_wrapper("logging");
         parallelNum = configuration.getInt("parallelNum");
@@ -61,8 +74,47 @@ public class PathLoggingManager implements LoggingManager {
     }
 
     @Override
-    public void syncRedoWriteAheadLog(RedoLogResult redoLogResult) throws IOException {
-        throw new UnsupportedOperationException("Not supported yet");
+    public void syncRetrieveLogs(RedoLogResult redoLogResult) throws IOException, ExecutionException, InterruptedException {
+        //Construct the history views
+        for (int i = 0; i < redoLogResult.redoLogPaths.size(); i++) {
+            Path walPath = Paths.get(redoLogResult.redoLogPaths.get(i));
+            AsynchronousFileChannel afc = AsynchronousFileChannel.open(walPath, READ);
+            int fileSize = (int) afc.size();
+            ByteBuffer dataBuffer = ByteBuffer.allocate(fileSize);
+            Future<Integer> result = afc.read(dataBuffer, 0);
+            result.get();
+            DataInputView inputView;
+            if (loggingOptions.getCompressionAlg() != None) {
+                inputView = new SnappyDataInputView(dataBuffer);//Default to use Snappy compression
+            } else {
+                inputView = new NativeDataInputView(dataBuffer);
+            }
+            byte[] object = inputView.readFullyDecompression();
+            String[] strings = new String(object, StandardCharsets.UTF_8).split(" ");
+            String[] abortIds = strings[0].split(";");
+            for (String abortId : abortIds) {
+                this.historyViews.addAbortId(redoLogResult.groupIds.get(i), redoLogResult.threadId, Long.parseLong(abortId));
+            }
+            for (int j = 1; j < strings.length; j++) {
+                String[] dependency = strings[j].split(";");
+                String key = dependency[0];
+                for (int k = 1; k < dependency.length; k++) {
+                    String[] kv = dependency[k].split(",");
+                    this.historyViews.addDependencies(redoLogResult.groupIds.get(i), key, Long.parseLong(kv[0]), kv[1]);
+                }
+            }
+            LOG.info("Finish construct the history views");
+        }
+    }
+
+    @Override
+    public boolean inspectAbortView(long groupId, int partitionId) {
+        return this.historyViews.inspectAbortView(groupId, partitionId);
+    }
+
+    @Override
+    public Object inspectDependencyView(long groupId, String key, long bid) {
+        return this.historyViews.inspectDependencyView(groupId, key, bid);
     }
 
     public static Logger getLOG() {

@@ -71,5 +71,5 @@ public abstract class Database {
     public abstract void asyncSnapshot(final long snapshotId, final int partitionId, final FTManager ftManager) throws IOException;
     public abstract void asyncCommit(final long groupId, final int partitionId, final FTManager ftManager) throws IOException;
     public abstract void syncReloadDB(SnapshotResult snapshotResult) throws IOException, ExecutionException, InterruptedException;
-    public abstract void syncRedoWriteAheadLog(RedoLogResult redoLogResult) throws IOException;
+    public abstract void syncRetrieveLogs(RedoLogResult redoLogResult) throws IOException, ExecutionException, InterruptedException;
 }

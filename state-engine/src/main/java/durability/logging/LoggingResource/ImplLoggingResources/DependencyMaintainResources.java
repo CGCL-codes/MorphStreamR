@@ -31,6 +31,7 @@ public class DependencyMaintainResources implements LoggingResources {
     }
     private void writeLogRecord(DataOutputView dataOutputView) throws IOException {
         dataOutputView.writeCompression(this.logResource.toString().getBytes(StandardCharsets.UTF_8));
+        this.logResource.reset();
     }
 
 }

@@ -274,7 +274,7 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
             RedoLogResult redoLogResult = (RedoLogResult) this.loggingManager.spoutAskRecovery(this.taskId, snapshotResult.snapshotId);
             if (redoLogResult.redoLogPaths.size() != 0) {
                 MeasureTools.BEGIN_REDO_WAL_MEASURE(this.taskId);
-                this.db.syncRedoWriteAheadLog(redoLogResult);
+                this.db.syncRetrieveLogs(redoLogResult);
                 MeasureTools.END_REDO_WAL_MEASURE(this.taskId);
                 needReplay = input_reload(snapshotResult.snapshotId, redoLogResult.lastedGroupId);
                 counter = (int) redoLogResult.lastedGroupId;
@@ -282,6 +282,15 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
                 needReplay = input_reload(snapshotResult.snapshotId, 0);
                 counter = (int) snapshotResult.snapshotId;
             }
+        } else if (ftOption == FTOption_PATH) {
+            RedoLogResult redoLogResult = (RedoLogResult) this.loggingManager.spoutAskRecovery(this.taskId, snapshotResult.snapshotId);
+            if (redoLogResult.redoLogPaths.size() != 0) {
+                MeasureTools.BEGIN_REDO_WAL_MEASURE(this.taskId);
+                this.db.syncRetrieveLogs(redoLogResult);
+                MeasureTools.END_REDO_WAL_MEASURE(this.taskId);
+            }
+            needReplay = input_reload(snapshotResult.snapshotId, 0);
+            counter = (int) snapshotResult.snapshotId;
         } else if (ftOption == FTOption_ISC) {
             needReplay = input_reload(snapshotResult.snapshotId, 0);
             counter = (int) snapshotResult.snapshotId;

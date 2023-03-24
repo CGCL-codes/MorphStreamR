@@ -6,10 +6,13 @@ import durability.struct.Logging.LoggingEntry;
 import storage.table.RecordSchema;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 public interface LoggingManager {
     void registerTable(RecordSchema recordSchema, String tableName);
     void addLogRecord(LoggingEntry logRecord);
     void commitLog(long groupId, int partitionId, FTManager ftManager) throws IOException;
-    void syncRedoWriteAheadLog(RedoLogResult redoLogResult) throws IOException;
+    void syncRetrieveLogs(RedoLogResult redoLogResult) throws IOException, ExecutionException, InterruptedException;
+    boolean inspectAbortView(long groupId, int partitionId);
+    Object inspectDependencyView(long groupId, String key, long bid);
 }

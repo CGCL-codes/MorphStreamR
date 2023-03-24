@@ -12,7 +12,7 @@ import utils.lib.ConcurrentHashMap;
 
 import static utils.FaultToleranceConstants.*;
 
-public class RScheduler<Context extends RSContext> implements IScheduler {
+public class RScheduler<Context extends RSContext> implements IScheduler<Context> {
     public final int delta;
     public final TaskPrecedenceGraph<Context> tpg;
     public int isLogging;
@@ -41,53 +41,59 @@ public class RScheduler<Context extends RSContext> implements IScheduler {
         this.tpg.isLogging = this.isLogging;
     }
     @Override
-    public void INITIALIZE(Object threadId) {
-
-    }
-
-    @Override
-    public void PROCESS(Object threadId, long mark_ID) {
-
-    }
-
-    @Override
-    public void EXPLORE(Object o) {
-
-    }
-
-    @Override
-    public boolean FINISHED(Object threadId) {
+    public boolean SubmitRequest(Context context, Request request) {
         return false;
     }
 
     @Override
-    public void RESET(Object o) {
+    public void TxnSubmitBegin(Context context) {
 
     }
 
     @Override
-    public boolean SubmitRequest(Object o, Request request) {
+    public void TxnSubmitFinished(Context context) {
+
+    }
+
+    @Override
+    public void AddContext(int threadId, Context context) {
+        tpg.threadToContextMap.put(threadId, context);
+        tpg.setOCs(context);
+    }
+
+    @Override
+    public void INITIALIZE(Context threadId) {
+        //TODO:add task placing
+    }
+
+    @Override
+    public void PROCESS(Context threadId, long mark_ID) {
+
+    }
+
+    @Override
+    public void EXPLORE(Context context) {
+
+    }
+
+    @Override
+    public boolean FINISHED(Context context) {
         return false;
     }
 
     @Override
-    public void TxnSubmitBegin(Object o) {
+    public void RESET(Context context) {
 
     }
 
     @Override
-    public void TxnSubmitFinished(Object o) {
-
-    }
-
-    @Override
-    public void AddContext(int thisTaskId, Object o) {
-
-    }
-
-    @Override
-    public void start_evaluation(Object o, long mark_ID, int num_events) {
-
+    public void start_evaluation(Context context, long mark_ID, int num_events) {
+        INITIALIZE(context);
+        do {
+            EXPLORE(context);
+            PROCESS(context, mark_ID);
+        } while (!FINISHED(context));
+        RESET(context);
     }
 
 }

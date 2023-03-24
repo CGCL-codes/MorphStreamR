@@ -33,6 +33,7 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import static java.nio.file.StandardOpenOption.READ;
@@ -89,13 +90,15 @@ public class WALManager implements LoggingManager {
     }
 
     @Override
-    public void syncRedoWriteAheadLog(RedoLogResult redoLogResult) throws IOException {
+    public void syncRetrieveLogs(RedoLogResult redoLogResult) throws IOException, ExecutionException, InterruptedException {
+        //Redo the data value logs
         for (String path : redoLogResult.redoLogPaths) {
             Path walPath = Paths.get(path);
             AsynchronousFileChannel afc = AsynchronousFileChannel.open(walPath, READ);
             int fileSize = (int) afc.size();
             ByteBuffer dataBuffer = ByteBuffer.allocate(fileSize);
             Future<Integer> result = afc.read(dataBuffer, 0);
+            result.get();
             DataInputView inputView;
             if (loggingOptions.getCompressionAlg() != None) {
                 inputView = new SnappyDataInputView(dataBuffer);//Default to use Snappy compression
@@ -122,6 +125,16 @@ public class WALManager implements LoggingManager {
             }
         }
         LOG.info("Redo write-ahead log complete");
+    }
+
+    @Override
+    public boolean inspectAbortView(long groupId, int partitionId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Object inspectDependencyView(long groupId, String key, long bid) {
+        throw new UnsupportedOperationException();
     }
 
     public static class WriteAheadLogTableInfo implements Serializable {

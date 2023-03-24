@@ -400,6 +400,7 @@ public class SLInputDurabilityHelper extends InputDurabilityHelper {
                         );
                     }
                     event.setTimestamp(timestamp);
+                    //TODO:check if the event has been aborted
                     lostEvents.add(event);
                 }
             }

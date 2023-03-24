@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import scheduler.context.recovery.RSContext;
 import utils.lib.ConcurrentHashMap;
 
+import java.util.ArrayDeque;
 import java.util.Deque;
 
 public class TaskPrecedenceGraph <Context extends RSContext>{
@@ -41,10 +42,56 @@ public class TaskPrecedenceGraph <Context extends RSContext>{
         }
     }
     public void setOCs(Context context) {
-
+        ArrayDeque<OperationChain> ocs = new ArrayDeque<>();
+        int left_bound = context.thisThreadId * delta;
+        int right_bound;
+        if (context.thisThreadId == totalThreads - 1) {//last executor need to handle left-over
+            right_bound = NUM_ITEMS;
+        } else {
+            right_bound = (context.thisThreadId + 1) * delta;
+        }
+        resetOCs(context);
+        String _key;
+        for (int key = left_bound; key < right_bound; key++) {
+            _key = String.valueOf(key);
+            if (app == 0) {
+                OperationChain gsOC = context.createTask("MicroTable", _key);
+                operationChains.get("MicroTable").threadOCsMap.get(context.thisThreadId).holder_v1.put(_key, gsOC);
+                ocs.add(gsOC);
+            } else if (app == 1) {
+                OperationChain accOC = context.createTask("accounts", _key);
+                OperationChain beOC = context.createTask("bookEntries", _key);
+                operationChains.get("accounts").threadOCsMap.get(context.thisThreadId).holder_v1.put(_key, accOC);
+                operationChains.get("bookEntries").threadOCsMap.get(context.thisThreadId).holder_v1.put(_key, beOC);
+                ocs.add(accOC);
+                ocs.add(beOC);
+            } else if (app == 2) {
+                OperationChain speedOC=context.createTask("segment_speed",_key);
+                OperationChain cntOC=context.createTask("segment_cnt",_key);
+                operationChains.get("segment_speed").threadOCsMap.get(context.thisThreadId).holder_v1.put(_key, speedOC);
+                operationChains.get("segment_cnt").threadOCsMap.get(context.thisThreadId).holder_v1.put(_key, cntOC);
+                ocs.add(speedOC);
+                ocs.add(cntOC);
+            } else if (app == 3) {
+                OperationChain gsOC = context.createTask("goods", _key);
+                operationChains.get("goods").threadOCsMap.get(context.thisThreadId).holder_v1.put(_key, gsOC);
+                ocs.add(gsOC);
+            }
+        }
+        threadToOCs.put(context.thisThreadId, ocs);//Init task placing
     }
-    private void resetOCs(){
-
+    private void resetOCs(Context context){
+        if (app == 0) {
+            operationChains.get("MicroTable").threadOCsMap.get(context.thisThreadId).holder_v1.clear();
+        } else if (app == 1) {
+            operationChains.get("accounts").threadOCsMap.get(context.thisThreadId).holder_v1.clear();
+            operationChains.get("bookEntries").threadOCsMap.get(context.thisThreadId).holder_v1.clear();
+        } else if( app == 2) {
+            operationChains.get("segment_speed").threadOCsMap.get(context.thisThreadId).holder_v1.clear();
+            operationChains.get("segment_cnt").threadOCsMap.get(context.thisThreadId).holder_v1.clear();
+        } else if (app == 3){
+            operationChains.get("goods").threadOCsMap.get(context.thisThreadId).holder_v1.clear();
+        }
     }
     public TableOCs getTableOCs(String tableName) {
         return operationChains.get(tableName);

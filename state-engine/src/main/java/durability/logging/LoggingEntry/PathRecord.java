@@ -10,7 +10,7 @@ import java.util.List;
 
 public class PathRecord implements LoggingEntry {
     public List<Long> abortBids = new ArrayList<>();
-    public HashMap<String, List<DependencyEdge>> dependencyEdges = new HashMap<>();//<Key, bid>
+    public HashMap<String, List<DependencyEdge>> dependencyEdges = new HashMap<>();//<Key, DependencyEdge>
     public void addAbortBid(long bid) {
         if (abortBids.contains(bid))
             return;
@@ -22,22 +22,26 @@ public class PathRecord implements LoggingEntry {
         dependencyEdges.get(key).add(new DependencyEdge(bid, value));
     }
     public void reset() {
+        System.out.println(abortBids);
+        System.out.println(dependencyEdges);
         this.abortBids.clear();
+        this.dependencyEdges.clear();
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(abortBids.size()).append(" ");
+        sb.append(abortBids.size()).append(";");
         for (long bid : abortBids) {
-            sb.append(bid).append(" ");
+            sb.append(bid).append(";");
         }
+        sb.append(" ");
         for (String key : dependencyEdges.keySet()) {
-            sb.append(key).append(" ");
-            sb.append(dependencyEdges.get(key).size()).append(" ");
+            sb.append(key).append(";");
             for (DependencyEdge edge : dependencyEdges.get(key)) {
-                sb.append(edge.bid).append(" ");
+                sb.append(edge.toString()).append(";");
             }
+            sb.append(" ");
         }
         return sb.toString();
     }

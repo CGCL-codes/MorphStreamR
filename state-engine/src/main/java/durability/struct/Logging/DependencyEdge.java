@@ -9,4 +9,7 @@ public class DependencyEdge implements Serializable {
         this.bid = bid;
         this.value = value;
     }
+    public String toString() {
+        return bid + "," + value.toString();
+    }
 }

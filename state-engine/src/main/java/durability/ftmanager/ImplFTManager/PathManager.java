@@ -78,9 +78,10 @@ public class PathManager extends FTManager {
     @Override
     public persistResult spoutAskRecovery(int taskId, long snapshotOffset) {
         RedoLogResult redoLogResult = new RedoLogResult();
+        redoLogResult.threadId = taskId;
         for (LoggingCommitInformation loggingCommitInformation : LoggingCommitInformation) {
             if (loggingCommitInformation.groupId > snapshotOffset) {
-                redoLogResult.addPath(loggingCommitInformation.loggingResults.get(taskId).path);
+                redoLogResult.addPath(loggingCommitInformation.loggingResults.get(taskId).path, loggingCommitInformation.groupId);
                 redoLogResult.setLastedGroupId(loggingCommitInformation.groupId);
             }
         }
@@ -133,10 +134,10 @@ public class PathManager extends FTManager {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-            if (!isFailure) {
-                File file = new File(this.walPath);
-                FileSystem.deleteFile(file);
-            }
+//            if (!isFailure) {
+//                File file = new File(this.walPath);
+//                FileSystem.deleteFile(file);
+//            }
             LOG.info("PathManager stops");
         }
     }
