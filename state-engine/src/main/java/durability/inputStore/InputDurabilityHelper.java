@@ -1,5 +1,6 @@
 package durability.inputStore;
 
+import durability.recovery.histroyviews.HistoryViews;
 import utils.FaultToleranceConstants;
 
 import java.io.File;
@@ -13,6 +14,7 @@ public abstract class InputDurabilityHelper {
     public int taskId;
     public FaultToleranceConstants.CompressionType encodingType;
     public boolean isCompression = true;
+    public HistoryViews historyViews = new HistoryViews();
 
     public abstract void reloadInput(File inputFile, Queue<Object> lostEvents, long redoOffset) throws IOException, ExecutionException, InterruptedException;
     public abstract void storeInput(Object[] myevents, long currentOffset, int interval, String inputStoreCurrentPath) throws IOException, ExecutionException, InterruptedException;

@@ -2,6 +2,7 @@ package durability.logging.LoggingStrategy;
 
 import durability.ftmanager.FTManager;
 import durability.recovery.RedoLogResult;
+import durability.recovery.histroyviews.HistoryViews;
 import durability.struct.Logging.LoggingEntry;
 import storage.table.RecordSchema;
 
@@ -13,6 +14,7 @@ public interface LoggingManager {
     void addLogRecord(LoggingEntry logRecord);
     void commitLog(long groupId, int partitionId, FTManager ftManager) throws IOException;
     void syncRetrieveLogs(RedoLogResult redoLogResult) throws IOException, ExecutionException, InterruptedException;
-    boolean inspectAbortView(long groupId, int partitionId);
+    boolean inspectAbortView(long bid);
     Object inspectDependencyView(long groupId, String key, long bid);
+    HistoryViews getHistoryViews();
 }

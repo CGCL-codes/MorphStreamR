@@ -42,12 +42,13 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
     }
     @Override
     public boolean SubmitRequest(Context context, Request request) {
+        context.push(request);
         return false;
     }
 
     @Override
     public void TxnSubmitBegin(Context context) {
-
+        context.requests.clear();
     }
 
     @Override

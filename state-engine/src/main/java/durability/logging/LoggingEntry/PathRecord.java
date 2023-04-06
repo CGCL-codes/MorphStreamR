@@ -22,8 +22,6 @@ public class PathRecord implements LoggingEntry {
         dependencyEdges.get(key).add(new DependencyEdge(bid, value));
     }
     public void reset() {
-        System.out.println(abortBids);
-        System.out.println(dependencyEdges);
         this.abortBids.clear();
         this.dependencyEdges.clear();
     }

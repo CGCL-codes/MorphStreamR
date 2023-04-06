@@ -1,5 +1,6 @@
 package common.faulttolerance.inputReload;
 
+import benchmark.datagenerator.Event;
 import common.collections.Configuration;
 import common.collections.OsUtils;
 import common.io.ByteIO.SyncFileAppender;
@@ -361,6 +362,9 @@ public class SLInputDurabilityHelper extends InputDurabilityHelper {
                     int type = intDecoders[0].readInt(buffer0);
                     long timestamp = timestampDecoder.readLong(buffer1);
                     long bid = longDecoders[0].readLong(buffer2);
+                    if (historyViews.inspectAbortView(bid)) {
+                        continue;
+                    }
                     int sourceAccountId = intDecoders[1].readInt(buffer3);
                     int npid =  (sourceAccountId / partitionOffset);
                     pids.put(( sourceAccountId / partitionOffset), 0);
@@ -407,7 +411,10 @@ public class SLInputDurabilityHelper extends InputDurabilityHelper {
         } else {
             while (stringDecoder.hasNext(dataBuffer)) {
                 String eventString = stringDecoder.readBinary(dataBuffer).getStringValue();
-                lostEvents.add(getEventFromString(eventString));
+                TxnEvent event = getEventFromString(eventString);
+                if (event != null) {
+                    lostEvents.add(event);
+                }
             }
         }
     }
@@ -420,7 +427,10 @@ public class SLInputDurabilityHelper extends InputDurabilityHelper {
         String txn = reader.readLine();
         int[] p_bids = new int[tthread];
         while (txn != null) {
-            lostEvents.add(getEventFromString(txn));
+            TxnEvent event = getEventFromString(txn);
+            if (event != null) {
+                lostEvents.add(event);
+            }
             txn = reader.readLine();
         }
         reader.close();
@@ -434,6 +444,9 @@ public class SLInputDurabilityHelper extends InputDurabilityHelper {
     private TxnEvent getEventFromString(String txn) {
         int[] p_bids = new int[tthread];
         String[] split = txn.split(",");
+        if (historyViews.inspectAbortView(Integer.parseInt(split[0]))) {
+            return null;
+        }
         int npid = (int) (Long.parseLong(split[1]) / partitionOffset);
         HashMap<Integer, Integer> pids = new HashMap<>();
         if (split.length == 8) {

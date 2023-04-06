@@ -15,6 +15,7 @@ import durability.logging.LoggingEntry.LogRecord;
 import durability.logging.LoggingResource.ImplLoggingResources.PartitionWalResources;
 import durability.logging.LoggingStream.ImplLoggingStreamFactory.NIOWalStreamFactory;
 import durability.recovery.RedoLogResult;
+import durability.recovery.histroyviews.HistoryViews;
 import durability.snapshot.LoggingOptions;
 import durability.struct.Logging.LoggingEntry;
 import org.slf4j.Logger;
@@ -128,12 +129,17 @@ public class WALManager implements LoggingManager {
     }
 
     @Override
-    public boolean inspectAbortView(long groupId, int partitionId) {
+    public boolean inspectAbortView(long bid) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public Object inspectDependencyView(long groupId, String key, long bid) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public HistoryViews getHistoryViews() {
         throw new UnsupportedOperationException();
     }
 

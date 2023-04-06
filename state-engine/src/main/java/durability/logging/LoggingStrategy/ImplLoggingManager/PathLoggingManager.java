@@ -93,7 +93,7 @@ public class PathLoggingManager implements LoggingManager {
             String[] strings = new String(object, StandardCharsets.UTF_8).split(" ");
             String[] abortIds = strings[0].split(";");
             for (String abortId : abortIds) {
-                this.historyViews.addAbortId(redoLogResult.groupIds.get(i), redoLogResult.threadId, Long.parseLong(abortId));
+                this.historyViews.addAbortId(redoLogResult.threadId, Long.parseLong(abortId));
             }
             for (int j = 1; j < strings.length; j++) {
                 String[] dependency = strings[j].split(";");
@@ -108,13 +108,18 @@ public class PathLoggingManager implements LoggingManager {
     }
 
     @Override
-    public boolean inspectAbortView(long groupId, int partitionId) {
-        return this.historyViews.inspectAbortView(groupId, partitionId);
+    public boolean inspectAbortView(long bid) {
+        return this.historyViews.inspectAbortView(bid);
     }
 
     @Override
     public Object inspectDependencyView(long groupId, String key, long bid) {
         return this.historyViews.inspectDependencyView(groupId, key, bid);
+    }
+
+    @Override
+    public HistoryViews getHistoryViews() {
+        return this.historyViews;
     }
 
     public static Logger getLOG() {

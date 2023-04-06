@@ -81,6 +81,7 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
                             input_store(counter);
                         }
                     }
+                    isRecovery = false;
                     return;
                 }
                 if (ftOption == FTOption_ISC || ftOption == FTOption_WSC) {
@@ -287,6 +288,7 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
             if (redoLogResult.redoLogPaths.size() != 0) {
                 MeasureTools.BEGIN_REDO_WAL_MEASURE(this.taskId);
                 this.db.syncRetrieveLogs(redoLogResult);
+                this.inputDurabilityHelper.historyViews = this.db.getLoggingManager().getHistoryViews();
                 MeasureTools.END_REDO_WAL_MEASURE(this.taskId);
             }
             needReplay = input_reload(snapshotResult.snapshotId, 0);
