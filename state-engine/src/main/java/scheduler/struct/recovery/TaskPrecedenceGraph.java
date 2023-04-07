@@ -8,6 +8,7 @@ import utils.lib.ConcurrentHashMap;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
+
 public class TaskPrecedenceGraph <Context extends RSContext>{
     private static final Logger LOG = LoggerFactory.getLogger(TaskPrecedenceGraph.class);
     public final int totalThreads;
@@ -18,7 +19,7 @@ public class TaskPrecedenceGraph <Context extends RSContext>{
     public final ConcurrentHashMap<Integer, Context> threadToContextMap;
     private final ConcurrentHashMap<String, TableOCs> operationChains;//shared data structure.
     public final ConcurrentHashMap<Integer, Deque<OperationChain>> threadToOCs;//Exactly which OCs are executed by each thread.
-
+    public ConcurrentHashMap<Integer, Task> idToTask;//Exactly which OCs are in one task.
     public TaskPrecedenceGraph(int totalThreads, int delta, int NUM_ITEMS, int app) {
         this.totalThreads = totalThreads;
         this.delta = delta;
@@ -99,7 +100,7 @@ public class TaskPrecedenceGraph <Context extends RSContext>{
     public ConcurrentHashMap<String, TableOCs> getOperationChains() {
         return operationChains;
     }
-    private OperationChain getOC(String tableName, String pKey) {
+    public OperationChain getOC(String tableName, String pKey) {
         int threadId = Integer.parseInt(pKey) / delta;
         ConcurrentHashMap<String, OperationChain> holder = getTableOCs(tableName).threadOCsMap.get(threadId).holder_v1;
         return holder.computeIfAbsent(pKey, s -> threadToContextMap.get(threadId).createTask(tableName, pKey));
@@ -108,5 +109,12 @@ public class TaskPrecedenceGraph <Context extends RSContext>{
         ConcurrentHashMap<String, OperationChain> holder = getTableOCs(tableName).threadOCsMap.get(threadId).holder_v1;
         return holder.computeIfAbsent(pKey, s -> threadToContextMap.get(threadId).createTask(tableName, pKey));
     }
-
+    public OperationChain addOperationToChain(Operation operation) {
+        // DD: Get the Holder for the table, then get a map for each thread, then get the list of operations
+        String table_name = operation.table_name;
+        String primaryKey = operation.pKey;
+        OperationChain retOc = getOC(table_name, primaryKey, operation.context.thisThreadId);
+        retOc.addOperation(operation);
+        return retOc;
+    }
 }

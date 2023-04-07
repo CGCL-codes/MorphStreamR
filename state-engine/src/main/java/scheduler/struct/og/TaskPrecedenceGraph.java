@@ -519,7 +519,6 @@ public class TaskPrecedenceGraph<Context extends OGSchedulerContext> {
                 } else {
                     // All ops in transaction event involves writing to the states, therefore, we ignore edge case for read ops.
                     curOC.addParent(op, OCFromConditionSource); // record dependency
-                    OCFromConditionSource.updateEdgeWeight(key);
                 }
             }
             curOC.checkPotentialFDChildrenOnNewArrival(op);

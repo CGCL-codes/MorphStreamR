@@ -2,14 +2,14 @@ package durability.struct.Logging;
 
 import java.io.Serializable;
 
-public class DependencyEdge implements Serializable {
+public class DependencyResult implements Serializable {
     public long bid;
     public Object value;
-    public DependencyEdge(long bid, Object value) {
+    public DependencyResult(long bid, Object value) {
         this.bid = bid;
         this.value = value;
     }
     public String toString() {
-        return bid + "," + value.toString();
+        return bid + "/" + value.toString() + ",";
     }
 }

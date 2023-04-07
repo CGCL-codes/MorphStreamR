@@ -97,10 +97,18 @@ public class PathLoggingManager implements LoggingManager {
             }
             for (int j = 1; j < strings.length; j++) {
                 String[] dependency = strings[j].split(";");
-                String key = dependency[0];
+                String tableName = dependency[0];
                 for (int k = 1; k < dependency.length; k++) {
-                    String[] kv = dependency[k].split(",");
-                    this.historyViews.addDependencies(redoLogResult.groupIds.get(i), key, Long.parseLong(kv[0]), kv[1]);
+                    String[] kp = dependency[k].split(":");
+                    String key = kp[0];
+                    for (int l = 1; l < kp.length; l++) {
+                        String[] pr = kp[l].split(",");
+                        String p = pr[0];
+                        for (int m = 1; m < pr.length; m++) {
+                            String[] kv = pr[m].split("/");
+                            this.historyViews.addDependencies(redoLogResult.groupIds.get(i), tableName, key, p, Long.parseLong(kv[0]), kv[1]);
+                        }
+                    }
                 }
             }
             LOG.info("Finish construct the history views");
@@ -113,8 +121,8 @@ public class PathLoggingManager implements LoggingManager {
     }
 
     @Override
-    public Object inspectDependencyView(long groupId, String key, long bid) {
-        return this.historyViews.inspectDependencyView(groupId, key, bid);
+    public Object inspectDependencyView(long groupId, String table, String from, String to, long bid) {
+        return this.historyViews.inspectDependencyView(table, from, to, bid);
     }
 
     @Override

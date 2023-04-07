@@ -2,10 +2,13 @@ package scheduler.struct.recovery;
 
 import transaction.impl.ordered.MyList;
 
+import java.util.Vector;
+
 public class OperationChain implements Comparable<OperationChain>{
     private final String tableName;
     private final String primaryKey;
     private final MyList<Operation> operations;
+    private final Vector<OperationChain> dependentOCs = new Vector<>();
     public OperationChain(String tableName, String primaryKey) {
         this.tableName = tableName;
         this.primaryKey = primaryKey;
@@ -25,5 +28,14 @@ public class OperationChain implements Comparable<OperationChain>{
 
     public String getPrimaryKey() {
         return primaryKey;
+    }
+
+    public void addOperation(Operation operation) {
+        operations.add(operation);
+    }
+    public void addDependentOCs(OperationChain ocs) {
+        if (this.dependentOCs.contains(ocs))
+            return;
+        this.dependentOCs.add(ocs);
     }
 }

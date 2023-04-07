@@ -198,7 +198,6 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
     protected void Transfer_Fun(AbstractOperation operation, long previous_mark_ID, boolean clean) {
         SchemaRecord preValues = operation.condition_records[0].content_.readPreValues(operation.bid);
         final long sourceAccountBalance = preValues.getValues().get(1).getLong();
-
         // apply function
         AppConfig.randomDelay();
 
@@ -218,14 +217,14 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
             synchronized (operation.success) {
                 operation.success[0]++;
             }
-            if (isLogging == LOGOption_path) {
-                int threadID = ((Operation) operation).context.thisThreadId;
-                this.threadToPathRecord.get(threadID).addDependencyEdge(((Operation) operation).pKey, operation.bid, true);
+            if (isLogging == LOGOption_path && !((Operation) operation).pKey.equals(preValues.GetPrimaryKey())) {
+                int id = getTaskId(((Operation) operation).pKey, delta);
+                this.threadToPathRecord.get(id).addDependencyEdge(operation.table_name,((Operation) operation).pKey, preValues.GetPrimaryKey(), operation.bid, true);
             }
         } else {
-            if (isLogging == LOGOption_path) {
-                int threadID = ((Operation) operation).context.thisThreadId;
-                this.threadToPathRecord.get(threadID).addDependencyEdge(((Operation) operation).pKey, operation.bid, false);
+            if (isLogging == LOGOption_path && !((Operation) operation).pKey.equals(preValues.GetPrimaryKey())) {
+                int id = getTaskId(((Operation) operation).pKey, delta);
+                this.threadToPathRecord.get(id).addDependencyEdge(operation.table_name, ((Operation) operation).pKey, preValues.GetPrimaryKey(), operation.bid, true);
             }
         }
     }
@@ -345,7 +344,7 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
             if (txnOpId == 0)
                 headerOperation = set_op;
             // addOperation an operation id for the operation for the purpose of temporal dependency construction
-            set_op.setTxnOpId(txnOpId++);
+            set_op.setTxnOpId(txnOpId ++);
             set_op.addHeader(headerOperation);
             headerOperation.addDescendant(set_op);
         }

@@ -17,7 +17,6 @@ import static scheduler.struct.OperationChainCommon.cleanUp;
 public class OperationChain implements Comparable<OperationChain> {
     public final String tableName;
     public final String primaryKey;
-    private final ConcurrentHashMap<String, AtomicInteger> edgeWeight = new ConcurrentHashMap<>();
     public final long bid;
     protected final MyList<Operation> operations;
     public final AtomicInteger ocParentsCount;
@@ -155,7 +154,6 @@ public class OperationChain implements Comparable<OperationChain> {
         for (PotentialChildrenInfo pChildInfo : potentialChldrenInfo) {
             if (newOp.bid < pChildInfo.childOp.bid) { // if bid is < dependents bid, therefore, it depends upon this operation
                 pChildInfo.potentialChildOC.addParent(pChildInfo.childOp, this);
-                this.updateEdgeWeight(pChildInfo.potentialChildOC.primaryKey);
                 processed.add(pChildInfo);
             }
         }
@@ -291,12 +289,5 @@ public class OperationChain implements Comparable<OperationChain> {
             }
         }
         isDependencyLevelCalculated = true;
-    }
-    public void updateEdgeWeight(String to) {
-        if (this.edgeWeight.contains(to)) {
-            this.edgeWeight.get(to).getAndIncrement();
-        } else {
-            this.edgeWeight.put(to, new AtomicInteger(1));
-        }
     }
 }

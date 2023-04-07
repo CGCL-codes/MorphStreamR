@@ -331,22 +331,9 @@ public class TaskPrecedenceGraph<Context extends OPSchedulerContext> {
                 } else {
                     // All ops in transaction event involves writing to the states, therefore, we ignore edge case for read ops.
                     curOC.addFDParent(op, OCFromConditionSource); // record dependency
-                    OCFromConditionSource.updateEdgeWeight(key);
                 }
             }
             curOC.checkPotentialFDChildrenOnNewArrival(op);
-        }
-    }
-
-    private void graphPartition() {
-
-    }
-    private void updateGraph(int threadId) {
-        for (OperationChain oc : threadToOCs.get(threadId)) {
-            graph.addNode(Integer.parseInt(oc.getPrimaryKey()), oc.getWeight());
-            for (Map.Entry<String, AtomicInteger> edges:oc.edgeWeight.entrySet()){
-                this.graph.addEdge(Integer.parseInt(oc.getPrimaryKey()), Integer.parseInt(edges.getKey()), edges.getValue().get());
-            }
         }
     }
 

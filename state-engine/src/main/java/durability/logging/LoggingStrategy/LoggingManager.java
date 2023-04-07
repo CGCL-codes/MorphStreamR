@@ -15,6 +15,6 @@ public interface LoggingManager {
     void commitLog(long groupId, int partitionId, FTManager ftManager) throws IOException;
     void syncRetrieveLogs(RedoLogResult redoLogResult) throws IOException, ExecutionException, InterruptedException;
     boolean inspectAbortView(long bid);
-    Object inspectDependencyView(long groupId, String key, long bid);
+    Object inspectDependencyView(long groupId, String table, String from, String to, long bid);
     HistoryViews getHistoryViews();
 }

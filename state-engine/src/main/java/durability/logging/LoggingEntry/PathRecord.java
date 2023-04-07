@@ -1,25 +1,24 @@
 package durability.logging.LoggingEntry;
 
-import durability.struct.Logging.DependencyEdge;
 import durability.struct.Logging.LoggingEntry;
+import durability.struct.Logging.keyToDependencies;
 
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PathRecord implements LoggingEntry {
     public List<Long> abortBids = new ArrayList<>();
-    public HashMap<String, List<DependencyEdge>> dependencyEdges = new HashMap<>();//<Key, DependencyEdge>
+    public ConcurrentHashMap<String, keyToDependencies> dependencyEdges = new ConcurrentHashMap<>();//<Key, DependencyEdge>
     public void addAbortBid(long bid) {
         if (abortBids.contains(bid))
             return;
         abortBids.add(bid);
     }
-    public void addDependencyEdge(String key, long bid, Object value) {
-        if (!dependencyEdges.containsKey(key))
-            dependencyEdges.put(key, new ArrayList<>());
-        dependencyEdges.get(key).add(new DependencyEdge(bid, value));
+    public void addDependencyEdge(String table, String from, String to, long bid, Object value) {
+        dependencyEdges.putIfAbsent(table, new keyToDependencies());
+        dependencyEdges.get(table).addDependencies(from, to, bid, value);
     }
     public void reset() {
         this.abortBids.clear();
@@ -34,11 +33,10 @@ public class PathRecord implements LoggingEntry {
             sb.append(bid).append(";");
         }
         sb.append(" ");
-        for (String key : dependencyEdges.keySet()) {
-            sb.append(key).append(";");
-            for (DependencyEdge edge : dependencyEdges.get(key)) {
-                sb.append(edge.toString()).append(";");
-            }
+        for (Map.Entry<String, keyToDependencies> logs : this.dependencyEdges.entrySet()) {
+            sb.append(logs.getKey());
+            sb.append(";");
+            sb.append(logs.getValue().toString());
             sb.append(" ");
         }
         return sb.toString();

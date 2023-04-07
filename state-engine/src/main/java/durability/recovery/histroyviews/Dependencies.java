@@ -7,4 +7,12 @@ public class Dependencies{
     public void addDependency(long bid, Object v) {
         this.dependencies.put(bid, v);
     }
+    public Object inspectDependency(long bid) {
+        for (long b : this.dependencies.keySet()) {
+            if (b > bid) {
+                return this.dependencies.get(b);
+            }
+        }
+        return null;
+    }
 }

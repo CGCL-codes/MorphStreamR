@@ -1,7 +1,6 @@
 package scheduler.struct.recovery;
 
 import content.common.CommonMetaTypes;
-import scheduler.context.op.OPSchedulerContext;
 import scheduler.context.recovery.RSContext;
 import scheduler.struct.AbstractOperation;
 import storage.SchemaRecordRef;
@@ -10,9 +9,13 @@ import transaction.context.TxnContext;
 import transaction.function.Condition;
 import transaction.function.Function;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class Operation extends AbstractOperation implements Comparable<Operation> {
     public final RSContext context;
     public final String pKey;
+    public Object historyView = null;
+    public AtomicInteger pdCount = new AtomicInteger(0);// We only ensure pdCount, TD count can be ensured by skipList
     public int txnOpId = 0;
     public <Context extends RSContext> Operation(String pKey, Context context, String table_name, TxnContext txn_context, long bid,
                                                           CommonMetaTypes.AccessType accessType, TableRecord d_record, Function function, Condition condition, TableRecord[] condition_records, int[] success) {
@@ -44,5 +47,8 @@ public class Operation extends AbstractOperation implements Comparable<Operation
 
     public int getTxnOpId() {
         return txnOpId;
+    }
+    public void incrementPd(){
+        this.pdCount.getAndIncrement();
     }
 }

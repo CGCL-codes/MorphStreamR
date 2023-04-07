@@ -134,7 +134,7 @@ public class WALManager implements LoggingManager {
     }
 
     @Override
-    public Object inspectDependencyView(long groupId, String key, long bid) {
+    public Object inspectDependencyView(long groupId, String table, String from, String to, long bid) {
         throw new UnsupportedOperationException();
     }
 

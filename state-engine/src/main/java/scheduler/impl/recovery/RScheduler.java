@@ -7,6 +7,8 @@ import durability.logging.LoggingStrategy.LoggingManager;
 import scheduler.Request;
 import scheduler.context.recovery.RSContext;
 import scheduler.impl.IScheduler;
+import scheduler.struct.recovery.Operation;
+import scheduler.struct.recovery.OperationChain;
 import scheduler.struct.recovery.TaskPrecedenceGraph;
 import utils.lib.ConcurrentHashMap;
 
@@ -53,7 +55,39 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
 
     @Override
     public void TxnSubmitFinished(Context context) {
-
+        int txnOpId = 0;
+        for (Request request : context.requests) {
+            long bid = request.txn_context.getBID();
+            Operation set_op;
+            switch (request.accessType) {
+                case WRITE_ONLY:
+                    set_op = new Operation(request.src_key, getTargetContext(request.src_key), request.table_name, request.txn_context, bid, request.accessType,
+                            request.d_record, null, null, null, null);
+                    set_op.value = request.value;
+                    break;
+                case READ_WRITE: // they can use the same method for processing
+                case READ_WRITE_COND:
+                    set_op = new Operation(request.src_key, getTargetContext(request.src_key), request.table_name, request.txn_context, bid, request.accessType,
+                            request.d_record, request.function, request.condition, request.condition_records, request.success);
+                    break;
+                case READ_WRITE_COND_READ:
+                case READ_WRITE_COND_READN:
+                    set_op = new Operation(request.src_key, getTargetContext(request.src_key), request.table_name, request.txn_context, bid, request.accessType,
+                            request.d_record, request.record_ref, request.function, request.condition, request.condition_records, request.success);
+                    break;
+                case READ_WRITE_READ:
+                    set_op = new Operation(request.src_key, getTargetContext(request.src_key), request.table_name, request.txn_context, bid, request.accessType,
+                            request.d_record, request.record_ref, request.function, null, null, null);
+                    break;
+                default:
+                    throw new UnsupportedOperationException();
+            }
+            //TODO:pre-process dependency
+            OperationChain curOC = tpg.addOperationToChain(set_op);
+            set_op.setTxnOpId(txnOpId ++);
+            if (request.condition_source != null)
+                inspectDependency(curOC, set_op, request.table_name, request.src_key, request.condition_sourceTable, request.condition_source);
+        }
     }
 
     @Override
@@ -65,6 +99,7 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
     @Override
     public void INITIALIZE(Context threadId) {
         //TODO:add task placing
+
     }
 
     @Override
@@ -96,5 +131,31 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
         } while (!FINISHED(context));
         RESET(context);
     }
-
+    public Context getTargetContext(String key) {
+        // the thread to submit the operation may not be the thread to execute it.
+        // we need to find the target context this thread is mapped to.
+        int threadId =  Integer.parseInt(key) / delta;
+        return tpg.threadToContextMap.get(threadId);
+    }
+    private void inspectDependency(OperationChain curOC, Operation op, String table_name,
+                                   String key, String[] condition_sourceTable, String[] condition_source){
+        if (condition_source != null) {
+            for (int index = 0; index < condition_source.length; index++) {
+                if (table_name.equals(condition_sourceTable[index]) && key.equals(condition_source[index]))
+                    continue;
+                Object history = this.loggingManager.inspectDependencyView(op.bid, table_name, key,condition_source[index], op.bid);
+                if (history != null) {
+                    op.historyView = history;
+                } else {
+                    OperationChain OCFromConditionSource = tpg.getOC(condition_sourceTable[index], condition_source[index]);
+                    //DFS-like
+                    op.incrementPd();
+                    //Add the proxy operations
+                    OCFromConditionSource.addOperation(op);
+                    //Add dependent
+                    OCFromConditionSource.addDependentOCs(curOC);
+                }
+            }
+        }
+    }
 }
