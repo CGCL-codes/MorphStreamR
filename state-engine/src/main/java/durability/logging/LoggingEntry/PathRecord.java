@@ -1,5 +1,8 @@
 package durability.logging.LoggingEntry;
 
+import common.util.graph.Edge;
+import common.util.graph.Graph;
+import durability.struct.Logging.Node;
 import durability.struct.Logging.LoggingEntry;
 import durability.struct.Logging.keyToDependencies;
 
@@ -10,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class PathRecord implements LoggingEntry {
     public List<Long> abortBids = new ArrayList<>();
-    public ConcurrentHashMap<String, keyToDependencies> dependencyEdges = new ConcurrentHashMap<>();//<Key, DependencyEdge>
+    public ConcurrentHashMap<String, keyToDependencies> dependencyEdges = new ConcurrentHashMap<>();//<Table, DependencyEdge>
     public void addAbortBid(long bid) {
         if (abortBids.contains(bid))
             return;
@@ -20,9 +23,25 @@ public class PathRecord implements LoggingEntry {
         dependencyEdges.putIfAbsent(table, new keyToDependencies());
         dependencyEdges.get(table).addDependencies(from, to, bid, value);
     }
+    public void addNode(String table, String from, int weight) {
+        dependencyEdges.putIfAbsent(table, new keyToDependencies());
+        dependencyEdges.get(table).holder.putIfAbsent(from, new Node(from));
+        dependencyEdges.get(table).holder.get(from).setNodeWeight(weight);
+    }
     public void reset() {
         this.abortBids.clear();
-        this.dependencyEdges.clear();
+        for (keyToDependencies edges : this.dependencyEdges.values()) {
+            edges.cleanDependency();
+        }
+    }
+    public void dependencyToGraph(Graph graph, String table){
+        keyToDependencies partitionG = this.dependencyEdges.get(table);
+        for (Node node : partitionG.holder.values()) {
+            graph.addNode(node.from, node.weight);
+            for (Edge edge : node.edges.values()) {
+                graph.addEdge(edge);
+            }
+        }
     }
 
     @Override

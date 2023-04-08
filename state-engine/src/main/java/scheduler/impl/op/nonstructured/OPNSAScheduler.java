@@ -38,7 +38,7 @@ public class OPNSAScheduler<Context extends OPNSAContext> extends OPNSScheduler<
     @Override
     public void EXPLORE(Context context) {
         if (isLogging == LOGOption_path) {
-            context.partitionStateManager.handleStateTransitionsWithAbortTracking(this.threadToPathRecord.get(context.thisThreadId));
+            context.partitionStateManager.handleStateTransitionsWithAbortTracking(this.tpg.threadToPathRecord.get(context.thisThreadId));
         } else {
             context.partitionStateManager.handleStateTransitions();
         }

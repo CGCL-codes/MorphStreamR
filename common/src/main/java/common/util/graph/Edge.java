@@ -1,14 +1,16 @@
 package common.util.graph;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class Edge {
     private int from;
     private int to;
-    private int weight;
+    private AtomicInteger weight;
 
     public Edge(int from, int to, int weight) {
         this.from = from;
         this.to = to;
-        this.weight = weight;
+        this.weight = new AtomicInteger(weight);
     }
 
     public int getFrom() {
@@ -20,6 +22,14 @@ public class Edge {
     }
 
     public int getWeight() {
-        return weight;
+        return weight.get();
+    }
+
+    public void addWeight() {
+       weight.incrementAndGet();
+    }
+
+    public void clean() {
+        weight.set(0);
     }
 }

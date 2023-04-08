@@ -154,7 +154,7 @@ public class OPDFSAScheduler<Context extends OPSAContext> extends OPDFSScheduler
                 operation.stateTransition(MetaTypes.OperationStateType.ABORTED);
                 notifyChildren(operation, MetaTypes.OperationStateType.ABORTED);
                 if (this.isLogging == LOGOption_path)
-                    this.threadToPathRecord.get(context.thisThreadId).addAbortBid(operation.bid);
+                    this.tpg.threadToPathRecord.get(context.thisThreadId).addAbortBid(operation.bid);
                 markAny = true;
             }
         }

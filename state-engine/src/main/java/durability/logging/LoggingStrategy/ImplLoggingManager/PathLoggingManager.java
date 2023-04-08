@@ -5,6 +5,8 @@ import common.collections.OsUtils;
 import common.io.ByteIO.DataInputView;
 import common.io.ByteIO.InputWithDecompression.NativeDataInputView;
 import common.io.ByteIO.InputWithDecompression.SnappyDataInputView;
+import common.util.graph.Graph;
+import common.util.graph.GraphPartitioner;
 import durability.ftmanager.FTManager;
 import durability.logging.LoggingEntry.PathRecord;
 import durability.logging.LoggingResource.ImplLoggingResources.DependencyMaintainResources;
@@ -18,7 +20,9 @@ import durability.snapshot.LoggingOptions;
 import durability.struct.Logging.LoggingEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import scheduler.struct.op.TableOCs;
 import storage.table.RecordSchema;
+import utils.SOURCE_CONTROL;
 import utils.lib.ConcurrentHashMap;
 
 import javax.annotation.Nonnull;
@@ -28,6 +32,7 @@ import java.nio.channels.AsynchronousFileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -39,6 +44,7 @@ public class PathLoggingManager implements LoggingManager {
     @Nonnull protected String loggingPath;
     @Nonnull protected LoggingOptions loggingOptions;
     protected int parallelNum;
+    private ConcurrentHashMap<String, Graph> graphs = new ConcurrentHashMap<>();//TableToGraph
     public ConcurrentHashMap<Integer, PathRecord> threadToPathRecord = new ConcurrentHashMap<>();
     public HistoryViews historyViews = new HistoryViews();//Used when recovery
     public PathLoggingManager(Configuration configuration) {
@@ -47,6 +53,18 @@ public class PathLoggingManager implements LoggingManager {
         loggingOptions = new LoggingOptions(parallelNum, configuration.getString("compressionAlg"));
         for (int i = 0; i < parallelNum; i ++) {
             this.threadToPathRecord.put(i, new PathRecord());
+        }
+        int app = configuration.getInt("app");
+        if (app == 0) {//GS
+            graphs.put("MicroTable", new Graph(configuration.getInt("NUM_ITEMS"),parallelNum));
+        } else if (app == 1) {//SL
+            graphs.put("accounts", new Graph(configuration.getInt("NUM_ITEMS"), parallelNum));
+            graphs.put("bookEntries", new Graph(configuration.getInt("NUM_ITEMS"), parallelNum));
+        } else if (app == 2){//TP
+            graphs.put("segment_speed", new Graph(configuration.getInt("NUM_ITEMS"), parallelNum));
+            graphs.put("segment_cnt", new Graph(configuration.getInt("NUM_ITEMS"), parallelNum));
+        } else if (app == 3) {//OB
+            graphs.put("goods", new Graph(configuration.getInt("NUM_ITEMS"), parallelNum));
         }
     }
     public DependencyMaintainResources syncPrepareResource(int partitionId) {
@@ -65,6 +83,7 @@ public class PathLoggingManager implements LoggingManager {
 
     @Override
     public void commitLog(long groupId, int partitionId, FTManager ftManager) throws IOException {
+        graphPartition(partitionId);
         NIOPathStreamFactory nioPathStreamFactory = new NIOPathStreamFactory(this.loggingPath);
         DependencyMaintainResources dependencyMaintainResources = syncPrepareResource(partitionId);
         AsynchronousFileChannel afc = nioPathStreamFactory.createLoggingStream();
@@ -132,5 +151,18 @@ public class PathLoggingManager implements LoggingManager {
 
     public static Logger getLOG() {
         return LOG;
+    }
+
+    private void graphPartition(int partitionId) {
+        for (Map.Entry<String, Graph> entry : graphs.entrySet()) {
+            this.threadToPathRecord.get(partitionId).dependencyToGraph(entry.getValue(), entry.getKey());
+        }
+        SOURCE_CONTROL.getInstance().waitForOtherThreads(partitionId);
+        if (partitionId == 0) {
+            for (Graph graph : graphs.values()) {
+                graph.partition();
+            }
+        }
+        SOURCE_CONTROL.getInstance().waitForOtherThreads(partitionId);
     }
 }

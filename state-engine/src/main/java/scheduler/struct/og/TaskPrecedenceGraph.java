@@ -1,6 +1,7 @@
 package scheduler.struct.og;
 
 import common.util.graph.Graph;
+import durability.logging.LoggingEntry.PathRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import profiler.MeasureTools;
@@ -20,6 +21,7 @@ import java.util.concurrent.CyclicBarrier;
 
 import static common.CONTROL.enable_log;
 import static utils.FaultToleranceConstants.LOGOption_no;
+import static utils.FaultToleranceConstants.LOGOption_path;
 
 /**
  * TPG  -> Partition -> Key:OperationChain -> Operation-Operation-Operation...
@@ -46,11 +48,11 @@ public class TaskPrecedenceGraph<Context extends OGSchedulerContext> {
     private final int NUM_ITEMS;
     private final ConcurrentHashMap<String, TableOCs<OperationChain>> operationChains;//shared data structure.
     private final ConcurrentHashMap<Integer, Deque<OperationChain>> threadToOCs;
+    public ConcurrentHashMap<Integer, PathRecord> threadToPathRecord;// Used by fault tolerance
     CyclicBarrier barrier;
     private int maxLevel = 0; // just for layered scheduling
     private final int app;
 
-    private final Graph graph;
     public int isLogging = LOGOption_no;
 
     public void reset(Context context) {
@@ -87,7 +89,6 @@ public class TaskPrecedenceGraph<Context extends OGSchedulerContext> {
         this.totalThreads = totalThreads;
         this.delta = delta;
         this.NUM_ITEMS = NUM_ITEMS;
-        this.graph = new Graph(this.NUM_ITEMS);
         threadToContextMap = new ConcurrentHashMap<>();
         threadToOCs = new ConcurrentHashMap<>();
         //shared data structure.
@@ -188,12 +189,6 @@ public class TaskPrecedenceGraph<Context extends OGSchedulerContext> {
     public void firstTimeExploreTPG(Context context) {
         int threadId = context.thisThreadId;
         MeasureTools.BEGIN_FIRST_EXPLORE_TIME_MEASURE(threadId);
-//        assert context.totalOsToSchedule == ocs.size();
-//        Collection<TableOCs<OperationChain>> tableOCsList = getOperationChains().values();
-//        for (TableOCs<OperationChain> tableOCs : tableOCsList) {//for each table.
-//            threadToOCs.computeIfAbsent(threadId, s -> new ArrayDeque<>()).addAll(tableOCs.threadOCsMap.get(threadId).holder_v1.values());
-//        }
-
         submit(context, threadToOCs.get(threadId));
         MeasureTools.END_FIRST_EXPLORE_TIME_MEASURE(threadId);
     }
@@ -203,24 +198,20 @@ public class TaskPrecedenceGraph<Context extends OGSchedulerContext> {
         HashSet<OperationChain> circularOCs = new HashSet<>();
         HashSet<OperationChain> resolvedOC = new HashSet<>();
         // TODO: simple dfs to solve circular, more efficient algorithm need to be involved. keywords: 如何找出有向图中的所有环路？
-//        HashMap<OperationChain, Integer> dfn = new HashMap<>();
-//        HashMap<OperationChain, Integer> low = new HashMap<>();
-//        HashMap<OperationChain, Boolean> inStack = new HashMap<>();
-//        Stack<OperationChain> stack = new Stack<>();
-//        int ts = 1;
-//        for (OperationChain oc : ocs) {
-//            detectCircular(oc, dfn, low, inStack, stack, ts, circularOCs);
-//        }
-//        detectAffectedOCs(scannedOCs, circularOCs);
         if (AppConfig.isCyclic) { // if the constructed OCs are not cyclic, skip this.
             circularDetect(context, ocs, scannedOCs, circularOCs, resolvedOC);
         }
-//        for (OperationChain oc : ocs) {
-//            context.fd += oc.ocParentsCount.get();
-//        }
-//        LOG.info("id: " + context.thisThreadId + " fd: " + context.fd);
         if (context instanceof OGSContext) {
             ((OGSContext) context).buildBucketPerThread(ocs, resolvedOC);
+            if (this.isLogging == LOGOption_path) {
+                for (OperationChain oc : ocs) {
+                    //TODO: we can track bid for different layer here
+                    if (oc.getOperations().isEmpty()) {
+                        continue;
+                    }
+                    this.threadToPathRecord.get(context.thisThreadId).addNode(oc.getTableName(), oc.primaryKey, oc.getOperations().size());
+                }
+            }
             SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
             if (context.thisThreadId == 0) { // gather
                 for (Context curContext : threadToContextMap.values()) {
@@ -247,6 +238,9 @@ public class TaskPrecedenceGraph<Context extends OGSchedulerContext> {
                 }
                 if (!oc.hasParents()) {
                     ((AbstractOGNSContext) context).getListener().onOcRootStart(oc);
+                }
+                if (this.isLogging == LOGOption_path) {
+                    this.threadToPathRecord.get(context.thisThreadId).addNode(oc.getTableName(), oc.primaryKey, oc.getOperations().size());
                 }
             }
         } else {

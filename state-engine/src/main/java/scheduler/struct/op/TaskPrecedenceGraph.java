@@ -1,6 +1,7 @@
 package scheduler.struct.op;
 
 import common.util.graph.Graph;
+import durability.logging.LoggingEntry.PathRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import profiler.MeasureTools;
@@ -46,9 +47,9 @@ public class TaskPrecedenceGraph<Context extends OPSchedulerContext> {
     public final ConcurrentHashMap<Integer, Context> threadToContextMap;
     private final ConcurrentHashMap<String, TableOCs> operationChains;//shared data structure.
     public final ConcurrentHashMap<Integer, Deque<OperationChain>> threadToOCs;
+    public ConcurrentHashMap<Integer, PathRecord> threadToPathRecord;
     private int maxLevel = 0;//just for layered scheduling
 
-    private final Graph graph;
     public int isLogging = LOGOption_no;
     public void reset(Context context) {
         //TODO: the short cut should be reset, but will take some time.
@@ -63,7 +64,6 @@ public class TaskPrecedenceGraph<Context extends OPSchedulerContext> {
         this.totalThreads = totalThreads;
         this.delta = delta;
         this.NUM_ITEMS = NUM_ITEMS;
-        this.graph = new Graph(this.NUM_ITEMS);
         // all parameters in this class should be thread safe.
         threadToContextMap = new ConcurrentHashMap<>();
         threadToOCs = new ConcurrentHashMap<>();
@@ -189,6 +189,9 @@ public class TaskPrecedenceGraph<Context extends OPSchedulerContext> {
                     }
                     context.operations.addAll(oc.getOperations());
                     context.totalOsToSchedule += oc.getOperations().size();
+                    if (this.isLogging == LOGOption_path) {
+                        this.threadToPathRecord.get(context.thisThreadId).addNode(oc.getTableName(), oc.getPrimaryKey(), oc.getOperations().size());
+                    }
                 }
             }
             ((OPSContext) context).buildBucketPerThread(context.operations, roots);
@@ -212,6 +215,9 @@ public class TaskPrecedenceGraph<Context extends OPSchedulerContext> {
                     context.totalOsToSchedule += oc.getOperations().size();
                     if (head.isRoot()) {
                         head.context.getListener().onRootStart(head);
+                    }
+                    if (this.isLogging == LOGOption_path) {
+                        this.threadToPathRecord.get(context.thisThreadId).addNode(oc.getTableName(), oc.getPrimaryKey(), oc.getOperations().size());
                     }
                 }
             }

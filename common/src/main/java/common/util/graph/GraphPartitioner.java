@@ -13,7 +13,7 @@ public class GraphPartitioner {
     private int[][] benefits;  // the benefit to move node_i to partition_j int[i][j] Vi -> Pj
     List<List<Integer>> partitions = new ArrayList<>();// Partition
     private int partitionCount;  // Partition count
-    private int max_itr = 1000;  // Max iteration count
+    private int max_itr = 100;  // Max iteration count
     public GraphPartitioner(int nodeSize, int[] nodeWeights, List<Edge> edges, int partitionCount) {
         this.nodeSize = nodeSize;
         this.edges = edges;
@@ -52,26 +52,26 @@ public class GraphPartitioner {
             averageWeight += nodeWeights[i];
         }
         averageWeight /= partitionCount;
-        while (true) {
-            boolean balanced = true;
-            for (int i = 0; i < partitionCount; i++) {
-                if (partitionWeights[i] > averageWeight) {
-                    balanced = false;
-                    int j = (i + 1) % partitionCount;
-                    while (partitionWeights[j] <= averageWeight) {
-                        j = (j + 1) % partitionCount;
-                    }
-                    int node = partitions.get(i).remove(partitions.get(i).size() - 1);
-                    partitions.get(j).add(node);
-                    partitionWeights[i] -= nodeWeights[node];
-                    partitionWeights[j] += nodeWeights[node];
-                    break;
-                }
-            }
-            if (balanced) {
-                break;
-            }
-        }
+//        while (true) {
+//            boolean balanced = true;
+//            for (int i = 0; i < partitionCount; i++) {
+//                if (partitionWeights[i] > averageWeight) {
+//                    balanced = false;
+//                    int j = (i + 1) % partitionCount;
+//                    while (partitionWeights[j] <= averageWeight) {
+//                        j = (j + 1) % partitionCount;
+//                    }
+//                    int node = partitions.get(i).remove(partitions.get(i).size() - 1);
+//                    partitions.get(j).add(node);
+//                    partitionWeights[i] -= nodeWeights[node];
+//                    partitionWeights[j] += nodeWeights[node];
+//                    break;
+//                }
+//            }
+//            if (balanced) {
+//                break;
+//            }
+//        }
         //calcWeight();
         calcBenefit();
     }
@@ -159,6 +159,9 @@ public class GraphPartitioner {
             }
         }
         return -1;
+    }
+    public List<List<Integer>> getPartitions() {
+        return partitions;
     }
 
 }

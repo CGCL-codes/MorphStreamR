@@ -181,7 +181,7 @@ public class OGBFSAScheduler extends AbstractOGBFSScheduler<OGSAContext> {
             if (bid == failedOp.bid) {
                 operation.stateTransition(MetaTypes.OperationStateType.ABORTED);
                 if (this.isLogging == LOGOption_path)
-                    this.threadToPathRecord.get(context.thisThreadId).addAbortBid(operation.bid);
+                    this.tpg.threadToPathRecord.get(context.thisThreadId).addAbortBid(operation.bid);
                 markAny = true;
             }
         }

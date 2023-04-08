@@ -12,7 +12,7 @@ public class GraphTest {
     @Test
     public void testPartition() {
         this.nodes = new Node[4];
-        Graph graph = new Graph(this.nodes.length);
+        Graph graph = new Graph(this.nodes.length, 2);
         for (int i = 0; i < this.nodes.length; i++) {
             graph.addNode(i, 4);
         }
@@ -24,5 +24,19 @@ public class GraphTest {
         List<List<Integer>> partitions = graphPartitioner.run();
         System.out.println(partitions);
         System.out.println("partitioning finished");
+        int[] nodeWeights = new int[4];
+        for (int i = 0; i < 4; i++) {
+            nodeWeights[i] = 4;
+        }
+        int[] ints = nodeWeights;
+        for (int i = 0; i < 4; i++) {
+            System.out.println(ints[i]);
+        }
+        for (int i = 0; i < 4; i++) {
+            nodeWeights[i] = 5;
+        }
+        for (int i = 0; i < 4; i++) {
+            System.out.println(ints[i]);
+        }
     }
 }

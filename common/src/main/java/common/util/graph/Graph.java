@@ -1,16 +1,17 @@
 package common.util.graph;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 public class Graph {
     private int nodeSize;
-    private List<Edge> edges = new ArrayList<>();
+    private Vector<Edge> edges = new Vector<>();
     private int[] nodeWeights;
-    private int[][] adjMatrix;
-    public Graph(int nodeSize) {
+    private GraphPartitioner graphPartitioner;
+    public Graph(int nodeSize, int partitionCount) {
         this.nodeSize = nodeSize;
         this.nodeWeights = new int[nodeSize];
+        this.graphPartitioner = new GraphPartitioner(nodeSize, nodeWeights, edges, partitionCount);
     }
 
     public List<Edge> getEdges() {
@@ -34,5 +35,14 @@ public class Graph {
 
     public int getNodeSize() {
         return nodeSize;
+    }
+    public void clean() {
+        edges.clear();
+    }
+    public void partition() {
+        graphPartitioner.run();
+    }
+    public List<List<Integer>> getPartitions() {
+        return graphPartitioner.getPartitions();
     }
 }

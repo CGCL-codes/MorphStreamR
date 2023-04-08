@@ -41,8 +41,6 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
     public final TaskPrecedenceGraph<Context> tpg; // TPG to be maintained in this global instance.
     public LoggingManager loggingManager; // Used by fault tolerance
     public int isLogging;// Used by fault tolerance
-    public ConcurrentHashMap<Integer, PathRecord> threadToPathRecord;
-
     public OPScheduler(int totalThreads, int NUM_ITEMS, int app) {
         delta = (int) Math.ceil(NUM_ITEMS / (double) totalThreads); // Check id generation in DateGenerator.
         this.tpg = new TaskPrecedenceGraph<>(totalThreads, delta, NUM_ITEMS, app);
@@ -59,7 +57,7 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
             isLogging = LOGOption_wal;
         } else if (loggingManager instanceof PathLoggingManager) {
             isLogging = LOGOption_path;
-            this.threadToPathRecord = ((PathLoggingManager) loggingManager).threadToPathRecord;
+            this.tpg.threadToPathRecord = ((PathLoggingManager) loggingManager).threadToPathRecord;
         } else {
             isLogging = LOGOption_no;
         }
@@ -219,12 +217,12 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
             }
             if (isLogging == LOGOption_path && !((Operation) operation).pKey.equals(preValues.GetPrimaryKey())) {
                 int id = getTaskId(((Operation) operation).pKey, delta);
-                this.threadToPathRecord.get(id).addDependencyEdge(operation.table_name,((Operation) operation).pKey, preValues.GetPrimaryKey(), operation.bid, true);
+                this.tpg.threadToPathRecord.get(id).addDependencyEdge(operation.table_name,((Operation) operation).pKey, preValues.GetPrimaryKey(), operation.bid, true);
             }
         } else {
             if (isLogging == LOGOption_path && !((Operation) operation).pKey.equals(preValues.GetPrimaryKey())) {
                 int id = getTaskId(((Operation) operation).pKey, delta);
-                this.threadToPathRecord.get(id).addDependencyEdge(operation.table_name, ((Operation) operation).pKey, preValues.GetPrimaryKey(), operation.bid, true);
+                this.tpg.threadToPathRecord.get(id).addDependencyEdge(operation.table_name, ((Operation) operation).pKey, preValues.GetPrimaryKey(), operation.bid, true);
             }
         }
     }

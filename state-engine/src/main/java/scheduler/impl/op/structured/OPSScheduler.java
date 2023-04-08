@@ -129,7 +129,7 @@ public class OPSScheduler<Context extends OPSContext> extends OPScheduler<Contex
             if (remove.isFailed && !remove.getOperationState().equals(MetaTypes.OperationStateType.ABORTED)) {
                 needAbortHandling = true;
                 if (isLogging == LOGOption_path)
-                    this.threadToPathRecord.get(context.thisThreadId).addAbortBid(remove.bid);
+                    this.tpg.threadToPathRecord.get(context.thisThreadId).addAbortBid(remove.bid);
             }
             NOTIFY(remove, context);
             MeasureTools.END_NOTIFY_TIME_MEASURE(threadId);

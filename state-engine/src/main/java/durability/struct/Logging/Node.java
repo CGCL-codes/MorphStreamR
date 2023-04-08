@@ -1,22 +1,41 @@
 package durability.struct.Logging;
+import common.util.graph.Edge;
+
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-public class DependencyEdges implements Serializable {
-    public ConcurrentHashMap<String, AtomicInteger> edgesWeights = new ConcurrentHashMap<>();//<to, weight>
+public class Node implements Serializable {
+    public AtomicBoolean isVisited = new AtomicBoolean(false);
+    public int from;
+    public int weight = 0;
+    public ConcurrentHashMap<String, Edge> edges = new ConcurrentHashMap<>();//<to, edges>
     public ConcurrentHashMap<String, Vector<DependencyResult>> dependencyEdges = new ConcurrentHashMap<>();//<to, DependencyResults>
+
+    public Node(String from) {
+        this.from = Integer.parseInt(from);
+    }
+
     public void addEdges(String to, long bid, Object result) {
-        this.edgesWeights.putIfAbsent(to, new AtomicInteger(0));
-        this.edgesWeights.get(to).getAndIncrement();
+        this.isVisited.compareAndSet(false, true);
+        this.edges.putIfAbsent(to, new Edge(from, Integer.parseInt(to), 0));
+        this.edges.get(to).addWeight();
         this.dependencyEdges.putIfAbsent(to, new Vector<>());
         this.dependencyEdges.get(to).add(new DependencyResult(bid, result));
     }
+    public void setNodeWeight(int weight) {
+        this.weight = weight;
+    }
     public void clean() {
-        this.edgesWeights.clear();
-        this.dependencyEdges.clear();
+        for (Edge edge : this.edges.values()) {
+            edge.clean();
+        }
+        for (Vector<DependencyResult> results : this.dependencyEdges.values()) {
+            results.clear();
+        }
+        this.isVisited.compareAndSet(true, false);
     }
 
     @Override
