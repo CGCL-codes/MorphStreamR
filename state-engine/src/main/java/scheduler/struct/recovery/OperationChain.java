@@ -7,7 +7,7 @@ import java.util.Vector;
 public class OperationChain implements Comparable<OperationChain>{
     private final String tableName;
     private final String primaryKey;
-    private final MyList<Operation> operations;
+    public final MyList<Operation> operations;
     private final Vector<OperationChain> dependentOCs = new Vector<>();
     public OperationChain(String tableName, String primaryKey) {
         this.tableName = tableName;

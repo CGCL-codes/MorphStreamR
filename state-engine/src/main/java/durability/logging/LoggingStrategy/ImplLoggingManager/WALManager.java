@@ -31,6 +31,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousFileChannel;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -135,6 +137,11 @@ public class WALManager implements LoggingManager {
 
     @Override
     public Object inspectDependencyView(long groupId, String table, String from, String to, long bid) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public HashMap<String, List<Integer>> inspectTaskPlacing(long groupId, int threadId) {
         throw new UnsupportedOperationException();
     }
 

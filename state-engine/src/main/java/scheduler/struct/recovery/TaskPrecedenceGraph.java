@@ -1,5 +1,6 @@
 package scheduler.struct.recovery;
 
+import durability.logging.LoggingEntry.PathRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scheduler.context.recovery.RSContext;
@@ -19,6 +20,8 @@ public class TaskPrecedenceGraph <Context extends RSContext>{
     public final ConcurrentHashMap<Integer, Context> threadToContextMap;
     private final ConcurrentHashMap<String, TableOCs> operationChains;//shared data structure.
     public final ConcurrentHashMap<Integer, Deque<OperationChain>> threadToOCs;//Exactly which OCs are executed by each thread.
+    public ConcurrentHashMap<Integer, PathRecord> threadToPathRecord;// Used by fault tolerance
+
     public ConcurrentHashMap<Integer, Task> idToTask;//Exactly which OCs are in one task.
     public TaskPrecedenceGraph(int totalThreads, int delta, int NUM_ITEMS, int app) {
         this.totalThreads = totalThreads;

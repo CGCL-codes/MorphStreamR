@@ -6,7 +6,6 @@ import common.io.ByteIO.DataInputView;
 import common.io.ByteIO.InputWithDecompression.NativeDataInputView;
 import common.io.ByteIO.InputWithDecompression.SnappyDataInputView;
 import common.util.graph.Graph;
-import common.util.graph.GraphPartitioner;
 import durability.ftmanager.FTManager;
 import durability.logging.LoggingEntry.PathRecord;
 import durability.logging.LoggingResource.ImplLoggingResources.DependencyMaintainResources;
@@ -20,7 +19,6 @@ import durability.snapshot.LoggingOptions;
 import durability.struct.Logging.LoggingEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scheduler.struct.op.TableOCs;
 import storage.table.RecordSchema;
 import utils.SOURCE_CONTROL;
 import utils.lib.ConcurrentHashMap;
@@ -32,6 +30,8 @@ import java.nio.channels.AsynchronousFileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -141,7 +141,12 @@ public class PathLoggingManager implements LoggingManager {
 
     @Override
     public Object inspectDependencyView(long groupId, String table, String from, String to, long bid) {
-        return this.historyViews.inspectDependencyView(table, from, to, bid);
+        return this.historyViews.inspectDependencyView(groupId, table, from, to, bid);
+    }
+
+    @Override
+    public HashMap<String, List<Integer>> inspectTaskPlacing(long groupId, int threadId) {
+        return this.historyViews.inspectTaskPlacing(groupId, threadId);
     }
 
     @Override

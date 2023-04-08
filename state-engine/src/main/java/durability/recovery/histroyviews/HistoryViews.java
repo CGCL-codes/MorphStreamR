@@ -1,9 +1,12 @@
 package durability.recovery.histroyviews;
+import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class HistoryViews {
+    public ConcurrentHashMap<Long, AllocationPlan> allocationPlans = new ConcurrentHashMap<>();//Group to allocationPlan
     public AbortViews abortViews = new AbortViews();
-    public ConcurrentHashMap<Long, DependencyViews> groupToDependencyView = new ConcurrentHashMap<>();
+    public ConcurrentHashMap<Long, DependencyViews> groupToDependencyView = new ConcurrentHashMap<>();//Group to DependencyView
     public void addAbortId(int threadId, long bid) {
         abortViews.addAbortId(threadId, bid);
     }
@@ -15,15 +18,19 @@ public class HistoryViews {
     public boolean inspectAbortView(long bid) {
         return abortViews.inspectView(bid);
     }
-    public Object inspectDependencyView(String table, String from, String to, long bid) {
-        long groupId = checkGroupId(bid);
+    public Object inspectDependencyView(long groupId, String table, String from, String to, long bid) {
         if (!groupToDependencyView.containsKey(groupId))
             return null;
         return groupToDependencyView.get(groupId).inspectView(table, from, to, bid);
     }
-    private long checkGroupId(long bid) {
+    public HashMap<String, List<Integer>> inspectTaskPlacing(long groupId, int threadId) {
+        if (!allocationPlans.containsKey(groupId))
+            return null;
+        return allocationPlans.get(groupId).getPlanByThreadId(threadId);
+    }
+    public long checkGroupId(long curId) {
         for (long groupId : this.groupToDependencyView.keySet()) {
-            if (groupId > bid) {
+            if (groupId >= curId) {
                 return groupId;
             }
         }

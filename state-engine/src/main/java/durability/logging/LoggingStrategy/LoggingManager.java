@@ -7,6 +7,8 @@ import durability.struct.Logging.LoggingEntry;
 import storage.table.RecordSchema;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public interface LoggingManager {
@@ -16,5 +18,6 @@ public interface LoggingManager {
     void syncRetrieveLogs(RedoLogResult redoLogResult) throws IOException, ExecutionException, InterruptedException;
     boolean inspectAbortView(long bid);
     Object inspectDependencyView(long groupId, String table, String from, String to, long bid);
+    HashMap<String, List<Integer>> inspectTaskPlacing(long groupId, int threadId);
     HistoryViews getHistoryViews();
 }

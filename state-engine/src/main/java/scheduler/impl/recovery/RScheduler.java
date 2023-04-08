@@ -1,6 +1,5 @@
 package scheduler.impl.recovery;
 
-import durability.logging.LoggingEntry.PathRecord;
 import durability.logging.LoggingStrategy.ImplLoggingManager.PathLoggingManager;
 import durability.logging.LoggingStrategy.ImplLoggingManager.WALManager;
 import durability.logging.LoggingStrategy.LoggingManager;
@@ -10,7 +9,11 @@ import scheduler.impl.IScheduler;
 import scheduler.struct.recovery.Operation;
 import scheduler.struct.recovery.OperationChain;
 import scheduler.struct.recovery.TaskPrecedenceGraph;
-import utils.lib.ConcurrentHashMap;
+import utils.SOURCE_CONTROL;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static utils.FaultToleranceConstants.*;
 
@@ -19,7 +22,6 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
     public final TaskPrecedenceGraph<Context> tpg;
     public int isLogging;
     public LoggingManager loggingManager;
-    public ConcurrentHashMap<Integer, PathRecord> threadToPathRecord;// Used by fault tolerance
 
     public RScheduler(int totalThreads, int NUM_ITEMS, int app) {
         this.delta = (int) Math.ceil(NUM_ITEMS / (double) totalThreads);
@@ -36,7 +38,7 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
             isLogging = LOGOption_wal;
         } else if (loggingManager instanceof PathLoggingManager) {
             isLogging = LOGOption_path;
-            this.threadToPathRecord = ((PathLoggingManager) loggingManager).threadToPathRecord;
+            this.tpg.threadToPathRecord = ((PathLoggingManager) loggingManager).threadToPathRecord;
         } else {
             isLogging = LOGOption_no;
         }
@@ -50,6 +52,10 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
 
     @Override
     public void TxnSubmitBegin(Context context) {
+        if (context.needCheckId) {
+            context.needCheckId = false;
+            context.groupId = this.loggingManager.getHistoryViews().checkGroupId(context.groupId);
+        }
         context.requests.clear();
     }
 
@@ -86,7 +92,7 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
             OperationChain curOC = tpg.addOperationToChain(set_op);
             set_op.setTxnOpId(txnOpId ++);
             if (request.condition_source != null)
-                inspectDependency(curOC, set_op, request.table_name, request.src_key, request.condition_sourceTable, request.condition_source);
+                inspectDependency(context.groupId, curOC, set_op, request.table_name, request.src_key, request.condition_sourceTable, request.condition_source);
         }
     }
 
@@ -97,33 +103,57 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
     }
 
     @Override
-    public void INITIALIZE(Context threadId) {
+    public void INITIALIZE(Context context) {
         //TODO:add task placing
-
+        HashMap<String, List<Integer>> plan = this.loggingManager.inspectTaskPlacing(context.groupId, context.thisThreadId);
+        if (plan == null) {
+            SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
+        } else {
+            for (Map.Entry<String, List<Integer>> entry : plan.entrySet()) {
+                String table = entry.getKey();
+                List<Integer> value = entry.getValue();
+                for (int partitionId : value) {
+                    OperationChain oc = tpg.getOperationChains().get(table).threadOCsMap.get(partitionId).holder_v1.get(String.valueOf(partitionId));
+                    context.allocatedTasks.add(oc);
+                }
+            }
+        }
     }
 
     @Override
-    public void PROCESS(Context threadId, long mark_ID) {
-
+    public void PROCESS(Context context, long mark_ID) {
+        OperationChain oc = context.ready_oc;
+        boolean continueFlag = true;
+        while (continueFlag && oc.operations.size() > 0){
+            Operation op = oc.operations.first();
+            if (op.pdCount.get() == 0) {
+                //TODO: execute operation
+            } else {
+                continueFlag = false;
+                context.wait_op = op;
+            }
+        }
     }
 
     @Override
     public void EXPLORE(Context context) {
-
+        context.next();
     }
 
     @Override
     public boolean FINISHED(Context context) {
-        return false;
+        return context.isFinished;
     }
 
     @Override
     public void RESET(Context context) {
-
+        context.needCheckId = true;
+        context.isFinished = false;
     }
 
     @Override
     public void start_evaluation(Context context, long mark_ID, int num_events) {
+        context.groupId = mark_ID;
         INITIALIZE(context);
         do {
             EXPLORE(context);
@@ -137,19 +167,19 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
         int threadId =  Integer.parseInt(key) / delta;
         return tpg.threadToContextMap.get(threadId);
     }
-    private void inspectDependency(OperationChain curOC, Operation op, String table_name,
+    private void inspectDependency(long groupId, OperationChain curOC, Operation op, String table_name,
                                    String key, String[] condition_sourceTable, String[] condition_source){
         if (condition_source != null) {
             for (int index = 0; index < condition_source.length; index++) {
                 if (table_name.equals(condition_sourceTable[index]) && key.equals(condition_source[index]))
                     continue;
-                Object history = this.loggingManager.inspectDependencyView(op.bid, table_name, key,condition_source[index], op.bid);
+                Object history = this.loggingManager.inspectDependencyView(groupId, table_name, key,condition_source[index], op.bid);
                 if (history != null) {
                     op.historyView = history;
                 } else {
                     OperationChain OCFromConditionSource = tpg.getOC(condition_sourceTable[index], condition_source[index]);
                     //DFS-like
-                    op.incrementPd();
+                    op.incrementPd(OCFromConditionSource);
                     //Add the proxy operations
                     OCFromConditionSource.addOperation(op);
                     //Add dependent
