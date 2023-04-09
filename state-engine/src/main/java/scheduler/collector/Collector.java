@@ -58,7 +58,7 @@ public class Collector {
      * Configure the bottom line for triggering scheduler switching
      */
     public void setBottomLine(String bottomLine){
-        String b_ls[]=bottomLine.split(",");
+        String b_ls[] = bottomLine.split(",");
         this.B_TD = Double.parseDouble(b_ls[0]);
         this.B_LD = Double.parseDouble(b_ls[1]);
         this.B_PD = Double.parseDouble(b_ls[2]);
@@ -71,7 +71,7 @@ public class Collector {
      */
     public void setWorkloadConfig(String config){
         isRuntime=false;
-        String configs[]=config.split(";");
+        String configs[] = config.split(";");
         for (String c:configs){
            workloadConfig.add(c.split(","));
         }
@@ -112,7 +112,7 @@ public class Collector {
         double PD = Double.parseDouble(para[2]);
         double VDD = Double.parseDouble(para[3]);
         double R_of_A = Double.parseDouble(para[4]);
-        boolean isCD = false,isCC=false;
+        boolean isCD = false, isCC = false;
         if(para[5].equals("1")){
             isCD=true;
         }

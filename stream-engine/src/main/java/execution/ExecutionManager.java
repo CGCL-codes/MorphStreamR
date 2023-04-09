@@ -120,6 +120,9 @@ public class ExecutionManager {
                 } else {
                     TxnManager.CreateScheduler(schedulerType, totalThread, numberOfStates, app);
                 }
+                if (conf.getBoolean("isRecovery")) {
+                    TxnManager.initRecoveryScheduler(conf.getInt("FTOption"),totalThread, numberOfStates, app);
+                }
             }
         }
         executorThread thread = null;

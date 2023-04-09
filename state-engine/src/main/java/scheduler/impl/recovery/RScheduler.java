@@ -6,15 +6,22 @@ import durability.logging.LoggingStrategy.LoggingManager;
 import scheduler.Request;
 import scheduler.context.recovery.RSContext;
 import scheduler.impl.IScheduler;
+import scheduler.struct.AbstractOperation;
 import scheduler.struct.recovery.Operation;
 import scheduler.struct.recovery.OperationChain;
 import scheduler.struct.recovery.TaskPrecedenceGraph;
+import storage.SchemaRecord;
+import storage.datatype.DataBox;
+import transaction.function.DEC;
+import transaction.function.INC;
+import utils.AppConfig;
 import utils.SOURCE_CONTROL;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static content.common.CommonMetaTypes.AccessType.*;
 import static utils.FaultToleranceConstants.*;
 
 public class RScheduler<Context extends RSContext> implements IScheduler<Context> {
@@ -127,7 +134,7 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
         while (continueFlag && oc.operations.size() > 0){
             Operation op = oc.operations.first();
             if (op.pdCount.get() == 0) {
-                //TODO: execute operation
+                execute(op, mark_ID, false);
             } else {
                 continueFlag = false;
                 context.wait_op = op;
@@ -149,6 +156,7 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
     public void RESET(Context context) {
         context.needCheckId = true;
         context.isFinished = false;
+        SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
     }
 
     @Override
@@ -187,5 +195,84 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
                 }
             }
         }
+    }
+    public void execute(Operation operation, long mark_ID, boolean clean) {
+        if (operation.accessType.equals(READ_WRITE_COND_READ)) {
+            Transfer_Fun(operation, mark_ID, clean);
+            // check whether it needs to return a read results of the operation
+            if (operation.record_ref != null) {
+                operation.record_ref.setRecord(operation.d_record.content_.readPreValues(operation.bid));//read the resulting tuple.
+            }
+            // operation success check, number of operation succeeded does not increase after execution
+
+        } else if (operation.accessType.equals(READ_WRITE_COND)) {
+            if (this.tpg.getApp() == 1) {//SL
+                Transfer_Fun(operation, mark_ID, clean);
+            } else {//OB
+                AppConfig.randomDelay();
+                List<DataBox> d_record = operation.condition_records[0].content_.ReadAccess(operation.bid, mark_ID, clean, operation.accessType).getValues();
+                long askPrice = d_record.get(1).getLong();//price
+                long left_qty = d_record.get(2).getLong();//available qty;
+                long bidPrice = operation.condition.arg1;
+                long bid_qty = operation.condition.arg2;
+                if (bidPrice > askPrice || bid_qty < left_qty) {
+                    d_record.get(2).setLong(left_qty - operation.function.delta_long);//new quantity.
+                    operation.success[0]++;
+                }
+            }
+
+        } else if (operation.accessType.equals(READ_WRITE)) {
+            if (this.tpg.getApp() == 1) {
+                Depo_Fun(operation, mark_ID, clean);
+            } else {
+                AppConfig.randomDelay();
+                SchemaRecord srcRecord = operation.s_record.content_.ReadAccess(operation.bid,mark_ID,clean,operation.accessType);
+                List<DataBox> values = srcRecord.getValues();
+                if (operation.function instanceof INC) {
+                    values.get(2).setLong(values.get(2).getLong() + operation.function.delta_long);
+                } else
+                    throw new UnsupportedOperationException();
+            }
+        }
+    }
+    protected void Transfer_Fun(AbstractOperation operation, long previous_mark_ID, boolean clean) {
+        Operation op = (Operation) operation;
+        final long sourceAccountBalance;
+        if (op.historyView != null) {
+            SchemaRecord preValues = operation.condition_records[0].content_.readPreValues(operation.bid);
+            sourceAccountBalance = preValues.getValues().get(1).getLong();
+        } else {
+            sourceAccountBalance = (long) op.historyView;
+        }
+        // apply function
+        AppConfig.randomDelay();
+
+        if (sourceAccountBalance > operation.condition.arg1
+                && sourceAccountBalance > operation.condition.arg2) {
+            // read
+            SchemaRecord srcRecord = operation.s_record.content_.readPreValues(operation.bid);
+            SchemaRecord tempo_record = new SchemaRecord(srcRecord);//tempo record
+
+            if (operation.function instanceof INC) {
+                tempo_record.getValues().get(1).incLong(sourceAccountBalance, operation.function.delta_long);//compute.
+            } else if (operation.function instanceof DEC) {
+                tempo_record.getValues().get(1).decLong(sourceAccountBalance, operation.function.delta_long);//compute.
+            } else
+                throw new UnsupportedOperationException();
+            operation.d_record.content_.updateMultiValues(operation.bid, previous_mark_ID, clean, tempo_record);//it may reduce NUMA-traffic.
+            synchronized (operation.success) {
+                operation.success[0]++;
+            }
+        }
+    }
+    protected void Depo_Fun(AbstractOperation operation, long mark_ID, boolean clean) {
+        SchemaRecord srcRecord = operation.s_record.content_.readPreValues(operation.bid);
+        List<DataBox> values = srcRecord.getValues();
+        //apply function to modify..
+        AppConfig.randomDelay();
+        SchemaRecord tempo_record;
+        tempo_record = new SchemaRecord(values);//tempo record
+        tempo_record.getValues().get(1).incLong(operation.function.delta_long);//compute.
+        operation.s_record.content_.updateMultiValues(operation.bid, mark_ID, clean, tempo_record);//it may reduce NUMA-traffic.
     }
 }

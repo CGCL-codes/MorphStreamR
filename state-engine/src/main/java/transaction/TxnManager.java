@@ -19,6 +19,7 @@ import scheduler.impl.op.structured.OPBFSAScheduler;
 import scheduler.impl.op.structured.OPBFSScheduler;
 import scheduler.impl.op.structured.OPDFSAScheduler;
 import scheduler.impl.op.structured.OPDFSScheduler;
+import scheduler.impl.recovery.RScheduler;
 
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,6 +32,7 @@ import static common.CONTROL.enable_log;
 public abstract class TxnManager implements ITxnManager {
     private static final Logger log = LoggerFactory.getLogger(TxnManager.class);
     protected static IScheduler scheduler; // TODO: this is a bad encapsulation, try to make it non static
+    protected static IScheduler recoveryScheduler;
 
 
     /**
@@ -124,6 +126,14 @@ public abstract class TxnManager implements ITxnManager {
             scheduler = schedulerPool.get(schedulerType);
             log.info("Current Scheduler is "+schedulerType + " markId: " +markId );
         }
+    }
+    public static void initRecoveryScheduler(int FTOption, int threadCount, int numberOfStates, int app) {
+        recoveryScheduler = new RScheduler(threadCount, numberOfStates, app);
+        recoveryScheduler.initTPG(0);
+        if (loggingManager != null) {
+            recoveryScheduler.setLoggingManager(loggingManager);
+        }
+        scheduler = recoveryScheduler;
     }
 
     /**

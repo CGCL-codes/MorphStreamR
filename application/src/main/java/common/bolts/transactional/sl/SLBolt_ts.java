@@ -115,7 +115,8 @@ public class SLBolt_ts extends SLBolt {
             }
             MeasureTools.END_TOTAL_TIME_MEASURE_TS(thread_Id, num_events);
             if (this.sink.stopRecovery) {
-                Metrics.RecoveryPerformance.stopRecovery[thread_Id] = true;
+                Metrics.RecoveryPerformance.stopRecovery[thread_Id] = true;//Change here is to measure time for entire epoch.
+                this.transactionManager.switch_scheduler(thread_Id, in.getBID());
             }
         } else {
             execute_ts_normal(in);

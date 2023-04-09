@@ -819,10 +819,10 @@ public class MeasureTools {
                         e.printStackTrace();
                     }
                 }
-                LocalDataOutputStream outputStream = new LocalDataOutputStream(file);
-                DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
-                dataOutputStream.writeLong(RuntimePerformance.lastTasks[i]);
-                dataOutputStream.close();
+                BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()));
+                fileWriter.write(String.valueOf(RuntimePerformance.lastTasks[i]));
+                fileWriter.flush();
+                fileWriter.close();
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

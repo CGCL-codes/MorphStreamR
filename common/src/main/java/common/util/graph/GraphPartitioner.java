@@ -45,7 +45,7 @@ public class GraphPartitioner {
     private void initPartitions() {
         //Partition G into a set of sub-graphs {G1,G2,. . . ,Gn} with about the same weight according to the key range
         //Workload-aware graph partitioning
-        weightPartition();
+        greedyPartition();
         //calcWeight();
         calcBenefit();
     }

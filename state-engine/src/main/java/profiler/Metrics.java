@@ -610,7 +610,7 @@ public class Metrics {
                 SnapshotSize[i] = new DescriptiveStatistics();
                 LogSize[i] = new DescriptiveStatistics();
                 count[i] = 0;
-                lastTasks[i] = 0;
+                lastTasks[i] = -1;
             }
         }
     }

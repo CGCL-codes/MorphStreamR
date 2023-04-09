@@ -9,10 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.lib.ConcurrentHashMap;
 
-import java.io.DataInputStream;
-import java.io.EOFException;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,9 +52,9 @@ public class RecoveryHelperProvider {
     public static void getLastTask(long[] lastTasks, String outputStoreRootPath) throws IOException {
         for (int i = 0; i < lastTasks.length; i ++) {
             File file = new File(outputStoreRootPath + OsUtils.OS_wrapper(i + ".output"));
-            LocalDataInputStream inputStream = new LocalDataInputStream(file);
-            DataInputStream dataInputStream = new DataInputStream(inputStream);
-            lastTasks[i] = dataInputStream.readLong();
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+            String line = bufferedReader.readLine();
+            lastTasks[i] = Long.parseLong(line);
         }
     }
 }

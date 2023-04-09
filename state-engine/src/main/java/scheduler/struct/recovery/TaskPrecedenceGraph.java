@@ -120,4 +120,8 @@ public class TaskPrecedenceGraph <Context extends RSContext>{
         retOc.addOperation(operation);
         return retOc;
     }
+
+    public int getApp() {
+        return app;
+    }
 }

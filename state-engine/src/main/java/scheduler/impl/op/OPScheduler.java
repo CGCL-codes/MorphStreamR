@@ -215,15 +215,10 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
             synchronized (operation.success) {
                 operation.success[0]++;
             }
-            if (isLogging == LOGOption_path && !((Operation) operation).pKey.equals(preValues.GetPrimaryKey())) {
-                int id = getTaskId(((Operation) operation).pKey, delta);
-                this.tpg.threadToPathRecord.get(id).addDependencyEdge(operation.table_name,((Operation) operation).pKey, preValues.GetPrimaryKey(), operation.bid, true);
-            }
-        } else {
-            if (isLogging == LOGOption_path && !((Operation) operation).pKey.equals(preValues.GetPrimaryKey())) {
-                int id = getTaskId(((Operation) operation).pKey, delta);
-                this.tpg.threadToPathRecord.get(id).addDependencyEdge(operation.table_name, ((Operation) operation).pKey, preValues.GetPrimaryKey(), operation.bid, true);
-            }
+        }
+        if (isLogging == LOGOption_path && !((Operation) operation).pKey.equals(preValues.GetPrimaryKey())) {
+            int id = getTaskId(((Operation) operation).pKey, delta);
+            this.tpg.threadToPathRecord.get(id).addDependencyEdge(operation.table_name,((Operation) operation).pKey, preValues.GetPrimaryKey(), operation.bid, sourceAccountBalance);
         }
     }
 

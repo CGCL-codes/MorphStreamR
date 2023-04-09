@@ -140,15 +140,10 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
             synchronized (operation.success) {
                 operation.success[0]++;
             }
-            if (isLogging == LOGOption_path && !operation.pKey.equals(preValues.GetPrimaryKey())) {
-                int id = getTaskId(operation.pKey, delta);
-                this.tpg.threadToPathRecord.get(id).addDependencyEdge(operation.table_name, operation.pKey, preValues.GetPrimaryKey(), operation.bid, true);
-            }
-        } else {
-            if (isLogging == LOGOption_path && !operation.pKey.equals(preValues.GetPrimaryKey())) {
-                int id = getTaskId(operation.pKey, delta);
-                this.tpg.threadToPathRecord.get(id).addDependencyEdge(operation.table_name, operation.pKey, preValues.GetPrimaryKey(), operation.bid, true);
-            }
+        }
+        if (isLogging == LOGOption_path && !operation.pKey.equals(preValues.GetPrimaryKey())) {
+            int id = getTaskId(operation.pKey, delta);
+            this.tpg.threadToPathRecord.get(id).addDependencyEdge(operation.table_name, operation.pKey, preValues.GetPrimaryKey(), operation.bid, sourceAccountBalance);
         }
     }
 

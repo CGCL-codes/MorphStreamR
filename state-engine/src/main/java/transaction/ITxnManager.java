@@ -119,6 +119,8 @@ public interface ITxnManager {
         OP_BFS_A,
         OP_DFS,
         OP_DFS_A,
-        TStream // original tstream
-        }
+        TStream , // original tstream
+        Recovery,
+    }
+    void switch_scheduler(int thread_Id, long mark_ID);
 }
