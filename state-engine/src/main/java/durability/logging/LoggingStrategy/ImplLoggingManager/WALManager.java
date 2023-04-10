@@ -132,7 +132,7 @@ public class WALManager implements LoggingManager {
 
     @Override
     public boolean inspectAbortView(long bid) {
-        throw new UnsupportedOperationException();
+        return false;
     }
 
     @Override

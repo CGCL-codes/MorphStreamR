@@ -84,78 +84,26 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
                     isRecovery = false;
                     return;
                 }
-                if (ftOption == FTOption_ISC || ftOption == FTOption_WSC) {
+                if (ftOption == FTOption_ISC || ftOption == FTOption_WSC || ftOption == FTOption_PATH) {
                     input_store(counter);
                 }
             }
-            if (counter < num_events_per_thread) {
-                Object event;
-                if (recoveryInput.size() != 0) {
-                    event = recoveryInput.poll();
-                } else {
-                    event = myevents[counter];
-                }
-                long bid = mybids[counter];
-                if (CONTROL.enable_latency_measurement){
-                    long time;
-                    if (arrivalControl) {
-                        time = this.systemStartTime + ((TxnEvent) event).getTimestamp() - remainTime;
-                    } else {
-                        time = System.nanoTime();
-                    }
-                    generalMsg = new GeneralMsg(DEFAULT_STREAM_ID, event, time);
-                } else {
-                    generalMsg = new GeneralMsg(DEFAULT_STREAM_ID, event);
-                }
-
-                tuple = new Tuple(bid, this.taskId, context, generalMsg);
-                bolt.execute(tuple);  // public Tuple(long bid, int sourceId, TopologyContext context, Message message)
-                counter ++;
-
-                if (ccOption == CCOption_TStream || ccOption == CCOption_SStore) {// This is only required by T-Stream.
-                    if (model_switch(counter)) {
-                        if (ftOption == FTOption_ISC && snapshot(counter)) {
-                            inputStoreCurrentPath = inputStoreRootPath + OsUtils.OS_wrapper(Integer.toString(counter));
-                            marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration, "snapshot", counter));
-                            if (this.taskId == 0) {
-                                this.ftManager.spoutRegister(counter, inputStoreCurrentPath);
-                            }
-                        } else if (ftOption == FTOption_WSC || ftOption == FTOption_PATH) {
-                            if (snapshot(counter)) {
-                                inputStoreCurrentPath = inputStoreRootPath + OsUtils.OS_wrapper(Integer.toString(counter));
-                                marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration, "commit_snapshot", counter));
-                                if (this.taskId == 0) {
-                                    this.ftManager.spoutRegister(counter, inputStoreCurrentPath);
-                                }
-                            } else {
-                                marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration, "commit", counter));
-                            }
-                            if (this.taskId == 0) {
-                                this.loggingManager.spoutRegister(counter, "");
-                            }
-                        } else {
-                            marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration));
-                        }
-                        bolt.execute(marker);
-                        if ((ftOption == FTOption_ISC || ftOption == FTOption_WSC || ftOption == FTOption_PATH) && counter != the_end && Metrics.RecoveryPerformance.stopRecovery[this.taskId]) {
-                            input_store(counter);
-                        }
-                    }
-                }
-                if (counter == the_end) {
-//                    if (ccOption == CCOption_SStore)
-//                        MeasureTools.END_TOTAL_TIME_MEASURE(taskId);//otherwise deadlock.
-                    SOURCE_CONTROL.getInstance().oneThreadCompleted(taskId); // deregister all barriers
-                    SOURCE_CONTROL.getInstance().finalBarrier(taskId);//sync for all threads to come to this line.
-                    if (taskId == 0)
-                        sink.end(global_cnt);
-                }
+            if (ftOption == FTOption_ISC) {
+                nextTuple_ISC();
+            } else if (ftOption == FTOption_WSC) {
+                nextTuple_WSC();
+            } else if (ftOption == FTOption_PATH) {
+                nextTuple_PATH();
+            } else {
+                nextTuple_Native();
             }
-        } catch (DatabaseException | BrokenBarrierException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (ExecutionException e) {
+            if (counter == the_end) {
+                SOURCE_CONTROL.getInstance().oneThreadCompleted(taskId); // deregister all barriers
+                SOURCE_CONTROL.getInstance().finalBarrier(taskId);//sync for all threads to come to this line.
+                if (taskId == 0)
+                    sink.end(global_cnt);
+            }
+        } catch (IOException | ExecutionException e) {
             throw new RuntimeException(e);
         }
     }
@@ -311,6 +259,217 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
         } else {
             MeasureTools.END_RELOAD_INPUT_MEASURE(this.taskId);
             return false;
+        }
+    }
+    private void nextTuple_Native() {
+        try {
+            if (counter < num_events_per_thread) {
+                Object event;
+                if (recoveryInput.size() != 0) {
+                    event = recoveryInput.poll();
+                } else {
+                    event = myevents[counter];
+                }
+                long bid = mybids[counter];
+                if (CONTROL.enable_latency_measurement){
+                    long time;
+                    if (arrivalControl) {
+                        time = this.systemStartTime + ((TxnEvent) event).getTimestamp() - remainTime;
+                    } else {
+                        time = System.nanoTime();
+                    }
+                    generalMsg = new GeneralMsg(DEFAULT_STREAM_ID, event, time);
+                } else {
+                    generalMsg = new GeneralMsg(DEFAULT_STREAM_ID, event);
+                }
+
+                tuple = new Tuple(bid, this.taskId, context, generalMsg);
+                bolt.execute(tuple);  // public Tuple(long bid, int sourceId, TopologyContext context, Message message)
+                counter ++;
+
+                if (ccOption == CCOption_TStream || ccOption == CCOption_SStore) {// This is only required by T-Stream.
+                    if (model_switch(counter)) {
+                        marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration));
+                        bolt.execute(marker);
+                    }
+                }
+            }
+        } catch (DatabaseException | BrokenBarrierException e) {
+            e.printStackTrace();
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    private void nextTuple_ISC() {
+        try {
+            if (counter < num_events_per_thread) {
+                Object event;
+                if (recoveryInput.size() != 0) {
+                    event = recoveryInput.poll();
+                } else {
+                    event = myevents[counter];
+                }
+                long bid = mybids[counter];
+                if (CONTROL.enable_latency_measurement){
+                    long time;
+                    if (arrivalControl) {
+                        time = this.systemStartTime + ((TxnEvent) event).getTimestamp() - remainTime;
+                    } else {
+                        time = System.nanoTime();
+                    }
+                    generalMsg = new GeneralMsg(DEFAULT_STREAM_ID, event, time);
+                } else {
+                    generalMsg = new GeneralMsg(DEFAULT_STREAM_ID, event);
+                }
+
+                tuple = new Tuple(bid, this.taskId, context, generalMsg);
+                bolt.execute(tuple);
+                counter ++;
+
+                if (ccOption == CCOption_TStream || ccOption == CCOption_SStore) {// This is only required by T-Stream.
+                    if (model_switch(counter)) {
+                        inputStoreCurrentPath = inputStoreRootPath + OsUtils.OS_wrapper(Integer.toString(counter));
+                        marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration, "snapshot", counter));
+                        if (this.taskId == 0) {
+                            this.ftManager.spoutRegister(counter, inputStoreCurrentPath);
+                        }
+                        bolt.execute(marker);
+                        if (counter != the_end && Metrics.RecoveryPerformance.stopRecovery[this.taskId]) {
+                            input_store(counter);
+                        }
+                    }
+                }
+            }
+        } catch (DatabaseException | BrokenBarrierException e) {
+            e.printStackTrace();
+        } catch (IOException | InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    private void nextTuple_WSC() throws InterruptedException{
+        try {
+            if (counter < num_events_per_thread) {
+                Object event;
+                if (recoveryInput.size() != 0) {
+                    event = recoveryInput.poll();
+                } else {
+                    event = myevents[counter];
+                }
+                long bid = mybids[counter];
+                if (CONTROL.enable_latency_measurement){
+                    long time;
+                    if (arrivalControl) {
+                        time = this.systemStartTime + ((TxnEvent) event).getTimestamp() - remainTime;
+                    } else {
+                        time = System.nanoTime();
+                    }
+                    generalMsg = new GeneralMsg(DEFAULT_STREAM_ID, event, time);
+                } else {
+                    generalMsg = new GeneralMsg(DEFAULT_STREAM_ID, event);
+                }
+
+                tuple = new Tuple(bid, this.taskId, context, generalMsg);
+                bolt.execute(tuple);  // public Tuple(long bid, int sourceId, TopologyContext context, Message message)
+                counter ++;
+
+                if (ccOption == CCOption_TStream || ccOption == CCOption_SStore) {// This is only required by T-Stream.
+                    if (model_switch(counter)) {
+                        if (snapshot(counter)) {
+                            inputStoreCurrentPath = inputStoreRootPath + OsUtils.OS_wrapper(Integer.toString(counter));
+                            marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration, "commit_snapshot", counter));
+                            if (this.taskId == 0) {
+                                this.ftManager.spoutRegister(counter, inputStoreCurrentPath);
+                            }
+                        } else {
+                            marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration, "commit", counter));
+                        }
+                        if (this.taskId == 0) {
+                            this.loggingManager.spoutRegister(counter, "");
+                        }
+                        bolt.execute(marker);
+                        if ((ftOption == FTOption_ISC || ftOption == FTOption_WSC || ftOption == FTOption_PATH) && counter != the_end && Metrics.RecoveryPerformance.stopRecovery[this.taskId]) {
+                            input_store(counter);
+                        }
+                    }
+                }
+            }
+        } catch (DatabaseException | BrokenBarrierException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    private void nextTuple_PATH() throws InterruptedException {
+        try {
+            if (counter < num_events_per_thread) {
+                Object event;
+                if (recoveryInput.size() != 0) {
+                    long bid = mybids[counter];
+                    if (!this.db.getLoggingManager().inspectAbortView(bid)) {
+                        event = recoveryInput.poll();
+                        if (CONTROL.enable_latency_measurement){
+                            long time;
+                            if (arrivalControl) {
+                                time = this.systemStartTime + ((TxnEvent) event).getTimestamp() - remainTime;
+                            } else {
+                                time = System.nanoTime();
+                            }
+                            generalMsg = new GeneralMsg(DEFAULT_STREAM_ID, event, time);
+                        } else {
+                            generalMsg = new GeneralMsg(DEFAULT_STREAM_ID, event);
+                        }
+
+                        tuple = new Tuple(bid, this.taskId, context, generalMsg);
+                        bolt.execute(tuple);
+                    }
+                } else {
+                    event = myevents[counter];
+                    long bid = mybids[counter];
+                    if (CONTROL.enable_latency_measurement){
+                        long time;
+                        if (arrivalControl) {
+                            time = this.systemStartTime + ((TxnEvent) event).getTimestamp() - remainTime;
+                        } else {
+                            time = System.nanoTime();
+                        }
+                        generalMsg = new GeneralMsg(DEFAULT_STREAM_ID, event, time);
+                    } else {
+                        generalMsg = new GeneralMsg(DEFAULT_STREAM_ID, event);
+                    }
+
+                    tuple = new Tuple(bid, this.taskId, context, generalMsg);
+                    bolt.execute(tuple);  // public Tuple(long bid, int sourceId, TopologyContext context, Message message)
+                }
+                counter ++;
+                if (ccOption == CCOption_TStream || ccOption == CCOption_SStore) {// This is only required by T-Stream.
+                    if (model_switch(counter)) {
+                        if (snapshot(counter)) {
+                            inputStoreCurrentPath = inputStoreRootPath + OsUtils.OS_wrapper(Integer.toString(counter));
+                            marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration, "commit_snapshot_early", counter));
+                            if (this.taskId == 0) {
+                                this.ftManager.spoutRegister(counter, inputStoreCurrentPath);
+                            }
+                        } else {
+                            marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration, "commit_early", counter));
+                        }
+                        if (this.taskId == 0) {
+                            this.loggingManager.spoutRegister(counter, "");
+                        }
+                        bolt.execute(marker);
+                        if ((ftOption == FTOption_ISC || ftOption == FTOption_WSC || ftOption == FTOption_PATH) && counter != the_end && Metrics.RecoveryPerformance.stopRecovery[this.taskId]) {
+                            input_store(counter);
+                        }
+                    }
+                }
+            }
+        } catch (DatabaseException | BrokenBarrierException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
         }
     }
 }

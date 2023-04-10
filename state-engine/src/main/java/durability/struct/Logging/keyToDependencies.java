@@ -20,12 +20,12 @@ public class keyToDependencies implements Serializable {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, Node> ds : holder.entrySet()) {
-            sb.append(ds.getKey());
-            sb.append(":");
-            if (!ds.getValue().isVisited.get())
-                continue;
-            sb.append(ds.getValue().toString());
-            sb.append(";");
+            if (ds.getValue().isVisited.get()) {
+                sb.append(ds.getKey());
+                sb.append(":");
+                sb.append(ds.getValue().toString());
+                sb.append(";");
+            }
         }
         return sb.toString();
     }

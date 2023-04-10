@@ -1,7 +1,6 @@
 package scheduler.impl.og;
 
 
-import durability.logging.LoggingEntry.PathRecord;
 import durability.logging.LoggingStrategy.ImplLoggingManager.PathLoggingManager;
 import durability.logging.LoggingStrategy.ImplLoggingManager.WALManager;
 import durability.logging.LoggingStrategy.LoggingManager;
@@ -27,7 +26,6 @@ import transaction.function.SUM;
 import transaction.impl.ordered.MyList;
 import utils.AppConfig;
 import utils.SOURCE_CONTROL;
-import utils.lib.ConcurrentHashMap;
 
 import java.util.ArrayList;
 import java.util.HashSet;

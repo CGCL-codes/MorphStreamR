@@ -11,8 +11,7 @@ public class HistoryViews {
         abortViews.addAbortId(threadId, bid);
     }
     public void addDependencies(long groupId, String table, String from, String to, long bid, Object v) {
-        if (!groupToDependencyView.containsKey(groupId))
-            groupToDependencyView.put(groupId, new DependencyViews());
+        groupToDependencyView.putIfAbsent(groupId, new DependencyViews());
         groupToDependencyView.get(groupId).addDependencies(table, from, to, bid, v);
     }
     public boolean inspectAbortView(long bid) {
@@ -27,6 +26,9 @@ public class HistoryViews {
         if (!allocationPlans.containsKey(groupId))
             return null;
         return allocationPlans.get(groupId).getPlanByThreadId(threadId);
+    }
+    public boolean canInspectTaskPlacing(long groupId) {
+        return allocationPlans.containsKey(groupId);
     }
     public long checkGroupId(long curId) {
         for (long groupId : this.groupToDependencyView.keySet()) {

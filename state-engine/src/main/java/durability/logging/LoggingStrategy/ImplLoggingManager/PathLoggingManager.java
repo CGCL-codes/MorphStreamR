@@ -83,7 +83,7 @@ public class PathLoggingManager implements LoggingManager {
 
     @Override
     public void commitLog(long groupId, int partitionId, FTManager ftManager) throws IOException {
-        graphPartition(partitionId);
+        graphPartition(partitionId, 100);
         NIOPathStreamFactory nioPathStreamFactory = new NIOPathStreamFactory(this.loggingPath);
         DependencyMaintainResources dependencyMaintainResources = syncPrepareResource(partitionId);
         AsynchronousFileChannel afc = nioPathStreamFactory.createLoggingStream();
@@ -119,18 +119,18 @@ public class PathLoggingManager implements LoggingManager {
                 String tableName = dependency[0];
                 for (int k = 1; k < dependency.length; k++) {
                     String[] kp = dependency[k].split(":");
-                    String key = kp[0];
+                    String from = kp[0];
                     for (int l = 1; l < kp.length; l++) {
                         String[] pr = kp[l].split(",");
-                        String p = pr[0];
+                        String to = pr[0];
                         for (int m = 1; m < pr.length; m++) {
                             String[] kv = pr[m].split("/");
-                            this.historyViews.addDependencies(redoLogResult.groupIds.get(i), tableName, key, p, Long.parseLong(kv[0]), kv[1]);
+                            this.historyViews.addDependencies(redoLogResult.groupIds.get(i), tableName, from, to, Long.parseLong(kv[0]), kv[1]);
                         }
                     }
                 }
             }
-            LOG.info("Finish construct the history views");
+            LOG.info("Finish construct the history views for groupId: " + redoLogResult.groupIds.get(i) + " threadId: " + redoLogResult.threadId);
         }
     }
 
@@ -146,7 +146,16 @@ public class PathLoggingManager implements LoggingManager {
 
     @Override
     public HashMap<String, List<Integer>> inspectTaskPlacing(long groupId, int threadId) {
-        return this.historyViews.inspectTaskPlacing(groupId, threadId);
+        if (historyViews.canInspectTaskPlacing(groupId)) {
+            return this.historyViews.inspectTaskPlacing(groupId, threadId);
+        } else {
+            graphPartition(threadId, 0);
+            HashMap<String, List<Integer>> result = new HashMap<>();
+            for (Map.Entry<String, Graph> entry : graphs.entrySet()) {
+                result.put(entry.getKey(), entry.getValue().getPartitions().get(threadId));
+            }
+            return result;
+        }
     }
 
     @Override
@@ -158,14 +167,14 @@ public class PathLoggingManager implements LoggingManager {
         return LOG;
     }
 
-    private void graphPartition(int partitionId) {
+    private void graphPartition(int partitionId, int max_itr) {
         for (Map.Entry<String, Graph> entry : graphs.entrySet()) {
             this.threadToPathRecord.get(partitionId).dependencyToGraph(entry.getValue(), entry.getKey());
         }
         SOURCE_CONTROL.getInstance().waitForOtherThreads(partitionId);
         if (partitionId == 0) {
             for (Graph graph : graphs.values()) {
-                graph.partition();
+                graph.partition(max_itr);
             }
         }
         SOURCE_CONTROL.getInstance().waitForOtherThreads(partitionId);

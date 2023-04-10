@@ -18,4 +18,8 @@ public class IOUtils {
         Scanner s = new Scanner(is, charsetName).useDelimiter("\\A");
         return s.hasNext() ? s.next() : "";
     }
+    public static void println(String str) {
+        StackTraceElement[] stackTrace = new Throwable().getStackTrace();
+        System.out.println(str + " : ---" + stackTrace[stackTrace.length > 2 ? 1 : 0].toString());
+    }
 }

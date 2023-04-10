@@ -232,6 +232,7 @@ public class SLTPGDynamicDataGenerator extends DynamicWorkloadGenerator {
             t = new SLTransferEvent(eventID, srcAcc, srcAst, dstAcc, dstAst, 100000000, 100000000);
         } else {
             t = new SLTransferEvent(eventID, srcAcc, srcAst, dstAcc, dstAst);
+            abort_num ++;
         }
 
         // increase the timestamp i.e. transaction id

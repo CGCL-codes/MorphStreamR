@@ -79,7 +79,6 @@ public class TxnManagerTStream extends TxnManagerDedicatedAsy {
         }
         MeasureTools.END_SCHEDULER_SWITCH_TIME_MEASURE(thread_Id);
     }
-    @Override
     public void switch_scheduler(int thread_Id, long mark_ID) {
         String schedulerType = collector.getDecision(thread_Id);
         this.SwitchScheduler(schedulerType, thread_Id, mark_ID);

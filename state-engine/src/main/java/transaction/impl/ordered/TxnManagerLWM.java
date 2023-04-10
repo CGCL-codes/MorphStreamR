@@ -219,6 +219,11 @@ public class TxnManagerLWM extends TxnManagerDedicatedLocked {
     }
 
     @Override
+    public void switch_scheduler(int thread_Id, long mark_ID) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
     public void AbortTransaction() {
         //not in use in this scheme.
     }

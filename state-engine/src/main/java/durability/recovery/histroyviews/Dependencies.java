@@ -8,11 +8,6 @@ public class Dependencies{
         this.dependencies.put(bid, v);
     }
     public Object inspectDependency(long bid) {
-        for (long b : this.dependencies.keySet()) {
-            if (b > bid) {
-                return this.dependencies.get(b);
-            }
-        }
-        return null;
+        return dependencies.get(bid);
     }
 }

@@ -1,6 +1,7 @@
 package benchmark.dynamicWorkloadGenerator;
 
 import benchmark.datagenerator.DataGenerator;
+import common.util.io.IOUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.List;
  * Created by curry on 16/3/22.
  */
 public abstract class DynamicWorkloadGenerator extends DataGenerator {
+    public int abort_num = 0;
     protected List<String> tranToDecisionConf =new ArrayList<>();
     protected DynamicDataGeneratorConfig dynamicDataConfig;
     public DynamicWorkloadGenerator(DynamicDataGeneratorConfig dynamicDataConfig) {
@@ -31,11 +33,13 @@ public abstract class DynamicWorkloadGenerator extends DataGenerator {
     public void generateStream() {
         //Init the Configuration
         for (int tupleNumber = 0; tupleNumber < nTuples + dynamicDataConfig.getTotalThreads(); tupleNumber++) {
-            if (tupleNumber%(dynamicDataConfig.getCheckpoint_interval()* dynamicDataConfig.getShiftRate()* dynamicDataConfig.getTotalThreads()) == 0) {
+            if (tupleNumber % (dynamicDataConfig.getCheckpoint_interval() * dynamicDataConfig.getShiftRate() * dynamicDataConfig.getTotalThreads()) == 0) {
                 String type = dynamicDataConfig.nextDataGeneratorConfig();
                 if (type != null) {
                     switchConfiguration(type);
                 }
+                IOUtils.println("Abort: " + abort_num);
+                abort_num = 0;
             }
             generateTuple();
         }

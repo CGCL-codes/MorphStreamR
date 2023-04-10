@@ -81,11 +81,11 @@ public class SLBolt_ts extends SLBolt {
                         MeasureTools.BEGIN_SNAPSHOT_TIME_MEASURE(this.thread_Id);
                         this.db.asyncSnapshot(in.getMarker().getSnapshotId(), this.thread_Id, this.ftManager);
                         MeasureTools.END_SNAPSHOT_TIME_MEASURE(this.thread_Id);
-                    } else if (Objects.equals(in.getMarker().getMessage(), "commit")){
+                    } else if (Objects.equals(in.getMarker().getMessage(), "commit") || Objects.equals(in.getMarker().getMessage(), "commit_early")) {
                         MeasureTools.BEGIN_LOGGING_TIME_MEASURE(this.thread_Id);
                         this.db.asyncCommit(in.getMarker().getSnapshotId(), this.thread_Id, this.loggingManager);
                         MeasureTools.END_LOGGING_TIME_MEASURE(this.thread_Id);
-                    } else if (Objects.equals(in.getMarker().getMessage(), "commit_snapshot")){
+                    } else if (Objects.equals(in.getMarker().getMessage(), "commit_snapshot") || Objects.equals(in.getMarker().getMessage(), "commit_snapshot_early")){
                         MeasureTools.BEGIN_LOGGING_TIME_MEASURE(this.thread_Id);
                         this.db.asyncCommit(in.getMarker().getSnapshotId(), this.thread_Id, this.loggingManager);
                         MeasureTools.END_LOGGING_TIME_MEASURE(this.thread_Id);
@@ -94,6 +94,9 @@ public class SLBolt_ts extends SLBolt {
                         MeasureTools.END_SNAPSHOT_TIME_MEASURE(this.thread_Id);
                     }
                     TRANSFER_REQUEST_CORE();
+                }
+                if (Objects.equals(in.getMarker().getMessage(), "commit_early")) {
+                    this.loggingManager.boltRegister(this.thread_Id, FaultToleranceConstants.FaultToleranceStatus.Commit, new LoggingResult(in.getMarker().getSnapshotId(), this.thread_Id, null));
                 }
                 BEGIN_POST_TIME_MEASURE(thread_Id);
                 {
@@ -108,6 +111,8 @@ public class SLBolt_ts extends SLBolt {
                 } else if (Objects.equals(in.getMarker().getMessage(), "commit_snapshot")){
                     this.ftManager.boltRegister(this.thread_Id, FaultToleranceConstants.FaultToleranceStatus.Commit, new SnapshotResult(in.getMarker().getSnapshotId(), this.thread_Id, null));
                     this.loggingManager.boltRegister(this.thread_Id, FaultToleranceConstants.FaultToleranceStatus.Commit, new LoggingResult(in.getMarker().getSnapshotId(), this.thread_Id, null));
+                } else if (Objects.equals(in.getMarker().getMessage(), "commit_snapshot_early")) {
+                    this.ftManager.boltRegister(this.thread_Id, FaultToleranceConstants.FaultToleranceStatus.Commit, new SnapshotResult(in.getMarker().getSnapshotId(), this.thread_Id, null));
                 }
                 //all tuples in the holder is finished.
                 transactionEvents.clear();

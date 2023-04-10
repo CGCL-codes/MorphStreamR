@@ -3,6 +3,7 @@ package scheduler.impl.recovery;
 import durability.logging.LoggingStrategy.ImplLoggingManager.PathLoggingManager;
 import durability.logging.LoggingStrategy.ImplLoggingManager.WALManager;
 import durability.logging.LoggingStrategy.LoggingManager;
+import profiler.MeasureTools;
 import scheduler.Request;
 import scheduler.context.recovery.RSContext;
 import scheduler.impl.IScheduler;
@@ -68,6 +69,7 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
 
     @Override
     public void TxnSubmitFinished(Context context) {
+        MeasureTools.BEGIN_TPG_CONSTRUCTION_TIME_MEASURE(context.thisThreadId);
         int txnOpId = 0;
         for (Request request : context.requests) {
             long bid = request.txn_context.getBID();
@@ -100,6 +102,7 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
             set_op.setTxnOpId(txnOpId ++);
             if (request.condition_source != null)
                 inspectDependency(context.groupId, curOC, set_op, request.table_name, request.src_key, request.condition_sourceTable, request.condition_source);
+            MeasureTools.END_TPG_CONSTRUCTION_TIME_MEASURE(context.thisThreadId);
         }
     }
 
@@ -112,17 +115,18 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
     @Override
     public void INITIALIZE(Context context) {
         //TODO:add task placing
-        HashMap<String, List<Integer>> plan = this.loggingManager.inspectTaskPlacing(context.groupId, context.thisThreadId);
-        if (plan == null) {
-            SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
-        } else {
-            for (Map.Entry<String, List<Integer>> entry : plan.entrySet()) {
-                String table = entry.getKey();
-                List<Integer> value = entry.getValue();
-                for (int partitionId : value) {
-                    OperationChain oc = tpg.getOperationChains().get(table).threadOCsMap.get(partitionId).holder_v1.get(String.valueOf(partitionId));
-                    context.allocatedTasks.add(oc);
-                }
+        HashMap<String, List<Integer>> plan;
+        if (!this.loggingManager.getHistoryViews().canInspectTaskPlacing(context.groupId)) {
+            this.graphConstruct(context);
+        }
+        plan = this.loggingManager.inspectTaskPlacing(context.groupId, context.thisThreadId);
+        for (Map.Entry<String, List<Integer>> entry : plan.entrySet()) {
+            String table = entry.getKey();
+            List<Integer> value = entry.getValue();
+            for (int key : value) {
+                int taskId = getTaskId(String.valueOf(key), delta);
+                OperationChain oc = tpg.getOperationChains().get(table).threadOCsMap.get(taskId).holder_v1.get(String.valueOf(key));
+                context.allocatedTasks.add(oc);
             }
         }
     }
@@ -133,11 +137,19 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
         boolean continueFlag = true;
         while (continueFlag && oc.operations.size() > 0){
             Operation op = oc.operations.first();
-            if (op.pdCount.get() == 0) {
-                execute(op, mark_ID, false);
+            if (op.pKey.equals(oc.getPrimaryKey())) {
+                if (op.pdCount.get() == 0) {
+                    oc.operations.pollFirst();
+                    MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(context.thisThreadId);
+                    execute(op, mark_ID, false);
+                    MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(context.thisThreadId);
+                } else {
+                    continueFlag = false;
+                    context.wait_op = op;
+                }
             } else {
-                continueFlag = false;
-                context.wait_op = op;
+                op.pdCount.decrementAndGet();
+                oc.operations.pollFirst();
             }
         }
     }
@@ -161,7 +173,6 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
 
     @Override
     public void start_evaluation(Context context, long mark_ID, int num_events) {
-        context.groupId = mark_ID;
         INITIALIZE(context);
         do {
             EXPLORE(context);
@@ -181,7 +192,7 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
             for (int index = 0; index < condition_source.length; index++) {
                 if (table_name.equals(condition_sourceTable[index]) && key.equals(condition_source[index]))
                     continue;
-                Object history = this.loggingManager.inspectDependencyView(groupId, table_name, key,condition_source[index], op.bid);
+                Object history = this.loggingManager.inspectDependencyView(groupId, table_name, key, condition_source[index], op.bid);
                 if (history != null) {
                     op.historyView = history;
                 } else {
@@ -194,6 +205,11 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
                     OCFromConditionSource.addDependentOCs(curOC);
                 }
             }
+        }
+    }
+    private void graphConstruct(Context context) {
+        for (OperationChain oc : tpg.threadToOCs.get(context.thisThreadId)) {
+            this.tpg.threadToPathRecord.get(context.thisThreadId).addNode(oc.getTableName(), oc.getPrimaryKey(),oc.operations.size());
         }
     }
     public void execute(Operation operation, long mark_ID, boolean clean) {
@@ -220,7 +236,6 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
                     operation.success[0]++;
                 }
             }
-
         } else if (operation.accessType.equals(READ_WRITE)) {
             if (this.tpg.getApp() == 1) {
                 Depo_Fun(operation, mark_ID, clean);
@@ -238,11 +253,11 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
     protected void Transfer_Fun(AbstractOperation operation, long previous_mark_ID, boolean clean) {
         Operation op = (Operation) operation;
         final long sourceAccountBalance;
-        if (op.historyView != null) {
+        if (op.historyView == null) {
             SchemaRecord preValues = operation.condition_records[0].content_.readPreValues(operation.bid);
             sourceAccountBalance = preValues.getValues().get(1).getLong();
         } else {
-            sourceAccountBalance = (long) op.historyView;
+            sourceAccountBalance = Long.parseLong(String.valueOf(op.historyView));
         }
         // apply function
         AppConfig.randomDelay();
@@ -274,5 +289,9 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
         tempo_record = new SchemaRecord(values);//tempo record
         tempo_record.getValues().get(1).incLong(operation.function.delta_long);//compute.
         operation.s_record.content_.updateMultiValues(operation.bid, mark_ID, clean, tempo_record);//it may reduce NUMA-traffic.
+    }
+    public static int getTaskId(String key, Integer delta) {
+        Integer _key = Integer.valueOf(key);
+        return _key / delta;
     }
 }

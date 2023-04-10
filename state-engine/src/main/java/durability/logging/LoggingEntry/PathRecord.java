@@ -2,6 +2,7 @@ package durability.logging.LoggingEntry;
 
 import common.util.graph.Edge;
 import common.util.graph.Graph;
+import common.util.io.IOUtils;
 import durability.struct.Logging.Node;
 import durability.struct.Logging.LoggingEntry;
 import durability.struct.Logging.keyToDependencies;
@@ -51,6 +52,8 @@ public class PathRecord implements LoggingEntry {
         for (long bid : abortBids) {
             sb.append(bid).append(";");
         }
+        IOUtils.println("Abort: " + abortBids.size());
+        IOUtils.println(sb.toString());
         sb.append(" ");
         for (Map.Entry<String, keyToDependencies> logs : this.dependencyEdges.entrySet()) {
             sb.append(logs.getKey());

@@ -18,8 +18,8 @@ public class RSContext implements SchedulerContext {
     public boolean isFinished = false;
     public Operation wait_op;
     public OperationChain ready_oc;
-    public RSContext(int totalThreads) {
-        this.totalThreads = totalThreads;
+    public RSContext(int thisThreadId) {
+        this.thisThreadId = thisThreadId;
         this.requests = new ArrayDeque<>();
 
     }
@@ -30,16 +30,17 @@ public class RSContext implements SchedulerContext {
         requests.push(request);
     }
     public void next() {
+        if (ready_oc != null && ready_oc.operations.isEmpty()) {
+            allocatedTasks.remove(ready_oc);
+        }
         if (wait_op == null) {
             if (!allocatedTasks.isEmpty()) {
-                ready_oc = allocatedTasks.pollLast();
+                ready_oc = allocatedTasks.peekFirst();//Not delete
             } else {
                 isFinished = true;
             }
         } else {
-            allocatedTasks.add(ready_oc);
             ready_oc = wait_op.dependentOC;
-            allocatedTasks.remove(wait_op.dependentOC);
             wait_op = null;
         }
     }

@@ -79,6 +79,11 @@ public class TxnManagerLock extends TxnManagerDedicatedLocked {
     }
 
     @Override
+    public void switch_scheduler(int thread_Id, long mark_ID) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
     public void AbortTransaction() {
         // recover updated data and release locks.
         for (int i = 0; i < access_list_.access_count_; ++i) {

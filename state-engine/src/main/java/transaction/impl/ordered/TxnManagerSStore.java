@@ -169,6 +169,11 @@ public class TxnManagerSStore extends TxnManagerDedicatedLocked {
     }
 
     @Override
+    public void switch_scheduler(int thread_Id, long mark_ID) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void AbortTransaction() {
         //not in use in this scheme.
     }

@@ -39,8 +39,8 @@ public class Graph {
     public void clean() {
         edges.clear();
     }
-    public void partition() {
-        graphPartitioner.run();
+    public void partition(int max_itr) {
+        graphPartitioner.run(max_itr);
     }
     public List<List<Integer>> getPartitions() {
         return graphPartitioner.getPartitions();
