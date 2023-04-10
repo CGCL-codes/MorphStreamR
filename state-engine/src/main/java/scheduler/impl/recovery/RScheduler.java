@@ -1,5 +1,6 @@
 package scheduler.impl.recovery;
 
+import common.util.io.IOUtils;
 import durability.logging.LoggingStrategy.ImplLoggingManager.PathLoggingManager;
 import durability.logging.LoggingStrategy.ImplLoggingManager.WALManager;
 import durability.logging.LoggingStrategy.LoggingManager;
@@ -139,10 +140,10 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
             Operation op = oc.operations.first();
             if (op.pKey.equals(oc.getPrimaryKey())) {
                 if (op.pdCount.get() == 0) {
-                    oc.operations.pollFirst();
                     MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(context.thisThreadId);
                     execute(op, mark_ID, false);
                     MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(context.thisThreadId);
+                    oc.operations.pollFirst();
                 } else {
                     continueFlag = false;
                     context.wait_op = op;
@@ -210,6 +211,7 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
     private void graphConstruct(Context context) {
         for (OperationChain oc : tpg.threadToOCs.get(context.thisThreadId)) {
             this.tpg.threadToPathRecord.get(context.thisThreadId).addNode(oc.getTableName(), oc.getPrimaryKey(),oc.operations.size());
+           // IOUtils.println("Thread " + context.thisThreadId + " has " + oc.operations.size() + " operations in " + oc.getTableName() + " " + oc.getPrimaryKey());
         }
     }
     public void execute(Operation operation, long mark_ID, boolean clean) {

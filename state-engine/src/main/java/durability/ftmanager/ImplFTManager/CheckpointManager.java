@@ -147,14 +147,14 @@ public class CheckpointManager extends FTManager {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-//            if (!isFailure) {
-//                File file = new File(this.basePath);
-//                FileSystem.deleteFile(file);
-//                file = new File(this.inputStoreRootPath);
-//                FileSystem.deleteFile(file);
-//                file = new File(this.outputStoreRootPath);
-//                FileSystem.deleteFile(file);
-//            }
+            if (!isFailure) {
+                File file = new File(this.basePath);
+                FileSystem.deleteFile(file);
+                file = new File(this.inputStoreRootPath);
+                FileSystem.deleteFile(file);
+                file = new File(this.outputStoreRootPath);
+                FileSystem.deleteFile(file);
+            }
             LOG.info("CheckpointManager stops");
         }
     }

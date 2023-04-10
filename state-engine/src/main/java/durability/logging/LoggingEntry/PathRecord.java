@@ -53,7 +53,6 @@ public class PathRecord implements LoggingEntry {
             sb.append(bid).append(";");
         }
         IOUtils.println("Abort: " + abortBids.size());
-        IOUtils.println(sb.toString());
         sb.append(" ");
         for (Map.Entry<String, keyToDependencies> logs : this.dependencyEdges.entrySet()) {
             sb.append(logs.getKey());

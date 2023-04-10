@@ -641,7 +641,7 @@ public class MeasureTools {
         try {
             File file = new File(directory + fileNameSuffix + ".overall");
             BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
-            fileWriter.write("RecoverySchedulerTimeBreakdownReport (ms): " + "\n");
+            fileWriter.write("RecoverySchedulerTimeBreakdownReport (ns): " + "\n");
             fileWriter.write("thread_id\t explore_time\t useful_time\t abort_time\t next_time\t notify_time\t construct_time\t first_explore_time\t scheduler_switch\n");
             double totalExploreTime = 0;
             double totalNextTime = 0;
@@ -670,20 +670,20 @@ public class MeasureTools {
                             "%-10.2f\t" +
                             "%-10.2f\t" +
                             "%-10.2f\t"
-                    , totalExploreTime / tthread / 1E6
-                    , totalUsefulTime / tthread / 1E6
-                    , totalAbortTime / tthread / 1E6
-                    , totalNextTime / tthread / 1E6
-                    , totalNotifyTime / tthread / 1E6
-                    , totalConstructTime / tthread / 1E6
-                    , totalFirstExploreTime / tthread / 1E6
-                    , totalSchedulerSwitchTime / tthread / 1E6
+                    , totalExploreTime / tthread
+                    , totalUsefulTime / tthread
+                    , totalAbortTime / tthread
+                    , totalNextTime / tthread
+                    , totalNotifyTime / tthread
+                    , totalConstructTime / tthread
+                    , totalFirstExploreTime / tthread
+                    , totalSchedulerSwitchTime / tthread
             );
             fileWriter.write(output + "\n");
             fileWriter.close();
-            recoveryTime[4] = totalExploreTime / tthread / 1E6;
-            recoveryTime[5] = totalUsefulTime / tthread / 1E6;
-            recoveryTime[6] = totalAbortTime / tthread / 1E6;
+            recoveryTime[4] = totalExploreTime / tthread;
+            recoveryTime[5] = totalUsefulTime / tthread;
+            recoveryTime[6] = totalAbortTime / tthread;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

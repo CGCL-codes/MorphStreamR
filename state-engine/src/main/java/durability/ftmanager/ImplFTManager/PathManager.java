@@ -134,10 +134,10 @@ public class PathManager extends FTManager {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-//            if (!isFailure) {
-//                File file = new File(this.walPath);
-//                FileSystem.deleteFile(file);
-//            }
+            if (!isFailure) {
+                File file = new File(this.walPath);
+                FileSystem.deleteFile(file);
+            }
             LOG.info("PathManager stops");
         }
     }

@@ -1,6 +1,7 @@
 package profiler;
 
 import common.io.LocalFS.FileSystem;
+import common.util.io.IOUtils;
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 
 import java.io.File;
