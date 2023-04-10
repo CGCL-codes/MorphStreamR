@@ -6,6 +6,7 @@ import common.io.ByteIO.DataInputView;
 import common.io.ByteIO.InputWithDecompression.NativeDataInputView;
 import common.io.ByteIO.InputWithDecompression.SnappyDataInputView;
 import common.util.graph.Graph;
+import common.util.io.IOUtils;
 import durability.ftmanager.FTManager;
 import durability.logging.LoggingEntry.PathRecord;
 import durability.logging.LoggingResource.ImplLoggingResources.DependencyMaintainResources;
@@ -14,6 +15,7 @@ import durability.logging.LoggingResult.LoggingHandler;
 import durability.logging.LoggingStrategy.LoggingManager;
 import durability.logging.LoggingStream.ImplLoggingStreamFactory.NIOPathStreamFactory;
 import durability.recovery.RedoLogResult;
+import durability.recovery.histroyviews.AllocationPlan;
 import durability.recovery.histroyviews.HistoryViews;
 import durability.snapshot.LoggingOptions;
 import durability.struct.Logging.LoggingEntry;
@@ -30,6 +32,7 @@ import java.nio.channels.AsynchronousFileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,6 +87,9 @@ public class PathLoggingManager implements LoggingManager {
     @Override
     public void commitLog(long groupId, int partitionId, FTManager ftManager) throws IOException {
         graphPartition(partitionId, 100);
+        for (String table : this.graphs.keySet()) {
+            this.threadToPathRecord.get(partitionId).tableToPlacing.put(table, this.graphs.get(table).getPartitions().get(partitionId));
+        }
         NIOPathStreamFactory nioPathStreamFactory = new NIOPathStreamFactory(this.loggingPath);
         DependencyMaintainResources dependencyMaintainResources = syncPrepareResource(partitionId);
         AsynchronousFileChannel afc = nioPathStreamFactory.createLoggingStream();
@@ -110,11 +116,21 @@ public class PathLoggingManager implements LoggingManager {
             }
             byte[] object = inputView.readFullyDecompression();
             String[] strings = new String(object, StandardCharsets.UTF_8).split(" ");
-            String[] abortIds = strings[0].split(";");
+            String[] taskPlacing = strings[0].split(";");//Task Placing View
+            for (String task : taskPlacing) {
+                String[] kv = task.split(":");
+                String table = kv[0];
+                List<Integer> placing = new ArrayList<>();
+                for (int j = 1; j < kv.length; j++) {
+                    placing.add(Integer.parseInt(kv[j]));
+                }
+                this.historyViews.addAllocationPlan(redoLogResult.groupIds.get(i), table, redoLogResult.threadId, placing);
+            }
+            String[] abortIds = strings[1].split(";");//Abort View
             for (String abortId : abortIds) {
                 this.historyViews.addAbortId(redoLogResult.threadId, Long.parseLong(abortId));
             }
-            for (int j = 1; j < strings.length; j++) {
+            for (int j = 2; j < strings.length; j++) {//Dependency View
                 String[] dependency = strings[j].split(";");
                 String tableName = dependency[0];
                 for (int k = 1; k < dependency.length; k++) {

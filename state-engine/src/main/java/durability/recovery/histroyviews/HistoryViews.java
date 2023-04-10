@@ -38,4 +38,8 @@ public class HistoryViews {
         }
         return 0L;
     }
+    public void addAllocationPlan(long groupId, String table, int threadId, List<Integer> plan) {
+        this.allocationPlans.putIfAbsent(groupId, new AllocationPlan());
+        this.allocationPlans.get(groupId).addPlan(table, threadId, plan);
+    }
 }

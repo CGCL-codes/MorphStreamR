@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class PathRecord implements LoggingEntry {
     public List<Long> abortBids = new ArrayList<>();
+    public ConcurrentHashMap<String, List<Integer>> tableToPlacing = new ConcurrentHashMap<>();//<Table, Placing>
     public ConcurrentHashMap<String, keyToDependencies> dependencyEdges = new ConcurrentHashMap<>();//<Table, DependencyEdge>
     public void addAbortBid(long bid) {
         if (abortBids.contains(bid))
@@ -31,6 +32,7 @@ public class PathRecord implements LoggingEntry {
     }
     public void reset() {
         this.abortBids.clear();
+        this.tableToPlacing.clear();
         for (keyToDependencies edges : this.dependencyEdges.values()) {
             edges.cleanDependency();
         }
@@ -48,11 +50,19 @@ public class PathRecord implements LoggingEntry {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(abortBids.size()).append(";");
+        for (Map.Entry<String, List<Integer>> allocation : this.tableToPlacing.entrySet()) {
+            sb.append(allocation.getKey());
+            sb.append(":");
+            for (int pid : allocation.getValue()) {
+                sb.append(pid);
+                sb.append(":");
+            }
+            sb.append(";");
+        }
+        sb.append(" ");
         for (long bid : abortBids) {
             sb.append(bid).append(";");
         }
-        IOUtils.println("Abort: " + abortBids.size());
         sb.append(" ");
         for (Map.Entry<String, keyToDependencies> logs : this.dependencyEdges.entrySet()) {
             sb.append(logs.getKey());
