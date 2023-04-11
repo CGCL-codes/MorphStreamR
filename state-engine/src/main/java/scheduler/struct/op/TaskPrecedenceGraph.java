@@ -1,12 +1,11 @@
 package scheduler.struct.op;
 
-import common.util.graph.Graph;
+import durability.logging.LoggingEntry.LVLogRecord;
 import durability.logging.LoggingEntry.PathRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import profiler.MeasureTools;
 import scheduler.Request;
-import scheduler.context.og.OGSContext;
 import scheduler.context.op.OPNSContext;
 import scheduler.context.op.OPSContext;
 import scheduler.context.op.OPSchedulerContext;
@@ -16,7 +15,6 @@ import utils.lib.ConcurrentHashMap;
 
 import java.util.*;
 import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static common.CONTROL.enable_log;
 import static utils.FaultToleranceConstants.LOGOption_no;
@@ -47,7 +45,8 @@ public class TaskPrecedenceGraph<Context extends OPSchedulerContext> {
     public final ConcurrentHashMap<Integer, Context> threadToContextMap;
     private final ConcurrentHashMap<String, TableOCs> operationChains;//shared data structure.
     public final ConcurrentHashMap<Integer, Deque<OperationChain>> threadToOCs;
-    public ConcurrentHashMap<Integer, PathRecord> threadToPathRecord;
+    public ConcurrentHashMap<Integer, PathRecord> threadToPathRecord;//Used by path logging
+    public ConcurrentHashMap<Integer, LVLogRecord> threadToLVLogRecord;//Used by LSN vector logging
     private int maxLevel = 0;//just for layered scheduling
 
     public int isLogging = LOGOption_no;

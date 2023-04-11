@@ -92,4 +92,27 @@ public abstract class LockContent implements Content {
     @Override
     public void UnlockPartitions() {
     }
+    @Override
+    public int[] getReadLVs() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int[] getWriteLVs() {
+        throw new UnsupportedOperationException();
+    }
+    @Override
+    public int[] getLVs() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void updateReadLv(int lsn, int partition) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void updateWriteLv(int lsn, int partition) {
+        throw new UnsupportedOperationException();
+    }
 }

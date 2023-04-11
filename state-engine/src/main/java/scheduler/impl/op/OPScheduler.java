@@ -2,6 +2,7 @@ package scheduler.impl.op;
 
 
 import durability.logging.LoggingEntry.PathRecord;
+import durability.logging.LoggingStrategy.ImplLoggingManager.LSNVectorLoggingManager;
 import durability.logging.LoggingStrategy.ImplLoggingManager.PathLoggingManager;
 import durability.logging.LoggingStrategy.ImplLoggingManager.WALManager;
 import durability.logging.LoggingStrategy.LoggingManager;
@@ -58,6 +59,9 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
         } else if (loggingManager instanceof PathLoggingManager) {
             isLogging = LOGOption_path;
             this.tpg.threadToPathRecord = ((PathLoggingManager) loggingManager).threadToPathRecord;
+        } else if (loggingManager instanceof LSNVectorLoggingManager) {
+            isLogging = LOGOption_lv;
+            this.tpg.threadToLVLogRecord = ((LSNVectorLoggingManager) loggingManager).threadToLVLogRecord;
         } else {
             isLogging = LOGOption_no;
         }

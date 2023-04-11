@@ -1,6 +1,7 @@
 package scheduler.struct.og;
 
 import common.util.graph.Graph;
+import durability.logging.LoggingEntry.LVLogRecord;
 import durability.logging.LoggingEntry.PathRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +49,8 @@ public class TaskPrecedenceGraph<Context extends OGSchedulerContext> {
     private final int NUM_ITEMS;
     private final ConcurrentHashMap<String, TableOCs<OperationChain>> operationChains;//shared data structure.
     private final ConcurrentHashMap<Integer, Deque<OperationChain>> threadToOCs;
-    public ConcurrentHashMap<Integer, PathRecord> threadToPathRecord;// Used by fault tolerance
+    public ConcurrentHashMap<Integer, PathRecord> threadToPathRecord;// Used path logging
+    public ConcurrentHashMap<Integer, LVLogRecord> threadToLVLogRecord;// Used LSN vector logging
     CyclicBarrier barrier;
     private int maxLevel = 0; // just for layered scheduling
     private final int app;

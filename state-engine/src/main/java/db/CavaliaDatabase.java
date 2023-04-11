@@ -2,6 +2,7 @@ package db;
 
 import common.collections.Configuration;
 import durability.ftmanager.FTManager;
+import durability.logging.LoggingStrategy.ImplLoggingManager.LSNVectorLoggingManager;
 import durability.logging.LoggingStrategy.ImplLoggingManager.PathLoggingManager;
 import durability.logging.LoggingStrategy.ImplLoggingManager.WALManager;
 import durability.recovery.RedoLogResult;
@@ -31,6 +32,8 @@ public class CavaliaDatabase extends Database {
             case 3 :
                 this.loggingManager = new PathLoggingManager(configuration);
                 break;
+            case 4:
+                this.loggingManager = new LSNVectorLoggingManager(configuration);
             default :
                 throw new UnsupportedOperationException("No such kind of FTOption");
         }

@@ -35,6 +35,7 @@ import static common.CONTROL.*;
 import static common.constants.LinearRoadConstants.Conf.Executor_Threads;
 import static common.constants.OnlineBidingSystemConstants.Conf.OB_THREADS;
 import static common.constants.StreamLedgerConstants.Conf.SL_THREADS;
+import static content.LVTStreamContent.LVTSTREAM_CONTENT;
 import static content.LWMContentImpl.LWM_CONTENT;
 import static content.LockContentImpl.LOCK_CONTENT;
 import static content.SStoreContentImpl.SSTORE_CONTENT;
@@ -98,7 +99,11 @@ public class MorphStreamRunner extends Runner {
                         content_type = LWM_CONTENT;
                         break;
                     case CCOption_MorphStream:
-                        content_type = T_STREAMCONTENT;//records the multi-version of table record.
+                        if (config.getInt("FTOption") == 4) {
+                            content_type = T_STREAMCONTENT;//records the multi-version of table record.
+                        } else {
+                            content_type = LVTSTREAM_CONTENT;
+                        }
                         break;
                     case CCOption_SStore://SStore
                         content_type = SSTORE_CONTENT;//records the multi-version of table record.

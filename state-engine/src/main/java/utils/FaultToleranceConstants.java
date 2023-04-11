@@ -7,6 +7,7 @@ public class FaultToleranceConstants {
     public static int LOGOption_no = 0;
     public static int LOGOption_wal = 1;
     public static int LOGOption_path = 2;
+    public static int LOGOption_lv = 3;
     /**
      * XOR GorillaV2
      * Delta-Delta GorillaV1
