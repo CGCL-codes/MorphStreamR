@@ -77,14 +77,14 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
                         MeasureTools.END_RECOVERY_TIME_MEASURE(this.taskId);
                         this.sink.stopRecovery = true;
                         Metrics.RecoveryPerformance.stopRecovery[this.taskId] = true;
-                        if ((ftOption == FTOption_ISC || ftOption == FTOption_WSC) && counter != the_end && Metrics.RecoveryPerformance.stopRecovery[this.taskId]) {
+                        if ((ftOption == FTOption_ISC || ftOption == FTOption_WSC || ftOption == FTOption_PATH || ftOption == FTOption_Dependency) && counter != the_end && Metrics.RecoveryPerformance.stopRecovery[this.taskId]) {
                             input_store(counter);
                         }
                     }
                     isRecovery = false;
                     return;
                 }
-                if (ftOption == FTOption_ISC || ftOption == FTOption_WSC || ftOption == FTOption_PATH) {
+                if (ftOption == FTOption_ISC || ftOption == FTOption_WSC || ftOption == FTOption_PATH || ftOption == FTOption_Dependency) {
                     input_store(counter);
                 }
             }
@@ -94,6 +94,8 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
                 nextTuple_WSC();
             } else if (ftOption == FTOption_PATH) {
                 nextTuple_PATH();
+            } else if (ftOption == FTOption_Dependency){
+                nextTuple_Dependency();
             } else {
                 nextTuple_Native();
             }
@@ -451,7 +453,60 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
                         this.loggingManager.spoutRegister(counter, "");
                     }
                     bolt.execute(marker);
-                    if ((ftOption == FTOption_ISC || ftOption == FTOption_WSC || ftOption == FTOption_PATH) && counter != the_end && Metrics.RecoveryPerformance.stopRecovery[this.taskId]) {
+                    if (counter != the_end && Metrics.RecoveryPerformance.stopRecovery[this.taskId]) {
+                        input_store(counter);
+                    }
+                }
+            }
+            if (counter == the_end) {
+                SOURCE_CONTROL.getInstance().oneThreadCompleted(taskId); // deregister all barriers
+                SOURCE_CONTROL.getInstance().finalBarrier(taskId);//sync for all threads to come to this line.
+                if (taskId == 0)
+                    sink.end(global_cnt);
+            }
+        }
+    }
+    private void nextTuple_Dependency() throws InterruptedException, IOException, ExecutionException, BrokenBarrierException, DatabaseException {
+        if (counter < num_events_per_thread) {
+            Object event;
+            if (recoveryInput.size() != 0) {
+                event = recoveryInput.poll();
+            } else {
+                event = myevents[counter];
+            }
+            long bid = mybids[counter];
+            if (CONTROL.enable_latency_measurement){
+                long time;
+                if (arrivalControl) {
+                    time = this.systemStartTime + ((TxnEvent) event).getTimestamp() - remainTime;
+                } else {
+                    time = System.nanoTime();
+                }
+                generalMsg = new GeneralMsg(DEFAULT_STREAM_ID, event, time);
+            } else {
+                generalMsg = new GeneralMsg(DEFAULT_STREAM_ID, event);
+            }
+
+            tuple = new Tuple(bid, this.taskId, context, generalMsg);
+            bolt.execute(tuple);  // public Tuple(long bid, int sourceId, TopologyContext context, Message message)
+            counter ++;
+
+            if (ccOption == CCOption_TStream || ccOption == CCOption_SStore) {// This is only required by T-Stream.
+                if (model_switch(counter)) {
+                    if (snapshot(counter)) {
+                        inputStoreCurrentPath = inputStoreRootPath + OsUtils.OS_wrapper(Integer.toString(counter));
+                        marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration, "commit_snapshot", counter));
+                        if (this.taskId == 0) {
+                            this.ftManager.spoutRegister(counter, inputStoreCurrentPath);
+                        }
+                    } else {
+                        marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration, "commit", counter));
+                    }
+                    if (this.taskId == 0) {
+                        this.loggingManager.spoutRegister(counter, "");
+                    }
+                    bolt.execute(marker);
+                    if (counter != the_end && Metrics.RecoveryPerformance.stopRecovery[this.taskId]) {
                         input_store(counter);
                     }
                 }

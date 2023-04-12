@@ -68,6 +68,7 @@ public class OperationChain implements Comparable<OperationChain> {
             if (parentOp.bid < targetOp.bid) { // find the exact operation in parent OC that this target OP depends on.
                 // setup dependencies on op level first.
                 targetOp.addFDParent(parentOp);
+                parentOp.addFDChild(targetOp);
                 setupDependency(targetOp, parentOC, parentOp);
                 break;
             }

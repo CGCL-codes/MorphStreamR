@@ -2,6 +2,8 @@ package scheduler.struct;
 
 import content.common.CommonMetaTypes;
 import durability.logging.LoggingEntry.LogRecord;
+import durability.struct.Logging.DependencyLog;
+import durability.struct.Logging.LoggingEntry;
 import storage.SchemaRecordRef;
 import storage.TableRecord;
 import storage.TableRecordRef;
@@ -11,6 +13,9 @@ import transaction.function.Condition;
 import transaction.function.Function;
 
 import java.util.List;
+
+import static content.common.ContentCommon.loggingRecord_type;
+import static utils.FaultToleranceConstants.*;
 
 /**
  * TODO: clean ``state" and ``reference".
@@ -34,8 +39,8 @@ public abstract class AbstractOperation {
     public volatile TableRecord[] condition_records;
     public Condition condition;
     public int[] success;
-    //required by Wal
-    public LogRecord logRecord;
+    //required by Wal, Dependency logging.
+    public LoggingEntry logRecord;
 
     public AbstractOperation(Function function, String table_name, SchemaRecordRef record_ref, TableRecord[] condition_records, Condition condition, int[] success,
                              TxnContext txn_context, CommonMetaTypes.AccessType accessType, TableRecord s_record, TableRecord d_record, long bid) {
@@ -50,6 +55,11 @@ public abstract class AbstractOperation {
         this.s_record = s_record;
         this.d_record = d_record;
         this.bid = bid;
-        this.logRecord = new LogRecord(table_name, bid, d_record.record_.GetPrimaryKey());
+        if (loggingRecord_type == LOGOption_dependency) {
+            this.logRecord = new DependencyLog(bid, table_name, d_record.record_.GetPrimaryKey(), accessType.toString(), function);
+        } else if (loggingRecord_type == LOGOption_wal) {
+            this.logRecord = new LogRecord(table_name, bid, d_record.record_.GetPrimaryKey());
+        }
     }
 }
+

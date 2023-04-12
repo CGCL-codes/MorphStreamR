@@ -6,12 +6,13 @@ import durability.struct.Logging.Node;
 import durability.struct.Logging.LoggingEntry;
 import durability.struct.Logging.keyToDependencies;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class PathRecord implements LoggingEntry {
+public class PathRecord implements Serializable {
     public List<Long> abortBids = new ArrayList<>();
     public ConcurrentHashMap<String, List<Integer>> tableToPlacing = new ConcurrentHashMap<>();//<Table, Placing>
     public ConcurrentHashMap<String, keyToDependencies> dependencyEdges = new ConcurrentHashMap<>();//<Table, DependencyEdge>

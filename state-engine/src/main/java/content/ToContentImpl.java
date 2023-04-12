@@ -159,6 +159,11 @@ public class ToContentImpl extends ToContent {
     }
 
     @Override
+    public int[] getLVs() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public SchemaRecord readPreValues(long ts) {
         return null;
     }

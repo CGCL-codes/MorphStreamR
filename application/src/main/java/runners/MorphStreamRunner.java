@@ -41,9 +41,11 @@ import static content.LockContentImpl.LOCK_CONTENT;
 import static content.SStoreContentImpl.SSTORE_CONTENT;
 import static content.TStreamContentImpl.T_STREAMCONTENT;
 import static content.common.ContentCommon.content_type;
+import static content.common.ContentCommon.loggingRecord_type;
 import static profiler.MeasureTools.METRICS_REPORT;
 import static profiler.MeasureTools.METRICS_REPORT_WITH_FAILURE;
 import static profiler.Metrics.timer;
+import static utils.FaultToleranceConstants.*;
 
 public class MorphStreamRunner extends Runner {
     private static final Logger log = LoggerFactory.getLogger(MorphStreamRunner.class);
@@ -100,9 +102,9 @@ public class MorphStreamRunner extends Runner {
                         break;
                     case CCOption_MorphStream:
                         if (config.getInt("FTOption") == 4) {
-                            content_type = T_STREAMCONTENT;//records the multi-version of table record.
+                            content_type = LVTSTREAM_CONTENT;//records the multi-version of table record.
                         } else {
-                            content_type = LVTSTREAM_CONTENT;
+                            content_type = T_STREAMCONTENT;
                         }
                         break;
                     case CCOption_SStore://SStore
@@ -143,6 +145,26 @@ public class MorphStreamRunner extends Runner {
                     config.put(Executor_Threads, threads);
                     break;
                 }
+            }
+            switch (config.getInt("FTOption", 0)) {
+                case 0:
+                case 1:
+                    loggingRecord_type = LOGOption_no;
+                    break;
+                case 2:
+                    loggingRecord_type = LOGOption_wal;
+                    break;
+                case 3:
+                    loggingRecord_type = LOGOption_path;
+                    break;
+                case 4:
+                    loggingRecord_type = LOGOption_lv;
+                    break;
+                case 5:
+                    loggingRecord_type = LOGOption_dependency;
+                    break;
+                default:
+                    System.exit(-1);
             }
 
             OperationChainCommon.cleanUp = config.getBoolean("cleanUp");

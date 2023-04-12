@@ -1,16 +1,16 @@
 package scheduler.impl.op;
 
 
-import durability.logging.LoggingEntry.PathRecord;
+import durability.logging.LoggingEntry.LogRecord;
 import durability.logging.LoggingStrategy.ImplLoggingManager.LSNVectorLoggingManager;
 import durability.logging.LoggingStrategy.ImplLoggingManager.PathLoggingManager;
 import durability.logging.LoggingStrategy.ImplLoggingManager.WALManager;
 import durability.logging.LoggingStrategy.LoggingManager;
+import durability.struct.Logging.DependencyLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import profiler.MeasureTools;
 import scheduler.Request;
-import scheduler.context.op.OPSContext;
 import scheduler.impl.IScheduler;
 import scheduler.context.op.OPSchedulerContext;
 import scheduler.struct.AbstractOperation;
@@ -28,7 +28,6 @@ import transaction.function.INC;
 import transaction.function.SUM;
 import utils.AppConfig;
 import utils.SOURCE_CONTROL;
-import utils.lib.ConcurrentHashMap;
 
 import java.util.HashSet;
 import java.util.List;
@@ -105,6 +104,22 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
         // if the operation is in state aborted or committable or committed, we can bypass the execution
         if (operation.getOperationState().equals(MetaTypes.OperationStateType.ABORTED) || operation.isFailed) {
             //otherwise, skip (those already been tagged as aborted).
+            if (isLogging == LOGOption_dependency) {
+                ((DependencyLog) operation.logRecord).setId(operation.bid + "." + operation.txnOpId);
+                for (Operation op : operation.fd_parents) {
+                    ((DependencyLog) operation.logRecord).addInEdge(op.bid + "." + op.txnOpId);
+                }
+                for (Operation op : operation.td_parents) {
+                    ((DependencyLog) operation.logRecord).addInEdge(op.bid + "." + op.txnOpId);
+                }
+                for (Operation op : operation.fd_children) {
+                    ((DependencyLog) operation.logRecord).addOutEdge(op.bid + "." + op.txnOpId);
+                }
+                for (Operation op : operation.td_children) {
+                    ((DependencyLog) operation.logRecord).addOutEdge(op.bid + "." + op.txnOpId);
+                }
+                this.loggingManager.addLogRecord(operation.logRecord);
+            }
             return;
         }
         int success;
@@ -189,7 +204,22 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
             throw new UnsupportedOperationException();
         }
         if (isLogging == LOGOption_wal) {
-            operation.logRecord.addUpdate(operation.d_record.content_.readPreValues(operation.bid));
+            ((LogRecord) operation.logRecord).addUpdate(operation.d_record.content_.readPreValues(operation.bid));
+            this.loggingManager.addLogRecord(operation.logRecord);
+        } else if (isLogging == LOGOption_dependency) {
+            ((DependencyLog) operation.logRecord).setId(operation.bid + "." + operation.txnOpId);
+            for (Operation op : operation.fd_parents) {
+                ((DependencyLog) operation.logRecord).addInEdge(op.bid + "." + op.txnOpId);
+            }
+            for (Operation op : operation.td_parents) {
+                ((DependencyLog) operation.logRecord).addInEdge(op.bid + "." + op.txnOpId);
+            }
+            for (Operation op : operation.fd_children) {
+                ((DependencyLog) operation.logRecord).addOutEdge(op.bid + "." + op.txnOpId);
+            }
+            for (Operation op : operation.td_children) {
+                ((DependencyLog) operation.logRecord).addOutEdge(op.bid + "." + op.txnOpId);
+            }
             this.loggingManager.addLogRecord(operation.logRecord);
         }
 

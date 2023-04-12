@@ -500,7 +500,7 @@ public class MeasureTools {
         try {
             File file = new File(directory + fileNameSuffix + ".overall");
             BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
-            if (ftOption == FTOption_ISC || ftOption == FTOption_WSC || ftOption == FTOption_PATH) {
+            if (ftOption == FTOption_ISC || ftOption == FTOption_WSC || ftOption == FTOption_PATH || ftOption == FTOption_Dependency) {
                 fileWriter.write("SnapshotSizeReport (KB): " + "\n");
                 fileWriter.write("thread_id" + "\t" + "size" + "\n");
                 double totalSize = 0;
@@ -529,6 +529,16 @@ public class MeasureTools {
                     fileWriter.write(i + "\t"+ RuntimePerformance.LogSize[i].getMean() + "\n");
                 }
                 fileWriter.write("PathLogTotalSize (KB): " + totalSize + "\n");
+            }
+            if (ftOption == FTOption_Dependency) {
+                fileWriter.write("DependencyLogSize: " + "\n");
+                fileWriter.write("thread_id" + "\t" + "size (KB)" + "\n");
+                double totalSize = 0;
+                for (int i = 0; i < tthread; i ++) {
+                    totalSize = totalSize + RuntimePerformance.LogSize[i].getMean();
+                    fileWriter.write(i + "\t"+ RuntimePerformance.LogSize[i].getMean() + "\n");
+                }
+                fileWriter.write("DependencyTotalSize (KB): " + totalSize + "\n");
             }
             fileWriter.close();
         } catch (IOException e) {

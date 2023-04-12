@@ -1,10 +1,13 @@
 package scheduler.impl.og;
 
 
+import durability.logging.LoggingEntry.LogRecord;
+import durability.logging.LoggingStrategy.ImplLoggingManager.DependencyLoggingManager;
 import durability.logging.LoggingStrategy.ImplLoggingManager.LSNVectorLoggingManager;
 import durability.logging.LoggingStrategy.ImplLoggingManager.PathLoggingManager;
 import durability.logging.LoggingStrategy.ImplLoggingManager.WALManager;
 import durability.logging.LoggingStrategy.LoggingManager;
+import durability.struct.Logging.DependencyLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import profiler.MeasureTools;
@@ -62,6 +65,8 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
         } else if (loggingManager instanceof LSNVectorLoggingManager) {
             isLogging = LOGOption_lv;
             this.tpg.threadToLVLogRecord = ((LSNVectorLoggingManager) loggingManager).threadToLVLogRecord;
+        } else if (loggingManager instanceof DependencyLoggingManager){
+            isLogging = LOGOption_dependency;
         } else {
             isLogging = LOGOption_no;
         }
@@ -210,6 +215,22 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
      */
     public void execute(Operation operation, long mark_ID, boolean clean) {
         if (operation.getOperationState().equals(MetaTypes.OperationStateType.ABORTED)) {
+            if (isLogging == LOGOption_dependency) {
+                ((DependencyLog) operation.logRecord).setId(operation.bid + "." + operation.getTxnOpId());
+                for (Operation op : operation.fd_parents) {
+                    ((DependencyLog) operation.logRecord).addInEdge(op.bid + "." + op.getTxnOpId());
+                }
+                Operation ldParent = operation.getOC().getOperations().lower(operation);
+                if (ldParent != null)
+                    ((DependencyLog) operation.logRecord).addInEdge(ldParent.bid + "." + ldParent.getTxnOpId());
+                Operation ldChild = operation.getOC().getOperations().higher(operation);
+                if (ldChild != null)
+                    ((DependencyLog) operation.logRecord).addOutEdge(ldChild.bid + "." + ldChild.getTxnOpId());
+                for (Operation op : operation.fd_children) {
+                    ((DependencyLog) operation.logRecord).addOutEdge(op.bid + "." + op.getTxnOpId());
+                }
+                this.loggingManager.addLogRecord(operation.logRecord);
+            }
             return; // return if the operation is already aborted
         }
         int success;
@@ -299,7 +320,22 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
             throw new UnsupportedOperationException();
         }
         if (isLogging == LOGOption_wal) {
-            operation.logRecord.addUpdate(operation.d_record.content_.readPreValues(operation.bid));
+            ((LogRecord) operation.logRecord).addUpdate(operation.d_record.content_.readPreValues(operation.bid));
+            this.loggingManager.addLogRecord(operation.logRecord);
+        } else if (isLogging == LOGOption_dependency) {
+            ((DependencyLog) operation.logRecord).setId(operation.bid + "." + operation.getTxnOpId());
+            for (Operation op : operation.fd_parents) {
+                ((DependencyLog) operation.logRecord).addInEdge(op.bid + "." + op.getTxnOpId());
+            }
+            Operation ldParent = operation.getOC().getOperations().lower(operation);
+            if (ldParent != null)
+                ((DependencyLog) operation.logRecord).addInEdge(ldParent.bid + "." + ldParent.getTxnOpId());
+            Operation ldChild = operation.getOC().getOperations().higher(operation);
+            if (ldChild != null)
+                ((DependencyLog) operation.logRecord).addOutEdge(ldChild.bid + "." + ldChild.getTxnOpId());
+            for (Operation op : operation.fd_children) {
+                ((DependencyLog) operation.logRecord).addOutEdge(op.bid + "." + op.getTxnOpId());
+            }
             this.loggingManager.addLogRecord(operation.logRecord);
         }
     }

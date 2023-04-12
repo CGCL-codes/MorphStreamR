@@ -1,11 +1,11 @@
 package durability.struct.Logging;
 
-public class CommandLog implements LoggingEntry, Comparable<CommandLog> {
+public abstract class CommandLog implements LoggingEntry, Comparable<CommandLog> {
     private long LSN;
-    private String tableName;
-    private String key;
-    private String OperationFunction;
-    private Object parameter;
+    public String tableName;
+    public String key;
+    public String OperationFunction;
+    public Object parameter;
     public CommandLog(long LSN, String tableName, String key, String OperationFunction, Object parameter){
         this.LSN = LSN;
         this.tableName = tableName;

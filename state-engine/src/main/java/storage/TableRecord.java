@@ -79,5 +79,4 @@ public class TableRecord implements Comparable<TableRecord> {
         stringBuilder.append(snapshotRecord.toString());
         return stringBuilder.toString();
     }
-
 }

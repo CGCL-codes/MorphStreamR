@@ -26,20 +26,23 @@ import java.util.Vector;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * Write-Ahead-Log&State Checkpoint (WSC)
+ * Dependency Manager
+ * Relate work: Scaling distributed transaction processing and recovery based on dependency logging
+ * Paper Link: https://doi.org/10.1007/s00778-018-0500-2
  * */
-public class WalManager extends FTManager {
-    private final Logger LOG = LoggerFactory.getLogger(WalManager.class);
+public class DependencyManager extends FTManager {
+    private final Logger LOG = LoggerFactory.getLogger(DependencyManager.class);
     private int parallelNum;
-    //Call if write-ahead log persist complete
+    //Call if persist complete
     private ConcurrentHashMap<Long, List<FaultToleranceStatus>> callPersist = new ConcurrentHashMap<>();
     //Call if all tuples in this group committed
     private ConcurrentHashMap<Long, List<FaultToleranceStatus>> callCommit = new ConcurrentHashMap<>();
     private ConcurrentHashMap<Long, LoggingCommitInformation> registerCommit = new ConcurrentHashMap<>();
-    private String walMetaPath;
-    private String walPath;
+    private String dependencyMetaPath;
+    private String dependencyPath;
     private Queue<Long> uncommittedId = new ConcurrentLinkedQueue<>();
     private long pendingId;
+
     /** Used during recovery */
     private boolean isRecovery;
     private boolean isFailure;
@@ -47,19 +50,19 @@ public class WalManager extends FTManager {
     @Override
     public void initialize(Configuration config) throws IOException {
         this.parallelNum = config.getInt("parallelNum");
-        walPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("logging");
-        walMetaPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("logging") + OsUtils.OS_wrapper("metaData.log");
+        dependencyPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("logging");
+        dependencyMetaPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("logging") + OsUtils.OS_wrapper("metaData.log");
         isRecovery = config.getBoolean("isRecovery");
         isFailure = config.getBoolean("isFailure");
-        File walFile = new File(walPath);
-        if (!walFile.exists()) {
-            walFile.mkdirs();
+        File dependencyFile = new File(dependencyPath);
+        if (!dependencyFile.exists()) {
+            dependencyFile.mkdirs();
         }
         if (isRecovery) {
-            RecoveryHelperProvider.getCommittedLogMetaData(new File(walMetaPath), LoggingCommitInformation);
+            RecoveryHelperProvider.getCommittedLogMetaData(new File(dependencyMetaPath), LoggingCommitInformation);
         }
-        LOG.info("WalManager initialize successfully");
-        this.setName("WalManager");
+        LOG.info("DependencyManager initialize successfully");
+        this.setName("DependencyManager");
     }
 
     @Override
@@ -119,7 +122,7 @@ public class WalManager extends FTManager {
     public void Listener() throws IOException {
         while (running) {
             if (all_register()) {
-                LOG.info("WalManager received all register and commit log");
+                LOG.info("DependencyManager received all register and commit log");
                 logComplete(pendingId);
                 if (uncommittedId.size() != 0) {
                     this.pendingId = uncommittedId.poll();
@@ -131,17 +134,17 @@ public class WalManager extends FTManager {
         }
     }
     public void run() {
-        LOG.info("WalManager starts!");
+        LOG.info("DependencyManager starts!");
         try {
             Listener();
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
             if (!isFailure) {
-                File file = new File(this.walPath);
+                File file = new File(this.dependencyPath);
                 FileSystem.deleteFile(file);
             }
-            LOG.info("WalManager stops");
+            LOG.info("DependencyManager stops");
         }
     }
     private List<FaultToleranceStatus> initCall() {
@@ -167,7 +170,7 @@ public class WalManager extends FTManager {
 
     private void logComplete(long pendingId) throws IOException {
         LoggingCommitInformation loggingCommitInformation = this.registerCommit.get(pendingId);
-        LocalDataOutputStream localDataOutputStream = new LocalDataOutputStream(new File(this.walMetaPath));
+        LocalDataOutputStream localDataOutputStream = new LocalDataOutputStream(new File(this.dependencyMetaPath));
         DataOutputStream dataOutputStream = new DataOutputStream(localDataOutputStream);
         byte[] result = Serialize.serializeObject(loggingCommitInformation);
         int length = result.length;
@@ -175,6 +178,6 @@ public class WalManager extends FTManager {
         dataOutputStream.write(result);
         dataOutputStream.close();
         this.registerCommit.remove(pendingId);
-        LOG.info("WalManager commit the wal to the current.log");
+        LOG.info("dependencyManager commit the dependency to the current.log");
     }
 }

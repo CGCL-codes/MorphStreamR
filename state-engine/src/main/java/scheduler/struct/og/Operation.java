@@ -36,6 +36,7 @@ public class Operation extends AbstractOperation implements Comparable<Operation
 //    public HashMap<TableRecord, Integer> condition_source_to_index;
 
     public final Queue<Operation> fd_parents; // the functional dependencies ops to be executed in advance
+    public final Queue<Operation> fd_children; // the functional dependencies ops to be executed after this op.
 
     private int txnOpId = 0;
     // logical dependencies are to be stored for the purpose of abort handling
@@ -55,6 +56,7 @@ public class Operation extends AbstractOperation implements Comparable<Operation
         operationState = OperationStateType.BLOCKED;
         this.context = context;
         ld_descendant_operations = new ArrayDeque<>();
+        fd_children = new ConcurrentLinkedDeque<>();
     }
 
     @Override
@@ -93,6 +95,10 @@ public class Operation extends AbstractOperation implements Comparable<Operation
 //        assert condition_source_to_index.containsKey(pKey);
         fd_parents.add(parent);
     }
+    public void addFDChild(Operation child) {
+//        assert condition_source_to_index.containsKey(pKey);
+        fd_children.add(child);
+    }
 
     public void stateTransition(OperationStateType state) {
         operationState = state;
@@ -126,7 +132,6 @@ public class Operation extends AbstractOperation implements Comparable<Operation
     }
 
     public void addDescendant(Operation descendant) {
-//        oc.addDescendant(this, descendant);
         ld_descendant_operations.add(descendant);
     }
 
