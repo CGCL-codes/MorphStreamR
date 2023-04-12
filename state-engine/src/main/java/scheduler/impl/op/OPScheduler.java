@@ -104,22 +104,7 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
         // if the operation is in state aborted or committable or committed, we can bypass the execution
         if (operation.getOperationState().equals(MetaTypes.OperationStateType.ABORTED) || operation.isFailed) {
             //otherwise, skip (those already been tagged as aborted).
-            if (isLogging == LOGOption_dependency) {
-                ((DependencyLog) operation.logRecord).setId(operation.bid + "." + operation.txnOpId);
-                for (Operation op : operation.fd_parents) {
-                    ((DependencyLog) operation.logRecord).addInEdge(op.bid + "." + op.txnOpId);
-                }
-                for (Operation op : operation.td_parents) {
-                    ((DependencyLog) operation.logRecord).addInEdge(op.bid + "." + op.txnOpId);
-                }
-                for (Operation op : operation.fd_children) {
-                    ((DependencyLog) operation.logRecord).addOutEdge(op.bid + "." + op.txnOpId);
-                }
-                for (Operation op : operation.td_children) {
-                    ((DependencyLog) operation.logRecord).addOutEdge(op.bid + "." + op.txnOpId);
-                }
-                this.loggingManager.addLogRecord(operation.logRecord);
-            }
+            commitLog(operation);
             return;
         }
         int success;
@@ -203,26 +188,7 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
         } else {
             throw new UnsupportedOperationException();
         }
-        if (isLogging == LOGOption_wal) {
-            ((LogRecord) operation.logRecord).addUpdate(operation.d_record.content_.readPreValues(operation.bid));
-            this.loggingManager.addLogRecord(operation.logRecord);
-        } else if (isLogging == LOGOption_dependency) {
-            ((DependencyLog) operation.logRecord).setId(operation.bid + "." + operation.txnOpId);
-            for (Operation op : operation.fd_parents) {
-                ((DependencyLog) operation.logRecord).addInEdge(op.bid + "." + op.txnOpId);
-            }
-            for (Operation op : operation.td_parents) {
-                ((DependencyLog) operation.logRecord).addInEdge(op.bid + "." + op.txnOpId);
-            }
-            for (Operation op : operation.fd_children) {
-                ((DependencyLog) operation.logRecord).addOutEdge(op.bid + "." + op.txnOpId);
-            }
-            for (Operation op : operation.td_children) {
-                ((DependencyLog) operation.logRecord).addOutEdge(op.bid + "." + op.txnOpId);
-            }
-            this.loggingManager.addLogRecord(operation.logRecord);
-        }
-
+        commitLog(operation);
         assert operation.getOperationState() != MetaTypes.OperationStateType.EXECUTED;
     }
 
@@ -396,6 +362,27 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
         } while (!FINISHED(context));
         RESET(context);//
 //        MeasureTools.SCHEDULE_TIME_RECORD(threadId, num_events);
+    }
+    private void commitLog(Operation operation) {
+        if (isLogging == LOGOption_wal) {
+            ((LogRecord) operation.logRecord).addUpdate(operation.d_record.content_.readPreValues(operation.bid));
+            this.loggingManager.addLogRecord(operation.logRecord);
+        } else if (isLogging == LOGOption_dependency) {
+            ((DependencyLog) operation.logRecord).setId(operation.bid + "." + operation.txnOpId);
+            for (Operation op : operation.fd_parents) {
+                ((DependencyLog) operation.logRecord).addInEdge(op.bid + "." + op.txnOpId);
+            }
+            for (Operation op : operation.td_parents) {
+                ((DependencyLog) operation.logRecord).addInEdge(op.bid + "." + op.txnOpId);
+            }
+            for (Operation op : operation.fd_children) {
+                ((DependencyLog) operation.logRecord).addOutEdge(op.bid + "." + op.txnOpId);
+            }
+            for (Operation op : operation.td_children) {
+                ((DependencyLog) operation.logRecord).addOutEdge(op.bid + "." + op.txnOpId);
+            }
+            this.loggingManager.addLogRecord(operation.logRecord);
+        }
     }
 
 }

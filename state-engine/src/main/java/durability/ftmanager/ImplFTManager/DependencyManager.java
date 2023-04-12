@@ -140,10 +140,10 @@ public class DependencyManager extends FTManager {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-            if (!isFailure) {
-                File file = new File(this.dependencyPath);
-                FileSystem.deleteFile(file);
-            }
+//            if (!isFailure) {
+//                File file = new File(this.dependencyPath);
+//                FileSystem.deleteFile(file);
+//            }
             LOG.info("DependencyManager stops");
         }
     }

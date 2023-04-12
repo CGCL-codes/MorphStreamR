@@ -113,7 +113,6 @@ public class OPSContext extends OPSchedulerContext {
         }
 
         for (Operation op : ops) {
-            //TODO: we can track bid for different layer here
             assert op.hasValidDependencyLevel();
             dependencyLevel = op.getDependencyLevel();
             if (localMaxDLevel < dependencyLevel)

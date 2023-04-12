@@ -2,6 +2,7 @@ package durability.struct.Logging;
 
 import scheduler.struct.MetaTypes;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,12 +10,12 @@ import java.util.List;
 //bid.0 is the first operation in the transaction
 //bid.1 is the second operation in the transaction
 public class DependencyLog extends CommandLog{
-    String id;
+    public String id;
     List<String> inEdges = new ArrayList<>();
     List<String> outEdges = new ArrayList<>();
     boolean isAborted = false;
-    public DependencyLog(long LSN, String tableName, String key, String OperationFunction, Object parameter) {
-        super(LSN, tableName, key, OperationFunction, parameter);
+    public DependencyLog(long LSN, String tableName, String key, String OperationFunction, String[] conditions, String parameter) {
+        super(LSN, tableName, key, OperationFunction, conditions, parameter);
     }
     public void setId(String txn_id){
         this.id = txn_id;
@@ -24,6 +25,18 @@ public class DependencyLog extends CommandLog{
     }
     public void addOutEdge(String bid){
         outEdges.add(bid);
+    }
+    public List<String> getInEdges(){
+        return inEdges;
+    }
+    public List<String> getOutEdges(){
+        return outEdges;
+    }
+    public boolean isRoot(){
+        return inEdges.size() == 0;
+    }
+    public boolean isLeaf() {
+        return outEdges.size() == 0;
     }
 
     @Override
@@ -45,8 +58,49 @@ public class DependencyLog extends CommandLog{
         stringBuilder.append(";");
         stringBuilder.append(tableName).append(";");
         stringBuilder.append(key).append(";");
+        for (String ckeys : condition) {
+            stringBuilder.append(ckeys).append(",");
+        }
+        stringBuilder.append(";");
         stringBuilder.append(OperationFunction).append(";");
-        stringBuilder.append(parameter).append(";");
-        return super.toString();
+        stringBuilder.append(parameter.toString()).append(";");
+        if (isAborted) {
+            stringBuilder.append(1).append(";");
+        } else {
+            stringBuilder.append(0).append(";");
+        }
+        return stringBuilder.toString();
+    }
+    public static DependencyLog getDependencyFromString(String string) {
+        String[] strings = string.split(";");
+        String id = strings[0];
+        String inEdgesString = strings[1];
+        List<String> inEdges = new ArrayList<>();
+        for (String in : inEdgesString.split(",")) {
+            if (in.equals(""))
+                continue;
+            inEdges.add(in);
+        }
+        String outEdgesString = strings[2];
+        List<String> outEdges = new ArrayList<>();
+        for (String out : outEdgesString.split(",")) {
+            if (out.equals(""))
+                continue;
+            outEdges.add(out);
+        }
+        String tableName = strings[3];
+        String key = strings[4];
+        String[] condition = strings[5].split(",");
+        String operationFunction = strings[6];
+        String parameter = strings[7];
+        int isAborted = Integer.parseInt(strings[8]);
+        return new DependencyLog(id, tableName, key, inEdges, outEdges, condition, operationFunction, parameter, isAborted);
+    }
+    public DependencyLog(String id, String tableName, String key, List<String> inEdges, List<String> outEdges, String[] conditions, String operationFunction, String para, int isAborted) {
+        super(0,tableName,key,operationFunction,conditions, para);
+        this.inEdges = inEdges;
+        this.outEdges = outEdges;
+        this.id = id;
+        this.isAborted = isAborted == 1;
     }
 }

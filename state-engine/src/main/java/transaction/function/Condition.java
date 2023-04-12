@@ -22,4 +22,5 @@ public class Condition {
         arg2 = -1;
         arg3 = -1;
     }
+
 }

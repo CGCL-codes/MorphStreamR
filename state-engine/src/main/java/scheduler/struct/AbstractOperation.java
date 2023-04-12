@@ -56,7 +56,16 @@ public abstract class AbstractOperation {
         this.d_record = d_record;
         this.bid = bid;
         if (loggingRecord_type == LOGOption_dependency) {
-            this.logRecord = new DependencyLog(bid, table_name, d_record.record_.GetPrimaryKey(), accessType.toString(), function);
+            String[] conditions;
+            if (condition_records != null) {
+                conditions = new String[condition_records.length];
+                for (int i = 0; i < condition_records.length; i++) {
+                    conditions[i] = condition_records[i].record_.GetPrimaryKey();
+                }
+            } else {
+                conditions = new String[0];
+            }
+            this.logRecord = new DependencyLog(bid, table_name, d_record.record_.GetPrimaryKey(), function.getClass().getName(), conditions, function.toString());
         } else if (loggingRecord_type == LOGOption_wal) {
             this.logRecord = new LogRecord(table_name, bid, d_record.record_.GetPrimaryKey());
         }

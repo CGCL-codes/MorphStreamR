@@ -5,12 +5,14 @@ public abstract class CommandLog implements LoggingEntry, Comparable<CommandLog>
     public String tableName;
     public String key;
     public String OperationFunction;
-    public Object parameter;
-    public CommandLog(long LSN, String tableName, String key, String OperationFunction, Object parameter){
+    public String[] condition;
+    public String parameter;
+    public CommandLog(long LSN, String tableName, String key, String OperationFunction, String[] condition, String parameter){
         this.LSN = LSN;
         this.tableName = tableName;
         this.key = key;
         this.OperationFunction = OperationFunction;
+        this.condition = condition;
         this.parameter = parameter;
     }
 

@@ -37,7 +37,7 @@ public class CavaliaDatabase extends Database {
                 this.loggingManager = new LSNVectorLoggingManager(configuration);
                 break;
             case 5:
-                this.loggingManager = new DependencyLoggingManager(configuration);
+                this.loggingManager = new DependencyLoggingManager(this.storageManager.tables, configuration);
                 break;
             default :
                 throw new UnsupportedOperationException("No such kind of FTOption");
