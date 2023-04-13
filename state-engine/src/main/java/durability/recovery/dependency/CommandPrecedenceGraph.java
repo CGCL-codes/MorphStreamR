@@ -1,7 +1,6 @@
 package durability.recovery.dependency;
 
 import common.util.io.IOUtils;
-import durability.logging.LoggingStrategy.ImplLoggingManager.DependencyLoggingManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.SOURCE_CONTROL;

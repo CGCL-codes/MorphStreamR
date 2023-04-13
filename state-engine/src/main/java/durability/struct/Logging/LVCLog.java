@@ -6,6 +6,7 @@ import scheduler.struct.MetaTypes;
 import java.util.ArrayList;
 
 public class LVCLog extends CommandLog{
+    public long bid;
     public int threadId;
     public CommonMetaTypes.AccessType accessType;
     public boolean isAborted = false;
@@ -25,6 +26,9 @@ public class LVCLog extends CommandLog{
     public void setLSN(long LSN) {
         this.LSN = LSN;
     }
+    public int[] getLVs() {
+        return LVs;
+    }
 
     @Override
     public String toString() {
@@ -43,10 +47,11 @@ public class LVCLog extends CommandLog{
         stringBuilder.append(OperationFunction).append(";");//OperationFunction -5
         stringBuilder.append(parameter.toString()).append(";");//parameter -6
         if (isAborted) {
-            stringBuilder.append(1).append(";");
+            stringBuilder.append(1).append(";");//isAborted -7
         } else {
             stringBuilder.append(0).append(";");
         }
+        stringBuilder.append(bid).append(";");//bid -8
         return stringBuilder.toString();
     }
     public static LVCLog getLVCLogFromString(String log) {
@@ -67,6 +72,7 @@ public class LVCLog extends CommandLog{
         if (Integer.parseInt(logParts[7]) == 1) {
             lvcLog.isAborted = true;
         }
+        lvcLog.bid = Long.parseLong(logParts[8]);
         return lvcLog;
     }
 
@@ -74,5 +80,8 @@ public class LVCLog extends CommandLog{
     public void setVote(MetaTypes.OperationStateType vote) {
         if (vote == MetaTypes.OperationStateType.ABORTED)
             isAborted = true;
+    }
+    public int getLSN() {
+        return (int) LSN;
     }
 }
