@@ -128,12 +128,18 @@ public abstract class TxnManager implements ITxnManager {
         }
     }
     public static void initRecoveryScheduler(int FTOption, int threadCount, int numberOfStates, int app) {
-        recoveryScheduler = new RScheduler(threadCount, numberOfStates, app);
-        recoveryScheduler.initTPG(0);
-        if (loggingManager != null) {
-            recoveryScheduler.setLoggingManager(loggingManager);
+        switch (FTOption) {
+            case 3:
+                recoveryScheduler = new RScheduler(threadCount, numberOfStates, app);
+                recoveryScheduler.initTPG(0);
+                if (loggingManager != null) {
+                    recoveryScheduler.setLoggingManager(loggingManager);
+                }
+                scheduler = recoveryScheduler;
+                break;
+            default:
+                break;
         }
-        scheduler = recoveryScheduler;
     }
 
     /**

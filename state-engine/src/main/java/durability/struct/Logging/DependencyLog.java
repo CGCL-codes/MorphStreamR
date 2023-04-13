@@ -13,7 +13,7 @@ public class DependencyLog extends CommandLog{
     public String id;
     List<String> inEdges = new ArrayList<>();
     List<String> outEdges = new ArrayList<>();
-    boolean isAborted = false;
+    public boolean isAborted = false;
     public DependencyLog(long LSN, String tableName, String key, String OperationFunction, String[] conditions, String parameter) {
         super(LSN, tableName, key, OperationFunction, conditions, parameter);
     }
@@ -91,10 +91,16 @@ public class DependencyLog extends CommandLog{
         String tableName = strings[3];
         String key = strings[4];
         String[] condition = strings[5].split(",");
+        ArrayList<String> conditions = new ArrayList<>();
+        for (String c : condition) {
+            if (c.equals(""))
+                continue;
+            conditions.add(c);
+        }
         String operationFunction = strings[6];
         String parameter = strings[7];
         int isAborted = Integer.parseInt(strings[8]);
-        return new DependencyLog(id, tableName, key, inEdges, outEdges, condition, operationFunction, parameter, isAborted);
+        return new DependencyLog(id, tableName, key, inEdges, outEdges, conditions.toArray(new String[0]), operationFunction, parameter, isAborted);
     }
     public DependencyLog(String id, String tableName, String key, List<String> inEdges, List<String> outEdges, String[] conditions, String operationFunction, String para, int isAborted) {
         super(0,tableName,key,operationFunction,conditions, para);

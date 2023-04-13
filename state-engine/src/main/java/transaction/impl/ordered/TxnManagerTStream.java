@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import profiler.MeasureTools;
 import profiler.Metrics;
+import scheduler.impl.recovery.RScheduler;
 import storage.SchemaRecord;
 import storage.StorageManager;
 import storage.TableRecord;
@@ -80,9 +81,11 @@ public class TxnManagerTStream extends TxnManagerDedicatedAsy {
         MeasureTools.END_SCHEDULER_SWITCH_TIME_MEASURE(thread_Id);
     }
     public void switch_scheduler(int thread_Id, long mark_ID) {
-        String schedulerType = collector.getDecision(thread_Id);
-        this.SwitchScheduler(schedulerType, thread_Id, mark_ID);
-        this.switchContext(schedulerType);
-        SOURCE_CONTROL.getInstance().waitForSchedulerSwitch(thread_Id);
+        if (scheduler instanceof RScheduler) {
+            String schedulerType = collector.getDecision(thread_Id);
+            this.SwitchScheduler(schedulerType, thread_Id, mark_ID);
+            this.switchContext(schedulerType);
+            SOURCE_CONTROL.getInstance().waitForSchedulerSwitch(thread_Id);
+        }
     }
 }

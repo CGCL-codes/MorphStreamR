@@ -5,6 +5,7 @@ import common.collections.OsUtils;
 import common.io.ByteIO.DataInputView;
 import common.io.ByteIO.InputWithDecompression.NativeDataInputView;
 import common.io.ByteIO.InputWithDecompression.SnappyDataInputView;
+import common.util.io.IOUtils;
 import storage.TableRecord;
 import storage.datatype.DataBox;
 import transaction.function.AVG;
@@ -137,12 +138,10 @@ public class DependencyLoggingManager implements LoggingManager {
     }
     private void EXPLORE(CSContext context) {
         CommandTask next = Next(context);
-        if (next == null && !context.finished()) {
-            while (next == null) {
-                SOURCE_CONTROL.getInstance().waitForOtherThreads(context.threadId);
-                ProcessedToNextLevel(context);
-                next = Next(context);
-            }
+        while (next == null && !context.finished()) {//current level is all processed at the current thread.
+            SOURCE_CONTROL.getInstance().waitForOtherThreads(context.threadId);
+            ProcessedToNextLevel(context);
+            next = Next(context);
         }
         context.readyTask = next;
     }
@@ -180,6 +179,9 @@ public class DependencyLoggingManager implements LoggingManager {
     protected void ProcessedToNextLevel(CSContext context) {
         context.currentLevel += 1;
         context.currentLevelIndex = 0;
+        if (context.currentLevel == context.maxLevel)
+            IOUtils.println("Thread " + context.threadId + " has finished processing level " + (context.currentLevel - 1));
+        IOUtils.println("Thread " + context.threadId + " has " + context.scheduledTaskCount + " tasks in total");
     }
 
     @Override
@@ -211,10 +213,11 @@ public class DependencyLoggingManager implements LoggingManager {
         return key / delta;
     }
     private void SLExecute(CommandTask task) {
-        if (task == null) return;
+        if (task == null || task.dependencyLog.isAborted) return;
         String table = task.dependencyLog.tableName;
         String pKey = task.dependencyLog.key;
-        long bid = Long.parseLong(task.dependencyLog.id);
+        double value = Double.parseDouble(task.dependencyLog.id);
+        long bid = (long) Math.floor(value);
         if (task.dependencyLog.condition.length > 0) {
             SchemaRecord preValue = this.tables.get(table).SelectKeyRecord(task.dependencyLog.condition[0]).content_.readPreValues(bid);
             long sourceAccountBalance = preValue.getValues().get(1).getLong();

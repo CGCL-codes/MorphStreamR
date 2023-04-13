@@ -1,5 +1,9 @@
 package durability.recovery.dependency;
 
+import common.util.io.IOUtils;
+import durability.logging.LoggingStrategy.ImplLoggingManager.DependencyLoggingManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import utils.SOURCE_CONTROL;
 import utils.lib.ConcurrentHashMap;
 
@@ -7,6 +11,7 @@ import java.util.ArrayList;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 public class CommandPrecedenceGraph {
+    private static final Logger LOG = LoggerFactory.getLogger(CommandPrecedenceGraph.class);
     public ConcurrentHashMap<Integer, ConcurrentSkipListMap<String, CommandTask>> threadToTaskMap = new ConcurrentHashMap<>();
     public ConcurrentHashMap<Integer, CSContext> threadToCSContextMap = new ConcurrentHashMap<>();
     private int maxLevel = 0;//just for layered scheduling
@@ -35,6 +40,7 @@ public class CommandPrecedenceGraph {
             }
         }
         context.totalTaskCount = threadToTaskMap.get(context.threadId).size();
+        IOUtils.println("total task count: " + context.totalTaskCount + " thread id: " + context.threadId);
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.threadId);
         context.buildBucketsPerThread(threadToTaskMap.get(context.threadId).values(), roots);
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.threadId);
@@ -42,6 +48,7 @@ public class CommandPrecedenceGraph {
             for (CSContext csContext : threadToCSContextMap.values()) {
                 maxLevel = Math.max(maxLevel, csContext.maxLevel);
             }
+            LOG.info("max level: {}", maxLevel);
         }
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.threadId);
         context.maxLevel = maxLevel;
