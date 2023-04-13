@@ -26,20 +26,21 @@ import java.util.Vector;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * Dependency Manager
- * Relate work: Scaling distributed transaction processing and recovery based on dependency logging
- * Paper Link: https://doi.org/10.1007/s00778-018-0500-2
- * */
-public class DependencyManager extends FTManager {
-    private final Logger LOG = LoggerFactory.getLogger(DependencyManager.class);
+ * LSN Vector Manager
+ * Relate work: Taurus: Lightweight Parallel Logging for In-Memory Database Management Systems
+ * Paper Link: https://doi.org/10.14778/3425879.3425889
+ * Project Link: https://github.com/yuxiamit/DBx1000_logging
+ */
+public class LSNVectorManager extends FTManager {
+    private final Logger LOG = LoggerFactory.getLogger(LSNVectorManager.class);
     private int parallelNum;
     //Call if persist complete
     private ConcurrentHashMap<Long, List<FaultToleranceStatus>> callPersist = new ConcurrentHashMap<>();
     //Call if all tuples in this group committed
     private ConcurrentHashMap<Long, List<FaultToleranceStatus>> callCommit = new ConcurrentHashMap<>();
     private ConcurrentHashMap<Long, LoggingCommitInformation> registerCommit = new ConcurrentHashMap<>();
-    private String dependencyMetaPath;
-    private String dependencyPath;
+    private String LSNVectorMetaPath;
+    private String LSNVectorPath;
     private Queue<Long> uncommittedId = new ConcurrentLinkedQueue<>();
     private long pendingId;
 
@@ -50,19 +51,19 @@ public class DependencyManager extends FTManager {
     @Override
     public void initialize(Configuration config) throws IOException {
         this.parallelNum = config.getInt("parallelNum");
-        dependencyPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("logging");
-        dependencyMetaPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("logging") + OsUtils.OS_wrapper("metaData.log");
+        LSNVectorPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("logging");
+        LSNVectorMetaPath = config.getString("rootFilePath") + OsUtils.OS_wrapper("logging") + OsUtils.OS_wrapper("metaData.log");
         isRecovery = config.getBoolean("isRecovery");
         isFailure = config.getBoolean("isFailure");
-        File dependencyFile = new File(dependencyPath);
-        if (!dependencyFile.exists()) {
-            dependencyFile.mkdirs();
+        File LSNVectorFile = new File(LSNVectorPath);
+        if (!LSNVectorFile.exists()) {
+            LSNVectorFile.mkdirs();
         }
         if (isRecovery) {
-            RecoveryHelperProvider.getCommittedLogMetaData(new File(dependencyMetaPath), LoggingCommitInformation);
+            RecoveryHelperProvider.getCommittedLogMetaData(new File(LSNVectorMetaPath), LoggingCommitInformation);
         }
-        LOG.info("DependencyManager initialize successfully");
-        this.setName("DependencyManager");
+        LOG.info("LSNVectorManager initialize successfully");
+        this.setName("LSNVectorManager");
     }
 
     @Override
@@ -122,7 +123,7 @@ public class DependencyManager extends FTManager {
     public void Listener() throws IOException {
         while (running) {
             if (all_register()) {
-                LOG.info("DependencyManager received all register and commit log");
+                LOG.info("LSNVectorManager received all register and commit log");
                 logComplete(pendingId);
                 if (uncommittedId.size() != 0) {
                     this.pendingId = uncommittedId.poll();
@@ -134,17 +135,17 @@ public class DependencyManager extends FTManager {
         }
     }
     public void run() {
-        LOG.info("DependencyManager starts!");
+        LOG.info("LSNVectorManager starts!");
         try {
             Listener();
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-            if (!isFailure) {
-                File file = new File(this.dependencyPath);
-                FileSystem.deleteFile(file);
-            }
-            LOG.info("DependencyManager stops");
+//            if (!isFailure) {
+//                File file = new File(this.LSNVectorPath);
+//                FileSystem.deleteFile(file);
+//            }
+            LOG.info("LSNVectorManager stops");
         }
     }
     private List<FaultToleranceStatus> initCall() {
@@ -170,7 +171,7 @@ public class DependencyManager extends FTManager {
 
     private void logComplete(long pendingId) throws IOException {
         LoggingCommitInformation loggingCommitInformation = this.registerCommit.get(pendingId);
-        LocalDataOutputStream localDataOutputStream = new LocalDataOutputStream(new File(this.dependencyMetaPath));
+        LocalDataOutputStream localDataOutputStream = new LocalDataOutputStream(new File(this.LSNVectorMetaPath));
         DataOutputStream dataOutputStream = new DataOutputStream(localDataOutputStream);
         byte[] result = Serialize.serializeObject(loggingCommitInformation);
         int length = result.length;
@@ -178,6 +179,6 @@ public class DependencyManager extends FTManager {
         dataOutputStream.write(result);
         dataOutputStream.close();
         this.registerCommit.remove(pendingId);
-        LOG.info("dependencyManager commit the dependency to the current.log");
+        LOG.info("LSNVectorManager commit the LSNVector to the current.log");
     }
 }

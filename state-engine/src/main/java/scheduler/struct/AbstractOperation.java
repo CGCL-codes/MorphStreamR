@@ -3,6 +3,7 @@ package scheduler.struct;
 import content.common.CommonMetaTypes;
 import durability.logging.LoggingEntry.LogRecord;
 import durability.struct.Logging.DependencyLog;
+import durability.struct.Logging.LVCLog;
 import durability.struct.Logging.LoggingEntry;
 import storage.SchemaRecordRef;
 import storage.TableRecord;
@@ -39,7 +40,7 @@ public abstract class AbstractOperation {
     public volatile TableRecord[] condition_records;
     public Condition condition;
     public int[] success;
-    //required by Wal, Dependency logging.
+    //required by Write-ahead-logging, Dependency logging, LV logging.
     public LoggingEntry logRecord;
 
     public AbstractOperation(Function function, String table_name, SchemaRecordRef record_ref, TableRecord[] condition_records, Condition condition, int[] success,
@@ -68,6 +69,17 @@ public abstract class AbstractOperation {
             this.logRecord = new DependencyLog(bid, table_name, d_record.record_.GetPrimaryKey(), function.getClass().getName(), conditions, function.toString());
         } else if (loggingRecord_type == LOGOption_wal) {
             this.logRecord = new LogRecord(table_name, bid, d_record.record_.GetPrimaryKey());
+        } else if (loggingRecord_type == LOGOption_lv) {
+            String[] conditions;
+            if (condition_records != null) {
+                conditions = new String[condition_records.length];
+                for (int i = 0; i < condition_records.length; i++) {
+                    conditions[i] = condition_records[i].record_.GetPrimaryKey();
+                }
+            } else {
+                conditions = new String[0];
+            }
+            this.logRecord = new LVCLog(bid, table_name, d_record.record_.GetPrimaryKey(), function.getClass().getName(), conditions, function.toString());
         }
     }
 }
