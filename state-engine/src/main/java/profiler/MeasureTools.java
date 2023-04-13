@@ -540,6 +540,16 @@ public class MeasureTools {
                 }
                 fileWriter.write("DependencyTotalSize (KB): " + totalSize + "\n");
             }
+            if (ftOption == FTOption_LV) {
+                fileWriter.write("LSNVectorLoggingSize: " + "\n");
+                fileWriter.write("thread_id" + "\t" + "size (KB)" + "\n");
+                double totalSize = 0;
+                for (int i = 0; i < tthread; i ++) {
+                    totalSize = totalSize + RuntimePerformance.LogSize[i].getMean();
+                    fileWriter.write(i + "\t"+ RuntimePerformance.LogSize[i].getMean() + "\n");
+                }
+                fileWriter.write("LSNVectorLoggingSize (KB): " + totalSize + "\n");
+            }
             fileWriter.close();
         } catch (IOException e) {
             throw new RuntimeException(e);

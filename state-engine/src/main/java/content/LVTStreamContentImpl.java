@@ -25,7 +25,7 @@ public class LVTStreamContentImpl extends LVTStreamContent{
 
     @Override
     public SchemaRecord ReadAccess(long snapshotId, boolean clean) {
-        return null;
+        return readValues(snapshotId, clean);
     }
 
     @Override

@@ -8,6 +8,7 @@ import durability.logging.LoggingStrategy.ImplLoggingManager.PathLoggingManager;
 import durability.logging.LoggingStrategy.ImplLoggingManager.WALManager;
 import durability.logging.LoggingStrategy.LoggingManager;
 import durability.struct.Logging.DependencyLog;
+import durability.struct.Logging.LVCLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import profiler.MeasureTools;
@@ -64,7 +65,6 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
             this.tpg.threadToPathRecord = ((PathLoggingManager) loggingManager).threadToPathRecord;
         } else if (loggingManager instanceof LSNVectorLoggingManager) {
             isLogging = LOGOption_lv;
-            this.tpg.threadToLVLogRecord = ((LSNVectorLoggingManager) loggingManager).threadToLVLogRecord;
         } else if (loggingManager instanceof DependencyLoggingManager){
             isLogging = LOGOption_dependency;
         } else {
@@ -490,7 +490,9 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
         return false;
     }
     private void commitLog(Operation operation) {
-        if (isLogging == LOGOption_wal) {
+        if (isLogging == LOGOption_path) {
+            return;
+        } else if (isLogging == LOGOption_wal) {
             ((LogRecord) operation.logRecord).addUpdate(operation.d_record.content_.readPreValues(operation.bid));
             this.loggingManager.addLogRecord(operation.logRecord);
         } else if (isLogging == LOGOption_dependency) {
@@ -507,6 +509,10 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
             Operation ldChild = operation.getOC().getOperations().higher(operation);
             if (ldChild != null)
                 ((DependencyLog) operation.logRecord).addOutEdge(ldChild.bid + "." + ldChild.getTxnOpId());
+            this.loggingManager.addLogRecord(operation.logRecord);
+        } else if (isLogging == LOGOption_lv) {
+            ((LVCLog) operation.logRecord).setAccessType(operation.accessType);
+            ((LVCLog) operation.logRecord).setThreadId(operation.context.thisThreadId);
             this.loggingManager.addLogRecord(operation.logRecord);
         }
     }

@@ -28,7 +28,7 @@ public abstract class LVTStreamContent implements Content {
             writeLV[i] = 0;
         }
     }
-    private int[] elemWiseMax() {
+    public int[] elemWiseMax() {
         int[] max = new int[readLV.length];
         for (int i = 0; i < readLV.length; i++) {
             max[i] = Math.max(readLV[i], writeLV[i]);

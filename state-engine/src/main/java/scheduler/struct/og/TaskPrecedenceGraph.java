@@ -50,7 +50,6 @@ public class TaskPrecedenceGraph<Context extends OGSchedulerContext> {
     private final ConcurrentHashMap<String, TableOCs<OperationChain>> operationChains;//shared data structure.
     private final ConcurrentHashMap<Integer, Deque<OperationChain>> threadToOCs;
     public ConcurrentHashMap<Integer, PathRecord> threadToPathRecord;// Used path logging
-    public ConcurrentHashMap<Integer, LVLogRecord> threadToLVLogRecord;// Used LSN vector logging
     CyclicBarrier barrier;
     private int maxLevel = 0; // just for layered scheduling
     private final int app;

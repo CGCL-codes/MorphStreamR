@@ -46,7 +46,6 @@ public class TaskPrecedenceGraph<Context extends OPSchedulerContext> {
     private final ConcurrentHashMap<String, TableOCs> operationChains;//shared data structure.
     public final ConcurrentHashMap<Integer, Deque<OperationChain>> threadToOCs;
     public ConcurrentHashMap<Integer, PathRecord> threadToPathRecord;//Used by path logging
-    public ConcurrentHashMap<Integer, LVLogRecord> threadToLVLogRecord;//Used by LSN vector logging
     private int maxLevel = 0;//just for layered scheduling
 
     public int isLogging = LOGOption_no;

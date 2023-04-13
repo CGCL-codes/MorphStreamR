@@ -41,6 +41,7 @@ public class TableRecord implements Comparable<TableRecord> {
                 content_ = new LVTStreamContentImpl();
                 content_.updateValues(0, 0, false, record);//mvcc, value_list @ts=0
                 content_.updateMultiValues(0, 0, false, record);//mvcc, value_list @ts=0
+                ((LVTStreamContentImpl) content_).setLVs(tthread);
                 break;
             default:
                 throw new UnsupportedOperationException();

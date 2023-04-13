@@ -34,7 +34,7 @@ public class CavaliaDatabase extends Database {
                 this.loggingManager = new PathLoggingManager(configuration);
                 break;
             case 4:
-                this.loggingManager = new LSNVectorLoggingManager(configuration);
+                this.loggingManager = new LSNVectorLoggingManager(this.storageManager.tables, configuration);
                 break;
             case 5:
                 this.loggingManager = new DependencyLoggingManager(this.storageManager.tables, configuration);

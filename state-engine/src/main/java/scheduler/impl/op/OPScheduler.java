@@ -7,6 +7,7 @@ import durability.logging.LoggingStrategy.ImplLoggingManager.PathLoggingManager;
 import durability.logging.LoggingStrategy.ImplLoggingManager.WALManager;
 import durability.logging.LoggingStrategy.LoggingManager;
 import durability.struct.Logging.DependencyLog;
+import durability.struct.Logging.LVCLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import profiler.MeasureTools;
@@ -60,7 +61,6 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
             this.tpg.threadToPathRecord = ((PathLoggingManager) loggingManager).threadToPathRecord;
         } else if (loggingManager instanceof LSNVectorLoggingManager) {
             isLogging = LOGOption_lv;
-            this.tpg.threadToLVLogRecord = ((LSNVectorLoggingManager) loggingManager).threadToLVLogRecord;
         } else {
             isLogging = LOGOption_no;
         }
@@ -352,19 +352,15 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
         INITIALIZE(context);
 
         do {
-//            MeasureTools.BEGIN_SCHEDULE_EXPLORE_TIME_MEASURE(threadId);
             EXPLORE(context);
-//            MeasureTools.END_SCHEDULE_EXPLORE_TIME_MEASURE(threadId);
-//            MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(threadId);
             PROCESS(context, mark_ID);
-//            MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(threadId);
-//            MeasureTools.END_SCHEDULE_EXPLORE_TIME_MEASURE(threadId);
         } while (!FINISHED(context));
         RESET(context);//
-//        MeasureTools.SCHEDULE_TIME_RECORD(threadId, num_events);
     }
     private void commitLog(Operation operation) {
-        if (isLogging == LOGOption_wal) {
+        if (isLogging == LOGOption_path) {
+            return;
+        } else if (isLogging == LOGOption_wal) {
             ((LogRecord) operation.logRecord).addUpdate(operation.d_record.content_.readPreValues(operation.bid));
             this.loggingManager.addLogRecord(operation.logRecord);
         } else if (isLogging == LOGOption_dependency) {
@@ -381,6 +377,10 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
             for (Operation op : operation.td_children) {
                 ((DependencyLog) operation.logRecord).addOutEdge(op.bid + "." + op.txnOpId);
             }
+            this.loggingManager.addLogRecord(operation.logRecord);
+        } else if (isLogging == LOGOption_lv) {
+            ((LVCLog) operation.logRecord).setAccessType(operation.accessType);
+            ((LVCLog) operation.logRecord).setThreadId(operation.context.thisThreadId);
             this.loggingManager.addLogRecord(operation.logRecord);
         }
     }
