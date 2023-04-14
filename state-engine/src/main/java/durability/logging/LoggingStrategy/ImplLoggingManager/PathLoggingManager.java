@@ -51,7 +51,7 @@ public class PathLoggingManager implements LoggingManager {
     public PathLoggingManager(Configuration configuration) {
         loggingPath = configuration.getString("rootFilePath") + OsUtils.OS_wrapper("logging");
         parallelNum = configuration.getInt("parallelNum");
-        loggingOptions = new LoggingOptions(parallelNum, configuration.getString("compressionAlg"));
+        loggingOptions = new LoggingOptions(parallelNum, configuration.getString("compressionAlg"), configuration.getBoolean("isSelective"), configuration.getInt("maxItr"));
         for (int i = 0; i < parallelNum; i ++) {
             this.threadToPathRecord.put(i, new PathRecord());
         }
@@ -84,9 +84,11 @@ public class PathLoggingManager implements LoggingManager {
 
     @Override
     public void commitLog(long groupId, int partitionId, FTManager ftManager) throws IOException {
-        graphPartition(partitionId, 100);
-        for (String table : this.graphs.keySet()) {
-            this.threadToPathRecord.get(partitionId).tableToPlacing.put(table, this.graphs.get(table).getPartitions().get(partitionId));
+        if (this.loggingOptions.isSelectiveLog()) {
+            graphPartition(partitionId, loggingOptions.getMax_itr());
+            for (String table : this.graphs.keySet()) {
+                this.threadToPathRecord.get(partitionId).tableToPlacing.put(table, this.graphs.get(table).getPartitions().get(partitionId));
+            }
         }
         NIOPathStreamFactory nioPathStreamFactory = new NIOPathStreamFactory(this.loggingPath);
         DependencyMaintainResources dependencyMaintainResources = syncPrepareResource(partitionId);

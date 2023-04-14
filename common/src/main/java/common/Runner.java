@@ -200,6 +200,10 @@ public abstract class Runner implements IRunner {
     public Integer FTOption = 0;
     @Parameter(names = {"--compressionAlg"}, description = "compression Alg: ")
     public String  compressionAlg = "None";
+    @Parameter(names = {"--isSelective"}, description = "isSelective: ")
+    public int  isSelective = 0;
+    @Parameter(names = {"--maxItr"}, description = "Max itr for graph partition alg: ")
+    public int  maxItr = 0;
     @Parameter(names = {"--snapshotInterval"}, description = "Snapshot interval ")
     public Integer snapshotInterval = 0;
     @Parameter(names = {"--arrivalRate"}, description = "Arrival rate of event, 200k/s ")
@@ -374,6 +378,12 @@ public abstract class Runner implements IRunner {
         config.put("arrivalRate", arrivalRate);
         config.put("failureTime", failureTime);
         config.put("measureInterval", measureInterval);
+        if (isSelective == 0) {
+            config.put("isSelective", false);
+        } else {
+            config.put("isSelective", true);
+        }
+        config.put("maxItr",maxItr);
         if (arrivalControl == 0) {
             config.put("arrivalControl", false);
         } else {
