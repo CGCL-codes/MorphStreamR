@@ -141,10 +141,10 @@ public class LSNVectorManager extends FTManager {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-//            if (!isFailure) {
-//                File file = new File(this.LSNVectorPath);
-//                FileSystem.deleteFile(file);
-//            }
+            if (!isFailure) {
+                File file = new File(this.LSNVectorPath);
+                FileSystem.deleteFile(file);
+            }
             LOG.info("LSNVectorManager stops");
         }
     }

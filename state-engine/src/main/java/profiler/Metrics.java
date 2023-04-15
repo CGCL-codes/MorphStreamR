@@ -627,6 +627,7 @@ public class Metrics {
     }
 
     public static class RecoveryPerformance {
+        public static long[] recoveryItems = new long[kMaxThreadNum];
         public static boolean stopRecovery[] = new boolean[kMaxThreadNum];
         public static long[] startRecoveryTime = new long[kMaxThreadNum];
         public static long[] startReloadDatabaseTime = new long[kMaxThreadNum];
@@ -680,6 +681,7 @@ public class Metrics {
                 FirstExplore[i] = 0;
                 Caching[i] = 0;
                 SchedulerSwitch[i] = 0;
+                recoveryItems[i] = 0;
             }
         }
         public static void COMPUTE_RECOVERY_START(int thread_id) {

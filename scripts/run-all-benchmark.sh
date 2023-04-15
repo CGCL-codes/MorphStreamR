@@ -12,7 +12,7 @@ function ResetParameters() {
     deposit_ratio=65
     abort_ratio=0
     key_skewness=25
-    isCyclic=0
+    isCyclic=1
     isDynamic=1
     workloadType="default,Up_abort,Down_abort,unchanging"
   # workloadType="default,unchanging,unchanging,unchanging,Up_abort,Down_abort,unchanging,unchanging"
@@ -103,14 +103,27 @@ function runApplication() {
       --isSelective $isSelective \
       --maxItr $maxItr
 }
+function withRecovery() {
+    isFailure=1
+    isRecovery=0
+    runApplication
+    sleep 2s
+    isFailure=0
+    isRecovery=1
+    runApplication
+}
+function withoutRecovery() {
+  runApplication
+  sleep 2s
+}
 
 function application_runner() {
  ResetParameters
  app=StreamLedger
  for FTOption in 0 1 2 3 4 5
  do
- runApplication
- sleep 2s
+ #withoutRecovery
+ withRecovery
  done
 }
 application_runner

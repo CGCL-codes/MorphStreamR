@@ -10,6 +10,7 @@ public class SINKCombo extends MeasureSink {
     private static final long serialVersionUID = 5481794109405775823L;
     boolean start_measure = false;
     public long lastTask = -1;
+    public long startRecovery = -1;
     public boolean stopRecovery = false;
 
     public void start() {

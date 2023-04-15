@@ -260,6 +260,7 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
             counter = (int) snapshotResult.snapshotId;
         }
         this.sink.lastTask = this.ftManager.sinkAskLastTask(this.taskId);
+        this.sink.startRecovery = snapshotResult.snapshotId;
         return needReplay;
     }
     @Override
@@ -305,6 +306,12 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
                     marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration));
                     bolt.execute(marker);
                 }
+            }
+            if (counter == the_end) {
+                SOURCE_CONTROL.getInstance().oneThreadCompleted(taskId); // deregister all barriers
+                SOURCE_CONTROL.getInstance().finalBarrier(taskId);//sync for all threads to come to this line.
+                if (taskId == 0)
+                    sink.end(global_cnt);
             }
         }
     }

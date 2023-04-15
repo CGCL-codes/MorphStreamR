@@ -102,7 +102,9 @@ public class Operation extends AbstractOperation implements Comparable<Operation
 
     public void stateTransition(OperationStateType state) {
         operationState = state;
-        logRecord.setVote(state);
+        if (logRecord != null) {
+            logRecord.setVote(state);
+        }
     }
 
     public OperationStateType getOperationState() {

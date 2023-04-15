@@ -559,11 +559,15 @@ public class MeasureTools {
         try {
             File file = new File(directory + fileNameSuffix + ".overall");
             BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
-            fileWriter.write("RecoveryTimeReport (ms): " + "\n");
-            fileWriter.write("thread_id" + "\t" + "time" + "\n");
+            fileWriter.write("Recovery Overall: " + "\n");
+            double totalRecoveryTime = 0;
+            long totalRecoveryItemsCount = 0;
             for (int i = 0; i < tthread; i++) {
-                fileWriter.write(i + "\t" + RecoveryPerformance.RecoveryTime[i].getMean() + "\n");
+                totalRecoveryTime = totalRecoveryTime + RecoveryPerformance.RecoveryTime[i].getMean();
+                totalRecoveryItemsCount = totalRecoveryItemsCount + RecoveryPerformance.recoveryItems[i];
             }
+            fileWriter.write("replayTime (ms) \t recoveryCount\t throughput (k/s) \n");
+            fileWriter.write(totalRecoveryTime / tthread + "\t" + totalRecoveryItemsCount /tthread + "\t" + totalRecoveryItemsCount / totalRecoveryTime + "\n");
             double[] recoveryTime = new double[8];
             WriteRecoveryTimeBreakDown(tthread, recoveryTime);
             WriteReplayTimeBreakDown(tthread, recoveryTime);
@@ -592,7 +596,7 @@ public class MeasureTools {
             File file = new File(directory + fileNameSuffix + ".overall");
             BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
             fileWriter.write("RecoveryTimeBreakDownReport (ms): " + "\n");
-            fileWriter.write("thread_id\t reloadDatabaseTime\t redoWriteAheadLogTime\t reloadInputTime\t replayTime\n");
+            fileWriter.write("reloadDatabaseTime\t redoWriteAheadLogTime\t reloadInputTime\t replayTime\n");
             double totalReloadDatabaseTime = 0;
             double totalRedoWriteAheadLogTime = 0;
             double totalReloadInputTime = 0;
