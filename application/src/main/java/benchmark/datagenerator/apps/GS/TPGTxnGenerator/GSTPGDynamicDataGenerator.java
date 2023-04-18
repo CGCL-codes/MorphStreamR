@@ -164,7 +164,7 @@ public class GSTPGDynamicDataGenerator extends DynamicWorkloadGenerator {
     }
 
     private GSEvent randomEvent() {
-        int[] keys = new int[NUM_ACCESS*Transaction_Length];
+        int[] keys = new int[NUM_ACCESS * Transaction_Length];
         int writeLevel = -1;
         if (!isUnique) {
             if (enable_states_partition) {
@@ -177,7 +177,7 @@ public class GSTPGDynamicDataGenerator extends DynamicWorkloadGenerator {
                             if (offset % NUM_ACCESS == 0) {
                                 // make sure this one is different with other write key
                                 for (int k = 0; k < j; k++) {
-                                    while (keys[k*NUM_ACCESS] == key) {
+                                    while (keys[k * NUM_ACCESS] == key) {
                                         key = getKey(partitionedKeyZipf[partitionId], partitionId, generatedKeys);
                                     }
                                 }

@@ -16,6 +16,7 @@ import java.util.List;
  */
 public abstract class DynamicWorkloadGenerator extends DataGenerator {
     public int abort_num = 0;
+    public int t_num = 0;
     protected List<String> tranToDecisionConf =new ArrayList<>();
     protected DynamicDataGeneratorConfig dynamicDataConfig;
     public DynamicWorkloadGenerator(DynamicDataGeneratorConfig dynamicDataConfig) {
@@ -39,6 +40,8 @@ public abstract class DynamicWorkloadGenerator extends DataGenerator {
                     switchConfiguration(type);
                 }
                 IOUtils.println("Abort: " + abort_num);
+                IOUtils.println("T: " + t_num);
+                t_num = 0;
                 abort_num = 0;
             }
             generateTuple();

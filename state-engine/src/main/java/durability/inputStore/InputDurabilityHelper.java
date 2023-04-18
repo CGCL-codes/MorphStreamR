@@ -16,6 +16,6 @@ public abstract class InputDurabilityHelper {
     public boolean isCompression = true;
     public HistoryViews historyViews = new HistoryViews();
 
-    public abstract void reloadInput(File inputFile, Queue<Object> lostEvents, long redoOffset) throws IOException, ExecutionException, InterruptedException;
+    public abstract void reloadInput(File inputFile, Queue<Object> lostEvents, long redoOffset, long startOffset, int interval) throws IOException, ExecutionException, InterruptedException;
     public abstract void storeInput(Object[] myevents, long currentOffset, int interval, String inputStoreCurrentPath) throws IOException, ExecutionException, InterruptedException;
 }

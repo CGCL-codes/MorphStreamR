@@ -160,7 +160,7 @@ public class OPBFSAScheduler<Context extends OPSAContext> extends OPBFSScheduler
         for (Operation failedOp : failedOperations) {
             if (bid == failedOp.bid) { //identify bids to be aborted (abort operation in one state transaction).
                 operation.stateTransition(MetaTypes.OperationStateType.ABORTED);
-                if (this.isLogging == LOGOption_path)
+                if (this.isLogging == LOGOption_path && operation.txnOpId == 0)
                     this.tpg.threadToPathRecord.get(context.thisThreadId).addAbortBid(operation.bid);
                 markAny = true;
             }

@@ -1,6 +1,5 @@
 package common.faulttolerance.inputReload;
 
-import benchmark.datagenerator.Event;
 import common.collections.Configuration;
 import common.collections.OsUtils;
 import common.io.ByteIO.SyncFileAppender;
@@ -152,11 +151,11 @@ public class SLInputDurabilityHelper extends InputDurabilityHelper {
         }
     }
     @Override
-    public void reloadInput(File inputFile, Queue<Object> lostEvents, long redoOffset) throws IOException, ExecutionException, InterruptedException {
+    public void reloadInput(File inputFile, Queue<Object> lostEvents, long redoOffset, long startOffset, int interval) throws IOException, ExecutionException, InterruptedException {
         if (isCompression) {
-            reloadInputWithCompression(inputFile, lostEvents, redoOffset);
+            reloadInputWithCompression(inputFile, lostEvents, redoOffset, startOffset, interval);
         } else {
-            reloadInputWithoutCompression(inputFile, lostEvents, redoOffset);
+            reloadInputWithoutCompression(inputFile, lostEvents, redoOffset, startOffset, interval);
         }
     }
     private void storeInputWithoutCompression(Object[] myevents, long currentOffset, int interval, File inputFile) throws IOException, ExecutionException, InterruptedException {
@@ -309,7 +308,7 @@ public class SLInputDurabilityHelper extends InputDurabilityHelper {
             MeasureTools.END_PERSIST_TIME_MEASURE(this.taskId);
         }
     }
-    private void reloadInputWithCompression(File inputFile, Queue<Object> lostEvents, long redoOffset) throws IOException, ExecutionException, InterruptedException {
+    private void reloadInputWithCompression(File inputFile, Queue<Object> lostEvents, long redoOffset, long startOffset, int interval) throws IOException, ExecutionException, InterruptedException {
         Path path = Paths.get(inputFile.getPath());
         AsynchronousFileChannel afc = AsynchronousFileChannel.open(path, READ);
         int fileSize = (int) afc.size();
@@ -341,7 +340,7 @@ public class SLInputDurabilityHelper extends InputDurabilityHelper {
                 ByteBuffer buffer8 = getByteBuffer(dataBuffer, position7, position8);//destinationAssetId only for Transfer Event
 
                 //Align to offset
-                while(redoOffset != 0) {
+                while(startOffset != redoOffset) {
                     int type = intDecoders[0].readInt(buffer0);
                     timestampDecoder.readLong(buffer1);
                     longDecoders[0].readLong(buffer2);
@@ -353,16 +352,23 @@ public class SLInputDurabilityHelper extends InputDurabilityHelper {
                         intDecoders[3].readInt(buffer7);
                         intDecoders[4].readInt(buffer8);
                     }
-                    redoOffset --;
+                    startOffset ++;
                 }
+                int number = 0;
+                long groupId = startOffset + interval;
                 while (intDecoders[0].hasNext(buffer0)) {
+                    number ++;
+                    if (number == interval) {
+                        groupId += interval;
+                        number = 0;
+                    }
                     TxnEvent event;
                     int[] p_bids = new int[tthread];
                     HashMap<Integer, Integer> pids = new HashMap<>();
                     int type = intDecoders[0].readInt(buffer0);
                     long timestamp = timestampDecoder.readLong(buffer1);
                     long bid = longDecoders[0].readLong(buffer2);
-                    if (historyViews.inspectAbortView(bid)) {
+                    if (historyViews.inspectAbortView(groupId, this.taskId, bid)) {
                         continue;
                     }
                     int sourceAccountId = intDecoders[1].readInt(buffer3);
@@ -409,27 +415,45 @@ public class SLInputDurabilityHelper extends InputDurabilityHelper {
                 }
             }
         } else {
+            while(startOffset != redoOffset) {
+                stringDecoder.readBinary(dataBuffer);
+                startOffset ++;
+            }
+            int number = 0;
+            long groupId = startOffset + interval;
             while (stringDecoder.hasNext(dataBuffer)) {
                 String eventString = stringDecoder.readBinary(dataBuffer).getStringValue();
-                TxnEvent event = getEventFromString(eventString);
+                TxnEvent event = getEventFromString(eventString, groupId);
                 if (event != null) {
                     lostEvents.add(event);
+                }
+                number ++;
+                if (number == interval) {
+                    groupId += interval;
+                    number = 0;
                 }
             }
         }
     }
-    private void reloadInputWithoutCompression(File inputFile, Queue<Object> lostEvents, long redoOffset) throws IOException {
+    private void reloadInputWithoutCompression(File inputFile, Queue<Object> lostEvents, long redoOffset, long startOffset, int interval) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(inputFile)));
-        while(redoOffset != 0) {
+        while(startOffset != redoOffset) {
             reader.readLine();
-            redoOffset --;
+            startOffset ++;
         }
+        int number = 0;
+        long groupId = startOffset + interval;
         String txn = reader.readLine();
         int[] p_bids = new int[tthread];
         while (txn != null) {
-            TxnEvent event = getEventFromString(txn);
+            TxnEvent event = getEventFromString(txn, groupId);
             if (event != null) {
                 lostEvents.add(event);
+            }
+            number ++;
+            if (number == interval) {
+                groupId += interval;
+                number = 0;
             }
             txn = reader.readLine();
         }
@@ -441,10 +465,10 @@ public class SLInputDurabilityHelper extends InputDurabilityHelper {
         dataBuffer.limit(position2 + 40);
         return dataBuffer.slice();
     }
-    private TxnEvent getEventFromString(String txn) {
+    private TxnEvent getEventFromString(String txn, long groupId) {
         int[] p_bids = new int[tthread];
         String[] split = txn.split(",");
-        if (historyViews.inspectAbortView(Integer.parseInt(split[0]))) {
+        if (historyViews.inspectAbortView(groupId, this.taskId, Integer.parseInt(split[0]))) {
             return null;
         }
         int npid = (int) (Long.parseLong(split[1]) / partitionOffset);

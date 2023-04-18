@@ -196,13 +196,17 @@ public class LSNVectorLoggingManager implements LoggingManager {
     }
 
     @Override
-    public boolean inspectAbortView(long bid) {
+    public boolean inspectAbortView(long groupId, int threadId, long bid) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public Object inspectDependencyView(long groupId, String table, String from, String to, long bid) {
         throw new UnsupportedOperationException();
+    }
+    @Override
+    public int inspectAbortNumber(long groupId, int threadId) {
+        throw new UnsupportedOperationException("does not support inspectAbortNumber");
     }
 
     @Override

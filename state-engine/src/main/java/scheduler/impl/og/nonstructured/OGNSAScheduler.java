@@ -7,6 +7,8 @@ import scheduler.struct.og.OperationChain;
 import transaction.impl.ordered.MyList;
 import utils.SOURCE_CONTROL;
 
+import static utils.FaultToleranceConstants.LOGOption_path;
+
 public class OGNSAScheduler extends AbstractOGNSScheduler<OGNSAContext> {
 
     public final ExecutableTaskListener executableTaskListener = new ExecutableTaskListener();
@@ -33,7 +35,11 @@ public class OGNSAScheduler extends AbstractOGNSScheduler<OGNSAContext> {
      */
     @Override
     public void EXPLORE(OGNSAContext context) {
-        context.partitionStateManager.handleStateTransitions();
+        if (isLogging == LOGOption_path) {
+            context.partitionStateManager.handleStateTransitionsWithAbortTracking(this.tpg.threadToPathRecord.get(context.thisThreadId));
+        } else {
+            context.partitionStateManager.handleStateTransitions();
+        }
     }
 
     @Override

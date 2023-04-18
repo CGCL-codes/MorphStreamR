@@ -3,7 +3,7 @@ source dir.sh || exit
 function ResetParameters() {
     app="StreamLedger"
     checkpointInterval=20480
-    tthread=24
+    tthread=20
     scheduler="OP_BFS_A"
     defaultScheduler="OP_BFS_A"
     CCOption=3 #TSTREAM
@@ -21,7 +21,7 @@ function ResetParameters() {
     rootFilePath="${RSTDIR}"
     shiftRate=1
     multicoreEvaluation=1
-    maxThreads=24
+    maxThreads=20
     totalEvents=`expr $checkpointInterval \* $maxThreads \* 4 \* $shiftRate`
 
     snapshotInterval=4
@@ -30,9 +30,9 @@ function ResetParameters() {
     FTOption=0
     isRecovery=0
     isFailure=0
-    failureTime=12000
+    failureTime=25000
     measureInterval=100
-    compressionAlg="Dictionary"
+    compressionAlg="None"
     isSelective=0
     maxItr=0
 }
@@ -120,7 +120,7 @@ function withoutRecovery() {
 function application_runner() {
  ResetParameters
  app=StreamLedger
- for FTOption in 0 1 2 3 4 5
+ for FTOption in 3
  do
  #withoutRecovery
  withRecovery

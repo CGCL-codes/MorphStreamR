@@ -42,6 +42,7 @@ public abstract class AbstractOperation {
     public int[] success;
     //required by Write-ahead-logging, Dependency logging, LV logging.
     public LoggingEntry logRecord;
+    public boolean isCommit = false;//It means that this operation has been added to LoggingManager.
 
     public AbstractOperation(Function function, String table_name, SchemaRecordRef record_ref, TableRecord[] condition_records, Condition condition, int[] success,
                              TxnContext txn_context, CommonMetaTypes.AccessType accessType, TableRecord s_record, TableRecord d_record, long bid) {

@@ -152,6 +152,7 @@ public class SLTPGDynamicDataGenerator extends DynamicWorkloadGenerator {
             event = randomDepositEvent();
         } else {
             event = randomTransferEvent();
+            t_num ++;
         }
         events.add(event);
     }

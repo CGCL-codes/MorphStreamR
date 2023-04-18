@@ -6,6 +6,7 @@ import scheduler.context.og.OGNSContext;
 import scheduler.struct.MetaTypes;
 import scheduler.struct.og.Operation;
 import scheduler.struct.og.OperationChain;
+import utils.FaultToleranceConstants;
 import utils.SOURCE_CONTROL;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -81,7 +82,9 @@ public class OGNSScheduler extends AbstractOGNSScheduler<OGNSContext> {
     protected void checkTransactionAbort(Operation operation, OperationChain operationChain) {
         // in coarse-grained algorithms, we will not handle transaction abort gracefully, just update the state of the operation
         operation.stateTransition(MetaTypes.OperationStateType.ABORTED);
-        this.tpg.threadToPathRecord.get(operationChain.context.thisThreadId).addAbortBid(operation.bid);
+        if (isLogging == FaultToleranceConstants.LOGOption_path && operation.getTxnOpId() == 0) {
+            this.tpg.threadToPathRecord.get(operationChain.context.thisThreadId).addAbortBid(operation.bid);
+        }
         // save the abort information and redo the batch.
         needAbortHandling.compareAndSet(false, true);
     }

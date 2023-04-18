@@ -10,11 +10,9 @@ public class AbortViews {
             threadToAbortList.put(threadId, new ArrayList<>());
         threadToAbortList.get(threadId).add(bid);
     }
-    public boolean inspectView(long bid) {
-        for (int threadId : threadToAbortList.keySet()) {
-            if (threadToAbortList.get(threadId).contains(bid))
-                return true;
-        }
-        return false;
+    public boolean inspectView(int threadId, long bid) {
+        if (!threadToAbortList.containsKey(threadId))
+            return false;
+        return threadToAbortList.get(threadId).contains(bid);
     }
 }

@@ -42,6 +42,9 @@ public class Node implements Serializable {
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
         for (Map.Entry<String, Vector<DependencyResult>> des:this.dependencyEdges.entrySet()) {
+            if (des.getValue().size() == 0) {
+                continue;
+            }
             stringBuilder.append(des.getKey());
             stringBuilder.append(",");
             for (DependencyResult result : des.getValue()) {

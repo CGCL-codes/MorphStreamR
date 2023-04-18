@@ -567,7 +567,7 @@ public class MeasureTools {
                 totalRecoveryItemsCount = totalRecoveryItemsCount + RecoveryPerformance.recoveryItems[i];
             }
             fileWriter.write("replayTime (ms) \t recoveryCount\t throughput (k/s) \n");
-            fileWriter.write(totalRecoveryTime / tthread + "\t" + totalRecoveryItemsCount /tthread + "\t" + totalRecoveryItemsCount / totalRecoveryTime + "\n");
+            fileWriter.write(totalRecoveryTime / tthread + "\t" + totalRecoveryItemsCount /tthread + "\t" + totalRecoveryItemsCount / totalRecoveryTime / tthread + "\n");
             double[] recoveryTime = new double[8];
             WriteRecoveryTimeBreakDown(tthread, recoveryTime);
             WriteReplayTimeBreakDown(tthread, recoveryTime);

@@ -22,6 +22,7 @@ import utils.SOURCE_CONTROL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import static content.common.CommonMetaTypes.AccessType.*;
 import static utils.FaultToleranceConstants.*;
@@ -128,6 +129,7 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
                 int taskId = getTaskId(String.valueOf(key), delta);
                 OperationChain oc = tpg.getOperationChains().get(table).threadOCsMap.get(taskId).holder_v1.get(String.valueOf(key));
                 context.allocatedTasks.add(oc);
+                context.totalTasks = context.totalTasks + oc.operations.size();
             }
         }
     }
@@ -137,20 +139,24 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
         OperationChain oc = context.ready_oc;
         boolean continueFlag = true;
         while (continueFlag && oc.operations.size() > 0){
-            Operation op = oc.operations.first();
-            if (op.pKey.equals(oc.getPrimaryKey())) {
-                if (op.pdCount.get() == 0) {
-                    MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(context.thisThreadId);
-                    execute(op, mark_ID, false);
-                    MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(context.thisThreadId);
-                    oc.operations.pollFirst();
+            try {
+                Operation op = oc.operations.first();
+                if (op.pKey.equals(oc.getPrimaryKey())) {
+                    if (op.pdCount.get() == 0) {
+                        MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(context.thisThreadId);
+                        execute(op, mark_ID, false);
+                        MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(context.thisThreadId);
+                        oc.operations.pollFirst();
+                    } else {
+                        continueFlag = false;
+                        context.wait_op = op;
+                    }
                 } else {
-                    continueFlag = false;
-                    context.wait_op = op;
+                    op.pdCount.decrementAndGet();
+                    oc.operations.pollFirst();
                 }
-            } else {
-                op.pdCount.decrementAndGet();
-                oc.operations.pollFirst();
+            } catch (NoSuchElementException e) {
+                System.out.println("No such element");
             }
         }
     }
@@ -202,7 +208,7 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
                     op.incrementPd(OCFromConditionSource);
                     //Add the proxy operations
                     OCFromConditionSource.addOperation(op);
-                    //Add dependent
+                    //Add dependent Oc
                     OCFromConditionSource.addDependentOCs(curOC);
                 }
             }

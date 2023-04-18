@@ -131,8 +131,12 @@ public class WALManager implements LoggingManager {
     }
 
     @Override
-    public boolean inspectAbortView(long bid) {
+    public boolean inspectAbortView(long groupId, int threadId, long bid) {
         return false;
+    }
+    @Override
+    public int inspectAbortNumber(long groupId, int threadId) {
+        throw new UnsupportedOperationException("does not support inspectAbortNumber");
     }
 
     @Override

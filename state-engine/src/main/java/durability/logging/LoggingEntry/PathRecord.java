@@ -2,6 +2,8 @@ package durability.logging.LoggingEntry;
 
 import common.util.graph.Edge;
 import common.util.graph.Graph;
+import common.util.io.IOUtils;
+import durability.struct.Logging.DependencyResult;
 import durability.struct.Logging.Node;
 import durability.struct.Logging.LoggingEntry;
 import durability.struct.Logging.keyToDependencies;
@@ -10,6 +12,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class PathRecord implements Serializable {
@@ -63,13 +66,26 @@ public class PathRecord implements Serializable {
         for (long bid : abortBids) {
             sb.append(bid).append(";");
         }
+//        IOUtils.println("abortBids: " + abortBids.size());
         sb.append(" ");
+        int size = 0;
         for (Map.Entry<String, keyToDependencies> logs : this.dependencyEdges.entrySet()) {
+            for (Node node : logs.getValue().holder.values()) {
+                if (node.isVisited.get()) {
+                    for (Vector<DependencyResult> edge : node.dependencyEdges.values()) {
+                        size += edge.size();
+                    }
+                }
+            }
+            String values = logs.getValue().toString();
+            if (values.length() == 0)
+                continue;
             sb.append(logs.getKey());
             sb.append(";");
-            sb.append(logs.getValue().toString());
+            sb.append(values);
             sb.append(" ");
         }
+//        IOUtils.println("size: " + size );
         return sb.toString();
     }
 }

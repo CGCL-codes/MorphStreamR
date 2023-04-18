@@ -16,9 +16,10 @@ import utils.SOURCE_CONTROL;
 import java.util.LinkedList;
 import java.util.concurrent.BrokenBarrierException;
 
-import static common.CONTROL.enable_log;
 import static content.common.CommonMetaTypes.AccessType.INSERT_ONLY;
+import static content.common.ContentCommon.loggingRecord_type;
 import static transaction.context.TxnAccess.Access;
+import static utils.FaultToleranceConstants.LOGOption_path;
 
 public class TxnManagerTStream extends TxnManagerDedicatedAsy {
     private static final Logger log = LoggerFactory.getLogger(TxnManagerTStream.class);
@@ -72,11 +73,13 @@ public class TxnManagerTStream extends TxnManagerDedicatedAsy {
         SOURCE_CONTROL.getInstance().postStateAccessBarrier(thread_Id);
         //Sync to switch scheduler(more overhead) decide by the mark_ID or runtime information
         MeasureTools.BEGIN_SCHEDULER_SWITCH_TIME_MEASURE(thread_Id);
-        if (enableDynamic && collector.timeToSwitch(mark_ID, thread_Id, currentSchedulerType.get(thread_Id)) && Metrics.RecoveryPerformance.stopRecovery[thread_Id]) {
-            String schedulerType = collector.getDecision(thread_Id);
-            this.SwitchScheduler(schedulerType, thread_Id, mark_ID);
-            this.switchContext(schedulerType);
-            SOURCE_CONTROL.getInstance().waitForSchedulerSwitch(thread_Id);
+        if (enableDynamic && collector.timeToSwitch(mark_ID, thread_Id, currentSchedulerType.get(thread_Id))) {
+            if (loggingRecord_type != LOGOption_path || Metrics.RecoveryPerformance.stopRecovery[thread_Id]) {
+                String schedulerType = collector.getDecision(thread_Id);
+                this.SwitchScheduler(schedulerType, thread_Id, mark_ID);
+                this.switchContext(schedulerType);
+                SOURCE_CONTROL.getInstance().waitForSchedulerSwitch(thread_Id);
+            }
         }
         MeasureTools.END_SCHEDULER_SWITCH_TIME_MEASURE(thread_Id);
     }

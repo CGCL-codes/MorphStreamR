@@ -95,7 +95,7 @@ public class SLBolt_ts extends SLBolt {
                     }
                     TRANSFER_REQUEST_CORE();
                 }
-                if (Objects.equals(in.getMarker().getMessage(), "commit_early")) {
+                if (Objects.equals(in.getMarker().getMessage(), "commit_early") || Objects.equals(in.getMarker().getMessage(), "commit_snapshot_early")) {
                     this.loggingManager.boltRegister(this.thread_Id, FaultToleranceConstants.FaultToleranceStatus.Commit, new LoggingResult(in.getMarker().getSnapshotId(), this.thread_Id, null));
                 }
                 BEGIN_POST_TIME_MEASURE(thread_Id);
@@ -228,10 +228,10 @@ public class SLBolt_ts extends SLBolt {
             SchemaRecord dstAccountValueRecord = event.dst_account_value.getRecord();
 
             if (srcAccountValueRecord == null) {
-                if (enable_log) LOG.debug(event.getBid() + " | " + event.getSourceAccountId());
+      //          if (enable_log) LOG.debug(event.getBid() + " | " + event.getSourceAccountId());
             }
             if (dstAccountValueRecord == null) {
-                if (enable_log) LOG.debug(event.getBid() + " | " + event.getTargetAccountId());
+//                if (enable_log) LOG.debug(event.getBid() + " | " + event.getTargetAccountId());
             }
 
             if (srcAccountValueRecord != null && dstAccountValueRecord != null)

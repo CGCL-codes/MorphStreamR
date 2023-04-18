@@ -180,7 +180,7 @@ public class OGBFSAScheduler extends AbstractOGBFSScheduler<OGSAContext> {
         for (Operation failedOp : failedOperations) {
             if (bid == failedOp.bid) {
                 operation.stateTransition(MetaTypes.OperationStateType.ABORTED);
-                if (this.isLogging == LOGOption_path)
+                if (this.isLogging == LOGOption_path && operation.getTxnOpId() == 0)
                     this.tpg.threadToPathRecord.get(context.thisThreadId).addAbortBid(operation.bid);
                 markAny = true;
             }

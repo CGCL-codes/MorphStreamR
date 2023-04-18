@@ -8,10 +8,8 @@ import common.io.ByteIO.InputWithDecompression.SnappyDataInputView;
 import common.util.io.IOUtils;
 import storage.TableRecord;
 import storage.datatype.DataBox;
-import transaction.function.AVG;
 import transaction.function.DEC;
 import transaction.function.INC;
-import transaction.function.SUM;
 import durability.ftmanager.FTManager;
 import durability.logging.LoggingResource.ImplLoggingResources.DependencyLoggingResources;
 import durability.logging.LoggingResult.Attachment;
@@ -190,8 +188,13 @@ public class DependencyLoggingManager implements LoggingManager {
     }
 
     @Override
-    public boolean inspectAbortView(long bid) {
+    public boolean inspectAbortView(long groupId, int threadId, long bid) {
         throw new UnsupportedOperationException("DependencyLoggingManager does not support inspectAbortView");
+    }
+
+    @Override
+    public int inspectAbortNumber(long groupId, int threadId) {
+        throw new UnsupportedOperationException("DependencyLoggingManager does not support inspectAbortNumber");
     }
 
     @Override

@@ -16,6 +16,8 @@ public class RSContext implements SchedulerContext {
     public ArrayDeque<Request> requests;
     public Deque<OperationChain> allocatedTasks = new ArrayDeque<>();
     public boolean isFinished = false;
+    public int totalTasks = 0;
+    public int scheduledTasks = 0;
     public Operation wait_op;
     public OperationChain ready_oc;
     public RSContext(int thisThreadId) {
@@ -43,5 +45,10 @@ public class RSContext implements SchedulerContext {
             ready_oc = wait_op.dependentOC;
             wait_op = null;
         }
+    }
+
+    public boolean isFinished() {
+        assert scheduledTasks <= totalTasks;
+        return scheduledTasks == totalTasks;
     }
 }

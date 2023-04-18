@@ -10,6 +10,6 @@ public class DependencyResult implements Serializable {
         this.value = value;
     }
     public String toString() {
-        return bid + "/" + value.toString() + ",";
+        return bid + "/" + value.toString();
     }
 }

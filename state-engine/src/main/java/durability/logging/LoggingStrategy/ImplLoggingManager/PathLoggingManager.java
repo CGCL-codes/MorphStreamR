@@ -117,19 +117,25 @@ public class PathLoggingManager implements LoggingManager {
             byte[] object = inputView.readFullyDecompression();
             String[] strings = new String(object, StandardCharsets.UTF_8).split(" ");
             String[] taskPlacing = strings[0].split(";");//Task Placing View
-            for (String task : taskPlacing) {
-                String[] kv = task.split(":");
-                String table = kv[0];
-                List<Integer> placing = new ArrayList<>();
-                for (int j = 1; j < kv.length; j++) {
-                    placing.add(Integer.parseInt(kv[j]));
+            if (taskPlacing.length > 1 || !taskPlacing[0].equals("")) {
+                for (String task : taskPlacing) {
+                    String[] kv = task.split(":");
+                    String table = kv[0];
+                    List<Integer> placing = new ArrayList<>();
+                    for (int j = 1; j < kv.length; j++) {
+                        placing.add(Integer.parseInt(kv[j]));
+                    }
+                    this.historyViews.addAllocationPlan(redoLogResult.groupIds.get(i), table, redoLogResult.threadId, placing);
                 }
-                this.historyViews.addAllocationPlan(redoLogResult.groupIds.get(i), table, redoLogResult.threadId, placing);
             }
             String[] abortIds = strings[1].split(";");//Abort View
-            for (String abortId : abortIds) {
-                this.historyViews.addAbortId(redoLogResult.threadId, Long.parseLong(abortId));
+            if (abortIds.length > 1 || !abortIds[0].equals("")) {
+                for (String abortId : abortIds) {
+                    int threadId = (int) (Long.parseLong(abortId) % parallelNum);
+                    this.historyViews.addAbortId(threadId, Long.parseLong(abortId), redoLogResult.groupIds.get(i));
+                }
             }
+            int size = 0;
             for (int j = 2; j < strings.length; j++) {//Dependency View
                 String[] dependency = strings[j].split(";");
                 String tableName = dependency[0];
@@ -142,18 +148,26 @@ public class PathLoggingManager implements LoggingManager {
                         for (int m = 1; m < pr.length; m++) {
                             String[] kv = pr[m].split("/");
                             this.historyViews.addDependencies(redoLogResult.groupIds.get(i), tableName, from, to, Long.parseLong(kv[0]), kv[1]);
+                            size++;
                         }
                     }
                 }
             }
             LOG.info("Finish construct the history views for groupId: " + redoLogResult.groupIds.get(i) + " threadId: " + redoLogResult.threadId);
         }
+        SOURCE_CONTROL.getInstance().waitForOtherThreads(redoLogResult.threadId);
     }
 
     @Override
-    public boolean inspectAbortView(long bid) {
-        return this.historyViews.inspectAbortView(bid);
+    public boolean inspectAbortView(long groupId, int threadId, long bid) {
+        return this.historyViews.inspectAbortView(groupId, threadId, bid);
     }
+
+    @Override
+    public int inspectAbortNumber(long groupId, int threadId) {
+        return this.historyViews.inspectAbortNumber(groupId, threadId);
+    }
+
 
     @Override
     public Object inspectDependencyView(long groupId, String table, String from, String to, long bid) {

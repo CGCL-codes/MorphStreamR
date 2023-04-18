@@ -169,7 +169,7 @@ public class OGDFSAScheduler extends AbstractOGDFSScheduler<OGSAContext> {
         for (Operation failedOp : failedOperations) {
             if (bid == failedOp.bid) {//identify bids to be aborted.
                 operation.stateTransition(MetaTypes.OperationStateType.ABORTED);
-                if (this.isLogging == LOGOption_path)
+                if (this.isLogging == LOGOption_path && operation.getTxnOpId() == 0)
                     this.tpg.threadToPathRecord.get(context.thisThreadId).addAbortBid(operation.bid);
                 markAny = true;
             }
