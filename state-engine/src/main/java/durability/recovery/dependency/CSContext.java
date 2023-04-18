@@ -36,6 +36,7 @@ public class CSContext {
         currentLevelIndex = 0;
         maxLevel = 0;
         totalTaskCount = 0;
+        scheduledTaskCount = 0;
         layerBuildHelperQueue.clear();
     }
     public ArrayList<CommandTask> CurrentLayer() {

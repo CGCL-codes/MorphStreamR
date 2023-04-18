@@ -169,17 +169,18 @@ public class DependencyLoggingManager implements LoggingManager {
         ArrayList<CommandTask> tasks = context.CurrentLayer();
         CommandTask commandTask = null;
         if (tasks != null && context.currentLevelIndex < tasks.size()) {
-            commandTask = tasks.get(context.currentLevelIndex ++);
+            commandTask = tasks.get(context.currentLevelIndex);
+            context.currentLevelIndex ++;
             context.scheduledTaskCount ++;
         }
         return commandTask;
     }
     protected void ProcessedToNextLevel(CSContext context) {
-        context.currentLevel += 1;
+        context.currentLevel ++;
         context.currentLevelIndex = 0;
-        if (context.currentLevel == context.maxLevel)
-            IOUtils.println("Thread " + context.threadId + " has finished processing level " + (context.currentLevel - 1));
-        IOUtils.println("Thread " + context.threadId + " has " + context.scheduledTaskCount + " tasks in total");
+        //if (context.currentLevel == context.maxLevel)
+            //IOUtils.println("Thread " + context.threadId + " has finished processing level " + (context.currentLevel - 1));
+        //IOUtils.println("Thread " + context.threadId + " has " + context.scheduledTaskCount + " tasks in total");
     }
 
     @Override

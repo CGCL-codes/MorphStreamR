@@ -30,17 +30,40 @@ public class CommandPrecedenceGraph {
                 roots.add(task);
             }
             for (String childId : task.dependencyLog.getOutEdges()) {
-                if (getTask(childId) != null)
-                    task.addChild(getTask(childId));
+                if (childId.equals(task.dependencyLog.id)) {
+                    System.out.println("self loop");
+                }
+                CommandTask child = getTask(childId);
+                if (child != null) {
+                    if (child.dependencyLog.getInEdges().contains(task.dependencyLog.id)) {
+                        task.addChild(child);
+                    } else {
+                        System.out.println("not Matched");
+                    }
+                } else {
+                    System.out.println("child not found");
+                }
             }
             for (String parentId : task.dependencyLog.getInEdges()) {
-                if (getTask(parentId) != null)
-                    task.addParent(getTask(parentId));
+                if (parentId.equals(task.dependencyLog.id)) {
+                    System.out.println("self loop");
+                }
+                CommandTask parent = getTask(parentId);
+                if (parent != null) {
+                    if (parent.dependencyLog.getOutEdges().contains(task.dependencyLog.id)) {
+                        task.addParent(parent);
+                    } else {
+                        System.out.println("not Matched");
+                    }
+                } else {
+                    System.out.println("parent not found");
+                }
             }
         }
         context.totalTaskCount = threadToTaskMap.get(context.threadId).size();
-        IOUtils.println("total task count: " + context.totalTaskCount + " thread id: " + context.threadId);
+//        IOUtils.println("total task count: " + context.totalTaskCount + " thread id: " + context.threadId);
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.threadId);
+//        LOG.info("Start building buckets per thread: {}", context.threadId);
         context.buildBucketsPerThread(threadToTaskMap.get(context.threadId).values(), roots);
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.threadId);
         if (context.threadId == 0) {

@@ -3,6 +3,7 @@ package durability.logging.LoggingResource.ImplLoggingResources;
 import common.io.ByteIO.DataOutputView;
 import common.io.ByteIO.OutputWithCompression.NativeDataOutputView;
 import common.io.ByteIO.OutputWithCompression.SnappyDataOutputView;
+import common.util.io.IOUtils;
 import durability.logging.LoggingResource.LoggingResources;
 import durability.snapshot.LoggingOptions;
 import durability.struct.Logging.DependencyLog;
@@ -33,6 +34,7 @@ public class DependencyLoggingResources implements LoggingResources {
     }
     private void writeLogRecord(DataOutputView dataOutputView) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
+        IOUtils.println("Partition " + partitionId + " has " + dependencyLogs.size() + " dependency logs");
         for (DependencyLog dependencyLog : dependencyLogs) {
             stringBuilder.append(dependencyLog.toString()).append(" ");
         }

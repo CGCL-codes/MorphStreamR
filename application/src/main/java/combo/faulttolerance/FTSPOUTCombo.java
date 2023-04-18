@@ -4,7 +4,6 @@ import common.CONTROL;
 import common.collections.Configuration;
 import common.collections.OsUtils;
 import common.param.TxnEvent;
-import common.util.io.IOUtils;
 import components.context.TopologyContext;
 import components.operators.api.TransactionalBolt;
 import components.operators.api.TransactionalSpout;
@@ -16,7 +15,6 @@ import execution.runtime.collector.OutputCollector;
 import execution.runtime.tuple.impl.Marker;
 import execution.runtime.tuple.impl.Tuple;
 import execution.runtime.tuple.impl.msgs.GeneralMsg;
-import org.mortbay.util.IO;
 import org.slf4j.Logger;
 import profiler.MeasureTools;
 import profiler.Metrics;
@@ -64,32 +62,32 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
     @Override
     public void nextTuple() throws InterruptedException {
         try {
-            if (counter == start_measure) {
-                if (taskId == 0) {
-                    sink.start();
-                }
-                this.systemStartTime = System.nanoTime();
-                sink.previous_measure_time = System.nanoTime();
-                if (isRecovery) {
-                    MeasureTools.BEGIN_RECOVERY_TIME_MEASURE(this.taskId);
-                    boolean needReplay = recoverData();
-                    if (needReplay) {
-                        MeasureTools.BEGIN_REPLAY_MEASURE(this.taskId);
-                    } else {
-                        MeasureTools.END_RECOVERY_TIME_MEASURE(this.taskId);
-                        this.sink.stopRecovery = true;
-                        Metrics.RecoveryPerformance.stopRecovery[this.taskId] = true;
-                        if ((ftOption == FTOption_ISC || ftOption == FTOption_WSC || ftOption == FTOption_PATH || ftOption == FTOption_Dependency || ftOption == FTOption_LV) && counter != the_end && Metrics.RecoveryPerformance.stopRecovery[this.taskId]) {
-                            input_store(counter);
-                        }
-                    }
-                    isRecovery = false;
-                    return;
-                }
-                if (ftOption == FTOption_ISC || ftOption == FTOption_WSC || ftOption == FTOption_PATH || ftOption == FTOption_Dependency || ftOption == FTOption_LV) {
-                    input_store(counter);
-                }
-            }
+//            if (counter == start_measure) {
+//                if (taskId == 0) {
+//                    sink.start();
+//                }
+//                this.systemStartTime = System.nanoTime();
+//                sink.previous_measure_time = System.nanoTime();
+//                if (isRecovery) {
+//                    MeasureTools.BEGIN_RECOVERY_TIME_MEASURE(this.taskId);
+//                    boolean needReplay = recoverData();
+//                    if (needReplay) {
+//                        MeasureTools.BEGIN_REPLAY_MEASURE(this.taskId);
+//                    } else {
+//                        MeasureTools.END_RECOVERY_TIME_MEASURE(this.taskId);
+//                        this.sink.stopRecovery = true;
+//                        Metrics.RecoveryPerformance.stopRecovery[this.taskId] = true;
+//                        if ((ftOption == FTOption_ISC || ftOption == FTOption_WSC || ftOption == FTOption_PATH || ftOption == FTOption_Dependency || ftOption == FTOption_LV) && counter != the_end && Metrics.RecoveryPerformance.stopRecovery[this.taskId]) {
+//                            input_store(counter);
+//                        }
+//                    }
+//                    isRecovery = false;
+//                    return;
+//                }
+//                if (ftOption == FTOption_ISC || ftOption == FTOption_WSC || ftOption == FTOption_PATH || ftOption == FTOption_Dependency || ftOption == FTOption_LV) {
+//                    input_store(counter);
+//                }
+//            }
             if (ftOption == FTOption_ISC) {
                 nextTuple_ISC();
             } else if (ftOption == FTOption_WSC) {
@@ -201,7 +199,7 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
         return true;
     }
     @Override
-    public boolean recoverData() throws IOException, ExecutionException, InterruptedException {
+    public long recoverData() throws IOException, ExecutionException, InterruptedException {
         SnapshotResult snapshotResult = (SnapshotResult) this.ftManager.spoutAskRecovery(this.taskId, 0L);
         if (snapshotResult != null) {
             MeasureTools.BEGIN_RELOAD_DATABASE_MEASURE(this.taskId);
@@ -210,17 +208,16 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
         } else {
             snapshotResult = new SnapshotResult(0L, this.taskId, null);
         }
-        boolean needReplay = false;
         if (ftOption == FTOption_WSC) {
             RedoLogResult redoLogResult = (RedoLogResult) this.loggingManager.spoutAskRecovery(this.taskId, snapshotResult.snapshotId);
             if (redoLogResult.redoLogPaths.size() != 0) {
                 MeasureTools.BEGIN_REDO_WAL_MEASURE(this.taskId);
                 this.db.syncRetrieveLogs(redoLogResult);
                 MeasureTools.END_REDO_WAL_MEASURE(this.taskId);
-                needReplay = input_reload(snapshotResult.snapshotId, redoLogResult.lastedGroupId);
+                input_reload(snapshotResult.snapshotId, redoLogResult.lastedGroupId);
                 counter = (int) redoLogResult.lastedGroupId;
             } else {
-                needReplay = input_reload(snapshotResult.snapshotId, snapshotResult.snapshotId);
+                input_reload(snapshotResult.snapshotId, snapshotResult.snapshotId);
                 counter = (int) snapshotResult.snapshotId;
             }
         } else if (ftOption == FTOption_PATH) {
@@ -231,7 +228,7 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
                 this.inputDurabilityHelper.historyViews = this.db.getLoggingManager().getHistoryViews();
                 MeasureTools.END_REDO_WAL_MEASURE(this.taskId);
             }
-            needReplay = input_reload(snapshotResult.snapshotId, snapshotResult.snapshotId);
+            input_reload(snapshotResult.snapshotId, snapshotResult.snapshotId);
             counter = (int) snapshotResult.snapshotId;
             int abort = this.db.getLoggingManager().inspectAbortNumber(counter + punctuation_interval, this.taskId);
             counter = counter + abort;
@@ -241,10 +238,10 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
                 MeasureTools.BEGIN_REDO_WAL_MEASURE(this.taskId);
                 this.db.syncRetrieveLogs(redoLogResult);
                 MeasureTools.END_REDO_WAL_MEASURE(this.taskId);
-                needReplay = input_reload(snapshotResult.snapshotId, redoLogResult.lastedGroupId);
+                input_reload(snapshotResult.snapshotId, redoLogResult.lastedGroupId);
                 counter = (int) redoLogResult.lastedGroupId;
             } else {
-                needReplay = input_reload(snapshotResult.snapshotId, snapshotResult.snapshotId);
+                input_reload(snapshotResult.snapshotId, snapshotResult.snapshotId);
                 counter = (int) snapshotResult.snapshotId;
             }
         } else if (ftOption == FTOption_LV) {
@@ -253,19 +250,19 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
                 MeasureTools.BEGIN_REDO_WAL_MEASURE(this.taskId);
                 this.db.syncRetrieveLogs(redoLogResult);
                 MeasureTools.END_REDO_WAL_MEASURE(this.taskId);
-                needReplay = input_reload(snapshotResult.snapshotId, redoLogResult.lastedGroupId);
+                input_reload(snapshotResult.snapshotId, redoLogResult.lastedGroupId);
                 counter = (int) redoLogResult.lastedGroupId;
             } else {
-                needReplay = input_reload(snapshotResult.snapshotId, snapshotResult.snapshotId);
+                input_reload(snapshotResult.snapshotId, snapshotResult.snapshotId);
                 counter = (int) snapshotResult.snapshotId;
             }
         } else if (ftOption == FTOption_ISC) {
-            needReplay = input_reload(snapshotResult.snapshotId, snapshotResult.snapshotId);
+            input_reload(snapshotResult.snapshotId, snapshotResult.snapshotId);
             counter = (int) snapshotResult.snapshotId;
         }
         this.sink.lastTask = this.ftManager.sinkAskLastTask(this.taskId);
         this.sink.startRecovery = snapshotResult.snapshotId;
-        return needReplay;
+        return snapshotResult.snapshotId;
     }
     @Override
     public boolean input_reload(long snapshotOffset, long redoOffset) throws IOException, ExecutionException, InterruptedException {
@@ -346,10 +343,14 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
 
             if (ccOption == CCOption_TStream || ccOption == CCOption_SStore) {// This is only required by T-Stream.
                 if (model_switch(counter)) {
-                    inputStoreCurrentPath = inputStoreRootPath + OsUtils.OS_wrapper(Integer.toString(counter));
-                    marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration, "snapshot", counter));
-                    if (this.taskId == 0) {
-                        this.ftManager.spoutRegister(counter, inputStoreCurrentPath);
+                    if (snapshot(counter)) {
+                        inputStoreCurrentPath = inputStoreRootPath + OsUtils.OS_wrapper(Integer.toString(counter));
+                        marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration, "snapshot", counter));
+                        if (this.taskId == 0) {
+                            this.ftManager.spoutRegister(counter, inputStoreCurrentPath);
+                        }
+                    } else {
+                        marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration, "", counter));
                     }
                     bolt.execute(marker);
                     if (counter != the_end && Metrics.RecoveryPerformance.stopRecovery[this.taskId]) {
@@ -419,6 +420,43 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
         }
     }
     private void nextTuple_PATH() throws InterruptedException, IOException, ExecutionException, BrokenBarrierException, DatabaseException {
+        if (counter == start_measure) {
+            if (taskId == 0) {
+                sink.start();
+            }
+            this.systemStartTime = System.nanoTime();
+            sink.previous_measure_time = System.nanoTime();
+            if (isRecovery) {
+                MeasureTools.BEGIN_RECOVERY_TIME_MEASURE(this.taskId);
+                long lastSnapshotId = recoverData();
+                if (counter < num_events_per_thread && mybids[counter] < this.sink.lastTask) {
+                    MeasureTools.BEGIN_REPLAY_MEASURE(this.taskId);
+                } else {
+                    MeasureTools.END_RECOVERY_TIME_MEASURE(this.taskId);
+                    this.sink.stopRecovery = true;
+                    Metrics.RecoveryPerformance.stopRecovery[this.taskId] = true;
+                    isRecovery = false;
+                    if (snapshot(counter) && counter != lastSnapshotId) {
+                        inputStoreCurrentPath = inputStoreRootPath + OsUtils.OS_wrapper(Integer.toString(counter));
+                        marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration, "snapshot", counter));
+                        if (this.taskId == 0) {
+                            this.ftManager.spoutRegister(counter, inputStoreCurrentPath);
+                        }
+                        bolt.execute(marker);
+                        if (counter != the_end)
+                            input_store(counter);
+                    }
+                    if (counter == the_end){
+                        SOURCE_CONTROL.getInstance().oneThreadCompleted(taskId); // deregister all barriers
+                        SOURCE_CONTROL.getInstance().finalBarrier(taskId);//sync for all threads to come to this line.
+                        if (taskId == 0)
+                            sink.end(global_cnt);
+                    }
+                }
+            } else {
+                input_store(counter);
+            }
+        }
         if (counter < num_events_per_thread) {
             Object event;
             if (recoveryInput.size() != 0) {
@@ -497,6 +535,43 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
         }
     }
     private void nextTuple_Dependency() throws InterruptedException, IOException, ExecutionException, BrokenBarrierException, DatabaseException {
+        if (counter == start_measure) {
+            if (taskId == 0) {
+                sink.start();
+            }
+            this.systemStartTime = System.nanoTime();
+            sink.previous_measure_time = System.nanoTime();
+            if (isRecovery) {
+                MeasureTools.BEGIN_RECOVERY_TIME_MEASURE(this.taskId);
+                long lastSnapshotId = recoverData();
+                if (counter < num_events_per_thread && mybids[counter] < this.sink.lastTask) {
+                    MeasureTools.BEGIN_REPLAY_MEASURE(this.taskId);
+                } else {
+                    MeasureTools.END_RECOVERY_TIME_MEASURE(this.taskId);
+                    this.sink.stopRecovery = true;
+                    Metrics.RecoveryPerformance.stopRecovery[this.taskId] = true;
+                    isRecovery = false;
+                    if (snapshot(counter) && counter != lastSnapshotId) {
+                        inputStoreCurrentPath = inputStoreRootPath + OsUtils.OS_wrapper(Integer.toString(counter));
+                        marker = new Tuple(bid, this.taskId, context, new Marker(DEFAULT_STREAM_ID, -1, bid, myiteration, "snapshot", counter));
+                        if (this.taskId == 0) {
+                            this.ftManager.spoutRegister(counter, inputStoreCurrentPath);
+                        }
+                        bolt.execute(marker);
+                        if (counter != the_end)
+                            input_store(counter);
+                    }
+                    if (counter == the_end){
+                        SOURCE_CONTROL.getInstance().oneThreadCompleted(taskId); // deregister all barriers
+                        SOURCE_CONTROL.getInstance().finalBarrier(taskId);//sync for all threads to come to this line.
+                        if (taskId == 0)
+                            sink.end(global_cnt);
+                    }
+                }
+            } else {
+                input_store(counter);
+            }
+        }
         if (counter < num_events_per_thread) {
             Object event;
             if (recoveryInput.size() != 0) {
