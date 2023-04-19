@@ -73,6 +73,12 @@ public class ExecutionManager {
                     this.ftManager.initialize(conf);
                     this.loggingManager.initialize(conf);
                     break;
+                case 6:
+                    this.ftManager = new CheckpointManager();
+                    this.loggingManager = new CommandManager();
+                    this.ftManager.initialize(conf);
+                    this.loggingManager.initialize(conf);
+                    break;
                 default:
                     this.ftManager = null;
                     this.loggingManager = null;

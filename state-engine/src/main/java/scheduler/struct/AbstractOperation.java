@@ -5,6 +5,7 @@ import durability.logging.LoggingEntry.LogRecord;
 import durability.struct.Logging.DependencyLog;
 import durability.struct.Logging.LVCLog;
 import durability.struct.Logging.LoggingEntry;
+import durability.struct.Logging.NativeCommandLog;
 import storage.SchemaRecordRef;
 import storage.TableRecord;
 import storage.TableRecordRef;
@@ -81,6 +82,17 @@ public abstract class AbstractOperation {
                 conditions = new String[0];
             }
             this.logRecord = new LVCLog(bid, table_name, d_record.record_.GetPrimaryKey(), function.getClass().getName(), conditions, function.toString());
+        } else if (loggingRecord_type == LOGOption_command) {
+            String[] conditions;
+            if (condition_records != null) {
+                conditions = new String[condition_records.length];
+                for (int i = 0; i < condition_records.length; i++) {
+                    conditions[i] = condition_records[i].record_.GetPrimaryKey();
+                }
+            } else {
+                conditions = new String[0];
+            }
+            this.logRecord = new NativeCommandLog(bid, table_name, d_record.record_.GetPrimaryKey(), function.getClass().getName(), conditions, function.toString());
         }
     }
 }

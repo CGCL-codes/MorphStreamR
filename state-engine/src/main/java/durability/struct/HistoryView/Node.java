@@ -1,4 +1,4 @@
-package durability.struct.Logging;
+package durability.struct.HistoryView;
 import common.util.graph.Edge;
 
 import java.io.Serializable;

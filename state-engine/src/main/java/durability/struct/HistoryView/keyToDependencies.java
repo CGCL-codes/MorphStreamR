@@ -1,4 +1,6 @@
-package durability.struct.Logging;
+package durability.struct.HistoryView;
+
+import durability.struct.HistoryView.Node;
 
 import java.io.Serializable;
 import java.util.Map;

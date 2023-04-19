@@ -2,13 +2,11 @@ package scheduler.impl.og;
 
 
 import durability.logging.LoggingEntry.LogRecord;
-import durability.logging.LoggingStrategy.ImplLoggingManager.DependencyLoggingManager;
-import durability.logging.LoggingStrategy.ImplLoggingManager.LSNVectorLoggingManager;
-import durability.logging.LoggingStrategy.ImplLoggingManager.PathLoggingManager;
-import durability.logging.LoggingStrategy.ImplLoggingManager.WALManager;
+import durability.logging.LoggingStrategy.ImplLoggingManager.*;
 import durability.logging.LoggingStrategy.LoggingManager;
 import durability.struct.Logging.DependencyLog;
 import durability.struct.Logging.LVCLog;
+import durability.struct.Logging.NativeCommandLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import profiler.MeasureTools;
@@ -67,6 +65,8 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
             isLogging = LOGOption_lv;
         } else if (loggingManager instanceof DependencyLoggingManager){
             isLogging = LOGOption_dependency;
+        } else if (loggingManager instanceof CommandLoggingManager) {
+            isLogging = LOGOption_command;
         } else {
             isLogging = LOGOption_no;
         }
@@ -516,6 +516,9 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
         } else if (isLogging == LOGOption_lv) {
             ((LVCLog) operation.logRecord).setAccessType(operation.accessType);
             ((LVCLog) operation.logRecord).setThreadId(operation.context.thisThreadId);
+            this.loggingManager.addLogRecord(operation.logRecord);
+        } else if (isLogging == LOGOption_command) {
+            ((NativeCommandLog) operation.logRecord).setId(operation.bid + "." + operation.getTxnOpId());
             this.loggingManager.addLogRecord(operation.logRecord);
         }
         operation.isCommit = true;

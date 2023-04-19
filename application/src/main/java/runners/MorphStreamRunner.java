@@ -163,6 +163,9 @@ public class MorphStreamRunner extends Runner {
                 case 5:
                     loggingRecord_type = LOGOption_dependency;
                     break;
+                case 6:
+                    loggingRecord_type = LOGOption_command;
+                    break;
                 default:
                     System.exit(-1);
             }
