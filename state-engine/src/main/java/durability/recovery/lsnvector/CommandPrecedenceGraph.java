@@ -1,5 +1,6 @@
 package durability.recovery.lsnvector;
 
+import common.util.io.IOUtils;
 import durability.struct.Logging.LVCLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,9 +23,12 @@ public class CommandPrecedenceGraph {
     }
     public void init_globalLv(CSContext context) {
         context.totalTaskCount = context.tasks.size();
+//        IOUtils.println("Thread " + context.threadId + " has " + context.totalTaskCount + " tasks");
         if (context.threadId == 0) {
-            GlobalLV = new int[threadToCSContextMap.size()];
-            Arrays.fill(GlobalLV, 0);
+            if (GlobalLV == null) {
+                GlobalLV = new int[threadToCSContextMap.size()];
+                Arrays.fill(GlobalLV, 0);
+            }
         }
     }
     public void updateGlobalLV(CSContext context) {
@@ -36,8 +40,10 @@ public class CommandPrecedenceGraph {
 
     public boolean canEvaluate(LVCLog lvcLog) {
         for (int i = 0; i < GlobalLV.length; i++) {
-            if (lvcLog.getLVs()[i] > GlobalLV[i])
+            if (lvcLog.getLVs()[i] > GlobalLV[i]) {
+//                IOUtils.println("Thread " + i + " LV: " + lvcLog.getLVs()[i] + " GlobalLV: " + GlobalLV[i]);
                 return false;
+            }
         }
         return true;
     }

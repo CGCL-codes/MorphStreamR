@@ -490,6 +490,9 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
         return false;
     }
     private void commitLog(Operation operation) {
+        if (operation.isCommit) {
+            return;
+        }
         if (isLogging == LOGOption_path) {
             return;
         } else if (isLogging == LOGOption_wal) {
@@ -515,6 +518,7 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
             ((LVCLog) operation.logRecord).setThreadId(operation.context.thisThreadId);
             this.loggingManager.addLogRecord(operation.logRecord);
         }
+        operation.isCommit = true;
     }
 
 }

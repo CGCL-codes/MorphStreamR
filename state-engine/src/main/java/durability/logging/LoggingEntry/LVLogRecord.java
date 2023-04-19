@@ -5,7 +5,6 @@ import content.common.CommonMetaTypes.AccessType;
 import durability.struct.Logging.LVCLog;
 import storage.TableRecord;
 
-import java.util.Arrays;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 public class LVLogRecord {
@@ -16,8 +15,10 @@ public class LVLogRecord {
         this.partitionId = partitionId;
     }
     public void addLog(LVCLog log, TableRecord tableRecord, int parallelNum, TableRecord[] conditionTableRecords) {
-        if (logs.contains(log))
+        if (logs.contains(log)) {
+            IOUtils.println("Log  already exists in ");
             return;
+        }
         int[] LVs = new int[parallelNum];
         for (int i = 0; i < parallelNum; i ++) {
             LVs[i] = 0;
@@ -50,6 +51,7 @@ public class LVLogRecord {
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
+        IOUtils.println("Partition " + partitionId + " has " + logs.size() + " logs");
         for (LVCLog log : logs) {
             stringBuilder.append(log.toString()).append(" ");
         }
@@ -57,7 +59,7 @@ public class LVLogRecord {
     }
     public void clean() {
         logs.clear();
-        allocatedLSN = 0;
+        //allocatedLSN = 0;
     }
     public int[] elemWiseMax(int[] readLV, int[] writeLV) {
         int[] max = new int[readLV.length];

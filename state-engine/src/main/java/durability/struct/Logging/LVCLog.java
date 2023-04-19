@@ -11,8 +11,9 @@ public class LVCLog extends CommandLog{
     public CommonMetaTypes.AccessType accessType;
     public boolean isAborted = false;
     private int[] LVs;
-    public LVCLog(long LSN, String tableName, String key, String OperationFunction, String[] conditions, String parameter) {
-        super(LSN, tableName, key, OperationFunction, conditions, parameter);
+    public LVCLog(long bid, String tableName, String key, String OperationFunction, String[] conditions, String parameter) {
+        super(-1, tableName, key, OperationFunction, conditions, parameter);
+        this.bid = bid;
     }
     public void setThreadId(int threadId) {
         this.threadId = threadId;
@@ -62,7 +63,7 @@ public class LVCLog extends CommandLog{
                 continue;
             conditions.add(c);
         }
-        LVCLog lvcLog = new LVCLog(Long.parseLong(logParts[0]), logParts[2], logParts[3], logParts[5], conditions.toArray(new String[0]), logParts[6]);
+        LVCLog lvcLog = new LVCLog(Long.parseLong(logParts[8]), logParts[2], logParts[3], logParts[5], conditions.toArray(new String[0]), logParts[6]);
         String[] LVs = logParts[1].split(",");
         int[] LVsInt = new int[LVs.length];
         for (int i = 0; i < LVs.length; i++) {
@@ -73,7 +74,13 @@ public class LVCLog extends CommandLog{
             lvcLog.isAborted = true;
         }
         lvcLog.bid = Long.parseLong(logParts[8]);
+        lvcLog.setLSN(Long.parseLong(logParts[0]));
         return lvcLog;
+    }
+
+    @Override
+    public int compareTo(CommandLog o) {
+        return Long.compare(LSN, o.LSN);
     }
 
     @Override

@@ -108,4 +108,9 @@ public class DependencyLog extends CommandLog{
         this.id = id;
         this.isAborted = isAborted == 1;
     }
+
+    @Override
+    public int compareTo(CommandLog o) {
+        return Double.compare(Double.parseDouble(this.id), Double.parseDouble(((DependencyLog) o).id));
+    }
 }

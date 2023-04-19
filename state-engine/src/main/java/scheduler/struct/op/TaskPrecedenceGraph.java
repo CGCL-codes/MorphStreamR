@@ -1,5 +1,6 @@
 package scheduler.struct.op;
 
+import common.util.io.IOUtils;
 import durability.logging.LoggingEntry.LVLogRecord;
 import durability.logging.LoggingEntry.PathRecord;
 import org.slf4j.Logger;
@@ -203,7 +204,6 @@ public class TaskPrecedenceGraph<Context extends OPSchedulerContext> {
             }
             SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
             ((OPSContext) context).maxLevel = maxLevel; // scatter
-
             if (enable_log) log.info("MaxLevel:" + (((OPSContext) context).maxLevel));
         } else if (context instanceof OPNSContext) {
             for (OperationChain oc : threadToOCs.get(context.thisThreadId)) {

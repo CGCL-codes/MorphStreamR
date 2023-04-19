@@ -1,7 +1,7 @@
 package durability.struct.Logging;
 
 public abstract class CommandLog implements LoggingEntry, Comparable<CommandLog> {
-    protected long LSN;
+    public long LSN;
     public String tableName;
     public String key;
     public String OperationFunction;

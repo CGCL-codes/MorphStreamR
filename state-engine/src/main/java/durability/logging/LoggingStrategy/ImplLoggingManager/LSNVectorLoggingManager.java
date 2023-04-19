@@ -5,6 +5,7 @@ import common.collections.OsUtils;
 import common.io.ByteIO.DataInputView;
 import common.io.ByteIO.InputWithDecompression.NativeDataInputView;
 import common.io.ByteIO.InputWithDecompression.SnappyDataInputView;
+import common.util.io.IOUtils;
 import durability.ftmanager.FTManager;
 import durability.logging.LoggingEntry.LVLogRecord;
 import durability.logging.LoggingResource.ImplLoggingResources.LSNVectorLoggingResources;
@@ -46,6 +47,7 @@ import utils.lib.ConcurrentHashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.nio.file.StandardOpenOption.READ;
 import static utils.FaultToleranceConstants.CompressionType.None;
@@ -57,6 +59,7 @@ public class LSNVectorLoggingManager implements LoggingManager {
     protected int app;
     @Nonnull protected LoggingOptions loggingOptions;
     public ConcurrentHashMap<Integer, LVLogRecord> threadToLVLogRecord = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<Integer, AtomicInteger> num = new ConcurrentHashMap<>();
     protected int parallelNum;
     protected Map<String, BaseTable> tables;
     //Used when recovery
@@ -69,6 +72,7 @@ public class LSNVectorLoggingManager implements LoggingManager {
         app = configuration.getInt("app");
         for (int i = 0; i < parallelNum; i ++) {
             this.threadToLVLogRecord.put(i, new LVLogRecord(i));
+            this.num.put(i, new AtomicInteger(0));
         }
     }
     public LSNVectorLoggingResources syncPrepareResource(int partitionId) {
@@ -77,6 +81,7 @@ public class LSNVectorLoggingManager implements LoggingManager {
     @Override
     public void addLogRecord(LoggingEntry logRecord) {
         LVCLog lvcLog = (LVCLog) logRecord;
+        this.num.get(lvcLog.threadId).addAndGet(1);
         LVLogRecord lvLogRecord = threadToLVLogRecord.get(lvcLog.threadId);
         TableRecord tableRecord = this.tables.get(lvcLog.tableName).SelectKeyRecord(lvcLog.key);
         TableRecord[] conditions = new TableRecord[lvcLog.condition.length];
@@ -88,6 +93,7 @@ public class LSNVectorLoggingManager implements LoggingManager {
 
     @Override
     public void commitLog(long groupId, int partitionId, FTManager ftManager) throws IOException {
+        this.num.get(partitionId).set(0);
         NIOLSNVectorStreamFactory lsnVectorStreamFactory = new NIOLSNVectorStreamFactory(loggingPath);
         LSNVectorLoggingResources resources = syncPrepareResource(partitionId);
         AsynchronousFileChannel afc = lsnVectorStreamFactory.createLoggingStream();
