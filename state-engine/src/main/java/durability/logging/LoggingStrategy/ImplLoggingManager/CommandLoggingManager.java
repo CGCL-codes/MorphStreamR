@@ -116,7 +116,7 @@ public class CommandLoggingManager implements LoggingManager {
             LOG.info("Thread " + redoLogResult.threadId + " has finished reading logs");
             SOURCE_CONTROL.getInstance().waitForOtherThreads(redoLogResult.threadId);
             if (redoLogResult.threadId == 0) {
-                IOUtils.println("Total number of tasks: " + this.cpg.tasks.size());
+                LOG.info("Total tasks: " + this.cpg.tasks.size());
                 start_evaluate();
             }
             SOURCE_CONTROL.getInstance().waitForOtherThreads(redoLogResult.threadId);
