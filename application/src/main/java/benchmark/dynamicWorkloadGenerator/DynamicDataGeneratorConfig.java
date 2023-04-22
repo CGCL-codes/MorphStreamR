@@ -120,15 +120,15 @@ public class DynamicDataGeneratorConfig extends DataGeneratorConfig {
                     return "PD";
                 }
             case "Up_abort":
-                if (this.Ratio_of_Transaction_Aborts + 2000 <= 10000) {
-                    this.Ratio_of_Transaction_Aborts = this.Ratio_of_Transaction_Aborts + 2000;
+                if (this.Ratio_of_Transaction_Aborts + 3000 <= 10000) {
+                    this.Ratio_of_Transaction_Aborts = this.Ratio_of_Transaction_Aborts + 3000;
                     return "abort";
                 } else {
                     return "unchanging";
                 }
             case "Down_abort":
-                if (this.Ratio_of_Transaction_Aborts - 2000 >= 0) {
-                    this.Ratio_of_Transaction_Aborts = this.Ratio_of_Transaction_Aborts - 2000;
+                if (this.Ratio_of_Transaction_Aborts - 3000 >= 0) {
+                    this.Ratio_of_Transaction_Aborts = this.Ratio_of_Transaction_Aborts - 3000;
                     return "abort";
                 } else {
                     return "unchanging";

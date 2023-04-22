@@ -99,7 +99,7 @@ public class OBTPGDynamicDataGenerator extends DynamicWorkloadGenerator {
         } else {
             stringBuilder.append("1,");
         }
-        stringBuilder.append(eventID+dynamicDataConfig.getShiftRate()*dynamicDataConfig.getCheckpoint_interval()*dynamicDataConfig.getTotalThreads());
+        stringBuilder.append(eventID + dynamicDataConfig.getShiftRate() * dynamicDataConfig.getCheckpoint_interval()*dynamicDataConfig.getTotalThreads());
         this.tranToDecisionConf.add(stringBuilder.toString());
     }
 

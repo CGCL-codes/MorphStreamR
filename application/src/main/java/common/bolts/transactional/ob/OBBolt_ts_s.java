@@ -54,7 +54,7 @@ public class OBBolt_ts_s extends OBBolt {
     public void execute(Tuple in) throws InterruptedException, DatabaseException, BrokenBarrierException {
         if (in.isMarker()){
             int readSize= buyingEvents.size();
-            int num_events=readSize+alertEvents+toppingEvents;
+            int num_events = readSize + alertEvents + toppingEvents;
             /**
              *  MeasureTools.BEGIN_TOTAL_TIME_MEASURE(thread_Id); at {@link #execute_ts_normal(Tuple)}}.
              */
@@ -99,8 +99,6 @@ public class OBBolt_ts_s extends OBBolt {
         //it simply construct the operations and return.
         transactionManager.BeginTransaction(txnContext);
         for (int i = 0; i < NUM_ACCESSES_PER_BUY; i++) {
-            //it simply constructs the operations and return.
-            //condition on itself.
             transactionManager.Asy_ModifyRecord(//TODO: addOperation atomicity preserving later.
                     txnContext,
                     "goods",
@@ -122,7 +120,7 @@ public class OBBolt_ts_s extends OBBolt {
         ALERT_REQUEST_POST(event);
         END_POST_TIME_MEASURE_ACC(thread_Id);
         transactionManager.CommitTransaction(txnContext);
-        alertEvents++;
+        alertEvents ++;
     }
     protected void TOPPING_REQUEST_CONSTRUCT(ToppingEvent event, TxnContext txnContext) throws DatabaseException, InterruptedException {
         //it simply construct the operations and return.
@@ -133,7 +131,7 @@ public class OBBolt_ts_s extends OBBolt {
         TOPPING_REQUEST_POST(event);
         END_POST_TIME_MEASURE_ACC(thread_Id);
         transactionManager.CommitTransaction(txnContext);
-        toppingEvents++;
+        toppingEvents ++;
     }
     private void BUYING_REQUEST_CORE() {
         for (BuyingEvent event : buyingEvents) {
@@ -148,7 +146,6 @@ public class OBBolt_ts_s extends OBBolt {
      */
     @Override
     protected void BUYING_REQUEST_CORE(BuyingEvent event) {
-        //measure_end if any item is not able to buy.
         event.biding_result = new BidingResult(event, event.success[0] == NUM_ACCESSES_PER_BUY);
     }
     private void BUYING_REQUEST_POST() throws InterruptedException {

@@ -53,10 +53,10 @@ public class TPTPGDynamicDataGenerator extends DynamicWorkloadGenerator {
     public void mapToTPGProperties() {
         //TD,LD,PD,VDD,R_of_A,isCD,isCC,
         StringBuilder stringBuilder = new StringBuilder();
-        double td = 2 * dynamicDataConfig.getCheckpoint_interval();
+        double td = dynamicDataConfig.getCheckpoint_interval();
         stringBuilder.append(td);
         stringBuilder.append(",");
-        double ld = 2 * dynamicDataConfig.getCheckpoint_interval();
+        double ld = dynamicDataConfig.getCheckpoint_interval();
         stringBuilder.append(ld);
         stringBuilder.append(",");
         double pd = 0;
