@@ -54,19 +54,19 @@ public class GSTPGDynamicDataGenerator extends DynamicWorkloadGenerator {
         //TD,LD,PD,VDD,R_of_A,isCD,isCC,
         StringBuilder stringBuilder = new StringBuilder();
         //TODO:hard code, function not sure
-        double td = Transaction_Length * dynamicDataConfig.getCheckpoint_interval();
-        td = td *((double) Ratio_of_Overlapped_Keys/100);
+        double td = NUM_ACCESS * dynamicDataConfig.getCheckpoint_interval();
+//        td = td * ((double) Ratio_of_Overlapped_Keys / 100);
         stringBuilder.append(td);
         stringBuilder.append(",");
-        double ld = Transaction_Length * dynamicDataConfig.getCheckpoint_interval();
+        double ld = NUM_ACCESS * dynamicDataConfig.getCheckpoint_interval();
         stringBuilder.append(ld);
         stringBuilder.append(",");
-        double pd = Transaction_Length * dynamicDataConfig.getCheckpoint_interval() * ((double) Ratio_of_Overlapped_Keys/100) * NUM_ACCESS;
+        double pd = dynamicDataConfig.getCheckpoint_interval() * ((double) Ratio_of_Multiple_State_Access / 100) * NUM_ACCESS;
         stringBuilder.append(pd);
         stringBuilder.append(",");
-        stringBuilder.append((double) State_Access_Skewness/100);
+        stringBuilder.append((double) State_Access_Skewness / 100);
         stringBuilder.append(",");
-        stringBuilder.append((double) Ratio_of_Transaction_Aborts/10000);
+        stringBuilder.append((double) Ratio_of_Transaction_Aborts / 10000);
         stringBuilder.append(",");
         if (AppConfig.isCyclic) {
             stringBuilder.append("1,");
@@ -96,26 +96,24 @@ public class GSTPGDynamicDataGenerator extends DynamicWorkloadGenerator {
                 nKeyState = dynamicDataConfig.getnKeyStates();
                 int MAX_LEVEL = 256;
                 for (int i = 0; i < nKeyState; i++) {
-                    idToLevel.put(i, i% MAX_LEVEL);
+                    idToLevel.put(i, i % MAX_LEVEL);
                 }
                 keyZipf = new FastZipfGenerator(nKeyState, (double) State_Access_Skewness / 100, 0, 12345678);
                 configure_store(1, (double) State_Access_Skewness / 100, dynamicDataConfig.getTotalThreads(), nKeyState);
                 p_generator = new FastZipfGenerator(nKeyState, (double) State_Access_Skewness / 100, 0);
             break;
-            case "LD" :
-                Transaction_Length = dynamicDataConfig.Transaction_Length;
-            break;
-            case "isCyclic" :
-                Ratio_of_Transaction_Aborts = dynamicDataConfig.Ratio_of_Transaction_Aborts;
-                State_Access_Skewness = dynamicDataConfig.State_Access_Skewness;
+            case "skew" :
                 keyZipf = new FastZipfGenerator(nKeyState, (double) State_Access_Skewness / 100, 0, 12345678);
                 configure_store(1, (double) State_Access_Skewness / 100, dynamicDataConfig.getTotalThreads(), nKeyState);
                 p_generator = new FastZipfGenerator(nKeyState, (double) State_Access_Skewness / 100, 0);
-                AppConfig.isCyclic = true;
             break;
-            case "complexity" :
-                AppConfig.complexity = 80000;
+            case "PD" :
+                Ratio_of_Multiple_State_Access = dynamicDataConfig.Ratio_of_Multiple_State_Access;
+                if (Ratio_of_Multiple_State_Access > 50)
+                    AppConfig.isCyclic = true;
             break;
+            case "abort":
+                Ratio_of_Transaction_Aborts = dynamicDataConfig.Ratio_of_Transaction_Aborts;
             case "unchanging" :
             break;
             default:
@@ -164,41 +162,28 @@ public class GSTPGDynamicDataGenerator extends DynamicWorkloadGenerator {
     }
 
     private GSEvent randomEvent() {
+        int NUM_ACCESS;
+        if (random.nextInt(100) < Ratio_of_Multiple_State_Access) {
+            NUM_ACCESS = this.NUM_ACCESS;
+        } else {
+            NUM_ACCESS = 1;
+        }
         int[] keys = new int[NUM_ACCESS * Transaction_Length];
         int writeLevel = -1;
         if (!isUnique) {
             if (enable_states_partition) {
+                int partitionId = key_to_partition(p_generator.next());
                 for (int j = 0; j < Transaction_Length; j++) {
-                    int partitionId = key_to_partition(p_generator.next());
-                    for (int i = 0; i < NUM_ACCESS; i++) {
+                    int key = getKey(partitionedKeyZipf[partitionId], partitionId, generatedKeys);
+                    keys[j * NUM_ACCESS] = key; //First key is always write key
+                    for (int i = 1; i < NUM_ACCESS; i ++) {
                         int offset = j * NUM_ACCESS + i;
-                        if (AppConfig.isCyclic) {
-                            int key = getKey(partitionedKeyZipf[partitionId], partitionId, generatedKeys);
-                            if (offset % NUM_ACCESS == 0) {
-                                // make sure this one is different with other write key
-                                for (int k = 0; k < j; k++) {
-                                    while (keys[k * NUM_ACCESS] == key) {
-                                        key = getKey(partitionedKeyZipf[partitionId], partitionId, generatedKeys);
-                                    }
-                                }
-                            }
-                            keys[offset] = key;
-                        } else {
-                            // TODO: correct it later
-                            keys[offset] = getKey(partitionedKeyZipf[partitionId], partitionId, generatedKeys);
-                            if (i == 0) {
-                                while (idToLevel.get(keys[offset]) == 0) {
-                                    keys[offset] = getKey(partitionedKeyZipf[partitionId], partitionId, generatedKeys);
-                                }
-                                writeLevel = idToLevel.get(keys[offset]);
-                            } else {
-                                while (writeLevel <= idToLevel.get(keys[offset])) {
-                                    keys[offset] = getKey(partitionedKeyZipf[partitionId], partitionId, generatedKeys);
-                                }
-                            }
+                        while (keys[offset] == key) {
+                            key = getKey(partitionedKeyZipf[partitionId], partitionId, generatedKeys);
                         }
-                        partitionId = (partitionId + 1) % dynamicDataConfig.getTotalThreads();
+                        keys[offset] = key;
                     }
+                    partitionId = (partitionId + 1) % dynamicDataConfig.getTotalThreads();
                 }
             } else {
                 for (int i = 0; i < NUM_ACCESS; i++) {
@@ -232,6 +217,7 @@ public class GSTPGDynamicDataGenerator extends DynamicWorkloadGenerator {
         GSEvent t;
         if (random.nextInt(10000) < Ratio_of_Transaction_Aborts) {
             t = new GSEvent(eventID, keys, true);
+            abort_num ++;
         } else {
             t = new GSEvent(eventID, keys, false);
         }
@@ -256,7 +242,7 @@ public class GSTPGDynamicDataGenerator extends DynamicWorkloadGenerator {
                 key = generatedKeys.get(random.nextInt(generatedKeys.size()));
                 while (key / floor_interval != partitionId) {
                     key = generatedKeys.get(random.nextInt(generatedKeys.size()));
-                    counter++;
+                    counter ++;
                     if (counter >= partitionId) {
                         key = zipfGenerator.next();
                         break;

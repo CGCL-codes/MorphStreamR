@@ -303,7 +303,8 @@ public abstract class Runner implements IRunner {
                 phaseNum = shiftRate * phaseType.length;
                 break;
             case "OnlineBiding" :
-                bottomLine = "500,5000,1,6000,0.2,0.2";//TD,LD,PD,SUM,VDD,R_of_A
+                //bottomLine = "500,5000,1,6000,0.2,0.2";//TD,LD,PD,SUM,VDD,R_of_A
+                bottomLine =  2 * checkpoint_interval + "," + 2 * checkpoint_interval + "," + checkpoint_interval + "," + 4 * checkpoint_interval + "," + "0.3,0.2";//TD,LD,PD,SUM,VDD,R_of_A
                 schedulerPools = "OG_BFS_A,OG_NS_A,OG_NS";
                 defaultScheduler = "OG_BFS_A";
                 phaseNum = shiftRate * phaseType.length;

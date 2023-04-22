@@ -40,6 +40,7 @@ import java.util.List;
 
 import transaction.function.DEC;
 import transaction.function.INC;
+import transaction.function.SUM;
 import utils.AppConfig;
 import utils.SOURCE_CONTROL;
 import utils.lib.ConcurrentHashMap;
@@ -152,6 +153,8 @@ public class LSNVectorLoggingManager implements LoggingManager {
     private void PROCESS(CSContext context) {
         switch (app) {
             case 0:
+                GSExecute(context.readyTask);
+                break;
             case 3:
             case 2:
                 break;
@@ -194,6 +197,29 @@ public class LSNVectorLoggingManager implements LoggingManager {
             tempo_record.getValues().get(1).incLong(Long.parseLong(task.parameter));//compute.
             src.content_.updateMultiValues(bid, 0, false, tempo_record);
         }
+    }
+    private void GSExecute(LVCLog task) {
+        if (task == null || task.isAborted)
+            return;
+        String table = task.tableName;
+        String pKey = task.key;
+        long bid = task.bid;
+        int keysLength = task.condition.length;
+        SchemaRecord[] preValues = new SchemaRecord[keysLength];
+        long sum = 0;
+        AppConfig.randomDelay();
+        for (int i = 0; i < keysLength; i++) {
+            preValues[i] = this.tables.get(table).SelectKeyRecord(task.condition[i]).content_.readPreValues(bid);
+            sum += preValues[i].getValues().get(1).getLong();
+        }
+        sum /= keysLength;
+        TableRecord srcRecord = this.tables.get(table).SelectKeyRecord(pKey);
+        SchemaRecord schemaRecord = srcRecord.content_.readPreValues(bid);
+        SchemaRecord tempo_record = new SchemaRecord(schemaRecord);//tempo record
+        if (task.OperationFunction.equals(SUM.class.getName())) {
+            tempo_record.getValues().get(1).setLong(sum);//compute.
+        } else
+            throw new UnsupportedOperationException();
     }
 
     @Override

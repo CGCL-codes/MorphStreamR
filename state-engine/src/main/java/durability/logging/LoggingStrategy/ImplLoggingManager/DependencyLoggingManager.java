@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import storage.SchemaRecord;
 import storage.table.BaseTable;
 import storage.table.RecordSchema;
+import transaction.function.SUM;
 import utils.AppConfig;
 import utils.SOURCE_CONTROL;
 import utils.lib.ConcurrentHashMap;
@@ -147,6 +148,7 @@ public class DependencyLoggingManager implements LoggingManager {
         CommandTask commandTask = next(context);
         switch (app) {
             case 0:
+                GSExecute(commandTask);
             case 3:
             case 2:
                 break;
@@ -244,5 +246,28 @@ public class DependencyLoggingManager implements LoggingManager {
             tempo_record.getValues().get(1).incLong(Long.parseLong(task.dependencyLog.parameter));//compute.
             src.content_.updateMultiValues(bid, 0, false, tempo_record);
         }
+    }
+    private void GSExecute(CommandTask task) {
+        if (task == null || task.dependencyLog.isAborted) return;
+        String table = task.dependencyLog.tableName;
+        String pKey = task.dependencyLog.key;
+        double value = Double.parseDouble(task.dependencyLog.id);
+        long bid = (long) Math.floor(value);
+        int keysLength = task.dependencyLog.condition.length;
+        SchemaRecord[] preValues = new SchemaRecord[keysLength];
+        long sum = 0;
+        AppConfig.randomDelay();
+        for (int i = 0; i < keysLength; i++) {
+            preValues[i] = this.tables.get(table).SelectKeyRecord(task.dependencyLog.condition[i]).content_.readPreValues(bid);
+            sum += preValues[i].getValues().get(1).getLong();
+        }
+        sum /= keysLength;
+        TableRecord srcRecord = this.tables.get(table).SelectKeyRecord(pKey);
+        SchemaRecord schemaRecord = srcRecord.content_.readPreValues(bid);
+        SchemaRecord tempo_record = new SchemaRecord(schemaRecord);//tempo record
+        if (task.dependencyLog.OperationFunction.equals(SUM.class.getName())) {
+            tempo_record.getValues().get(1).setLong(sum);//compute.
+        } else
+            throw new UnsupportedOperationException();
     }
 }

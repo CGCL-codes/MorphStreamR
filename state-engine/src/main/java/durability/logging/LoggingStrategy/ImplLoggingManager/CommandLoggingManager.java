@@ -28,6 +28,7 @@ import storage.table.BaseTable;
 import storage.table.RecordSchema;
 import transaction.function.DEC;
 import transaction.function.INC;
+import transaction.function.SUM;
 import utils.AppConfig;
 import utils.SOURCE_CONTROL;
 
@@ -131,6 +132,8 @@ public class CommandLoggingManager implements LoggingManager {
     private void PROCESS(NativeCommandLog nativeCommandLog) {
         switch (app) {
             case 0:
+                GSExecute(nativeCommandLog);
+                break;
             case 3:
             case 2:
                 break;
@@ -200,5 +203,28 @@ public class CommandLoggingManager implements LoggingManager {
             tempo_record.getValues().get(1).incLong(Long.parseLong(task.parameter));//compute.
             src.content_.updateMultiValues(bid, 0, false, tempo_record);
         }
+    }
+    private void GSExecute(NativeCommandLog task) {
+        if (task == null || task.isAborted) return;
+        String table = task.tableName;
+        String pKey = task.key;
+        double value = Double.parseDouble(task.id);
+        long bid = (long) Math.floor(value);
+        int keysLength = task.condition.length;
+        SchemaRecord[] preValues = new SchemaRecord[keysLength];
+        long sum = 0;
+        AppConfig.randomDelay();
+        for (int i = 0; i < keysLength; i++) {
+            preValues[i] = this.tables.get(table).SelectKeyRecord(task.condition[i]).content_.readPreValues(bid);
+            sum += preValues[i].getValues().get(1).getLong();
+        }
+        sum /= keysLength;
+        TableRecord srcRecord = this.tables.get(table).SelectKeyRecord(pKey);
+        SchemaRecord schemaRecord = srcRecord.content_.readPreValues(bid);
+        SchemaRecord tempo_record = new SchemaRecord(schemaRecord);//tempo record
+        if (task.OperationFunction.equals(SUM.class.getName())) {
+            tempo_record.getValues().get(1).setLong(sum);//compute.
+        } else
+            throw new UnsupportedOperationException();
     }
 }

@@ -121,7 +121,7 @@ public abstract class TxnManager implements ITxnManager {
      * When the workload changes and the scheduler is no longer applicable
      */
     public void SwitchScheduler(String schedulerType, int threadId, long markId) {
-        currentSchedulerType.put(threadId,schedulerType);
+        currentSchedulerType.put(threadId, schedulerType);
         if (threadId == 0) {
             scheduler = schedulerPool.get(schedulerType);
             log.info("Current Scheduler is "+schedulerType + " markId: " +markId );

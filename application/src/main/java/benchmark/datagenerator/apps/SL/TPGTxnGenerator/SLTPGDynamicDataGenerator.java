@@ -100,8 +100,6 @@ public class SLTPGDynamicDataGenerator extends DynamicWorkloadGenerator {
                 Ratio_of_Overlapped_Keys = dynamicDataConfig.Ratio_of_Overlapped_Keys;
 
                 nKeyState = dynamicDataConfig.getnKeyStates();
-                // allocate levels for each key, to prevent circular.
-//        int MAX_LEVEL = (nKeyState / dataConfig.getTotalThreads()) / 2;
                 int MAX_LEVEL = 256;
                 for (int i = 0; i < nKeyState; i++) {
                     idToLevel.put(i, random.nextInt(MAX_LEVEL));
@@ -152,7 +150,6 @@ public class SLTPGDynamicDataGenerator extends DynamicWorkloadGenerator {
             event = randomDepositEvent();
         } else {
             event = randomTransferEvent();
-            t_num ++;
         }
         events.add(event);
     }
@@ -231,7 +228,6 @@ public class SLTPGDynamicDataGenerator extends DynamicWorkloadGenerator {
         Event t;
         if (random.nextInt(10000) < Ratio_of_Transaction_Aborts) {
             t = new SLTransferEvent(eventID, srcAcc, srcAst, dstAcc, dstAst, 100000000, 100000000);
-            abort_num ++;
         } else {
             t = new SLTransferEvent(eventID, srcAcc, srcAst, dstAcc, dstAst);
         }

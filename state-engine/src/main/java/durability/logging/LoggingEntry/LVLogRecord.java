@@ -43,6 +43,17 @@ public class LVLogRecord {
             int[] comparedLVs = elemWiseMax(tableRecord.content_.getReadLVs(), tableRecord.content_.getWriteLVs());
             LVs = elemWiseMax(LVs, comparedLVs);
             tableRecord.content_.updateWriteLv(allocatedLSN, partitionId);
+        } else if (log.accessType == AccessType.READ_WRITE_COND_READN) {
+            for (TableRecord conditionTableRecord : conditionTableRecords) {
+                if (conditionTableRecord.equals(tableRecord))
+                    continue;
+                LVs = elemWiseMax(LVs, conditionTableRecord.content_.getWriteLVs());
+                conditionTableRecord.content_.updateReadLv(allocatedLSN, partitionId);
+            }
+            int[] comparedLVs = elemWiseMax(tableRecord.content_.getReadLVs(), tableRecord.content_.getWriteLVs());
+            LVs = elemWiseMax(LVs, comparedLVs);
+            tableRecord.content_.updateWriteLv(allocatedLSN, partitionId);
+            tableRecord.content_.updateReadLv(allocatedLSN, partitionId);
         }
         log.setLVs(LVs);
         logs.add(log);
@@ -51,7 +62,7 @@ public class LVLogRecord {
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
-        IOUtils.println("Partition " + partitionId + " has " + logs.size() + " logs");
+     //   IOUtils.println("Partition " + partitionId + " has " + logs.size() + " logs");
         for (LVCLog log : logs) {
             stringBuilder.append(log.toString()).append(" ");
         }
@@ -59,7 +70,6 @@ public class LVLogRecord {
     }
     public void clean() {
         logs.clear();
-        //allocatedLSN = 0;
     }
     public int[] elemWiseMax(int[] readLV, int[] writeLV) {
         int[] max = new int[readLV.length];

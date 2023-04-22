@@ -2,19 +2,26 @@ package common.bolts.transactional.gs;
 
 import combo.SINKCombo;
 import common.param.mb.MicroEvent;
+import common.util.io.IOUtils;
 import db.DatabaseException;
+import durability.logging.LoggingResult.LoggingResult;
+import durability.snapshot.SnapshotResult.SnapshotResult;
 import execution.ExecutionGraph;
 import execution.runtime.tuple.impl.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import profiler.MeasureTools;
+import profiler.Metrics;
 import transaction.context.TxnContext;
 import transaction.function.Condition;
 import transaction.function.SUM;
 import transaction.impl.ordered.TxnManagerTStream;
+import utils.FaultToleranceConstants;
 
+import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.concurrent.BrokenBarrierException;
 
 import static common.CONTROL.*;
@@ -49,12 +56,6 @@ public class GSBolt_ts extends GSBolt {
             MicroEvent event = (MicroEvent) input_event;
             if (enable_latency_measurement)
                 (event).setTimestamp(timestamp);
-            boolean flag = event.READ_EVENT();
-//            if (flag) {//read
-//                read_construct(event, txnContext);
-//            } else {
-//                write_construct(event, txnContext);
-//            }
             RANGE_WRITE_CONSRUCT((MicroEvent) event, txnContext);
         }
 
@@ -63,7 +64,7 @@ public class GSBolt_ts extends GSBolt {
     private void RANGE_WRITE_CONSRUCT(MicroEvent event, TxnContext txnContext) throws DatabaseException {
         SUM sum;
         if (event.READ_EVENT()) {
-            sum = new SUM(-1);
+            sum = new SUM(-1);//It means this transaction should be aborted.
         } else
             sum = new SUM();
 
@@ -85,7 +86,8 @@ public class GSBolt_ts extends GSBolt {
                     String.valueOf(event.getKeys()[writeKeyIdx]), // src key to write ahead
                     event.getRecord_refs()[writeKeyIdx],//to be fill up.
                     sum,
-                    condition_table, condition_source,//condition source, condition id.
+                    condition_table,
+                    condition_source,//condition source, condition id.
                     event.success);          //asynchronously return.
         }
         transactionManager.CommitTransaction(txnContext);
@@ -100,16 +102,6 @@ public class GSBolt_ts extends GSBolt {
     }
 
     void READ_REQUEST_CORE() throws InterruptedException {
-//        while (!EventsHolder.isEmpty() && !Thread.interrupted()) {
-//            MicroEvent input_event = EventsHolder.remove();
-//            if (!READ_REQUEST_CORE(input_event))
-//                EventsHolder.offer(input_event);
-//            else {
-//                BEGIN_POST_TIME_MEASURE(thread_Id);
-//                BUYING_REQUEST_POST(input_event);
-//                END_POST_TIME_MEASURE_ACC(thread_Id);
-//            }
-//        }
         for (MicroEvent event : microEvents) {
             READ_CORE(event);
         }
@@ -120,32 +112,59 @@ public class GSBolt_ts extends GSBolt {
             READ_POST(event);
         }
     }
-    int i=0;
     @Override
-    public void execute(Tuple in) throws InterruptedException, DatabaseException, BrokenBarrierException {
+    public void execute(Tuple in) throws InterruptedException, DatabaseException, BrokenBarrierException, IOException {
 
         if (in.isMarker()) {
             int num_events = microEvents.size();
-            /**
-             *  MeasureTools.BEGIN_TOTAL_TIME_MEASURE(thread_Id); at {@link #execute_ts_normal(Tuple)}}.
-             */
             {
-                MeasureTools.BEGIN_TXN_TIME_MEASURE(thread_Id);
                 {
                     transactionManager.start_evaluate(thread_Id, in.getBID(), num_events);//start lazy evaluation in transaction manager.
-                    i++;
+                    if (Objects.equals(in.getMarker().getMessage(), "snapshot")) {
+                        MeasureTools.BEGIN_SNAPSHOT_TIME_MEASURE(this.thread_Id);
+                        this.db.asyncSnapshot(in.getMarker().getSnapshotId(), this.thread_Id, this.ftManager);
+                        MeasureTools.END_SNAPSHOT_TIME_MEASURE(this.thread_Id);
+                    } else if (Objects.equals(in.getMarker().getMessage(), "commit") || Objects.equals(in.getMarker().getMessage(), "commit_early")) {
+                        MeasureTools.BEGIN_LOGGING_TIME_MEASURE(this.thread_Id);
+                        this.db.asyncCommit(in.getMarker().getSnapshotId(), this.thread_Id, this.loggingManager);
+                        MeasureTools.END_LOGGING_TIME_MEASURE(this.thread_Id);
+                    } else if (Objects.equals(in.getMarker().getMessage(), "commit_snapshot") || Objects.equals(in.getMarker().getMessage(), "commit_snapshot_early")){
+                        MeasureTools.BEGIN_LOGGING_TIME_MEASURE(this.thread_Id);
+                        this.db.asyncCommit(in.getMarker().getSnapshotId(), this.thread_Id, this.loggingManager);
+                        MeasureTools.END_LOGGING_TIME_MEASURE(this.thread_Id);
+                        BEGIN_SNAPSHOT_TIME_MEASURE(this.thread_Id);
+                        this.db.asyncSnapshot(in.getMarker().getSnapshotId(), this.thread_Id, this.ftManager);
+                        MeasureTools.END_SNAPSHOT_TIME_MEASURE(this.thread_Id);
+                    }
                     READ_REQUEST_CORE();
                 }
-                MeasureTools.END_TXN_TIME_MEASURE(thread_Id);
+                if (Objects.equals(in.getMarker().getMessage(), "commit_early") || Objects.equals(in.getMarker().getMessage(), "commit_snapshot_early")) {
+                    this.loggingManager.boltRegister(this.thread_Id, FaultToleranceConstants.FaultToleranceStatus.Commit, new LoggingResult(in.getMarker().getSnapshotId(), this.thread_Id, null));
+                }
                 BEGIN_POST_TIME_MEASURE(thread_Id);
                 {
                     READ_POST();
                 }
                 END_POST_TIME_MEASURE_ACC(thread_Id);
+                if (Objects.equals(in.getMarker().getMessage(), "snapshot")) {
+                    this.ftManager.boltRegister(this.thread_Id, FaultToleranceConstants.FaultToleranceStatus.Commit, new SnapshotResult(in.getMarker().getSnapshotId(), this.thread_Id, null));
+                } else if (Objects.equals(in.getMarker().getMessage(), "commit")){
+                    this.loggingManager.boltRegister(this.thread_Id, FaultToleranceConstants.FaultToleranceStatus.Commit, new LoggingResult(in.getMarker().getSnapshotId(), this.thread_Id, null));
+                } else if (Objects.equals(in.getMarker().getMessage(), "commit_snapshot")){
+                    this.ftManager.boltRegister(this.thread_Id, FaultToleranceConstants.FaultToleranceStatus.Commit, new SnapshotResult(in.getMarker().getSnapshotId(), this.thread_Id, null));
+                    this.loggingManager.boltRegister(this.thread_Id, FaultToleranceConstants.FaultToleranceStatus.Commit, new LoggingResult(in.getMarker().getSnapshotId(), this.thread_Id, null));
+                } else if (Objects.equals(in.getMarker().getMessage(), "commit_snapshot_early")) {
+                    this.ftManager.boltRegister(this.thread_Id, FaultToleranceConstants.FaultToleranceStatus.Commit, new SnapshotResult(in.getMarker().getSnapshotId(), this.thread_Id, null));
+                }
                 //all tuples in the holder is finished.
                 microEvents.clear();
             }
             MeasureTools.END_TOTAL_TIME_MEASURE_TS(thread_Id, num_events);
+            if (this.sink.stopRecovery) {
+                Metrics.RecoveryPerformance.stopRecovery[thread_Id] = true;//Change here is to measure time for entire epoch.
+                Metrics.RecoveryPerformance.recoveryItems[thread_Id] = this.sink.lastTask - this.sink.startRecovery;
+                this.transactionManager.switch_scheduler(thread_Id, in.getBID());
+            }
         } else {
             execute_ts_normal(in);
         }

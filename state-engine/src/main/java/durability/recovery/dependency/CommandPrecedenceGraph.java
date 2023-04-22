@@ -61,9 +61,9 @@ public class CommandPrecedenceGraph {
             }
         }
         context.totalTaskCount = threadToTaskMap.get(context.threadId).size();
-//        IOUtils.println("total task count: " + context.totalTaskCount + " thread id: " + context.threadId);
+        //IOUtils.println("total task count: " + context.totalTaskCount + " thread id: " + context.threadId);
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.threadId);
-//        LOG.info("Start building buckets per thread: {}", context.threadId);
+        //LOG.info("Start building buckets per thread: {}", context.threadId);
         context.buildBucketsPerThread(threadToTaskMap.get(context.threadId).values(), roots);
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.threadId);
         if (context.threadId == 0) {

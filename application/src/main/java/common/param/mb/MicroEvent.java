@@ -150,9 +150,24 @@ public class MicroEvent extends TxnEvent {
         value[access_id] = values;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder str = new StringBuilder();
+        str.append(getBid());
+        for (int key : keys) {
+            str.append(",").append(key);
+        }
+        str.append(",").append(this.Txn_Length);
+        str.append(",").append(flag);
+        str.append(",").append(getTimestamp());
+        return str.toString();
+    }
+
     public MicroEvent cloneEvent() {
-        return new MicroEvent((int) bid, pid,
+        MicroEvent event = new MicroEvent((int) bid, pid,
                 Arrays.toString(bid_array), Arrays.toString(partition_indexs),
                 number_of_partitions, Arrays.toString(keys), TOTAL_NUM_ACCESS, Txn_Length, flag);
+        event.setTimestamp(this.timestamp);
+        return event;
     }
 }

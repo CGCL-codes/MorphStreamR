@@ -1,9 +1,10 @@
-package combo;
+package combo.faulttolerance;
 
 import benchmark.DataHolder;
+import combo.GSCombo;
 import common.bolts.transactional.gs.*;
 import common.collections.Configuration;
-import common.collections.OsUtils;
+import common.faulttolerance.inputReload.GSInputDurabilityHelp;
 import common.param.TxnEvent;
 import common.param.mb.MicroEvent;
 import components.context.TopologyContext;
@@ -12,30 +13,20 @@ import execution.runtime.collector.OutputCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayDeque;
-import java.util.Scanner;
 
 import static common.CONTROL.*;
-import static common.Constants.Event_Path;
 import static content.Content.*;
-import static profiler.Metrics.NUM_ACCESSES;
-import static profiler.Metrics.NUM_ITEMS;
 
-//TODO: Re-name microbenchmark as GS (Grep and Sum).
-public class GSCombo extends SPOUTCombo {
-    private static final Logger LOG = LoggerFactory.getLogger(GSCombo.class);
-    private static final long serialVersionUID = -2394340130331865581L;
+public class FTGSCombo extends FTSPOUTCombo {
+    private static final Logger LOG = LoggerFactory.getLogger(FTGSCombo.class);
     int concurrency = 0;
     int pre_concurrency = 0;
     int[] concerned_length = new int[]{40};
     int cnt = 0;
     ArrayDeque<MicroEvent> prevents = new ArrayDeque<>();
 
-    public GSCombo() {
+    public FTGSCombo() {
         super(LOG, 0);
     }
 
@@ -102,6 +93,7 @@ public class GSCombo extends SPOUTCombo {
         assert enable_shared_state;//This application requires enable_shared_state.
 
         super.initialize(thread_Id, thisTaskId, graph);
+        this.inputDurabilityHelper = new GSInputDurabilityHelp(config, thisTaskId, this.compressionType);
         sink.configPrefix = this.getConfigPrefix();
         sink.prepare(config, context, collector);
         switch (config.getInt("CCOption", 0)) {

@@ -77,7 +77,7 @@ public class GSInitializer extends TableInitilizer {
             DynamicDataGeneratorConfig dynamicDataGeneratorConfig=new DynamicDataGeneratorConfig();
             dynamicDataGeneratorConfig.initialize(config);
             configurePath(dynamicDataGeneratorConfig);
-            dataGenerator=new GSTPGDynamicDataGenerator(dynamicDataGeneratorConfig);
+            dataGenerator = new GSTPGDynamicDataGenerator(dynamicDataGeneratorConfig);
         }else {
             GSTPGDataGeneratorConfig dataConfig = new GSTPGDataGeneratorConfig();
             dataConfig.initialize(config);
@@ -116,6 +116,18 @@ public class GSInitializer extends TableInitilizer {
                             ((GSTPGDataGeneratorConfig) dataConfig).Transaction_Length,
                             ((GSTPGDataGeneratorConfig) dataConfig).Ratio_of_Multiple_State_Access,
                             AppConfig.isCyclic)
+                        .getBytes(StandardCharsets.UTF_8));
+            else if (dataConfig instanceof DynamicDataGeneratorConfig)
+                bytes = digest.digest(String.format("%d_%d_%d_%d_%d_%d_%d_%s_%s",
+                                dataConfig.getTotalThreads(),
+                                dataConfig.getTotalEvents(),
+                                dataConfig.getnKeyStates(),
+                                ((DynamicDataGeneratorConfig) dataConfig).Ratio_of_Multiple_State_Access,
+                                ((DynamicDataGeneratorConfig) dataConfig).State_Access_Skewness,
+                                ((DynamicDataGeneratorConfig) dataConfig).Ratio_of_Overlapped_Keys,
+                                ((DynamicDataGeneratorConfig) dataConfig).Ratio_of_Transaction_Aborts,
+                                AppConfig.isCyclic,
+                                config.getString("workloadType"))
                         .getBytes(StandardCharsets.UTF_8));
             else
                 bytes = digest.digest(String.format("%d_%d_%d_%s_%s_%s",
@@ -198,6 +210,10 @@ public class GSInitializer extends TableInitilizer {
         String folder = dataRootPath;
         File file = new File(folder);
         if (file.exists()) {
+            if (config.getBoolean("isDynamic")) {
+                //file.delete();
+                dataGenerator.generateTPGProperties();
+            }
             if (enable_log) LOG.info("Data already exists.. skipping data generation...");
             return false;
         }
@@ -237,7 +253,7 @@ public class GSInitializer extends TableInitilizer {
             int keyLength = split.length - 2;
             HashMap<Integer, Integer> pids = new HashMap<>();
             long[] keys = new long[keyLength];
-            for (int i = 1; i < keyLength+1; i++) {
+            for (int i = 1; i < keyLength + 1; i++) {
                 keys[i-1] = Long.parseLong(split[i]);
                 pids.put((int) (keys[i-1] / partitionOffset), 0);
             }
@@ -253,6 +269,7 @@ public class GSInitializer extends TableInitilizer {
                     keyLength,
                     Transaction_Length,
                     Boolean.parseBoolean(split[keyLength+1]));
+            event.setTimestamp(event.getBid() * this.increaseTime);
             DataHolder.events.add(event);
             if (enable_log) LOG.debug(String.format("%d deposit read...", count));
             txn = reader.readLine();
@@ -338,11 +355,11 @@ public class GSInitializer extends TableInitilizer {
             prepare_input_events(config.getInt("totalEvents"));
             if (getTranToDecisionConf() != null && getTranToDecisionConf().size() !=0){
                 StringBuilder stringBuilder = new StringBuilder();
-                for(String decision:getTranToDecisionConf()){
+                for(String decision : getTranToDecisionConf()){
                     stringBuilder.append(decision);
                     stringBuilder.append(";");
                 }
-                stringBuilder.deleteCharAt(stringBuilder.length()-1);
+                stringBuilder.deleteCharAt(stringBuilder.length() - 1);
                 config.put("WorkloadConfig",stringBuilder.toString());
             }
         } catch (IOException e) {

@@ -85,6 +85,7 @@ public class TxnManagerTStream extends TxnManagerDedicatedAsy {
     }
     public void switch_scheduler(int thread_Id, long mark_ID) {
         if (scheduler instanceof RScheduler) {
+            SOURCE_CONTROL.getInstance().waitForSchedulerSwitch(thread_Id);
             String schedulerType = collector.getDecision(thread_Id);
             this.SwitchScheduler(schedulerType, thread_Id, mark_ID);
             this.switchContext(schedulerType);

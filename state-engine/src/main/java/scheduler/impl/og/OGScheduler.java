@@ -175,31 +175,27 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
     protected void GrepSum_Fun(Operation operation, long previous_mark_ID, boolean clean) {
         int keysLength = operation.condition_records.length;
         SchemaRecord[] preValues = new SchemaRecord[operation.condition_records.length];
-
         long sum = 0;
-
-        // apply function
         AppConfig.randomDelay();
 
         for (int i = 0; i < keysLength; i++) {
             preValues[i] = operation.condition_records[i].content_.readPreValues(operation.bid);
             sum += preValues[i].getValues().get(1).getLong();
         }
-
         sum /= keysLength;
-
         if (operation.function.delta_long != -1) {
-            // read
             SchemaRecord srcRecord = operation.s_record.content_.readPreValues(operation.bid);
             SchemaRecord tempo_record = new SchemaRecord(srcRecord);//tempo record
-            // apply function
-
             if (operation.function instanceof SUM) {
-//                tempo_record.getValues().get(1).incLong(tempo_record, sum);//compute.
                 tempo_record.getValues().get(1).setLong(sum);//compute.
             } else
                 throw new UnsupportedOperationException();
             operation.d_record.content_.updateMultiValues(operation.bid, previous_mark_ID, clean, tempo_record);//it may reduce NUMA-traffic.
+            if (isLogging == LOGOption_path && keysLength > 1 && !operation.isCommit) {
+                int id = getTaskId(operation.pKey, delta);
+                this.tpg.threadToPathRecord.get(id).addDependencyEdge(operation.table_name,operation.pKey, operation.condition_records[1].record_.GetPrimaryKey(), operation.bid, sum);
+                operation.isCommit = true;
+            }
             synchronized (operation.success) {
                 operation.success[0]++;
             }

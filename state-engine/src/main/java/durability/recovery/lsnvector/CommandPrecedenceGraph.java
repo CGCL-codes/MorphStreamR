@@ -25,6 +25,7 @@ public class CommandPrecedenceGraph {
         context.totalTaskCount = context.tasks.size();
 //        IOUtils.println("Thread " + context.threadId + " has " + context.totalTaskCount + " tasks");
         if (context.threadId == 0) {
+            LOG.info("Start redo");
             if (GlobalLV == null) {
                 GlobalLV = new int[threadToCSContextMap.size()];
                 Arrays.fill(GlobalLV, 0);

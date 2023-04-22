@@ -103,6 +103,9 @@ public class DynamicDataGeneratorConfig extends DataGeneratorConfig {
                     } else {
                         return "unchanging";
                     }
+                } else if (this.app.equals("GrepSum")){
+                    this.Ratio_of_Multiple_State_Access = Math.min(this.Ratio_of_Multiple_State_Access + 20, 100);
+                    return "PD";
                 }
             case "Down_PD":
                 if (this.app.equals("StreamLedger")) {
@@ -112,6 +115,9 @@ public class DynamicDataGeneratorConfig extends DataGeneratorConfig {
                     } else {
                         return "unchanging";
                     }
+                } else if (this.app.equals("GrepSum")){
+                    this.Ratio_of_Multiple_State_Access = Math.max(this.Ratio_of_Multiple_State_Access - 20, 0);
+                    return "PD";
                 }
             case "Up_abort":
                 if (this.Ratio_of_Transaction_Aborts + 2000 <= 10000) {

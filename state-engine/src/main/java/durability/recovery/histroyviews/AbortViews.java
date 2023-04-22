@@ -1,13 +1,13 @@
 package durability.recovery.histroyviews;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class AbortViews {
-    public ConcurrentHashMap<Integer, List<Long>> threadToAbortList = new ConcurrentHashMap<>();
+    public ConcurrentHashMap<Integer, Vector<Long>> threadToAbortList = new ConcurrentHashMap<>();
     public void addAbortId(int threadId, long bid) {
-        if (!threadToAbortList.containsKey(threadId))
-            threadToAbortList.put(threadId, new ArrayList<>());
+        threadToAbortList.putIfAbsent(threadId, new Vector<>());
         threadToAbortList.get(threadId).add(bid);
     }
     public boolean inspectView(int threadId, long bid) {

@@ -16,6 +16,7 @@ import storage.SchemaRecord;
 import storage.datatype.DataBox;
 import transaction.function.DEC;
 import transaction.function.INC;
+import transaction.function.SUM;
 import utils.AppConfig;
 import utils.SOURCE_CONTROL;
 
@@ -223,12 +224,9 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
     public void execute(Operation operation, long mark_ID, boolean clean) {
         if (operation.accessType.equals(READ_WRITE_COND_READ)) {
             Transfer_Fun(operation, mark_ID, clean);
-            // check whether it needs to return a read results of the operation
             if (operation.record_ref != null) {
                 operation.record_ref.setRecord(operation.d_record.content_.readPreValues(operation.bid));//read the resulting tuple.
             }
-            // operation success check, number of operation succeeded does not increase after execution
-
         } else if (operation.accessType.equals(READ_WRITE_COND)) {
             if (this.tpg.getApp() == 1) {//SL
                 Transfer_Fun(operation, mark_ID, clean);
@@ -255,6 +253,11 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
                     values.get(2).setLong(values.get(2).getLong() + operation.function.delta_long);
                 } else
                     throw new UnsupportedOperationException();
+            }
+        } else if (operation.accessType.equals(READ_WRITE_COND_READN)) {
+            GrepSum_Fun(operation, mark_ID, clean);
+            if (operation.record_ref != null) {
+                operation.record_ref.setRecord(operation.d_record.content_.readPreValues(operation.bid));//read the resulting tuple.
             }
         }
     }
@@ -297,6 +300,28 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
         tempo_record = new SchemaRecord(values);//tempo record
         tempo_record.getValues().get(1).incLong(operation.function.delta_long);//compute.
         operation.s_record.content_.updateMultiValues(operation.bid, mark_ID, clean, tempo_record);//it may reduce NUMA-traffic.
+    }
+    protected void GrepSum_Fun(Operation operation, long previous_mark_ID, boolean clean) {
+        int keysLength = operation.condition_records.length;
+        SchemaRecord[] preValues = new SchemaRecord[operation.condition_records.length];
+        long sum = 0;
+        AppConfig.randomDelay();
+        if (operation.historyView != null) {
+            sum = Long.parseLong(String.valueOf(operation.historyView));
+        } else {
+            for (int i = 0; i < keysLength; i++) {
+                preValues[i] = operation.condition_records[i].content_.readPreValues(operation.bid);
+                sum += preValues[i].getValues().get(1).getLong();
+            }
+        }
+        sum /= keysLength;
+        SchemaRecord srcRecord = operation.s_record.content_.readPreValues(operation.bid);
+        SchemaRecord tempo_record = new SchemaRecord(srcRecord);//tempo record
+        if (operation.function instanceof SUM) {
+            tempo_record.getValues().get(1).setLong(sum);//compute.
+        } else
+            throw new UnsupportedOperationException();
+        operation.d_record.content_.updateMultiValues(operation.bid, previous_mark_ID, clean, tempo_record);//it may reduce NUMA-traffic.
     }
     public static int getTaskId(String key, Integer delta) {
         Integer _key = Integer.valueOf(key);

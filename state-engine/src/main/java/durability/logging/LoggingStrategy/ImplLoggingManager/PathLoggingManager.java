@@ -6,6 +6,7 @@ import common.io.ByteIO.DataInputView;
 import common.io.ByteIO.InputWithDecompression.NativeDataInputView;
 import common.io.ByteIO.InputWithDecompression.SnappyDataInputView;
 import common.util.graph.Graph;
+import common.util.io.IOUtils;
 import durability.ftmanager.FTManager;
 import durability.logging.LoggingEntry.PathRecord;
 import durability.logging.LoggingResource.ImplLoggingResources.DependencyMaintainResources;
@@ -135,6 +136,7 @@ public class PathLoggingManager implements LoggingManager {
                     this.historyViews.addAbortId(threadId, Long.parseLong(abortId), redoLogResult.groupIds.get(i));
                 }
             }
+       //     IOUtils.println("Abort: " + abortIds.length);
             int size = 0;
             for (int j = 2; j < strings.length; j++) {//Dependency View
                 String[] dependency = strings[j].split(";");
@@ -148,11 +150,16 @@ public class PathLoggingManager implements LoggingManager {
                         for (int m = 1; m < pr.length; m++) {
                             String[] kv = pr[m].split("/");
                             this.historyViews.addDependencies(redoLogResult.groupIds.get(i), tableName, from, to, Long.parseLong(kv[0]), kv[1]);
-                            size++;
+                            Object history = this.historyViews.inspectDependencyView(redoLogResult.groupIds.get(i), tableName, from, to, Long.parseLong(kv[0]));
+                            if (history == null) {
+                             IOUtils.println("Error: " + redoLogResult.groupIds.get(i) + " " + tableName + " " + from + " " + to + " " + Long.parseLong(kv[0]) + " " + kv[1]);
+                            }
+                            size ++;
                         }
                     }
                 }
             }
+  //          IOUtils.println("Finish construct the history views for groupId: " + redoLogResult.groupIds.get(i) + " threadId: " + redoLogResult.threadId + " size: " + size);
             LOG.info("Finish construct the history views for groupId: " + redoLogResult.groupIds.get(i) + " threadId: " + redoLogResult.threadId);
         }
         SOURCE_CONTROL.getInstance().waitForOtherThreads(redoLogResult.threadId);
