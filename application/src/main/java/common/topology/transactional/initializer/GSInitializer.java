@@ -74,14 +74,13 @@ public class GSInitializer extends TableInitilizer {
     protected void createTPGGenerator(Configuration config) {
         if(config.getBoolean("isDynamic")) {
             //TODO:add the dynamic workload dataGenerator
-            DynamicDataGeneratorConfig dynamicDataGeneratorConfig=new DynamicDataGeneratorConfig();
+            DynamicDataGeneratorConfig dynamicDataGeneratorConfig = new DynamicDataGeneratorConfig();
             dynamicDataGeneratorConfig.initialize(config);
             configurePath(dynamicDataGeneratorConfig);
             dataGenerator = new GSTPGDynamicDataGenerator(dynamicDataGeneratorConfig);
         }else {
             GSTPGDataGeneratorConfig dataConfig = new GSTPGDataGeneratorConfig();
             dataConfig.initialize(config);
-
             configurePath(dataConfig);
             dataGenerator = new GSTPGDataGenerator(dataConfig);
         }
@@ -211,7 +210,6 @@ public class GSInitializer extends TableInitilizer {
         File file = new File(folder);
         if (file.exists()) {
             if (config.getBoolean("isDynamic")) {
-                //file.delete();
                 dataGenerator.generateTPGProperties();
             }
             if (enable_log) LOG.info("Data already exists.. skipping data generation...");

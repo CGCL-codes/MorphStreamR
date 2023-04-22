@@ -14,8 +14,8 @@ import java.util.HashMap;
 import java.util.Queue;
 import java.util.concurrent.ExecutionException;
 
-public class GSInputDurabilityHelp extends InputDurabilityHelper {
-    public GSInputDurabilityHelp(Configuration configuration, int taskId, FaultToleranceConstants.CompressionType compressionType) {
+public class GSInputDurabilityHelper extends InputDurabilityHelper {
+    public GSInputDurabilityHelper(Configuration configuration, int taskId, FaultToleranceConstants.CompressionType compressionType) {
         this.tthread = configuration.getInt("tthread");
         this.partitionOffset = configuration.getInt("NUM_ITEMS") / tthread;
         this.encodingType = compressionType;

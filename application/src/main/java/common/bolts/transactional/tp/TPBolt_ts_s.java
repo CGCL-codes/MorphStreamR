@@ -2,26 +2,33 @@ package common.bolts.transactional.tp;
 
 import combo.SINKCombo;
 import common.param.lr.LREvent;
+import common.util.io.IOUtils;
 import components.context.TopologyContext;
 import db.DatabaseException;
+import durability.logging.LoggingResult.LoggingResult;
+import durability.snapshot.SnapshotResult.SnapshotResult;
 import execution.ExecutionGraph;
 import execution.runtime.collector.OutputCollector;
 import execution.runtime.tuple.impl.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import profiler.MeasureTools;
+import profiler.Metrics;
 import transaction.context.TxnContext;
 import transaction.function.AVG;
 import transaction.function.CNT;
 import transaction.function.Condition;
 import transaction.impl.ordered.TxnManagerTStream;
+import utils.FaultToleranceConstants;
 
+import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.BrokenBarrierException;
 
 import static common.CONTROL.enable_latency_measurement;
-import static common.constants.TPConstants.Constant.NUM_SEGMENTS;
+import static profiler.MeasureTools.BEGIN_SNAPSHOT_TIME_MEASURE;
 import static profiler.Metrics.NUM_ITEMS;
 
 public class TPBolt_ts_s extends TPBolt {
@@ -38,7 +45,7 @@ public class TPBolt_ts_s extends TPBolt {
     public void initialize(int thread_Id, int thisTaskId, ExecutionGraph graph) {
         super.initialize(thread_Id, thisTaskId, graph);
         transactionManager=new TxnManagerTStream(db.getStorageManager(), this.context.getThisComponentId(),thread_Id,
-                NUM_ITEMS,this.context.getThisComponent().getNumTasks(),config.getString("scheduler","BF"));
+                NUM_ITEMS, this.context.getThisComponent().getNumTasks(),config.getString("scheduler","BF"));
         LREvents = new ArrayDeque<>();
     }
     public void loadDB(Map conf, TopologyContext context, OutputCollector collector) {
@@ -46,27 +53,56 @@ public class TPBolt_ts_s extends TPBolt {
                 , context.getGraph());
     }
     @Override
-    public void execute(Tuple in) throws InterruptedException, DatabaseException, BrokenBarrierException {
+    public void execute(Tuple in) throws InterruptedException, DatabaseException, BrokenBarrierException, IOException {
         if (in.isMarker()){
-            /**
-             *  MeasureTools.BEGIN_TOTAL_TIME_MEASURE(thread_Id); at {@link #execute_ts_normal(Tuple)}}.
-             */
-            int readSize=LREvents.size();
-            MeasureTools.BEGIN_TXN_TIME_MEASURE(thread_Id);
+            int readSize = LREvents.size();
             {
                 transactionManager.start_evaluate(thread_Id,in.getBID(),readSize);
+                if (Objects.equals(in.getMarker().getMessage(), "snapshot")) {
+                    MeasureTools.BEGIN_SNAPSHOT_TIME_MEASURE(this.thread_Id);
+                    this.db.asyncSnapshot(in.getMarker().getSnapshotId(), this.thread_Id, this.ftManager);
+                    MeasureTools.END_SNAPSHOT_TIME_MEASURE(this.thread_Id);
+                } else if (Objects.equals(in.getMarker().getMessage(), "commit") || Objects.equals(in.getMarker().getMessage(), "commit_early")) {
+                    MeasureTools.BEGIN_LOGGING_TIME_MEASURE(this.thread_Id);
+                    this.db.asyncCommit(in.getMarker().getSnapshotId(), this.thread_Id, this.loggingManager);
+                    MeasureTools.END_LOGGING_TIME_MEASURE(this.thread_Id);
+                } else if (Objects.equals(in.getMarker().getMessage(), "commit_snapshot") || Objects.equals(in.getMarker().getMessage(), "commit_snapshot_early")){
+                    MeasureTools.BEGIN_LOGGING_TIME_MEASURE(this.thread_Id);
+                    this.db.asyncCommit(in.getMarker().getSnapshotId(), this.thread_Id, this.loggingManager);
+                    MeasureTools.END_LOGGING_TIME_MEASURE(this.thread_Id);
+                    BEGIN_SNAPSHOT_TIME_MEASURE(this.thread_Id);
+                    this.db.asyncSnapshot(in.getMarker().getSnapshotId(), this.thread_Id, this.ftManager);
+                    MeasureTools.END_SNAPSHOT_TIME_MEASURE(this.thread_Id);
+                }
                 REQUEST_REQUEST_CORE();
             }
-            MeasureTools.END_TXN_TIME_MEASURE(thread_Id);
+            if (Objects.equals(in.getMarker().getMessage(), "commit_early") || Objects.equals(in.getMarker().getMessage(), "commit_snapshot_early")) {
+                this.loggingManager.boltRegister(this.thread_Id, FaultToleranceConstants.FaultToleranceStatus.Commit, new LoggingResult(in.getMarker().getSnapshotId(), this.thread_Id, null));
+            }
             MeasureTools.BEGIN_POST_TIME_MEASURE(thread_Id);
             {
                 REQUEST_POST();
             }
             MeasureTools.END_POST_TIME_MEASURE_ACC(thread_Id);
+            if (Objects.equals(in.getMarker().getMessage(), "snapshot")) {
+                this.ftManager.boltRegister(this.thread_Id, FaultToleranceConstants.FaultToleranceStatus.Commit, new SnapshotResult(in.getMarker().getSnapshotId(), this.thread_Id, null));
+            } else if (Objects.equals(in.getMarker().getMessage(), "commit")){
+                this.loggingManager.boltRegister(this.thread_Id, FaultToleranceConstants.FaultToleranceStatus.Commit, new LoggingResult(in.getMarker().getSnapshotId(), this.thread_Id, null));
+            } else if (Objects.equals(in.getMarker().getMessage(), "commit_snapshot")){
+                this.ftManager.boltRegister(this.thread_Id, FaultToleranceConstants.FaultToleranceStatus.Commit, new SnapshotResult(in.getMarker().getSnapshotId(), this.thread_Id, null));
+                this.loggingManager.boltRegister(this.thread_Id, FaultToleranceConstants.FaultToleranceStatus.Commit, new LoggingResult(in.getMarker().getSnapshotId(), this.thread_Id, null));
+            } else if (Objects.equals(in.getMarker().getMessage(), "commit_snapshot_early")) {
+                this.ftManager.boltRegister(this.thread_Id, FaultToleranceConstants.FaultToleranceStatus.Commit, new SnapshotResult(in.getMarker().getSnapshotId(), this.thread_Id, null));
+            }
             //all tuples in the holder is finished.
             LREvents.clear();
             MeasureTools.END_TOTAL_TIME_MEASURE_TS(thread_Id,readSize);
-        }else{
+            if (this.sink.stopRecovery) {
+                Metrics.RecoveryPerformance.stopRecovery[thread_Id] = true;//Change here is to measure time for entire epoch.
+                Metrics.RecoveryPerformance.recoveryItems[thread_Id] = this.sink.lastTask - this.sink.startRecovery;
+                this.transactionManager.switch_scheduler(thread_Id, in.getBID());
+            }
+        } else {
             execute_ts_normal(in);
         }
     }
@@ -85,24 +121,18 @@ public class TPBolt_ts_s extends TPBolt {
     }
     protected void REQUEST_CONSTRUCT(LREvent event,TxnContext txnContext) throws DatabaseException{
         transactionManager.BeginTransaction(txnContext);
-//        transactionManager.Asy_ModifyRecord_Read(txnContext
-//                , "segment_speed"
-//                , String.valueOf(event.getPOSReport().getSegment())
-//                , event.speed_value//holder to be filled up.
-//                , new AVG(event.getPOSReport().getSpeed())
-//        );          //asynchronously return.
         transactionManager.Asy_ModifyRecord_Read(txnContext
-                , "segment_speed", String.valueOf(event.getPOSReport().getSegment())
+                , "segment_speed"
+                , String.valueOf(event.getPOSReport().getSegment())
                 , event.speed_value
                 , new AVG(event.getPOSReport().getSpeed())
-                , new Condition(event.getPOSReport().getSpeed(),200)
                 , event.success);
         transactionManager.Asy_ModifyRecord_Read(txnContext
                 , "segment_cnt"
                 , String.valueOf(event.getPOSReport().getSegment())
                 , event.count_value//holder to be filled up.
                 , new CNT(event.getPOSReport().getVid())
-        );          //asynchronously return.
+                , event.success);
         transactionManager.CommitTransaction(txnContext);
         LREvents.add(event);
     }

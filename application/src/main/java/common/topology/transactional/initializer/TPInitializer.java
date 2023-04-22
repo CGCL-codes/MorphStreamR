@@ -69,26 +69,29 @@ public class TPInitializer extends TableInitilizer {
         configurePath(dynamicDataGeneratorConfig);
         dataGenerator = new TPTPGDynamicDataGenerator(dynamicDataGeneratorConfig);
     }
-    private void configurePath(DynamicDataGeneratorConfig dynamicDataGeneratorConfig) {
+    private void configurePath(DynamicDataGeneratorConfig dataConfig) {
         MessageDigest digest;
         String subFolder = null;
         try {
             digest = MessageDigest.getInstance("SHA-256");
             byte[] bytes;
-            bytes = digest.digest(String.format("%d_%d_%d_%s_%s",
-                            dynamicDataGeneratorConfig.getTotalThreads(),
-                            dynamicDataGeneratorConfig.getTotalEvents(),
-                            dynamicDataGeneratorConfig.getnKeyStates(),
-                            dynamicDataGeneratorConfig.getApp(),
-                            AppConfig.isCyclic)
+            bytes = digest.digest(String.format("%d_%d_%d_%d_%d_%d_%s_%s",
+                            dataConfig.getTotalThreads(),
+                            dataConfig.getTotalEvents(),
+                            dataConfig.getnKeyStates(),
+                            dataConfig.State_Access_Skewness,
+                            dataConfig.Ratio_of_Overlapped_Keys,
+                            dataConfig.Ratio_of_Transaction_Aborts,
+                            AppConfig.isCyclic,
+                            config.getString("workloadType"))
                     .getBytes(StandardCharsets.UTF_8));
             subFolder = OsUtils.osWrapperPostFix(
                     DatatypeConverter.printHexBinary(bytes));
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
-        dynamicDataGeneratorConfig.setRootPath(dynamicDataGeneratorConfig.getRootPath() + OsUtils.OS_wrapper(subFolder));
-        dynamicDataGeneratorConfig.setIdsPath(dynamicDataGeneratorConfig.getIdsPath() + OsUtils.OS_wrapper(subFolder));
+        dataConfig.setRootPath(dataConfig.getRootPath() + OsUtils.OS_wrapper(subFolder));
+        dataConfig.setIdsPath(dataConfig.getIdsPath() + OsUtils.OS_wrapper(subFolder));
         this.dataRootPath += OsUtils.OS_wrapper(subFolder);
     }
 
@@ -214,6 +217,9 @@ public class TPInitializer extends TableInitilizer {
         String folder = dataRootPath;
         File file = new File(folder);
         if (file.exists()) {
+            if (config.getBoolean("isDynamic")) {
+                dataGenerator.generateTPGProperties();
+            }
             if (enable_log) LOG.info("Data already exists.. skipping data generation...");
             return false;
         }
@@ -250,7 +256,7 @@ public class TPInitializer extends TableInitilizer {
             String[] split = txn.split(",");
             if (split[split.length-1].equals("true")) {
                 positionReport = new PositionReport((short) 0,
-                        randomNumberGenerator.generate(1,100),
+                        200,
                         200,
                         randomNumberGenerator.generate(1,4),
                         (short)randomNumberGenerator.generate(1,4),
@@ -267,7 +273,8 @@ public class TPInitializer extends TableInitilizer {
                         Integer.parseInt(split[1]),
                         randomNumberGenerator.generate(1,100));
             }
-            event = new LREvent(positionReport,dataConfig.getTotalThreads(),Long.parseLong(split[0]));
+            event = new LREvent(positionReport, dataConfig.getTotalThreads(), Long.parseLong(split[0]));
+            event.setTimestamp(event.getBid() * this.increaseTime);
             DataHolder.events.add(event);
             if (enable_log) LOG.debug(String.format("%d deposit read...", count));
             txn = reader.readLine();

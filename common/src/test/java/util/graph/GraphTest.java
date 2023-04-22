@@ -12,13 +12,11 @@ public class GraphTest {
     public Node[] nodes;
     @Test
     public void testPartition() {
-        StringBuilder stringBuilder = new StringBuilder();
-        ConcurrentSkipListSet<Integer> concurrentSkipListSet = new ConcurrentSkipListSet<>();
-        concurrentSkipListSet.add(1);
-        System.out.println(concurrentSkipListSet.first());
-        System.out.println(stringBuilder.toString().length());
-        stringBuilder.append("22").append(";");
-        stringBuilder.append("33").append(";");
+        int[] a = new int[1];
+        a[0] = 5;
+        int[] b = a;
+        a[0] = 6;
+        System.out.println(b[0]);
         this.nodes = new Node[4];
         Graph graph = new Graph(this.nodes.length, 2);
         for (int i = 0; i < this.nodes.length; i++) {

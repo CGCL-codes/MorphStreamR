@@ -16,7 +16,6 @@ public class LREvent extends TxnEvent {
     public SchemaRecordRef speed_value;
     public SchemaRecordRef count_value;
     private long timestamp;
-//  private final AvgVehicleSpeedTuple vsreport;//intermediate input.
 
     /**
      * creating a new LREvent.
@@ -29,7 +28,6 @@ public class LREvent extends TxnEvent {
         super(bid);
         this.posreport = posreport;
         this.tthread = tthread;
-//      vsreport = vehicleSpeedTuple;
         this.bid = bid;
         speed_value = new SchemaRecordRef();
         count_value = new SchemaRecordRef();
@@ -57,6 +55,22 @@ public class LREvent extends TxnEvent {
 
     @Override
     public LREvent cloneEvent() {
-        return new LREvent(this.posreport,tthread,bid);
+        LREvent lrEvent = new LREvent(this.posreport,tthread,bid);
+        lrEvent.setTimestamp(timestamp);
+        return lrEvent;
+    }
+    public String toString(){
+        StringBuilder str = new StringBuilder();
+        str.append(getBid());//0_bid
+        str.append(",").append(getTimestamp());//1_timestamp
+        str.append(",").append(posreport.getTime());//2_time
+        str.append(",").append(posreport.getVid());//3_vid
+        str.append(",").append(posreport.getSpeed());//4_speed
+        str.append(",").append(posreport.getXWay());//5_xway
+        str.append(",").append(posreport.getLane());//6_lane
+        str.append(",").append(posreport.getDirection());//7_direction
+        str.append(",").append(posreport.getSegment());//8_segment
+        str.append(",").append(posreport.getPosition());//9_position
+        return str.toString();
     }
 }

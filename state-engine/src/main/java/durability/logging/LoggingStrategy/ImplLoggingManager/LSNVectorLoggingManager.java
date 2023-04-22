@@ -36,8 +36,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
+import transaction.function.AVG;
 import transaction.function.DEC;
 import transaction.function.INC;
 import transaction.function.SUM;
@@ -157,6 +159,7 @@ public class LSNVectorLoggingManager implements LoggingManager {
                 break;
             case 3:
             case 2:
+                TPExecute(context.readyTask);
                 break;
             case 1:
                 SLExecute(context.readyTask);
@@ -220,6 +223,27 @@ public class LSNVectorLoggingManager implements LoggingManager {
             tempo_record.getValues().get(1).setLong(sum);//compute.
         } else
             throw new UnsupportedOperationException();
+    }
+    private void TPExecute(LVCLog task) {
+        if (task == null || task.isAborted)
+            return;
+        String table = task.tableName;
+        String pKey = task.key;
+        AppConfig.randomDelay();
+        TableRecord srcRecord = this.tables.get(table).SelectKeyRecord(pKey);
+        if (task.OperationFunction.equals(AVG.class.getName())) {
+            double latestAvgSpeeds = srcRecord.record_.getValues().get(1).getDouble();
+            double lav;
+            if (latestAvgSpeeds == 0) {//not initialized
+                lav = Double.parseDouble(task.parameter);
+            } else
+                lav = (latestAvgSpeeds + Double.parseDouble(task.parameter)) / 2;
+
+            srcRecord.record_.getValues().get(1).setDouble(lav);//write to state.
+        } else {
+            HashSet cnt_segment = srcRecord.record_.getValues().get(1).getHashSet();
+            cnt_segment.add(Integer.parseInt(task.parameter));
+        }
     }
 
     @Override

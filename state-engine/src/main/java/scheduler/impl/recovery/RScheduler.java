@@ -14,17 +14,19 @@ import scheduler.struct.recovery.OperationChain;
 import scheduler.struct.recovery.TaskPrecedenceGraph;
 import storage.SchemaRecord;
 import storage.datatype.DataBox;
+import storage.datatype.DoubleDataBox;
+import storage.datatype.IntDataBox;
+import transaction.function.AVG;
 import transaction.function.DEC;
 import transaction.function.INC;
 import transaction.function.SUM;
 import utils.AppConfig;
 import utils.SOURCE_CONTROL;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 
+import static common.constants.TPConstants.Constant.MAX_INT;
+import static common.constants.TPConstants.Constant.MAX_SPEED;
 import static content.common.CommonMetaTypes.AccessType.*;
 import static utils.FaultToleranceConstants.*;
 
@@ -95,7 +97,7 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
                     break;
                 case READ_WRITE_READ:
                     set_op = new Operation(request.src_key, getTargetContext(request.src_key), request.table_name, request.txn_context, bid, request.accessType,
-                            request.d_record, request.record_ref, request.function, null, null, null);
+                            request.d_record, request.record_ref, request.function, null, null, request.success);
                     break;
                 default:
                     throw new UnsupportedOperationException();
@@ -189,8 +191,6 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
         RESET(context);
     }
     public Context getTargetContext(String key) {
-        // the thread to submit the operation may not be the thread to execute it.
-        // we need to find the target context this thread is mapped to.
         int threadId =  Integer.parseInt(key) / delta;
         return tpg.threadToContextMap.get(threadId);
     }
@@ -230,35 +230,18 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
         } else if (operation.accessType.equals(READ_WRITE_COND)) {
             if (this.tpg.getApp() == 1) {//SL
                 Transfer_Fun(operation, mark_ID, clean);
-            } else {//OB
-                AppConfig.randomDelay();
-                List<DataBox> d_record = operation.condition_records[0].content_.ReadAccess(operation.bid, mark_ID, clean, operation.accessType).getValues();
-                long askPrice = d_record.get(1).getLong();//price
-                long left_qty = d_record.get(2).getLong();//available qty;
-                long bidPrice = operation.condition.arg1;
-                long bid_qty = operation.condition.arg2;
-                if (bidPrice > askPrice || bid_qty < left_qty) {
-                    d_record.get(2).setLong(left_qty - operation.function.delta_long);//new quantity.
-                    operation.success[0]++;
-                }
             }
         } else if (operation.accessType.equals(READ_WRITE)) {
             if (this.tpg.getApp() == 1) {
                 Depo_Fun(operation, mark_ID, clean);
-            } else {
-                AppConfig.randomDelay();
-                SchemaRecord srcRecord = operation.s_record.content_.ReadAccess(operation.bid,mark_ID,clean,operation.accessType);
-                List<DataBox> values = srcRecord.getValues();
-                if (operation.function instanceof INC) {
-                    values.get(2).setLong(values.get(2).getLong() + operation.function.delta_long);
-                } else
-                    throw new UnsupportedOperationException();
             }
         } else if (operation.accessType.equals(READ_WRITE_COND_READN)) {
             GrepSum_Fun(operation, mark_ID, clean);
             if (operation.record_ref != null) {
                 operation.record_ref.setRecord(operation.d_record.content_.readPreValues(operation.bid));//read the resulting tuple.
             }
+        } else if (operation.accessType.equals(READ_WRITE_READ)) {
+            TollProcess_Fun(operation, mark_ID, clean);
         }
     }
     protected void Transfer_Fun(AbstractOperation operation, long previous_mark_ID, boolean clean) {
@@ -322,6 +305,25 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
         } else
             throw new UnsupportedOperationException();
         operation.d_record.content_.updateMultiValues(operation.bid, previous_mark_ID, clean, tempo_record);//it may reduce NUMA-traffic.
+    }
+    protected void TollProcess_Fun(Operation operation, long previous_mark_ID, boolean clean) {
+        AppConfig.randomDelay();
+        List<DataBox> srcRecord = operation.s_record.record_.getValues();
+        if (operation.function instanceof AVG) {
+            double latestAvgSpeeds = srcRecord.get(1).getDouble();
+            double lav;
+            if (latestAvgSpeeds == 0) {//not initialized
+                lav = operation.function.delta_double;
+            } else
+                lav = (latestAvgSpeeds + operation.function.delta_double) / 2;
+
+            srcRecord.get(1).setDouble(lav);//write to state.
+            operation.record_ref.setRecord(new SchemaRecord(new DoubleDataBox(lav)));//return updated record.
+        } else {
+            HashSet cnt_segment = srcRecord.get(1).getHashSet();
+            cnt_segment.add(operation.function.delta_int);//update hashset; updated state also. TODO: be careful of this.
+            operation.record_ref.setRecord(new SchemaRecord(new IntDataBox(cnt_segment.size())));//return updated record.
+        }
     }
     public static int getTaskId(String key, Integer delta) {
         Integer _key = Integer.valueOf(key);

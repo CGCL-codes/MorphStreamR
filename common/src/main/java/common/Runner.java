@@ -304,20 +304,17 @@ public abstract class Runner implements IRunner {
                 break;
             case "OnlineBiding" :
                 //bottomLine = "500,5000,1,6000,0.2,0.2";//TD,LD,PD,SUM,VDD,R_of_A
-                bottomLine =  2 * checkpoint_interval + "," + 2 * checkpoint_interval + "," + checkpoint_interval + "," + 4 * checkpoint_interval + "," + "0.3,0.2";//TD,LD,PD,SUM,VDD,R_of_A
-                schedulerPools = "OG_BFS_A,OG_NS_A,OG_NS";
-                defaultScheduler = "OG_BFS_A";
+                bottomLine =  checkpoint_interval + "," + 2 * checkpoint_interval + "," + checkpoint_interval + "," + 4 * checkpoint_interval + "," + "0.3,0.2";//TD,LD,PD,SUM,VDD,R_of_A
                 phaseNum = shiftRate * phaseType.length;
                 break;
             case "GrepSum" :
-                bottomLine = "500,5000,6500,3000,0.2,0.2";//TD,LD,PD,SUM,VDD,R_of_A
-                schedulerPools = "OP_NS_A,OG_BFS_A,OP_NS,OP_NS_A";
-                defaultScheduler = "OP_NS_A";
+                //bottomLine = "500,5000,6500,3000,0.2,0.2";//TD,LD,PD,SUM,VDD,R_of_A
+                bottomLine =  2 * checkpoint_interval + "," + 2 * checkpoint_interval + "," + checkpoint_interval + "," + 4 * checkpoint_interval + "," + "0.3,0.2";//TD,LD,PD,SUM,VDD,R_of_A
                 phaseNum = shiftRate * phaseType.length;
                 break;
             case "TollProcessing" :
-                phaseNum = shiftRate * 1;
-                defaultScheduler = "OG_BFS_A";
+                bottomLine =  checkpoint_interval + "," + checkpoint_interval + "," + checkpoint_interval + "," + 4 * checkpoint_interval + "," + "0.3,0.2";//TD,LD,PD,SUM,VDD,R_of_A
+                phaseNum = shiftRate * phaseType.length;
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + application);

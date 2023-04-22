@@ -1,10 +1,9 @@
 package combo.faulttolerance;
 
 import benchmark.DataHolder;
-import combo.GSCombo;
 import common.bolts.transactional.gs.*;
 import common.collections.Configuration;
-import common.faulttolerance.inputReload.GSInputDurabilityHelp;
+import common.faulttolerance.inputReload.GSInputDurabilityHelper;
 import common.param.TxnEvent;
 import common.param.mb.MicroEvent;
 import components.context.TopologyContext;
@@ -93,7 +92,7 @@ public class FTGSCombo extends FTSPOUTCombo {
         assert enable_shared_state;//This application requires enable_shared_state.
 
         super.initialize(thread_Id, thisTaskId, graph);
-        this.inputDurabilityHelper = new GSInputDurabilityHelp(config, thisTaskId, this.compressionType);
+        this.inputDurabilityHelper = new GSInputDurabilityHelper(config, thisTaskId, this.compressionType);
         sink.configPrefix = this.getConfigPrefix();
         sink.prepare(config, context, collector);
         switch (config.getInt("CCOption", 0)) {

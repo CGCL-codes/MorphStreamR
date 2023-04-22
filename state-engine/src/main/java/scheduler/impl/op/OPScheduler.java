@@ -32,6 +32,8 @@ import utils.SOURCE_CONTROL;
 import java.util.HashSet;
 import java.util.List;
 
+import static common.constants.TPConstants.Constant.MAX_INT;
+import static common.constants.TPConstants.Constant.MAX_SPEED;
 import static content.common.CommonMetaTypes.AccessType.*;
 import static utils.FaultToleranceConstants.*;
 
@@ -171,22 +173,11 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
             operation.d_record.record_.getValues().get(1).setLong(operation.value);
         } else if (operation.accessType.equals(READ_WRITE_READ)){
             assert operation.record_ref != null;
-            AppConfig.randomDelay();
-            List<DataBox> srcRecord = operation.s_record.record_.getValues();
-            if (operation.function instanceof AVG) {
-                double latestAvgSpeeds = srcRecord.get(1).getDouble();
-                double lav;
-                if (latestAvgSpeeds == 0) {//not initialized
-                    lav = operation.function.delta_double;
-                } else
-                    lav = (latestAvgSpeeds + operation.function.delta_double) / 2;
-
-                srcRecord.get(1).setDouble(lav);//write to state.
-                operation.record_ref.setRecord(new SchemaRecord(new DoubleDataBox(lav)));//return updated record.
-            } else {
-                HashSet cnt_segment = srcRecord.get(1).getHashSet();
-                cnt_segment.add(operation.function.delta_int);//update hashset; updated state also. TODO: be careful of this.
-                operation.record_ref.setRecord(new SchemaRecord(new IntDataBox(cnt_segment.size())));//return updated record.
+            success = operation.success[0];
+            if (this.tpg.getApp() == 2)
+                TollProcess_Fun(operation, mark_ID, clean);
+            if (operation.success[0] == success) {
+                operation.isFailed = true;
             }
         } else {
             throw new UnsupportedOperationException();
@@ -265,7 +256,35 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
                 operation.isCommit = true;
             }
         }
+    }
+    protected void TollProcess_Fun(AbstractOperation operation, long previous_mark_ID, boolean clean) {
+        AppConfig.randomDelay();
+        List<DataBox> srcRecord = operation.s_record.record_.getValues();
+        if (operation.function instanceof AVG) {
+            if (operation.function.delta_double < MAX_SPEED) {
+                double latestAvgSpeeds = srcRecord.get(1).getDouble();
+                double lav;
+                if (latestAvgSpeeds == 0) {//not initialized
+                    lav = operation.function.delta_double;
+                } else
+                    lav = (latestAvgSpeeds + operation.function.delta_double) / 2;
 
+                srcRecord.get(1).setDouble(lav);//write to state.
+                operation.record_ref.setRecord(new SchemaRecord(new DoubleDataBox(lav)));//return updated record.
+                synchronized (operation.success) {
+                    operation.success[0] ++;
+                }
+            }
+        } else {
+            if (operation.function.delta_int < MAX_INT) {
+                HashSet cnt_segment = srcRecord.get(1).getHashSet();
+                cnt_segment.add(operation.function.delta_int);//update hashset; updated state also. TODO: be careful of this.
+                operation.record_ref.setRecord(new SchemaRecord(new IntDataBox(cnt_segment.size())));//return updated record.
+                synchronized (operation.success) {
+                    operation.success[0] ++;
+                }
+            }
+        }
     }
 
     @Override
@@ -311,7 +330,7 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
             switch (request.accessType) {
                 case WRITE_ONLY:
                     set_op = new Operation(request.src_key, getTargetContext(request.src_key), request.table_name, request.txn_context, bid, request.accessType,
-                            request.d_record, null, null, null, null);
+                            request.d_record, null, null, null, request.success);
                     set_op.value = request.value;
                     break;
                 case READ_WRITE: // they can use the same method for processing
@@ -326,7 +345,7 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
                     break;
                 case READ_WRITE_READ:
                     set_op = new Operation(request.src_key, getTargetContext(request.src_key), request.table_name, request.txn_context, bid, request.accessType,
-                            request.d_record, request.record_ref, request.function, null, null, null);
+                            request.d_record, request.record_ref, request.function, null, null, request.success);
                     break;
                 default:
                     throw new UnsupportedOperationException();

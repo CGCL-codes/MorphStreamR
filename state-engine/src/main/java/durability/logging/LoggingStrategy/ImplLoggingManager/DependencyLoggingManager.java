@@ -8,6 +8,7 @@ import common.io.ByteIO.InputWithDecompression.SnappyDataInputView;
 import common.util.io.IOUtils;
 import storage.TableRecord;
 import storage.datatype.DataBox;
+import transaction.function.AVG;
 import transaction.function.DEC;
 import transaction.function.INC;
 import durability.ftmanager.FTManager;
@@ -151,6 +152,7 @@ public class DependencyLoggingManager implements LoggingManager {
                 GSExecute(commandTask);
             case 3:
             case 2:
+                TPExecute(commandTask);
                 break;
             case 1:
                 SLExecute(commandTask);
@@ -269,5 +271,27 @@ public class DependencyLoggingManager implements LoggingManager {
             tempo_record.getValues().get(1).setLong(sum);//compute.
         } else
             throw new UnsupportedOperationException();
+    }
+    private void TPExecute(CommandTask task) {
+        if (task == null || task.dependencyLog.isAborted) return;
+        String table = task.dependencyLog.tableName;
+        String pKey = task.dependencyLog.key;
+        double value = Double.parseDouble(task.dependencyLog.id);
+        long bid = (long) Math.floor(value);
+        AppConfig.randomDelay();
+        TableRecord srcRecord = this.tables.get(table).SelectKeyRecord(pKey);
+        if (task.dependencyLog.OperationFunction.equals(AVG.class.getName())) {
+            double latestAvgSpeeds = srcRecord.record_.getValues().get(1).getDouble();
+            double lav;
+            if (latestAvgSpeeds == 0) {//not initialized
+                lav = Double.parseDouble(task.dependencyLog.parameter);
+            } else
+                lav = (latestAvgSpeeds + Double.parseDouble(task.dependencyLog.parameter)) / 2;
+
+            srcRecord.record_.getValues().get(1).setDouble(lav);//write to state.
+        } else {
+            HashSet cnt_segment = srcRecord.record_.getValues().get(1).getHashSet();
+            cnt_segment.add(Integer.parseInt(task.dependencyLog.parameter));
+        }
     }
 }

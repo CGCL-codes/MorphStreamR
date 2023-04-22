@@ -34,6 +34,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import static common.constants.TPConstants.Constant.MAX_INT;
+import static common.constants.TPConstants.Constant.MAX_SPEED;
 import static content.common.CommonMetaTypes.AccessType.*;
 import static utils.FaultToleranceConstants.*;
 
@@ -128,10 +130,7 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
     protected void Transfer_Fun(Operation operation, long previous_mark_ID, boolean clean) {
         SchemaRecord preValues = operation.condition_records[0].content_.readPreValues(operation.bid);
         final long sourceAccountBalance = preValues.getValues().get(1).getLong();
-
-        // apply function
         AppConfig.randomDelay();
-
         if (sourceAccountBalance > operation.condition.arg1
                 && sourceAccountBalance > operation.condition.arg2) {
             // read
@@ -145,12 +144,12 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
                 throw new UnsupportedOperationException();
             operation.d_record.content_.updateMultiValues(operation.bid, previous_mark_ID, clean, tempo_record);//it may reduce NUMA-traffic.
             synchronized (operation.success) {
-                operation.success[0]++;
+                operation.success[0] ++;
             }
-        }
-        if (isLogging == LOGOption_path && !operation.pKey.equals(preValues.GetPrimaryKey())) {
-            int id = getTaskId(operation.pKey, delta);
-            this.tpg.threadToPathRecord.get(id).addDependencyEdge(operation.table_name, operation.pKey, preValues.GetPrimaryKey(), operation.bid, sourceAccountBalance);
+            if (isLogging == LOGOption_path && !operation.pKey.equals(preValues.GetPrimaryKey())) {
+                int id = getTaskId(operation.pKey, delta);
+                this.tpg.threadToPathRecord.get(id).addDependencyEdge(operation.table_name, operation.pKey, preValues.GetPrimaryKey(), operation.bid, sourceAccountBalance);
+            }
         }
     }
 
@@ -201,6 +200,35 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
             }
         }
     }
+    protected void TollProcess_Fun(Operation operation, long previous_mark_ID, boolean clean) {
+        AppConfig.randomDelay();
+        List<DataBox> srcRecord = operation.s_record.record_.getValues();
+        if (operation.function instanceof AVG) {
+            if (operation.function.delta_double < MAX_SPEED) {
+                double latestAvgSpeeds = srcRecord.get(1).getDouble();
+                double lav;
+                if (latestAvgSpeeds == 0) {//not initialized
+                    lav = operation.function.delta_double;
+                } else
+                    lav = (latestAvgSpeeds + operation.function.delta_double) / 2;
+
+                srcRecord.get(1).setDouble(lav);//write to state.
+                operation.record_ref.setRecord(new SchemaRecord(new DoubleDataBox(lav)));//return updated record.
+                synchronized (operation.success) {
+                    operation.success[0] ++;
+                }
+            }
+        } else {
+            if (operation.function.delta_int < MAX_INT) {
+                HashSet cnt_segment = srcRecord.get(1).getHashSet();
+                cnt_segment.add(operation.function.delta_int);//update hashset; updated state also. TODO: be careful of this.
+                operation.record_ref.setRecord(new SchemaRecord(new IntDataBox(cnt_segment.size())));//return updated record.
+                synchronized (operation.success) {
+                    operation.success[0] ++;
+                }
+            }
+        }
+    }
 
     /**
      * general operation execution entry method for all schedulers.
@@ -237,7 +265,7 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
                 long bid_qty = operation.condition.arg2;
                 if (bidPrice > askPrice || bid_qty < left_qty) {
                     d_record.get(2).setLong(left_qty - operation.function.delta_long);//new quantity.
-                    operation.success[0]++;
+                    operation.success[0] ++;
                 }
             }
             if (operation.success[0] == success) {
@@ -265,33 +293,12 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
                 operation.isFailed = true;
             }
         } else if (operation.accessType.equals(READ_WRITE_READ)) {
-            //TODO: implement the operation
             assert operation.record_ref != null;
-            AppConfig.randomDelay();
-            List<DataBox> srcRecord = operation.s_record.record_.getValues();
-            if (operation.function instanceof AVG) {
-                success = operation.success[0];
-                if (operation.condition.arg1 < operation.condition.arg2) {
-                    double latestAvgSpeeds = srcRecord.get(1).getDouble();
-                    double lav;
-                    if (latestAvgSpeeds == 0) {//not initialized
-                        lav = operation.function.delta_double;
-                    } else
-                        lav = (latestAvgSpeeds + operation.function.delta_double) / 2;
-
-                    srcRecord.get(1).setDouble(lav);//write to state.
-                    operation.record_ref.setRecord(new SchemaRecord(new DoubleDataBox(lav)));//return updated record.
-                    synchronized (operation.success) {
-                        operation.success[0]++;
-                    }
-                }
-                if (operation.success[0] == success) {
-                    operation.isFailed = true;
-                }
-            } else {
-                HashSet cnt_segment = srcRecord.get(1).getHashSet();
-                cnt_segment.add(operation.function.delta_int);//update hashset; updated state also. TODO: be careful of this.
-                operation.record_ref.setRecord(new SchemaRecord(new IntDataBox(cnt_segment.size())));//return updated record.
+            success = operation.success[0];
+            if (this.tpg.getApp() == 2)
+                TollProcess_Fun(operation, mark_ID, clean);
+            if (operation.success[0] == success) {
+                operation.isFailed = true;
             }
         } else if (operation.accessType.equals(WRITE_ONLY)) {
             //OB-Alert
@@ -452,7 +459,7 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
                         request.success, request.txn_context, request.accessType, request.d_record, request.d_record, bid, targetContext);
                 break;
             case READ_WRITE_READ:
-                set_op = new Operation(request.src_key, request.function, request.table_name, request.record_ref, null, request.condition,
+                set_op = new Operation(request.src_key, request.function, request.table_name, request.record_ref, null, null,
                         request.success, request.txn_context, request.accessType, request.d_record, request.d_record, bid, targetContext);
                 break;
             default:

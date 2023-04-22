@@ -16,7 +16,6 @@ public class LVLogRecord {
     }
     public void addLog(LVCLog log, TableRecord tableRecord, int parallelNum, TableRecord[] conditionTableRecords) {
         if (logs.contains(log)) {
-            IOUtils.println("Log  already exists in ");
             return;
         }
         int[] LVs = new int[parallelNum];
@@ -50,6 +49,11 @@ public class LVLogRecord {
                 LVs = elemWiseMax(LVs, conditionTableRecord.content_.getWriteLVs());
                 conditionTableRecord.content_.updateReadLv(allocatedLSN, partitionId);
             }
+            int[] comparedLVs = elemWiseMax(tableRecord.content_.getReadLVs(), tableRecord.content_.getWriteLVs());
+            LVs = elemWiseMax(LVs, comparedLVs);
+            tableRecord.content_.updateWriteLv(allocatedLSN, partitionId);
+            tableRecord.content_.updateReadLv(allocatedLSN, partitionId);
+        } else if (log.accessType == AccessType.READ_WRITE_READ) {
             int[] comparedLVs = elemWiseMax(tableRecord.content_.getReadLVs(), tableRecord.content_.getWriteLVs());
             LVs = elemWiseMax(LVs, comparedLVs);
             tableRecord.content_.updateWriteLv(allocatedLSN, partitionId);

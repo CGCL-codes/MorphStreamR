@@ -33,7 +33,7 @@ public class CommandLoggingResources implements LoggingResources {
     }
     private void writeLogRecord(DataOutputView dataOutputView) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
- //       IOUtils.println("Partition " + partitionId + " has " + commandLogs.size() + " command logs");
+        //IOUtils.println("Partition " + partitionId + " has " + commandLogs.size() + " command logs");
         for (NativeCommandLog nativeCommandLog: commandLogs) {
             if (!nativeCommandLog.isAborted)
                 stringBuilder.append(nativeCommandLog.toString()).append(" ");
