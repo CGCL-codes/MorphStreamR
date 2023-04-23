@@ -86,9 +86,8 @@ public class MorphStreamRunner extends Runner {
                 case 1:
                     this.platform = new HP_Machine();
                     break;
-                default:
-                    this.platform = new HUAWEI_Machine();
             }
+            Platform.MACHINE = config.getInt("machine");
 
             if (enable_shared_state) {
                 //configure database.
