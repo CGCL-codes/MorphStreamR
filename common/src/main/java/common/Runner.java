@@ -295,7 +295,7 @@ public abstract class Runner implements IRunner {
 
         config.put("application",application);
 
-        String phaseType[]=workloadType.split(",");
+        String phaseType[] = workloadType.split(",");
         switch(application) {
             case "StreamLedger" :
                 //bottomLine = "300,3000,500,1200,0.3,0.1";//TD,LD,PD,SUM,VDD,R_of_A

@@ -18,9 +18,9 @@ function ResetParameters() {
     schedulerPool="OG_NS_A,OG_NS"
     rootFilePath="${RSTDIR}"
     shiftRate=1
-    multicoreEvaluation=1
+    multicoreEvaluation=0
     maxThreads=20
-    totalEvents=`expr $checkpointInterval \* $maxThreads \* 4 \* $shiftRate`
+    totalEvents=`expr $checkpointInterval \* $tthread \* 4 \* $shiftRate`
 
     snapshotInterval=4
     arrivalControl=1
@@ -113,7 +113,7 @@ function withoutRecovery() {
 
 function application_runner() {
  ResetParameters
- app=StreamLedger
+ app=TollProcessing
  for FTOption in 3
  do
  #withoutRecovery

@@ -65,7 +65,7 @@ public class PathRecord implements Serializable {
         for (long bid : abortBids) {
             sb.append(bid).append(";");
         }
-        IOUtils.println("abortBids: " + abortBids.size());
+       // IOUtils.println("abortBids: " + abortBids.size());
         sb.append(" ");
         int size = 0;
         for (Map.Entry<String, keyToDependencies> logs : this.dependencyEdges.entrySet()) {
@@ -84,7 +84,7 @@ public class PathRecord implements Serializable {
             sb.append(values);
             sb.append(" ");
         }
-        IOUtils.println("size: " + size );
+        //IOUtils.println("size: " + size );
         return sb.toString();
     }
 }
