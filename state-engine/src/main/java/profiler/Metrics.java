@@ -321,6 +321,24 @@ public class Metrics {
     public static void COMPUTE_NOTIFY(int thread_id) {
         Scheduler.Notify[thread_id] += System.nanoTime() - Scheduler.NotifyStart[thread_id];
     }
+    public static void COMPUTE_RECOVERY_ABORT_PUSHDOWN_START(int thread_id) {
+        RecoveryPerformance.AbortPushDownStart[thread_id] = System.nanoTime();
+    }
+    public static void COMPUTE_RECOVERY_ABORT_PUSHDOWN(int thread_id) {
+        RecoveryPerformance.AbortPushDown[thread_id] += System.nanoTime() - RecoveryPerformance.AbortPushDownStart[thread_id];
+    }
+    public static void COMPUTE_RECOVERY_HISTORY_INSPECTION_START(int thread_id) {
+        RecoveryPerformance.HistoryInspectionStart[thread_id] = System.nanoTime();
+    }
+    public static void COMPUTE_RECOVERY_HISTORY_INSPECTION(int thread_id) {
+        RecoveryPerformance.HistoryInspection[thread_id] += System.nanoTime() - RecoveryPerformance.HistoryInspectionStart[thread_id];
+    }
+    public static void COMPUTE_RECOVERY_TASK_PLACING_START(int thread_id) {
+        RecoveryPerformance.TaskPlacingStart[thread_id] = System.nanoTime();
+    }
+    public static void COMPUTE_RECOVERY_TASK_PLACING(int thread_id) {
+        RecoveryPerformance.TaskPlacing[thread_id] += System.nanoTime() - RecoveryPerformance.TaskPlacingStart[thread_id];
+    }
 
     static class  TxnRuntime {
         public static long[] IndexStart = new long[kMaxThreadNum];
@@ -648,6 +666,13 @@ public class Metrics {
         public static long[] Caching = new long[kMaxThreadNum];//Caching.
         public static long[] SchedulerSwitch = new long[kMaxThreadNum];//Scheduler switch.
 
+        public static long[] AbortPushDownStart = new long[kMaxThreadNum];
+        public static long[] AbortPushDown = new long[kMaxThreadNum];
+        public static long[] HistoryInspectionStart = new long[kMaxThreadNum];
+        public static long[] HistoryInspection = new long[kMaxThreadNum];
+        public static long[] TaskPlacingStart = new long[kMaxThreadNum];
+        public static long[] TaskPlacing = new long[kMaxThreadNum];
+
         public static void Initialize() {
             for (int i = 0; i < kMaxThreadNum; i++) {
                 stopRecovery[i] = true;
@@ -675,6 +700,12 @@ public class Metrics {
                 Caching[i] = 0;
                 SchedulerSwitch[i] = 0;
                 recoveryItems[i] = 0;
+                AbortPushDownStart[i] = 0;
+                AbortPushDown[i] = 0;
+                HistoryInspectionStart[i] = 0;
+                HistoryInspection[i] = 0;
+                TaskPlacingStart[i] = 0;
+                TaskPlacing[i] = 0;
             }
         }
         public static void COMPUTE_RECOVERY_START(int thread_id) {

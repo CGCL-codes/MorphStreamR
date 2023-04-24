@@ -105,8 +105,11 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
             //TODO:pre-process dependency
             OperationChain curOC = tpg.addOperationToChain(set_op);
             set_op.setTxnOpId(txnOpId ++);
-            if (request.condition_source != null)
+            if (request.condition_source != null) {
+                MeasureTools.BEGIN_RECOVERY_HISTORY_INSPECT_MEASURE(context.thisThreadId);
                 inspectDependency(context.groupId, curOC, set_op, request.table_name, request.src_key, request.condition_sourceTable, request.condition_source);
+                MeasureTools.END_RECOVERY_HISTORY_INSPECT_MEASURE(context.thisThreadId);
+            }
             MeasureTools.END_TPG_CONSTRUCTION_TIME_MEASURE(context.thisThreadId);
         }
     }
@@ -119,6 +122,7 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
 
     @Override
     public void INITIALIZE(Context context) {
+        MeasureTools.BEGIN_RECOVERY_TASK_PLACING_MEASURE(context.thisThreadId);
         HashMap<String, List<Integer>> plan;
         if (!this.loggingManager.getHistoryViews().canInspectTaskPlacing(context.groupId)) {
             this.graphConstruct(context);
@@ -134,6 +138,7 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
                 context.totalTasks = context.totalTasks + oc.operations.size();
             }
         }
+        MeasureTools.END_RECOVERY_TASK_PLACING_MEASURE(context.thisThreadId);
     }
 
     @Override

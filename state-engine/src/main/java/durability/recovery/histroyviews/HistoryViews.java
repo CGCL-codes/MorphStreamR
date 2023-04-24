@@ -1,4 +1,6 @@
 package durability.recovery.histroyviews;
+import profiler.MeasureTools;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,13 +18,21 @@ public class HistoryViews {
         groupToDependencyView.get(groupId).addDependencies(table, from, to, bid, v);
     }
     public boolean inspectAbortView(long groupId, int threadId, long bid) {
-        if (!abortViews.containsKey(groupId))
+        MeasureTools.BEGIN_RECOVERY_ABORT_PUSH_DOWN_MEASURE(threadId);
+        if (!abortViews.containsKey(groupId)) {
+            MeasureTools.END_RECOVERY_ABORT_PUSH_DOWN_MEASURE(threadId);
             return false;
+        }
+        MeasureTools.END_RECOVERY_ABORT_PUSH_DOWN_MEASURE(threadId);
         return abortViews.get(groupId).inspectView(threadId, bid);
     }
     public int inspectAbortNumber(long groupId, int threadId) {
-        if (!abortViews.containsKey(groupId))
+        MeasureTools.BEGIN_RECOVERY_ABORT_PUSH_DOWN_MEASURE(threadId);
+        if (!abortViews.containsKey(groupId)) {
+            MeasureTools.END_RECOVERY_ABORT_PUSH_DOWN_MEASURE(threadId);
             return 0;
+        }
+        MeasureTools.END_RECOVERY_ABORT_PUSH_DOWN_MEASURE(threadId);
         return abortViews.get(groupId).threadToAbortList.get(threadId).size();
     }
     public Object inspectDependencyView(long groupId, String table, String from, String to, long bid) {
