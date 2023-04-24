@@ -2,6 +2,7 @@ package scheduler.impl.og.structured;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import profiler.MeasureTools;
 import scheduler.context.og.OGSAContext;
 import scheduler.struct.MetaTypes;
 import scheduler.struct.og.Operation;
@@ -169,8 +170,11 @@ public class OGDFSAScheduler extends AbstractOGDFSScheduler<OGSAContext> {
         for (Operation failedOp : failedOperations) {
             if (bid == failedOp.bid) {//identify bids to be aborted.
                 operation.stateTransition(MetaTypes.OperationStateType.ABORTED);
-                if (this.isLogging == LOGOption_path && operation.getTxnOpId() == 0)
+                if (this.isLogging == LOGOption_path && operation.getTxnOpId() == 0) {
+                    MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(context.thisThreadId);
                     this.tpg.threadToPathRecord.get(context.thisThreadId).addAbortBid(operation.bid);
+                    MeasureTools.END_SCHEDULE_TRACKING_TIME_MEASURE(context.thisThreadId);
+                }
                 markAny = true;
             }
         }

@@ -128,6 +128,8 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
      * @param clean
      */
     protected void Transfer_Fun(Operation operation, long previous_mark_ID, boolean clean) {
+        MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(operation.context.thisThreadId);
+        int success = operation.success[0];
         SchemaRecord preValues = operation.condition_records[0].content_.readPreValues(operation.bid);
         final long sourceAccountBalance = preValues.getValues().get(1).getLong();
         AppConfig.randomDelay();
@@ -146,9 +148,21 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
             synchronized (operation.success) {
                 operation.success[0] ++;
             }
-            if (isLogging == LOGOption_path && !operation.pKey.equals(preValues.GetPrimaryKey())) {
+        }
+        if (operation.record_ref != null) {
+            operation.record_ref.setRecord(operation.d_record.content_.readPreValues(operation.bid));//read the resulting tuple.
+        }
+        if (operation.success[0] == success) {
+            operation.isFailed = true;
+        }
+        MeasureTools.END_SCHEDULE_TRACKING_TIME_MEASURE(operation.context.thisThreadId);
+        if (!operation.isFailed) {
+            if (isLogging == LOGOption_path && !operation.pKey.equals(preValues.GetPrimaryKey()) && !operation.isCommit) {
+                MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(operation.context.thisThreadId);
                 int id = getTaskId(operation.pKey, delta);
                 this.tpg.threadToPathRecord.get(id).addDependencyEdge(operation.table_name, operation.pKey, preValues.GetPrimaryKey(), operation.bid, sourceAccountBalance);
+                operation.isCommit = true;
+                MeasureTools.END_SCHEDULE_TRACKING_TIME_MEASURE(operation.context.thisThreadId);
             }
         }
     }
@@ -161,6 +175,7 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
      * @param clean
      */
     protected void Depo_Fun(Operation operation, long mark_ID, boolean clean) {
+        MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(operation.context.thisThreadId);
         SchemaRecord srcRecord = operation.s_record.content_.readPreValues(operation.bid);
         List<DataBox> values = srcRecord.getValues();
         AppConfig.randomDelay();
@@ -169,14 +184,16 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
         tempo_record = new SchemaRecord(values);//tempo record
         tempo_record.getValues().get(1).incLong(operation.function.delta_long);//compute.
         operation.s_record.content_.updateMultiValues(operation.bid, mark_ID, clean, tempo_record);//it may reduce NUMA-traffic.
+        MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(operation.context.thisThreadId);
     }
 
     protected void GrepSum_Fun(Operation operation, long previous_mark_ID, boolean clean) {
+        MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(operation.context.thisThreadId);
+        int success = operation.success[0];
         int keysLength = operation.condition_records.length;
         SchemaRecord[] preValues = new SchemaRecord[operation.condition_records.length];
         long sum = 0;
         AppConfig.randomDelay();
-
         for (int i = 0; i < keysLength; i++) {
             preValues[i] = operation.condition_records[i].content_.readPreValues(operation.bid);
             sum += preValues[i].getValues().get(1).getLong();
@@ -190,17 +207,30 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
             } else
                 throw new UnsupportedOperationException();
             operation.d_record.content_.updateMultiValues(operation.bid, previous_mark_ID, clean, tempo_record);//it may reduce NUMA-traffic.
-            if (isLogging == LOGOption_path && keysLength > 1 && !operation.isCommit) {
-                int id = getTaskId(operation.pKey, delta);
-                this.tpg.threadToPathRecord.get(id).addDependencyEdge(operation.table_name,operation.pKey, operation.condition_records[1].record_.GetPrimaryKey(), operation.bid, sum);
-                operation.isCommit = true;
-            }
             synchronized (operation.success) {
                 operation.success[0]++;
             }
         }
+        if (operation.record_ref != null) {
+            operation.record_ref.setRecord(operation.d_record.content_.readPreValues(operation.bid));//read the resulting tuple.
+        }
+        if (operation.success[0] == success) {
+            operation.isFailed = true;
+        }
+        MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(operation.context.thisThreadId);
+        if (!operation.isFailed) {
+            if (isLogging == LOGOption_path && keysLength > 1 && !operation.isCommit) {
+                MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(operation.context.thisThreadId);
+                int id = getTaskId(operation.pKey, delta);
+                this.tpg.threadToPathRecord.get(id).addDependencyEdge(operation.table_name,operation.pKey, operation.condition_records[1].record_.GetPrimaryKey(), operation.bid, sum);
+                operation.isCommit = true;
+                MeasureTools.END_SCHEDULE_TRACKING_TIME_MEASURE(operation.context.thisThreadId);
+            }
+        }
     }
     protected void TollProcess_Fun(Operation operation, long previous_mark_ID, boolean clean) {
+        MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(operation.context.thisThreadId);
+        int success = operation.success[0];
         AppConfig.randomDelay();
         List<DataBox> srcRecord = operation.s_record.record_.getValues();
         if (operation.function instanceof AVG) {
@@ -228,6 +258,10 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
                 }
             }
         }
+        if (operation.success[0] == success) {
+            operation.isFailed = true;
+        }
+        MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(operation.context.thisThreadId);
     }
 
     /**
@@ -242,18 +276,9 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
             commitLog(operation);
             return; // return if the operation is already aborted
         }
-        int success;
         if (operation.accessType.equals(READ_WRITE_COND_READ)) {
-            success = operation.success[0];
             Transfer_Fun(operation, mark_ID, clean);
-            if (operation.record_ref != null) {
-                operation.record_ref.setRecord(operation.d_record.content_.readPreValues(operation.bid));//read the resulting tuple.
-            }
-            if (operation.success[0] == success) {
-                operation.isFailed = true;
-            }
         } else if (operation.accessType.equals(READ_WRITE_COND)) {
-            success = operation.success[0];
             if (this.tpg.getApp() == 1) {//SL
                 Transfer_Fun(operation, mark_ID, clean);
             } else {//OB
@@ -268,9 +293,6 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
                     operation.success[0] ++;
                 }
             }
-            if (operation.success[0] == success) {
-                operation.isFailed = true;
-            }
         } else if (operation.accessType.equals(READ_WRITE)) {
             if (this.tpg.getApp() == 1) { //SL
                 Depo_Fun(operation, mark_ID, clean);
@@ -284,22 +306,11 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
                     throw new UnsupportedOperationException();
             }
         } else if (operation.accessType.equals(READ_WRITE_COND_READN)) {
-            success = operation.success[0];
             GrepSum_Fun(operation, mark_ID, clean);
-            if (operation.record_ref != null) {
-                operation.record_ref.setRecord(operation.d_record.content_.readPreValues(operation.bid));//read the resulting tuple.
-            }
-            if (operation.success[0] == success) {
-                operation.isFailed = true;
-            }
         } else if (operation.accessType.equals(READ_WRITE_READ)) {
             assert operation.record_ref != null;
-            success = operation.success[0];
             if (this.tpg.getApp() == 2)
                 TollProcess_Fun(operation, mark_ID, clean);
-            if (operation.success[0] == success) {
-                operation.isFailed = true;
-            }
         } else if (operation.accessType.equals(WRITE_ONLY)) {
             //OB-Alert
             AppConfig.randomDelay();
@@ -359,9 +370,7 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
             if (isConflicted(context, operationChain, operation)) {
                 return false;
             }
-            MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(context.thisThreadId);
             execute(operation, mark_ID, false);
-            MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(context.thisThreadId);
             if (!operation.isFailed && !operation.getOperationState().equals(MetaTypes.OperationStateType.ABORTED)) {
                 operation.stateTransition(MetaTypes.OperationStateType.EXECUTED);
             } else {
@@ -493,6 +502,7 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
         return false;
     }
     private void commitLog(Operation operation) {
+        MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(operation.context.thisThreadId);
         if (operation.isCommit) {
             return;
         }
@@ -525,6 +535,7 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
             this.loggingManager.addLogRecord(operation.logRecord);
         }
         operation.isCommit = true;
+        MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(operation.context.thisThreadId);
     }
 
 }

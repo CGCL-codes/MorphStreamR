@@ -106,7 +106,9 @@ public class PartitionStateManagerWithAbort implements Runnable, OperationChainS
             } else if (ocSignal instanceof OnHeaderStartAbortHandlingSignal) {
                 MeasureTools.BEGIN_SCHEDULE_ABORT_TIME_MEASURE(operationChain.context.thisThreadId);
                 ocHeaderStartAbortHandlingTransition(operationChain, ((OnHeaderStartAbortHandlingSignal) ocSignal).getOperation());
+                MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(operationChain.context.thisThreadId);
                 pathRecord.addAbortBid(((OnHeaderStartAbortHandlingSignal) ocSignal).getOperation().bid);
+                MeasureTools.END_SCHEDULE_TRACKING_TIME_MEASURE(operationChain.context.thisThreadId);
                 MeasureTools.END_SCHEDULE_ABORT_TIME_MEASURE(operationChain.context.thisThreadId);
             }
             ocSignal = ocSignalQueue.poll();

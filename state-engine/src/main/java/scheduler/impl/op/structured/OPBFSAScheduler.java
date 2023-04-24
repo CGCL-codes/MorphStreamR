@@ -92,9 +92,7 @@ public class OPBFSAScheduler<Context extends OPSAContext> extends OPBFSScheduler
         } while (true);
         MeasureTools.END_SCHEDULE_NEXT_TIME_MEASURE(threadId);
         for (Operation operation : context.batchedOperations) {
-            MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(threadId);
             execute(operation, mark_ID, false);
-            MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(threadId);
         }
 
         while (context.batchedOperations.size() != 0) {
@@ -160,8 +158,11 @@ public class OPBFSAScheduler<Context extends OPSAContext> extends OPBFSScheduler
         for (Operation failedOp : failedOperations) {
             if (bid == failedOp.bid) { //identify bids to be aborted (abort operation in one state transaction).
                 operation.stateTransition(MetaTypes.OperationStateType.ABORTED);
-                if (this.isLogging == LOGOption_path && operation.txnOpId == 0)
+                if (this.isLogging == LOGOption_path && operation.txnOpId == 0) {
+                    MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(context.thisThreadId);
                     this.tpg.threadToPathRecord.get(context.thisThreadId).addAbortBid(operation.bid);
+                    MeasureTools.END_SCHEDULE_TRACKING_TIME_MEASURE(context.thisThreadId);
+                }
                 markAny = true;
             }
         }

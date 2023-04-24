@@ -108,7 +108,9 @@ public class PartitionStateManagerWithAbort implements OperationStateListener, R
             } else if (signal instanceof OnHeaderStartAbortHandlingSignal) {
                 MeasureTools.BEGIN_SCHEDULE_ABORT_TIME_MEASURE(operation.context.thisThreadId);
                 onHeaderStartAbortHandlingTransition(operation);
+                MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(operation.context.thisThreadId);
                 pathRecord.addAbortBid(operation.bid);
+                MeasureTools.END_SCHEDULE_TRACKING_TIME_MEASURE(operation.context.thisThreadId);
                 MeasureTools.END_SCHEDULE_ABORT_TIME_MEASURE(operation.context.thisThreadId);
             } else if (signal instanceof OnNeedAbortHandlingSignal) {
                 MeasureTools.BEGIN_SCHEDULE_ABORT_TIME_MEASURE(operation.context.thisThreadId);

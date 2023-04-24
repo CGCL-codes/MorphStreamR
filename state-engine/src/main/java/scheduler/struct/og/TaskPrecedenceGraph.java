@@ -205,6 +205,7 @@ public class TaskPrecedenceGraph<Context extends OGSchedulerContext> {
         if (context instanceof OGSContext) {
             ((OGSContext) context).buildBucketPerThread(ocs, resolvedOC);
             if (this.isLogging == LOGOption_path) {
+                MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(context.thisThreadId);
                 for (OperationChain oc : ocs) {
                     //TODO: we can track bid for different layer here
                     if (oc.getOperations().isEmpty()) {
@@ -212,6 +213,7 @@ public class TaskPrecedenceGraph<Context extends OGSchedulerContext> {
                     }
                     this.threadToPathRecord.get(context.thisThreadId).addNode(oc.getTableName(), oc.primaryKey, oc.getOperations().size());
                 }
+                MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(context.thisThreadId);
             }
             SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
             if (context.thisThreadId == 0) { // gather
@@ -241,7 +243,9 @@ public class TaskPrecedenceGraph<Context extends OGSchedulerContext> {
                     ((AbstractOGNSContext) context).getListener().onOcRootStart(oc);
                 }
                 if (this.isLogging == LOGOption_path) {
+                    MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(context.thisThreadId);
                     this.threadToPathRecord.get(context.thisThreadId).addNode(oc.getTableName(), oc.primaryKey, oc.getOperations().size());
+                    MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(context.thisThreadId);
                 }
             }
         } else {

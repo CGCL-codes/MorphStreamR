@@ -118,9 +118,7 @@ public class OPSScheduler<Context extends OPSContext> extends OPScheduler<Contex
         MeasureTools.END_SCHEDULE_NEXT_TIME_MEASURE(threadId);
 
         for (Operation operation : context.batchedOperations) {
-            MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(threadId);
             execute(operation, mark_ID, false);
-            MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(threadId);
         }
 
         while (!context.batchedOperations.isEmpty()) {
@@ -128,8 +126,11 @@ public class OPSScheduler<Context extends OPSContext> extends OPScheduler<Contex
             MeasureTools.BEGIN_NOTIFY_TIME_MEASURE(threadId);
             if (remove.isFailed && !remove.getOperationState().equals(MetaTypes.OperationStateType.ABORTED)) {
                 needAbortHandling = true;
-                if (isLogging == LOGOption_path && remove.txnOpId == 0)
+                if (isLogging == LOGOption_path && remove.txnOpId == 0) {
+                    MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(threadId);
                     this.tpg.threadToPathRecord.get(context.thisThreadId).addAbortBid(remove.bid);
+                    MeasureTools.END_SCHEDULE_TRACKING_TIME_MEASURE(threadId);
+                }
             }
             NOTIFY(remove, context);
             MeasureTools.END_NOTIFY_TIME_MEASURE(threadId);

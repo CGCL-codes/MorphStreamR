@@ -119,7 +119,6 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
 
     @Override
     public void INITIALIZE(Context context) {
-        //TODO:add task placing
         HashMap<String, List<Integer>> plan;
         if (!this.loggingManager.getHistoryViews().canInspectTaskPlacing(context.groupId)) {
             this.graphConstruct(context);

@@ -6,6 +6,7 @@ import common.io.ByteIO.DataInputView;
 import common.io.ByteIO.InputWithDecompression.NativeDataInputView;
 import common.io.ByteIO.InputWithDecompression.SnappyDataInputView;
 import common.util.io.IOUtils;
+import profiler.MeasureTools;
 import storage.TableRecord;
 import storage.datatype.DataBox;
 import transaction.function.AVG;
@@ -100,6 +101,7 @@ public class DependencyLoggingManager implements LoggingManager {
     public void syncRetrieveLogs(RedoLogResult redoLogResult) throws IOException, ExecutionException, InterruptedException {
         this.cpg.addContext(redoLogResult.threadId, new CSContext(redoLogResult.threadId));
         for (int i = 0; i < redoLogResult.redoLogPaths.size(); i++) {
+            MeasureTools.BEGIN_TPG_CONSTRUCTION_TIME_MEASURE(redoLogResult.threadId);
             Path walPath = Paths.get(redoLogResult.redoLogPaths.get(i));
             AsynchronousFileChannel afc = AsynchronousFileChannel.open(walPath, READ);
             int fileSize = (int) afc.size();
@@ -119,8 +121,12 @@ public class DependencyLoggingManager implements LoggingManager {
                 this.cpg.addTask(redoLogResult.threadId, new CommandTask(dependencyLog));
             }
             LOG.info("Thread " + redoLogResult.threadId + " has finished reading logs");
+            MeasureTools.END_TPG_CONSTRUCTION_TIME_MEASURE(redoLogResult.threadId);
             SOURCE_CONTROL.getInstance().waitForOtherThreads(redoLogResult.threadId);
+            MeasureTools.BEGIN_SCHEDULE_EXPLORE_TIME_MEASURE(redoLogResult.threadId);
             start_evaluate(this.cpg.threadToCSContextMap.get(redoLogResult.threadId));
+            MeasureTools.END_SCHEDULE_EXPLORE_TIME_MEASURE(redoLogResult.threadId);
+            MeasureTools.SCHEDULE_TIME_RECORD(redoLogResult.threadId, 0);
             SOURCE_CONTROL.getInstance().waitForOtherThreads(redoLogResult.threadId);
         }
     }
@@ -146,10 +152,12 @@ public class DependencyLoggingManager implements LoggingManager {
         context.readyTask = next;
     }
     private void PROCESS(CSContext context) {
+        MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(context.threadId);
         CommandTask commandTask = next(context);
         switch (app) {
             case 0:
                 GSExecute(commandTask);
+                break;
             case 3:
             case 2:
                 TPExecute(commandTask);
@@ -158,6 +166,7 @@ public class DependencyLoggingManager implements LoggingManager {
                 SLExecute(commandTask);
                 break;
         }
+        MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(context.threadId);
     }
     private void RESET(CSContext context) {
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.threadId);

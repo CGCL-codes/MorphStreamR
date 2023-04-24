@@ -114,71 +114,24 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
         }
         int success;
         if (operation.accessType.equals(READ_WRITE_COND_READ)) {
-            success = operation.success[0];
             Transfer_Fun(operation, mark_ID, clean);
-            // check whether it needs to return a read results of the operation
-            if (operation.record_ref != null) {
-                operation.record_ref.setRecord(operation.d_record.content_.readPreValues(operation.bid));//read the resulting tuple.
-            }
-            // operation success check, number of operation succeeded does not increase after execution
-            if (operation.success[0] == success) {
-                operation.isFailed = true;
-            }
         } else if (operation.accessType.equals(READ_WRITE_COND)) {
-            success = operation.success[0];
             if (this.tpg.getApp() == 1) {//SL
                 Transfer_Fun(operation, mark_ID, clean);
-            } else {//OB
-                AppConfig.randomDelay();
-                List<DataBox> d_record = operation.condition_records[0].content_.ReadAccess(operation.bid, mark_ID, clean, operation.accessType).getValues();
-                long askPrice = d_record.get(1).getLong();//price
-                long left_qty = d_record.get(2).getLong();//available qty;
-                long bidPrice = operation.condition.arg1;
-                long bid_qty = operation.condition.arg2;
-                if (bidPrice > askPrice || bid_qty < left_qty) {
-                    d_record.get(2).setLong(left_qty - operation.function.delta_long);//new quantity.
-                    operation.success[0]++;
-                }
-            }
-            // operation success check, number of operation succeeded does not increase after execution
-            if (operation.success[0] == success) {
-                operation.isFailed = true;
             }
         } else if (operation.accessType.equals(READ_WRITE)) {
             if (this.tpg.getApp() == 1) {
                 Depo_Fun(operation, mark_ID, clean);
-            } else {
-                AppConfig.randomDelay();
-                SchemaRecord srcRecord = operation.s_record.content_.ReadAccess(operation.bid,mark_ID,clean,operation.accessType);
-                List<DataBox> values = srcRecord.getValues();
-                if (operation.function instanceof INC) {
-                    values.get(2).setLong(values.get(2).getLong() + operation.function.delta_long);
-                } else
-                    throw new UnsupportedOperationException();
             }
         } else if (operation.accessType.equals(READ_WRITE_COND_READN)) {
-            success = operation.success[0];
             GrepSum_Fun(operation, mark_ID, clean);
-            // check whether it needs to return a read results of the operation
-            if (operation.record_ref != null) {
-                operation.record_ref.setRecord(operation.d_record.content_.readPreValues(operation.bid));//read the resulting tuple.
-            }
-            // operation success check, number of operation succeeded does not increase after execution
-            if (operation.success[0] == success) {
-                operation.isFailed = true;
-            }
         } else if (operation.accessType.equals(WRITE_ONLY)) {
-            //OB-Alert
             AppConfig.randomDelay();
             operation.d_record.record_.getValues().get(1).setLong(operation.value);
         } else if (operation.accessType.equals(READ_WRITE_READ)){
             assert operation.record_ref != null;
-            success = operation.success[0];
             if (this.tpg.getApp() == 2)
                 TollProcess_Fun(operation, mark_ID, clean);
-            if (operation.success[0] == success) {
-                operation.isFailed = true;
-            }
         } else {
             throw new UnsupportedOperationException();
         }
@@ -187,10 +140,11 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
     }
 
     // DD: Transfer event processing
-    protected void Transfer_Fun(AbstractOperation operation, long previous_mark_ID, boolean clean) {
+    protected void Transfer_Fun(Operation operation, long previous_mark_ID, boolean clean) {
+        MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(operation.context.thisThreadId);
+        int success = operation.success[0];
         SchemaRecord preValues = operation.condition_records[0].content_.readPreValues(operation.bid);
         final long sourceAccountBalance = preValues.getValues().get(1).getLong();
-        // apply function
         AppConfig.randomDelay();
 
         if (sourceAccountBalance > operation.condition.arg1
@@ -207,28 +161,42 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
                 throw new UnsupportedOperationException();
             operation.d_record.content_.updateMultiValues(operation.bid, previous_mark_ID, clean, tempo_record);//it may reduce NUMA-traffic.
             synchronized (operation.success) {
-                operation.success[0]++;
+                operation.success[0] ++;
             }
-            if (isLogging == LOGOption_path && !((Operation) operation).pKey.equals(preValues.GetPrimaryKey()) && !operation.isCommit) {
-                int id = getTaskId(((Operation) operation).pKey, delta);
-                this.tpg.threadToPathRecord.get(id).addDependencyEdge(operation.table_name,((Operation) operation).pKey, preValues.GetPrimaryKey(), operation.bid, sourceAccountBalance);
+        }
+        if (operation.record_ref != null) {
+            operation.record_ref.setRecord(operation.d_record.content_.readPreValues(operation.bid));//read the resulting tuple.
+        }
+        if (operation.success[0] == success) {
+            operation.isFailed = true;
+        }
+        MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(operation.context.thisThreadId);
+        if (!operation.isFailed) {
+            if (isLogging == LOGOption_path && !operation.pKey.equals(preValues.GetPrimaryKey()) && !operation.isCommit) {
+                MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(operation.context.thisThreadId);
+                int id = getTaskId(operation.pKey, delta);
+                this.tpg.threadToPathRecord.get(id).addDependencyEdge(operation.table_name, operation.pKey, preValues.GetPrimaryKey(), operation.bid, sourceAccountBalance);
                 operation.isCommit = true;
+                MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(operation.context.thisThreadId);
             }
         }
     }
 
-    protected void Depo_Fun(AbstractOperation operation, long mark_ID, boolean clean) {
+    protected void Depo_Fun(Operation operation, long mark_ID, boolean clean) {
+        MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(operation.context.thisThreadId);
         SchemaRecord srcRecord = operation.s_record.content_.readPreValues(operation.bid);
         List<DataBox> values = srcRecord.getValues();
-        //apply function to modify..
         AppConfig.randomDelay();
         SchemaRecord tempo_record;
         tempo_record = new SchemaRecord(values);//tempo record
         tempo_record.getValues().get(1).incLong(operation.function.delta_long);//compute.
         operation.s_record.content_.updateMultiValues(operation.bid, mark_ID, clean, tempo_record);//it may reduce NUMA-traffic.
+        MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(operation.context.thisThreadId);
     }
 
-    protected void GrepSum_Fun(AbstractOperation operation, long previous_mark_ID, boolean clean) {
+    protected void GrepSum_Fun(Operation operation, long previous_mark_ID, boolean clean) {
+        MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(operation.context.thisThreadId);
+        int success = operation.success[0];
         int keysLength = operation.condition_records.length;
         SchemaRecord[] preValues = new SchemaRecord[operation.condition_records.length];
         long sum = 0;
@@ -250,14 +218,27 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
             synchronized (operation.success) {
                 operation.success[0]++;
             }
+        }
+        if (operation.record_ref != null) {
+            operation.record_ref.setRecord(operation.d_record.content_.readPreValues(operation.bid));//read the resulting tuple.
+        }
+        if (operation.success[0] == success) {
+            operation.isFailed = true;
+        }
+        MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(operation.context.thisThreadId);
+        if (!operation.isFailed) {
             if (isLogging == LOGOption_path && keysLength > 1 && !operation.isCommit) {
+                MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(((Operation) operation).context.thisThreadId);
                 int id = getTaskId(((Operation) operation).pKey, delta);
                 this.tpg.threadToPathRecord.get(id).addDependencyEdge(operation.table_name,((Operation) operation).pKey, operation.condition_records[1].record_.GetPrimaryKey(), operation.bid, sum);
                 operation.isCommit = true;
+                MeasureTools.END_SCHEDULE_TRACKING_TIME_MEASURE(((Operation) operation).context.thisThreadId);
             }
         }
     }
-    protected void TollProcess_Fun(AbstractOperation operation, long previous_mark_ID, boolean clean) {
+    protected void TollProcess_Fun(Operation operation, long previous_mark_ID, boolean clean) {
+        MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(operation.context.thisThreadId);
+        int success = operation.success[0];
         AppConfig.randomDelay();
         List<DataBox> srcRecord = operation.s_record.record_.getValues();
         if (operation.function instanceof AVG) {
@@ -285,6 +266,10 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
                 }
             }
         }
+        if (operation.success[0] == success) {
+            operation.isFailed = true;
+        }
+        MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(operation.context.thisThreadId);
     }
 
     @Override
@@ -376,6 +361,7 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
         RESET(context);//
     }
     private void commitLog(Operation operation) {
+        MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(operation.context.thisThreadId);
         if (operation.isCommit)
             return;
         if (isLogging == LOGOption_path) {
@@ -407,6 +393,7 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
             this.loggingManager.addLogRecord(operation.logRecord);
         }
         operation.isCommit = true;
+        MeasureTools.END_SCHEDULE_TRACKING_TIME_MEASURE(operation.context.thisThreadId);
     }
 
 }

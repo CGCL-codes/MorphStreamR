@@ -52,9 +52,7 @@ public abstract class AbstractOGNSScheduler<Context extends AbstractOGNSContext>
     public boolean execute(Context context, OperationChain operationChain, long mark_ID) {
         MyList<Operation> operation_chain_list = operationChain.getOperations();
         for (Operation operation : operation_chain_list) {
-//            MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(context.thisThreadId);
             execute(operation, mark_ID, false);
-//            MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(context.thisThreadId);
         }
         return true;
     }

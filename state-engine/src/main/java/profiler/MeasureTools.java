@@ -230,8 +230,6 @@ public class MeasureTools {
             COMPUTE_LOGGING_TIME(thread_id);
     }
 
-
-
     // OGScheduler Specific.
     public static void BEGIN_SCHEDULE_NEXT_TIME_MEASURE(int thread_id) {
         if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
@@ -262,6 +260,14 @@ public class MeasureTools {
     public static void END_SCHEDULE_USEFUL_TIME_MEASURE(int thread_id) {
         if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted() && !Metrics.Scheduler.isAbort[thread_id])
             COMPUTE_SCHEDULE_USEFUL(thread_id);
+    }
+    public static void BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(int thread_id) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            COMPUTE_SCHEDULE_TRACKING_START(thread_id);
+    }
+    public static void END_SCHEDULE_TRACKING_TIME_MEASURE(int thread_id) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            COMPUTE_SCHEDULE_TRACKING(thread_id);
     }
 
     public static void BEGIN_SCHEDULE_ABORT_TIME_MEASURE(int thread_id) {
@@ -500,7 +506,7 @@ public class MeasureTools {
         try {
             File file = new File(directory + fileNameSuffix + ".overall");
             BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
-            if (ftOption == FTOption_ISC || ftOption == FTOption_WSC || ftOption == FTOption_PATH || ftOption == FTOption_Dependency) {
+            if (ftOption == FTOption_ISC || ftOption == FTOption_WSC || ftOption == FTOption_PATH || ftOption == FTOption_Dependency || ftOption == FTOption_Command) {
                 fileWriter.write("SnapshotSizeReport (KB): " + "\n");
                 fileWriter.write("thread_id" + "\t" + "size" + "\n");
                 double totalSize = 0;
@@ -550,6 +556,16 @@ public class MeasureTools {
                 }
                 fileWriter.write("LSNVectorLoggingSize (KB): " + totalSize + "\n");
             }
+            if (ftOption == FTOption_LV) {
+                fileWriter.write("CommandLoggingSize: " + "\n");
+                fileWriter.write("thread_id" + "\t" + "size (KB)" + "\n");
+                double totalSize = 0;
+                for (int i = 0; i < tthread; i ++) {
+                    totalSize = totalSize + RuntimePerformance.LogSize[i].getMean();
+                    fileWriter.write(i + "\t"+ RuntimePerformance.LogSize[i].getMean() + "\n");
+                }
+                fileWriter.write("CommandLoggingSize (KB): " + totalSize + "\n");
+            }
             fileWriter.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -567,13 +583,13 @@ public class MeasureTools {
                 totalRecoveryItemsCount = totalRecoveryItemsCount + RecoveryPerformance.recoveryItems[i];
             }
             fileWriter.write("replayTime (ms) \t recoveryCount\t throughput (k/s) \n");
-            fileWriter.write(totalRecoveryTime / tthread + "\t" + totalRecoveryItemsCount /tthread + "\t" + totalRecoveryItemsCount / totalRecoveryTime / tthread + "\n");
-            double[] recoveryTime = new double[8];
+            fileWriter.write(totalRecoveryTime / tthread + "\t" + totalRecoveryItemsCount /tthread + "\t" + totalRecoveryItemsCount / totalRecoveryTime + "\n");
+            double[] recoveryTime = new double[9];
             WriteRecoveryTimeBreakDown(tthread, recoveryTime);
             WriteReplayTimeBreakDown(tthread, recoveryTime);
             WriteRecoverySchedulerTimeBreakdownReport(tthread, recoveryTime);
-            fileWriter.write("ReplayTimeBreakDownReport (ms): " + "\n");
-            fileWriter.write("reloadDatabaseTime\t redoWriteAheadLogTime\t reloadInputTime\t stream_process\t explore_time\t useful_time\t abort_time\t overheads\n");
+            fileWriter.write("OverallBreakDownReport (ms): " + "\n");
+            fileWriter.write("reloadDatabaseTime\t redoWriteAheadLogTime\t reloadInputTime\t stream_process\t explore_time\t construct_time\t useful_time\t abort_time\t overheads\n");
             String output = String.format(
                     "%-10.2f\t" +
                             "%-10.2f\t" +
@@ -656,7 +672,7 @@ public class MeasureTools {
             fileWriter.write(output + "\n");
             fileWriter.close();
             recoveryTime[3] = totalStreamProcessTime / tthread / 1E6;
-            recoveryTime[7] = totalOverheads / tthread / 1E6;
+            recoveryTime[8] = totalOverheads / tthread / 1E6;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -666,30 +682,18 @@ public class MeasureTools {
             File file = new File(directory + fileNameSuffix + ".overall");
             BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
             fileWriter.write("RecoverySchedulerTimeBreakdownReport (ns): " + "\n");
-            fileWriter.write("thread_id\t explore_time\t useful_time\t abort_time\t next_time\t notify_time\t construct_time\t first_explore_time\t scheduler_switch\n");
+            fileWriter.write("thread_id\t explore_time\t useful_time\t abort_time\t construct_time\n");
             double totalExploreTime = 0;
-            double totalNextTime = 0;
             double totalUsefulTime = 0;
             double totalAbortTime = 0;
-            double totalNotifyTime = 0;
             double totalConstructTime = 0;
-            double totalFirstExploreTime = 0;
-            double totalSchedulerSwitchTime = 0;
             for (int threadId = 0; threadId < tthread; threadId++) {
                 totalExploreTime = totalExploreTime + RecoveryPerformance.Explore[threadId];
-                totalNextTime = totalNextTime + RecoveryPerformance.Next[threadId];
                 totalUsefulTime = totalUsefulTime + RecoveryPerformance.Useful[threadId];
                 totalAbortTime = totalAbortTime + RecoveryPerformance.Abort[threadId];
-                totalNotifyTime = totalNotifyTime + RecoveryPerformance.Notify[threadId];
                 totalConstructTime = totalConstructTime + RecoveryPerformance.Construct[threadId];
-                totalFirstExploreTime = totalFirstExploreTime + RecoveryPerformance.FirstExplore[threadId];
-                totalSchedulerSwitchTime = totalSchedulerSwitchTime + RecoveryPerformance.SchedulerSwitch[threadId];
             }
             String output = String.format(
-                            "%-10.2f\t" +
-                            "%-10.2f\t" +
-                            "%-10.2f\t" +
-                            "%-10.2f\t" +
                             "%-10.2f\t" +
                             "%-10.2f\t" +
                             "%-10.2f\t" +
@@ -697,17 +701,14 @@ public class MeasureTools {
                     , totalExploreTime / tthread
                     , totalUsefulTime / tthread
                     , totalAbortTime / tthread
-                    , totalNextTime / tthread
-                    , totalNotifyTime / tthread
                     , totalConstructTime / tthread
-                    , totalFirstExploreTime / tthread
-                    , totalSchedulerSwitchTime / tthread
             );
             fileWriter.write(output + "\n");
             fileWriter.close();
             recoveryTime[4] = totalExploreTime / tthread;
-            recoveryTime[5] = totalUsefulTime / tthread;
-            recoveryTime[6] = totalAbortTime / tthread;
+            recoveryTime[5] = totalConstructTime / tthread;
+            recoveryTime[6] = totalUsefulTime / tthread;
+            recoveryTime[7] = totalAbortTime / tthread;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -719,31 +720,22 @@ public class MeasureTools {
             BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
             fileWriter.write("SchedulerTimeBreakdownReport (ns)\n");
             if (enable_log) log.info("===Scheduler Time Breakdown Report===");
-            fileWriter.write("explore_time\t useful_time\t abort_time\t construct_time\t first_explore_time\t next_time\t notify_time\t scheduler_switch\n");
+            fileWriter.write("explore_time\t useful_time\t abort_time\t construct_time\t tracking_time\n");
             if (enable_log)
-                log.info("explore_time\t useful_time\t abort_time\t construct_time\t first_explore_time\t next_time\t notify_time\t scheduler_switch");
+                log.info("explore_time\t useful_time\t abort_time\t construct_time\t tracking_time\n");
             double explore_time = 0;
             double useful_time = 0;
             double abort_time = 0;
             double construct_time = 0;
-            double first_explore_time = 0;
-            double next_time = 0;
-            double notify_time = 0;
-            double scheduler_switch = 0;
+            double tracking_time = 0;
             for (int threadId = 0; threadId < tthread; threadId++) {
                 explore_time += Scheduler_Record.Explore[threadId].getMean();
                 useful_time += Scheduler_Record.Useful[threadId].getMean();
                 abort_time += Scheduler_Record.Abort[threadId].getMean();
                 construct_time += Scheduler_Record.Construct[threadId].getMean();
-                first_explore_time += Scheduler_Record.FirstExplore[threadId].getMean();
-                next_time += Scheduler_Record.Next[threadId].getMean();
-                notify_time += Scheduler_Record.Notify[threadId].getMean();
-                scheduler_switch += Scheduler_Record.SchedulerSwitch[threadId].getMean();
+                tracking_time += Scheduler_Record.Tracking[threadId].getMean();
             }
             String output = String.format(
-                            "%-10.2f\t" +
-                            "%-10.2f\t" +
-                            "%-10.2f\t" +
                             "%-10.2f\t" +
                             "%-10.2f\t" +
                             "%-10.2f\t" +
@@ -753,10 +745,7 @@ public class MeasureTools {
                     , useful_time / tthread
                     , abort_time / tthread
                     , construct_time / tthread
-                    , first_explore_time / tthread
-                    , next_time / tthread
-                    , notify_time / tthread
-                    , scheduler_switch / tthread
+                    , tracking_time / tthread
             );
             if (enable_log) log.info(output);
             fileWriter.write(output + "\n");

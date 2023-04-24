@@ -189,7 +189,9 @@ public class TaskPrecedenceGraph<Context extends OPSchedulerContext> {
                     context.operations.addAll(oc.getOperations());
                     context.totalOsToSchedule += oc.getOperations().size();
                     if (this.isLogging == LOGOption_path) {
+                        MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(threadId);
                         this.threadToPathRecord.get(context.thisThreadId).addNode(oc.getTableName(), oc.getPrimaryKey(), oc.getOperations().size());
+                        MeasureTools.END_SCHEDULE_TRACKING_TIME_MEASURE(threadId);
                     }
                 }
             }
@@ -215,7 +217,9 @@ public class TaskPrecedenceGraph<Context extends OPSchedulerContext> {
                         head.context.getListener().onRootStart(head);
                     }
                     if (this.isLogging == LOGOption_path) {
+                        MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(threadId);
                         this.threadToPathRecord.get(context.thisThreadId).addNode(oc.getTableName(), oc.getPrimaryKey(), oc.getOperations().size());
+                        MeasureTools.END_SCHEDULE_TRACKING_TIME_MEASURE(threadId);
                     }
                 }
             }

@@ -1,16 +1,18 @@
 #!/bin/bash
 source dir.sh || exit
 function ResetParameters() {
-    app="StreamLedger"
+    app="GrepSum"
     checkpointInterval=20480
-    tthread=20
+    tthread=24
     scheduler="OP_BFS_A"
     defaultScheduler="OP_BFS_A"
     CCOption=3 #TSTREAM
     complexity=0
     NUM_ITEMS=491520
-    deposit_ratio=65
     abort_ratio=0
+    multiple_ratio=80
+    txn_length=1
+    NUM_ACCESS=2
     key_skewness=25
     isCyclic=1
     isDynamic=1
@@ -47,8 +49,10 @@ function runApplication() {
               --checkpoint_interval $checkpointInterval \
               --CCOption $CCOption \
               --complexity $complexity \
-              --deposit_ratio $deposit_ratio \
               --abort_ratio $abort_ratio \
+              --multiple_ratio $multiple_ratio \
+              --txn_length $txn_length \
+              --NUM_ACCESS $NUM_ACCESS \
               --key_skewness $key_skewness \
               --isCyclic $isCyclic \
               --rootFilePath $rootFilePath \
@@ -79,8 +83,10 @@ function runApplication() {
       --checkpoint_interval $checkpointInterval \
       --CCOption $CCOption \
       --complexity $complexity \
-      --deposit_ratio $deposit_ratio \
       --abort_ratio $abort_ratio \
+      --multiple_ratio $multiple_ratio \
+      --txn_length $txn_length \
+      --NUM_ACCESS $NUM_ACCESS \
       --key_skewness $key_skewness \
       --isCyclic $isCyclic \
       --rootFilePath $rootFilePath \
@@ -119,7 +125,7 @@ function withoutRecovery() {
 
 function application_runner() {
  ResetParameters
- app=StreamLedger
+ app=GrepSum
  for FTOption in 3
  do
  #withoutRecovery

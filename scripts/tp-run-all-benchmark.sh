@@ -3,7 +3,7 @@ source dir.sh || exit
 function ResetParameters() {
     app="TollProcessing"
     checkpointInterval=20480
-    tthread=20
+    tthread=24
     scheduler="OG_NS_A"
     defaultScheduler="OG_NS_A"
     CCOption=3 #TSTREAM

@@ -60,7 +60,6 @@ public class OPNSScheduler<Context extends OPNSContext> extends OPScheduler<Cont
             // rollback to the starting point and redo.
             do {
                 EXPLORE(context);
-                MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(threadId);
                 PROCESS(context, mark_ID);
             } while (!FINISHED(context));
             END_SCHEDULE_ABORT_TIME_MEASURE(threadId);
@@ -113,9 +112,7 @@ public class OPNSScheduler<Context extends OPNSContext> extends OPScheduler<Cont
         MeasureTools.END_SCHEDULE_NEXT_TIME_MEASURE(threadId);
 
         for (Operation operation : context.batchedOperations) {
-            MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(threadId);
             execute(operation, mark_ID, false);
-            MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(threadId);
         }
 
         while (!context.batchedOperations.isEmpty()) {
@@ -123,8 +120,11 @@ public class OPNSScheduler<Context extends OPNSContext> extends OPScheduler<Cont
             MeasureTools.BEGIN_NOTIFY_TIME_MEASURE(threadId);
             if (remove.isFailed && !remove.getOperationState().equals(OperationStateType.ABORTED)) {
                 needAbortHandling = false;
-                if (isLogging == LOGOption_path && remove.txnOpId == 0)
+                if (isLogging == LOGOption_path && remove.txnOpId == 0) {
+                    MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(threadId);
                     this.tpg.threadToPathRecord.get(context.thisThreadId).addAbortBid(remove.bid);
+                    MeasureTools.END_SCHEDULE_TRACKING_TIME_MEASURE(threadId);
+                }
             }
             NOTIFY(remove, context);
             MeasureTools.END_NOTIFY_TIME_MEASURE(threadId);

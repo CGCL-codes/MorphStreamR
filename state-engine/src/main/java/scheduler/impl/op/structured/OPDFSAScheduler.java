@@ -84,9 +84,7 @@ public class OPDFSAScheduler<Context extends OPSAContext> extends OPDFSScheduler
         MeasureTools.END_SCHEDULE_NEXT_TIME_MEASURE(threadId);
 
         for (Operation operation : context.batchedOperations) {
-            MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(threadId);
             execute(operation, mark_ID, false);
-            MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(threadId);
         }
 
         while (context.batchedOperations.size() != 0) {
@@ -153,8 +151,11 @@ public class OPDFSAScheduler<Context extends OPSAContext> extends OPDFSScheduler
             if (bid == failedOp.bid) {//identify bids to be aborted.
                 operation.stateTransition(MetaTypes.OperationStateType.ABORTED);
                 notifyChildren(operation, MetaTypes.OperationStateType.ABORTED);
-                if (this.isLogging == LOGOption_path && operation.txnOpId == 0)
+                if (this.isLogging == LOGOption_path && operation.txnOpId == 0) {
+                    MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(context.thisThreadId);
                     this.tpg.threadToPathRecord.get(context.thisThreadId).addAbortBid(operation.bid);
+                    MeasureTools.END_SCHEDULE_TRACKING_TIME_MEASURE(context.thisThreadId);
+                }
                 markAny = true;
             }
         }

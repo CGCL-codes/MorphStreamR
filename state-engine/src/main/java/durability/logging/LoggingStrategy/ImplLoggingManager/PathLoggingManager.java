@@ -20,6 +20,7 @@ import durability.snapshot.LoggingOptions;
 import durability.struct.Logging.LoggingEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import profiler.MeasureTools;
 import storage.table.RecordSchema;
 import utils.SOURCE_CONTROL;
 import utils.lib.ConcurrentHashMap;
@@ -101,7 +102,6 @@ public class PathLoggingManager implements LoggingManager {
 
     @Override
     public void syncRetrieveLogs(RedoLogResult redoLogResult) throws IOException, ExecutionException, InterruptedException {
-        //Construct the history views
         for (int i = 0; i < redoLogResult.redoLogPaths.size(); i++) {
             Path walPath = Paths.get(redoLogResult.redoLogPaths.get(i));
             AsynchronousFileChannel afc = AsynchronousFileChannel.open(walPath, READ);
@@ -117,6 +117,8 @@ public class PathLoggingManager implements LoggingManager {
             }
             byte[] object = inputView.readFullyDecompression();
             String[] strings = new String(object, StandardCharsets.UTF_8).split(" ");
+            if (strings.length == 0)
+                continue;
             String[] taskPlacing = strings[0].split(";");//Task Placing View
             if (taskPlacing.length > 1 || !taskPlacing[0].equals("")) {
                 for (String task : taskPlacing) {

@@ -75,9 +75,7 @@ public class OPNSAScheduler<Context extends OPNSAContext> extends OPNSScheduler<
         MeasureTools.END_SCHEDULE_NEXT_TIME_MEASURE(threadId);
 
         for (Operation operation : context.batchedOperations) {
-            MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(threadId);
             execute(operation, mark_ID, false);
-            MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(threadId);
         }
 
 

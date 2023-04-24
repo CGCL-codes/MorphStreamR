@@ -34,35 +34,22 @@ public class Metrics {
     }
 
     public static void RECORD_SCHEDULE_TIME(int thread_id, int num_events) {
-        double explore_time = (Scheduler.Explore[thread_id] - Scheduler.Useful[thread_id] - Scheduler.Abort[thread_id]) / (double) num_events;
-        double useful_time = (Scheduler.Useful[thread_id] * (Scheduler.UsefulCount[thread_id] - Scheduler.RedoCount[thread_id]) / (double) Scheduler.UsefulCount[thread_id]) / (double) num_events;
-        double abort_time = (Scheduler.Abort[thread_id] + Scheduler.Useful[thread_id] * Scheduler.RedoCount[thread_id] / (double) Scheduler.UsefulCount[thread_id]) / (double) num_events;
-        double next_time = Scheduler.Next[thread_id] / (double) num_events;
-        double construct_time = Scheduler.Construct[thread_id] / (double) num_events;
-        double notify_time = Scheduler.Notify[thread_id] / (double) num_events;
-        double first_explore_time = Scheduler.FirstExplore[thread_id] / (double) num_events;
-        double caching_time = Scheduler.Caching[thread_id] / (double) num_events;
-        double switch_time = Scheduler.SchedulerSwitch[thread_id] / (double) num_events;
         if (!RecoveryPerformance.stopRecovery[thread_id]) {
             RecoveryPerformance.Explore[thread_id] = RecoveryPerformance.Explore[thread_id] + Scheduler.Explore[thread_id] - Scheduler.Useful[thread_id] - Scheduler.Abort[thread_id];
-            RecoveryPerformance.Next[thread_id] = RecoveryPerformance.Next[thread_id] + Scheduler.Next[thread_id];
             RecoveryPerformance.Useful[thread_id] = RecoveryPerformance.Useful[thread_id] + (Scheduler.Useful[thread_id] * (Scheduler.UsefulCount[thread_id] - Scheduler.RedoCount[thread_id]) / Scheduler.UsefulCount[thread_id]);
             RecoveryPerformance.Abort[thread_id] = RecoveryPerformance.Abort[thread_id] + (Scheduler.Abort[thread_id] + Scheduler.Useful[thread_id] * Scheduler.RedoCount[thread_id] / Scheduler.UsefulCount[thread_id]);
             RecoveryPerformance.Construct[thread_id] = RecoveryPerformance.Construct[thread_id] + Scheduler.Construct[thread_id];
-            RecoveryPerformance.Notify[thread_id] = RecoveryPerformance.Notify[thread_id] + Scheduler.Notify[thread_id];
-            RecoveryPerformance.FirstExplore[thread_id] = RecoveryPerformance.FirstExplore[thread_id] + Scheduler.FirstExplore[thread_id];
-            RecoveryPerformance.Caching[thread_id] = RecoveryPerformance.Caching[thread_id] + Scheduler.Caching[thread_id];
-            RecoveryPerformance.SchedulerSwitch[thread_id] = RecoveryPerformance.SchedulerSwitch[thread_id] + Scheduler.SchedulerSwitch[thread_id];
         } else {
+            double explore_time = (Scheduler.Explore[thread_id] - Scheduler.Useful[thread_id] - Scheduler.Abort[thread_id] - Scheduler.Tracking[thread_id]) / (double) num_events;
+            double useful_time = (Scheduler.Useful[thread_id] * (Scheduler.UsefulCount[thread_id] - Scheduler.RedoCount[thread_id]) / (double) Scheduler.UsefulCount[thread_id]) / (double) num_events;
+            double abort_time = (Scheduler.Abort[thread_id] + Scheduler.Useful[thread_id] * Scheduler.RedoCount[thread_id] / (double) Scheduler.UsefulCount[thread_id]) / (double) num_events;
+            double construct_time = Scheduler.Construct[thread_id] / (double) num_events;
+            double tracking_time = Scheduler.Tracking[thread_id] / (double) num_events;
             Scheduler_Record.Explore[thread_id].addValue(explore_time);
-            Scheduler_Record.Next[thread_id].addValue(next_time);
             Scheduler_Record.Useful[thread_id].addValue(useful_time);
             Scheduler_Record.Abort[thread_id].addValue(abort_time);
             Scheduler_Record.Construct[thread_id].addValue(construct_time);
-            Scheduler_Record.Notify[thread_id].addValue(notify_time);
-            Scheduler_Record.FirstExplore[thread_id].addValue(first_explore_time);
-            Scheduler_Record.Caching[thread_id].addValue(caching_time);
-            Scheduler_Record.SchedulerSwitch[thread_id].addValue(switch_time);
+            Scheduler_Record.Tracking[thread_id].addValue(tracking_time);
         }
         Scheduler.Initialize(thread_id);
     }
@@ -238,10 +225,6 @@ public class Metrics {
         Transaction_Record.lock_ratio[thread_id].addValue(TxnRuntime.Lock[thread_id]);
         Transaction_Record.sync_ratio[thread_id].addValue(TxnRuntime.Wait[thread_id]);
         TxnRuntime.Initialize(thread_id);
-//        Transaction_Record.index_ratio[thread_id].addValue(TxnRuntime.Index[thread_id] / (double) Runtime.Txn[thread_id]);
-//        Transaction_Record.useful_ratio[thread_id].addValue(TxnRuntime.Access[thread_id] / (double) Runtime.Txn[thread_id]);
-//        Transaction_Record.lock_ratio[thread_id].addValue(TxnRuntime.Lock[thread_id] / (double) Runtime.Txn[thread_id]);
-//        Transaction_Record.sync_ratio[thread_id].addValue((TxnRuntime.Wait[thread_id]-TxnRuntime.Lock[thread_id]) / (double) Runtime.Txn[thread_id]);
     }
 
     public static void RECORD_TXN_BREAKDOWN_RATIO(int thread_id, int number_events) {
@@ -250,10 +233,6 @@ public class Metrics {
         Transaction_Record.lock_ratio[thread_id].addValue(TxnRuntime.Lock[thread_id] / (double) number_events);
         Transaction_Record.sync_ratio[thread_id].addValue(TxnRuntime.Wait[thread_id] / (double) number_events);
         TxnRuntime.Initialize(thread_id);
-//        Transaction_Record.index_ratio[thread_id].addValue(TxnRuntime.Index[thread_id] / (double) Runtime.Txn[thread_id]);
-//        Transaction_Record.useful_ratio[thread_id].addValue(TxnRuntime.Access[thread_id] / (double) Runtime.Txn[thread_id]);
-//        Transaction_Record.lock_ratio[thread_id].addValue(TxnRuntime.Lock[thread_id] / (double) Runtime.Txn[thread_id]);
-//        Transaction_Record.sync_ratio[thread_id].addValue((TxnRuntime.Wait[thread_id]-TxnRuntime.Lock[thread_id]) / (double) Runtime.Txn[thread_id]);
     }
 
     // OGScheduler
@@ -280,6 +259,12 @@ public class Metrics {
     public static void COMPUTE_SCHEDULE_USEFUL(int thread_id) {
         Scheduler.Useful[thread_id] += System.nanoTime() - Scheduler.UsefulStart[thread_id];
         Scheduler.UsefulCount[thread_id] ++;
+    }
+    public static void COMPUTE_SCHEDULE_TRACKING_START(int thread_id) {
+        Scheduler.TrackingStart[thread_id] = System.nanoTime();
+    }
+    public static void COMPUTE_SCHEDULE_TRACKING(int thread_id) {
+        Scheduler.Tracking[thread_id] += System.nanoTime() - Scheduler.TrackingStart[thread_id];
     }
 
     public static void COMPUTE_SCHEDULE_ABORT_START(int thread_id) {
@@ -478,6 +463,8 @@ public class Metrics {
         public static long[] ExploreStart = new long[kMaxThreadNum];
         public static long[] ConstructStart = new long[kMaxThreadNum];
         public static long[] Construct = new long[kMaxThreadNum];
+        public static long[] TrackingStart = new long[kMaxThreadNum];
+        public static long[] Tracking = new long[kMaxThreadNum];
         public static long[] NotifyStart = new long[kMaxThreadNum];
         public static long[] Notify = new long[kMaxThreadNum];
         public static long[] FirstExploreStart = new long[kMaxThreadNum];
@@ -501,6 +488,8 @@ public class Metrics {
                 Explore[i] = 0;
                 ConstructStart[i] = 0;
                 Construct[i] = 0;
+                TrackingStart[i] = 0;
+                Tracking[i] = 0;
                 NotifyStart[i] = 0;
                 Notify[i] = 0;
                 FirstExploreStart[i] = 0;
@@ -526,6 +515,8 @@ public class Metrics {
             Explore[i] = 0;
             ConstructStart[i] = 0;
             Construct[i] = 0;
+            TrackingStart[i] = 0;
+            Tracking[i] = 0;
             NotifyStart[i] = 0;
             Notify[i] = 0;
             FirstExploreStart[i] = 0;
@@ -546,6 +537,7 @@ public class Metrics {
         public static DescriptiveStatistics[] Useful = new DescriptiveStatistics[kMaxThreadNum];//Useful_work time.
         public static DescriptiveStatistics[] Abort = new DescriptiveStatistics[kMaxThreadNum];//Abort time.
         public static DescriptiveStatistics[] Construct = new DescriptiveStatistics[kMaxThreadNum];//Construction time.
+        public static DescriptiveStatistics[] Tracking = new DescriptiveStatistics[kMaxThreadNum];//Tracking time.
         public static DescriptiveStatistics[] Notify = new DescriptiveStatistics[kMaxThreadNum];//Notify time.
         public static DescriptiveStatistics[] FirstExplore = new DescriptiveStatistics[kMaxThreadNum];//First explore time.
         public static DescriptiveStatistics[] Caching = new DescriptiveStatistics[kMaxThreadNum];//Caching time.
@@ -559,6 +551,7 @@ public class Metrics {
                 Useful[i] = new DescriptiveStatistics();
                 Abort[i] = new DescriptiveStatistics();
                 Construct[i] = new DescriptiveStatistics();
+                Tracking[i] = new DescriptiveStatistics();
                 Notify[i] = new DescriptiveStatistics();
                 FirstExplore[i] = new DescriptiveStatistics();
                 Caching[i] = new DescriptiveStatistics();
@@ -628,10 +621,10 @@ public class Metrics {
 
     public static class RecoveryPerformance {
         public static long[] recoveryItems = new long[kMaxThreadNum];
-        public static boolean stopRecovery[] = new boolean[kMaxThreadNum];
+        public static boolean[] stopRecovery = new boolean[kMaxThreadNum];
         public static long[] startRecoveryTime = new long[kMaxThreadNum];
         public static long[] startReloadDatabaseTime = new long[kMaxThreadNum];
-        public static long[] startRedoWriteAheadLogTime = new long[kMaxThreadNum];
+        public static long[] startRedoWriteAheadLogTime = new long[kMaxThreadNum];//For pathLogging it is the time used to construct the path.
         public static long[] startReloadInputTime = new long[kMaxThreadNum];
         public static long[] startReplayTime = new long[kMaxThreadNum];
         //in ms.
