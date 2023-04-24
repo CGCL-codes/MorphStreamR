@@ -535,7 +535,7 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
             this.loggingManager.addLogRecord(operation.logRecord);
         }
         operation.isCommit = true;
-        MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(operation.context.thisThreadId);
+        MeasureTools.END_SCHEDULE_TRACKING_TIME_MEASURE(operation.context.thisThreadId);
     }
 
 }

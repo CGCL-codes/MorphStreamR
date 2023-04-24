@@ -708,7 +708,7 @@ public class MeasureTools {
         try {
             File file = new File(directory + fileNameSuffix + ".overall");
             BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
-            fileWriter.write("RecoverySchedulerTimeBreakdownReport (ns): " + "\n");
+            fileWriter.write("RecoverySchedulerTimeBreakdownReport (ms): " + "\n");
             fileWriter.write("thread_id\t explore_time\t useful_time\t abort_time\t construct_time\t abort_push\t history_inspection\t task_placing\n");
             double totalExploreTime = 0;
             double totalUsefulTime = 0;
@@ -734,13 +734,13 @@ public class MeasureTools {
                             "%-10.2f\t" +
                             "%-10.2f\t" +
                             "%-10.2f\t"
-                    , totalExploreTime - totalHistoryInspectionTime / tthread
-                    , totalUsefulTime / tthread
-                    , totalAbortTime / tthread
-                    , totalConstructTime - totalTaskPlacingTime / tthread
-                    , totalAbortPushTime / tthread
-                    , totalHistoryInspectionTime / tthread
-                    , totalTaskPlacingTime / tthread
+                    , totalExploreTime - totalHistoryInspectionTime / tthread / 1E6
+                    , totalUsefulTime / tthread / 1E6
+                    , totalAbortTime / tthread / 1E6
+                    , totalConstructTime - totalTaskPlacingTime / tthread / 1E6
+                    , totalAbortPushTime / tthread / 1E6
+                    , totalHistoryInspectionTime / tthread / 1E6
+                    , totalTaskPlacingTime / tthread / 1E6
             );
             fileWriter.write(output + "\n");
             fileWriter.close();
@@ -764,7 +764,7 @@ public class MeasureTools {
             if (enable_log) log.info("===Scheduler Time Breakdown Report===");
             fileWriter.write("explore_time\t useful_time\t abort_time\t construct_time\t tracking_time\n");
             if (enable_log)
-                log.info("explore_time\t useful_time\t abort_time\t construct_time\t tracking_time\n");
+                log.info("explore_time\t useful_time\t abort_time\t construct_time\t tracking_time");
             double explore_time = 0;
             double useful_time = 0;
             double abort_time = 0;
