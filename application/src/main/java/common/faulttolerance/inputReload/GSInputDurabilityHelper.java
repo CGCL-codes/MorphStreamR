@@ -18,6 +18,7 @@ public class GSInputDurabilityHelper extends InputDurabilityHelper {
     public GSInputDurabilityHelper(Configuration configuration, int taskId, FaultToleranceConstants.CompressionType compressionType) {
         this.tthread = configuration.getInt("tthread");
         this.partitionOffset = configuration.getInt("NUM_ITEMS") / tthread;
+        this.ftOption = configuration.getInt("FTOption");
         this.encodingType = compressionType;
         this.taskId = taskId;
         switch(compressionType) {
@@ -94,7 +95,7 @@ public class GSInputDurabilityHelper extends InputDurabilityHelper {
     private TxnEvent getEventFromString(String txn, long groupId) {
         int[] p_bids = new int[tthread];
         String[] split = txn.split(",");
-        if (historyViews.inspectAbortView(groupId, this.taskId, Integer.parseInt(split[0]))) {
+        if (this.ftOption == 3 && historyViews.inspectAbortView(groupId, this.taskId, Integer.parseInt(split[0]))) {
             return null;
         }
         int npid = (int) (Long.parseLong(split[1]) / partitionOffset);

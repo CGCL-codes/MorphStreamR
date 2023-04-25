@@ -12,6 +12,7 @@ public abstract class InputDurabilityHelper {
     public int partitionOffset;
     public int tthread;
     public int taskId;
+    public int ftOption;
     public FaultToleranceConstants.CompressionType encodingType;
     public boolean isCompression = true;
     public HistoryViews historyViews = new HistoryViews();

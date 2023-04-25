@@ -56,6 +56,7 @@ public class SLInputDurabilityHelper extends InputDurabilityHelper {
         this.tthread = configuration.getInt("tthread");
         this.partitionOffset = configuration.getInt("NUM_ITEMS") / tthread;
         this.encodingType = compressionType;
+        this.ftOption = configuration.getInt("FTOption");
         this.taskId = taskId;
         switch(compressionType) {
             case None:
@@ -468,7 +469,7 @@ public class SLInputDurabilityHelper extends InputDurabilityHelper {
     private TxnEvent getEventFromString(String txn, long groupId) {
         int[] p_bids = new int[tthread];
         String[] split = txn.split(",");
-        if (historyViews.inspectAbortView(groupId, this.taskId, Integer.parseInt(split[0]))) {
+        if (this.ftOption == 3 && historyViews.inspectAbortView(groupId, this.taskId, Integer.parseInt(split[0]))) {
             return null;
         }
         int npid = (int) (Long.parseLong(split[1]) / partitionOffset);

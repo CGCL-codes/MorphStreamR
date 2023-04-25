@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutionException;
 public class TPInputDurabilityHelper extends InputDurabilityHelper {
     public TPInputDurabilityHelper(Configuration configuration, int taskId, FaultToleranceConstants.CompressionType compressionType) {
         this.tthread = configuration.getInt("tthread");
+        this.ftOption = configuration.getInt("FTOption");
         this.partitionOffset = configuration.getInt("NUM_ITEMS") / tthread;
         this.encodingType = compressionType;
         this.taskId = taskId;
@@ -97,7 +98,7 @@ public class TPInputDurabilityHelper extends InputDurabilityHelper {
     private TxnEvent getEventFromString(String txn, long groupId) {
         String[] split = txn.split(",");
         long bid = Long.parseLong(split[0]);
-        if (historyViews.inspectAbortView(groupId, this.taskId, Integer.parseInt(split[0]))) {
+        if (this.ftOption == 3 && historyViews.inspectAbortView(groupId, this.taskId, Integer.parseInt(split[0]))) {
             return null;
         }
         long timestamp = Long.parseLong(split[1]);

@@ -625,6 +625,7 @@ public class MeasureTools {
                             "%-10.2f\t" +
                             "%-10.2f\t" +
                             "%-10.2f\t" +
+                            "%-10.2f\t" +
                             "%-10.2f\t"
                     , recoveryTime[0], recoveryTime[1], recoveryTime[2], recoveryTime[3], recoveryTime[4], recoveryTime[5], recoveryTime[6], recoveryTime[7], recoveryTime[8], recoveryTime[9], recoveryTime[10], recoveryTime[11]
             );
@@ -675,7 +676,7 @@ public class MeasureTools {
             File file = new File(directory + fileNameSuffix + ".overall");
             BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
             fileWriter.write("ReplayTimeBreakDownReport (ms): " + "\n");
-            fileWriter.write("thread_id\t total_time\t stream_process\t txn_process\t overheads\n");
+            fileWriter.write("total_time\t stream_process\t txn_process\t overheads\n");
             double totalReplayTime = 0;
             double totalStreamProcessTime = 0;
             double totalTxnProcessTime = 0;
@@ -709,7 +710,7 @@ public class MeasureTools {
             File file = new File(directory + fileNameSuffix + ".overall");
             BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
             fileWriter.write("RecoverySchedulerTimeBreakdownReport (ms): " + "\n");
-            fileWriter.write("thread_id\t explore_time\t useful_time\t abort_time\t construct_time\t abort_push\t history_inspection\t task_placing\n");
+            fileWriter.write("explore_time\t useful_time\t abort_time\t construct_time\t abort_push\t history_inspection\t task_placing\n");
             double totalExploreTime = 0;
             double totalUsefulTime = 0;
             double totalAbortTime = 0;
@@ -717,7 +718,7 @@ public class MeasureTools {
             double totalAbortPushTime = 0;
             double totalHistoryInspectionTime = 0;
             double totalTaskPlacingTime = 0;
-            for (int threadId = 0; threadId < tthread; threadId++) {
+            for (int threadId = 0; threadId < tthread; threadId ++) {
                 totalAbortPushTime = totalAbortPushTime + RecoveryPerformance.AbortPushDown[threadId];
                 totalHistoryInspectionTime = totalHistoryInspectionTime + RecoveryPerformance.HistoryInspection[threadId];
                 totalTaskPlacingTime = totalTaskPlacingTime + RecoveryPerformance.TaskPlacing[threadId];
@@ -734,18 +735,18 @@ public class MeasureTools {
                             "%-10.2f\t" +
                             "%-10.2f\t" +
                             "%-10.2f\t"
-                    , (totalExploreTime - totalHistoryInspectionTime) / tthread / 1E6
+                    , (totalExploreTime - totalTaskPlacingTime) / tthread / 1E6
                     , totalUsefulTime / tthread / 1E6
                     , totalAbortTime / tthread / 1E6
-                    , (totalConstructTime - totalTaskPlacingTime) / tthread / 1E6
+                    , (totalConstructTime - totalHistoryInspectionTime) / tthread / 1E6
                     , totalAbortPushTime / tthread / 1E6
                     , totalHistoryInspectionTime / tthread / 1E6
                     , totalTaskPlacingTime / tthread / 1E6
             );
             fileWriter.write(output + "\n");
             fileWriter.close();
-            recoveryTime[4] = (totalExploreTime - totalHistoryInspectionTime) / tthread / 1E6;
-            recoveryTime[5] = (totalConstructTime - totalTaskPlacingTime) / tthread / 1E6;
+            recoveryTime[4] = (totalExploreTime - totalTaskPlacingTime) / tthread / 1E6;
+            recoveryTime[5] = (totalConstructTime - totalHistoryInspectionTime) / tthread / 1E6;
             recoveryTime[6] = totalUsefulTime / tthread / 1E6;
             recoveryTime[7] = totalAbortTime / tthread / 1E6;
             recoveryTime[9] = totalAbortPushTime / tthread / 1E6;
