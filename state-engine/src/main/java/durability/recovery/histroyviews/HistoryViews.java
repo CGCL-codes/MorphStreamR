@@ -23,8 +23,9 @@ public class HistoryViews {
             MeasureTools.END_RECOVERY_ABORT_PUSH_DOWN_MEASURE(threadId);
             return false;
         }
+        boolean isAbort = abortViews.get(groupId).inspectView(threadId, bid);
         MeasureTools.END_RECOVERY_ABORT_PUSH_DOWN_MEASURE(threadId);
-        return abortViews.get(groupId).inspectView(threadId, bid);
+        return isAbort;
     }
     public int inspectAbortNumber(long groupId, int threadId) {
         MeasureTools.BEGIN_RECOVERY_ABORT_PUSH_DOWN_MEASURE(threadId);
