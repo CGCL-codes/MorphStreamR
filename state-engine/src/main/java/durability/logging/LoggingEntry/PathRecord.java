@@ -20,8 +20,6 @@ public class PathRecord implements Serializable {
     public ConcurrentHashMap<String, List<Integer>> tableToPlacing = new ConcurrentHashMap<>();//<Table, Placing>
     public ConcurrentHashMap<String, keyToDependencies> dependencyEdges = new ConcurrentHashMap<>();//<Table, DependencyEdge>
     public void addAbortBid(long bid) {
-        if (abortBids.contains(bid))
-            return;
         abortBids.add(bid);
     }
     public void addDependencyEdge(String table, String from, String to, long bid, Object value) {
