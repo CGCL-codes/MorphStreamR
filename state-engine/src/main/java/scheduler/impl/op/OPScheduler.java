@@ -228,11 +228,11 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
         MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(operation.context.thisThreadId);
         if (!operation.isFailed) {
             if (isLogging == LOGOption_path && keysLength > 1 && !operation.isCommit) {
-                MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(((Operation) operation).context.thisThreadId);
-                int id = getTaskId(((Operation) operation).pKey, delta);
-                this.tpg.threadToPathRecord.get(id).addDependencyEdge(operation.table_name,((Operation) operation).pKey, operation.condition_records[1].record_.GetPrimaryKey(), operation.bid, sum);
+                MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(operation.context.thisThreadId);
+                int id = getTaskId(operation.pKey, delta);
+                this.tpg.threadToPathRecord.get(id).addDependencyEdge(operation.table_name, operation.pKey, operation.condition_records[1].record_.GetPrimaryKey(), operation.bid, sum);
                 operation.isCommit = true;
-                MeasureTools.END_SCHEDULE_TRACKING_TIME_MEASURE(((Operation) operation).context.thisThreadId);
+                MeasureTools.END_SCHEDULE_TRACKING_TIME_MEASURE(operation.context.thisThreadId);
             }
         }
     }
@@ -361,12 +361,13 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
         RESET(context);//
     }
     private void commitLog(Operation operation) {
-        MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(operation.context.thisThreadId);
         if (operation.isCommit)
             return;
         if (isLogging == LOGOption_path) {
             return;
-        } else if (isLogging == LOGOption_wal) {
+        }
+        MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(operation.context.thisThreadId);
+        if (isLogging == LOGOption_wal) {
             ((LogRecord) operation.logRecord).addUpdate(operation.d_record.content_.readPreValues(operation.bid));
             this.loggingManager.addLogRecord(operation.logRecord);
         } else if (isLogging == LOGOption_dependency) {

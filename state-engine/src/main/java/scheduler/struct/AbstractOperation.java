@@ -43,7 +43,7 @@ public abstract class AbstractOperation {
     public int[] success;
     //required by Write-ahead-logging, Dependency logging, LV logging.
     public LoggingEntry logRecord;
-    public boolean isCommit = false;//It means that this operation has been added to LoggingManager.
+    public boolean isCommit = true;//It means that this operation has been added to LoggingManager.
 
     public AbstractOperation(Function function, String table_name, SchemaRecordRef record_ref, TableRecord[] condition_records, Condition condition, int[] success,
                              TxnContext txn_context, CommonMetaTypes.AccessType accessType, TableRecord s_record, TableRecord d_record, long bid) {
@@ -69,6 +69,7 @@ public abstract class AbstractOperation {
                 conditions = new String[0];
             }
             this.logRecord = new DependencyLog(bid, table_name, d_record.record_.GetPrimaryKey(), function.getClass().getName(), conditions, function.toString());
+            this.isCommit = false;
         } else if (loggingRecord_type == LOGOption_wal) {
             this.logRecord = new LogRecord(table_name, bid, d_record.record_.GetPrimaryKey());
         } else if (loggingRecord_type == LOGOption_lv) {
@@ -82,6 +83,7 @@ public abstract class AbstractOperation {
                 conditions = new String[0];
             }
             this.logRecord = new LVCLog(bid, table_name, d_record.record_.GetPrimaryKey(), function.getClass().getName(), conditions, function.toString());
+            this.isCommit = false;
         } else if (loggingRecord_type == LOGOption_command) {
             String[] conditions;
             if (condition_records != null) {
@@ -93,6 +95,7 @@ public abstract class AbstractOperation {
                 conditions = new String[0];
             }
             this.logRecord = new NativeCommandLog(bid, table_name, d_record.record_.GetPrimaryKey(), function.getClass().getName(), conditions, function.toString());
+            this.isCommit = false;
         }
     }
 }

@@ -228,6 +228,7 @@ public class SLTPGDynamicDataGenerator extends DynamicWorkloadGenerator {
         Event t;
         if (random.nextInt(10000) < Ratio_of_Transaction_Aborts) {
             t = new SLTransferEvent(eventID, srcAcc, srcAst, dstAcc, dstAst, 100000000, 100000000);
+            abort_num ++;
         } else {
             t = new SLTransferEvent(eventID, srcAcc, srcAst, dstAcc, dstAst);
         }

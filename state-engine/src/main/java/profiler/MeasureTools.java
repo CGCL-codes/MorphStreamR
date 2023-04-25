@@ -734,23 +734,23 @@ public class MeasureTools {
                             "%-10.2f\t" +
                             "%-10.2f\t" +
                             "%-10.2f\t"
-                    , totalExploreTime - totalHistoryInspectionTime / tthread / 1E6
+                    , (totalExploreTime - totalHistoryInspectionTime) / tthread / 1E6
                     , totalUsefulTime / tthread / 1E6
                     , totalAbortTime / tthread / 1E6
-                    , totalConstructTime - totalTaskPlacingTime / tthread / 1E6
+                    , (totalConstructTime - totalTaskPlacingTime) / tthread / 1E6
                     , totalAbortPushTime / tthread / 1E6
                     , totalHistoryInspectionTime / tthread / 1E6
                     , totalTaskPlacingTime / tthread / 1E6
             );
             fileWriter.write(output + "\n");
             fileWriter.close();
-            recoveryTime[4] = totalExploreTime / tthread;
-            recoveryTime[5] = totalConstructTime / tthread;
-            recoveryTime[6] = totalUsefulTime / tthread;
-            recoveryTime[7] = totalAbortTime / tthread;
-            recoveryTime[9] = totalAbortPushTime / tthread;
-            recoveryTime[10] = totalHistoryInspectionTime / tthread;
-            recoveryTime[11] = totalTaskPlacingTime / tthread;
+            recoveryTime[4] = (totalExploreTime - totalHistoryInspectionTime) / tthread / 1E6;
+            recoveryTime[5] = (totalConstructTime - totalTaskPlacingTime) / tthread / 1E6;
+            recoveryTime[6] = totalUsefulTime / tthread / 1E6;
+            recoveryTime[7] = totalAbortTime / tthread / 1E6;
+            recoveryTime[9] = totalAbortPushTime / tthread / 1E6;
+            recoveryTime[10] = totalHistoryInspectionTime / tthread / 1E6;
+            recoveryTime[11] = totalTaskPlacingTime / tthread / 1E6;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

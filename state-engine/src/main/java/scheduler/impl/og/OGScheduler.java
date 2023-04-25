@@ -502,13 +502,14 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
         return false;
     }
     private void commitLog(Operation operation) {
-        MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(operation.context.thisThreadId);
         if (operation.isCommit) {
             return;
         }
         if (isLogging == LOGOption_path) {
             return;
-        } else if (isLogging == LOGOption_wal) {
+        }
+        MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(operation.context.thisThreadId);
+        if (isLogging == LOGOption_wal) {
             ((LogRecord) operation.logRecord).addUpdate(operation.d_record.content_.readPreValues(operation.bid));
             this.loggingManager.addLogRecord(operation.logRecord);
         } else if (isLogging == LOGOption_dependency) {

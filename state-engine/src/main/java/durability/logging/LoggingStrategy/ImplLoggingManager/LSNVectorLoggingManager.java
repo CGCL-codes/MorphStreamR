@@ -154,7 +154,6 @@ public class LSNVectorLoggingManager implements LoggingManager {
     private void EXPLORE(CSContext context) {
         LVCLog lvcLog = context.tasks.pollFirst();
         while (!this.cpg.canEvaluate(lvcLog)) {
-
         }
         context.readyTask = lvcLog;
     }

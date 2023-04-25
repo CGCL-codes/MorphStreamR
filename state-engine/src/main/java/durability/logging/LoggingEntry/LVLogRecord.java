@@ -15,9 +15,6 @@ public class LVLogRecord {
         this.partitionId = partitionId;
     }
     public void addLog(LVCLog log, TableRecord tableRecord, int parallelNum, TableRecord[] conditionTableRecords) {
-        if (logs.contains(log)) {
-            return;
-        }
         int[] LVs = new int[parallelNum];
         for (int i = 0; i < parallelNum; i ++) {
             LVs[i] = 0;

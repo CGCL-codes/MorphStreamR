@@ -82,8 +82,7 @@ public class DependencyLoggingManager implements LoggingManager {
     @Override
     public void addLogRecord(LoggingEntry logRecord) {
         DependencyLog dependencyLog = (DependencyLog) logRecord;
-        if (!this.threadToDependencyLog.get(getPartitionId(dependencyLog.key)).contains(logRecord))
-            this.threadToDependencyLog.get(getPartitionId(dependencyLog.key)).add(dependencyLog);
+        this.threadToDependencyLog.get(getPartitionId(dependencyLog.key)).add(dependencyLog);
     }
 
 

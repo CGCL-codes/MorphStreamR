@@ -200,23 +200,10 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
     }
     private void inspectDependency(long groupId, OperationChain curOC, Operation op, String table_name,
                                    String key, String[] condition_sourceTable, String[] condition_source){
-        if (condition_source != null) {
-            for (int index = 0; index < condition_source.length; index++) {
-                if (table_name.equals(condition_sourceTable[index]) && key.equals(condition_source[index]))
-                    continue;
-                Object history = this.loggingManager.inspectDependencyView(groupId, table_name, key, condition_source[index], op.bid);
-                if (history != null) {
-                    op.historyView = history;
-                } else {
-                    OperationChain OCFromConditionSource = tpg.getOC(condition_sourceTable[index], condition_source[index]);
-                    //DFS-like
-                    op.incrementPd(OCFromConditionSource);
-                    //Add the proxy operations
-                    OCFromConditionSource.addOperation(op);
-                    //Add dependent Oc
-                    OCFromConditionSource.addDependentOCs(curOC);
-                }
-            }
+        if (tpg.getApp() == 0) {
+            inspectGSDependency(groupId, curOC, op, table_name, key, condition_sourceTable, condition_source);
+        } else if (tpg.getApp() == 1) {
+            inspectSLDependency(groupId, curOC, op, table_name, key, condition_sourceTable, condition_source);
         }
     }
     private void graphConstruct(Context context) {
@@ -327,6 +314,45 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
             HashSet cnt_segment = srcRecord.get(1).getHashSet();
             cnt_segment.add(operation.function.delta_int);//update hashset; updated state also. TODO: be careful of this.
             operation.record_ref.setRecord(new SchemaRecord(new IntDataBox(cnt_segment.size())));//return updated record.
+        }
+    }
+    private void inspectSLDependency(long groupId, OperationChain curOC, Operation op, String table_name,
+                                   String key, String[] condition_sourceTable, String[] condition_source){
+        if (condition_source != null) {
+            for (int index = 0; index < condition_source.length; index++) {
+                if (table_name.equals(condition_sourceTable[index]) && key.equals(condition_source[index]))
+                    continue;
+                Object history = this.loggingManager.inspectDependencyView(groupId, table_name, key, condition_source[index], op.bid);
+                if (history != null) {
+                    op.historyView = history;
+                } else {
+                    OperationChain OCFromConditionSource = tpg.getOC(condition_sourceTable[index], condition_source[index]);
+                    //DFS-like
+                    op.incrementPd(OCFromConditionSource);
+                    //Add the proxy operations
+                    OCFromConditionSource.addOperation(op);
+                    //Add dependent Oc
+                    OCFromConditionSource.addDependentOCs(curOC);
+                }
+            }
+        }
+    }
+    private void inspectGSDependency(long groupId, OperationChain curOC, Operation op, String table_name,
+                                   String key, String[] condition_sourceTable, String[] condition_source){
+        if (condition_source != null) {
+            int index = 1;
+            Object history = this.loggingManager.inspectDependencyView(groupId, table_name, key, condition_source[index], op.bid);
+            if (history != null) {
+                op.historyView = history;
+            } else {
+                OperationChain OCFromConditionSource = tpg.getOC(condition_sourceTable[index], condition_source[index]);
+                //DFS-like
+                op.incrementPd(OCFromConditionSource);
+                //Add the proxy operations
+                OCFromConditionSource.addOperation(op);
+                //Add dependent Oc
+                OCFromConditionSource.addDependentOCs(curOC);
+            }
         }
     }
     public static int getTaskId(String key, Integer delta) {

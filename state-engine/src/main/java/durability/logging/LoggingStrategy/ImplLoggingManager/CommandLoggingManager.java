@@ -79,9 +79,7 @@ public class CommandLoggingManager implements LoggingManager {
     @Override
     public void addLogRecord(LoggingEntry logRecord) {
         NativeCommandLog nativeCommandLog = (NativeCommandLog) logRecord;
-        if (!this.threadToCommandLog.get(getPartitionId(nativeCommandLog.key)).contains(nativeCommandLog)) {
-            this.threadToCommandLog.get(getPartitionId(nativeCommandLog.key)).add(nativeCommandLog);
-        }
+        this.threadToCommandLog.get(getPartitionId(nativeCommandLog.key)).add(nativeCommandLog);
     }
     @Override
     public void commitLog(long groupId, int partitionId, FTManager ftManager) throws IOException {
@@ -236,7 +234,6 @@ public class CommandLoggingManager implements LoggingManager {
     }
     private void TPExecute(NativeCommandLog task) {
         if (task == null || task.isAborted) return;
-        System.out.println();
         String table = task.tableName;
         String pKey = task.key;
         double value = Double.parseDouble(task.id);

@@ -299,21 +299,21 @@ public abstract class Runner implements IRunner {
         switch(application) {
             case "StreamLedger" :
                 //bottomLine = "300,3000,500,1200,0.3,0.1";//TD,LD,PD,SUM,VDD,R_of_A
-                bottomLine = 0.2 * checkpoint_interval + "," + 2 * checkpoint_interval + "," + 0.3 * checkpoint_interval + "," + 0.8 * checkpoint_interval + "," + "0.3,0.1";//TD,LD,PD,SUM,VDD,R_of_A
+                bottomLine = 0.2 * checkpoint_interval + "," + 2 * checkpoint_interval + "," + 0.3 * checkpoint_interval + "," + 0.8 * checkpoint_interval + "," + "0.5,0.1";//TD,LD,PD,SUM,VDD,R_of_A
                 phaseNum = shiftRate * phaseType.length;
                 break;
             case "OnlineBiding" :
                 //bottomLine = "500,5000,1,6000,0.2,0.2";//TD,LD,PD,SUM,VDD,R_of_A
-                bottomLine =  checkpoint_interval + "," + 2 * checkpoint_interval + "," + checkpoint_interval + "," + 4 * checkpoint_interval + "," + "0.3,0.2";//TD,LD,PD,SUM,VDD,R_of_A
+                bottomLine =  checkpoint_interval + "," + 2 * checkpoint_interval + "," + checkpoint_interval + "," + 4 * checkpoint_interval + "," + "0.5,0.2";//TD,LD,PD,SUM,VDD,R_of_A
                 phaseNum = shiftRate * phaseType.length;
                 break;
             case "GrepSum" :
                 //bottomLine = "500,5000,6500,3000,0.2,0.2";//TD,LD,PD,SUM,VDD,R_of_A
-                bottomLine =  2 * checkpoint_interval + "," + 2 * checkpoint_interval + "," + checkpoint_interval + "," + 4 * checkpoint_interval + "," + "0.3,0.2";//TD,LD,PD,SUM,VDD,R_of_A
+                bottomLine =  2 * checkpoint_interval + "," + 2 * checkpoint_interval + "," + checkpoint_interval + "," + 4 * checkpoint_interval + "," + "0.5,0.2";//TD,LD,PD,SUM,VDD,R_of_A
                 phaseNum = shiftRate * phaseType.length;
                 break;
             case "TollProcessing" :
-                bottomLine =  checkpoint_interval + "," + checkpoint_interval + "," + checkpoint_interval + "," + 4 * checkpoint_interval + "," + "0.3,0.2";//TD,LD,PD,SUM,VDD,R_of_A
+                bottomLine =  checkpoint_interval + "," + checkpoint_interval + "," + checkpoint_interval + "," + 4 * checkpoint_interval + "," + "0.5,0.2";//TD,LD,PD,SUM,VDD,R_of_A
                 phaseNum = shiftRate * phaseType.length;
                 break;
             default:

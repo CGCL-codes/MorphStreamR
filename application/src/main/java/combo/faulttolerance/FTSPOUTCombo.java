@@ -338,6 +338,8 @@ public abstract class FTSPOUTCombo extends TransactionalSpout implements FaultTo
                             sink.end(global_cnt);
                     }
                 }
+            } else {
+                input_store(counter);
             }
         }
         if (counter < num_events_per_thread) {
