@@ -269,6 +269,14 @@ public class MeasureTools {
         if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
             COMPUTE_SCHEDULE_TRACKING(thread_id);
     }
+    public static void BEGIN_RECOVERY_CONSTRUCT_GRAPH_MEASURE(int thread_id) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            COMPUTE_RECOVERY_CONSTRUCT_GRAPH_START(thread_id);
+    }
+    public static void END_RECOVERY_CONSTRUCT_GRAPH_MEASURE(int thread_id) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            COMPUTE_RECOVERY_CONSTRUCT_GRAPH(thread_id);
+    }
 
     public static void BEGIN_SCHEDULE_ABORT_TIME_MEASURE(int thread_id) {
         if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
@@ -608,12 +616,12 @@ public class MeasureTools {
             }
             fileWriter.write("recoveryTime (ms) \t recoveryCount\t throughput (k/s) \n");
             fileWriter.write(totalRecoveryTime / tthread + "\t" + totalRecoveryItemsCount /tthread + "\t" + totalRecoveryItemsCount / totalRecoveryTime + "\n");
-            double[] recoveryTime = new double[12];
+            double[] recoveryTime = new double[13];
             WriteRecoveryTimeBreakDown(tthread, recoveryTime);
             WriteReplayTimeBreakDown(tthread, recoveryTime);
             WriteRecoverySchedulerTimeBreakdownReport(tthread, recoveryTime);
             fileWriter.write("OverallBreakDownReport (ms): " + "\n");
-            fileWriter.write("reloadDatabaseTime\t redoWriteAheadLogTime\t reloadInputTime\t stream_process\t explore_time\t construct_time\t useful_time\t abort_time\t overheads\t abort_push_down\t history_inspect\t tasking_placing\n");
+            fileWriter.write("reloadDatabaseTime\t redoWriteAheadLogTime\t reloadInputTime\t stream_process\t explore_time\t construct_time\t useful_time\t abort_time\t overheads\t abort_push_down\t history_inspect\t tasking_placing\t construct_graph\n");
             String output = String.format(
                     "%-10.2f\t" +
                             "%-10.2f\t" +
@@ -626,8 +634,9 @@ public class MeasureTools {
                             "%-10.2f\t" +
                             "%-10.2f\t" +
                             "%-10.2f\t" +
+                            "%-10.2f\t" +
                             "%-10.2f\t"
-                    , recoveryTime[0], recoveryTime[1], recoveryTime[2], recoveryTime[3], recoveryTime[4], recoveryTime[5], recoveryTime[6], recoveryTime[7], recoveryTime[8], recoveryTime[9], recoveryTime[10], recoveryTime[11]
+                    , recoveryTime[0], recoveryTime[1], recoveryTime[2], recoveryTime[3], recoveryTime[4], recoveryTime[5], recoveryTime[6], recoveryTime[7], recoveryTime[8], recoveryTime[9], recoveryTime[10], recoveryTime[11], recoveryTime[12]
             );
             fileWriter.write(output + "\n");
             fileWriter.close();
@@ -718,10 +727,12 @@ public class MeasureTools {
             double totalAbortPushTime = 0;
             double totalHistoryInspectionTime = 0;
             double totalTaskPlacingTime = 0;
+            double totalConstructGraphTime = 0;
             for (int threadId = 0; threadId < tthread; threadId ++) {
                 totalAbortPushTime = totalAbortPushTime + RecoveryPerformance.AbortPushDown[threadId];
                 totalHistoryInspectionTime = totalHistoryInspectionTime + RecoveryPerformance.HistoryInspection[threadId];
                 totalTaskPlacingTime = totalTaskPlacingTime + RecoveryPerformance.TaskPlacing[threadId];
+                totalConstructGraphTime = totalConstructGraphTime + RecoveryPerformance.ConstructGraph[threadId];
                 totalExploreTime = totalExploreTime + RecoveryPerformance.Explore[threadId];
                 totalUsefulTime = totalUsefulTime + RecoveryPerformance.Useful[threadId];
                 totalAbortTime = totalAbortTime + RecoveryPerformance.Abort[threadId];
@@ -734,24 +745,27 @@ public class MeasureTools {
                             "%-10.2f\t" +
                             "%-10.2f\t" +
                             "%-10.2f\t" +
+                            "%-10.2f\t" +
                             "%-10.2f\t"
-                    , (totalExploreTime - totalTaskPlacingTime) / tthread / 1E6
+                    , (totalExploreTime - totalTaskPlacingTime - totalConstructGraphTime) / tthread / 1E6
                     , totalUsefulTime / tthread / 1E6
                     , totalAbortTime / tthread / 1E6
                     , (totalConstructTime - totalHistoryInspectionTime) / tthread / 1E6
                     , totalAbortPushTime / tthread / 1E6
                     , totalHistoryInspectionTime / tthread / 1E6
                     , totalTaskPlacingTime / tthread / 1E6
+                    , totalConstructGraphTime / tthread / 1E6
             );
             fileWriter.write(output + "\n");
             fileWriter.close();
-            recoveryTime[4] = (totalExploreTime - totalTaskPlacingTime) / tthread / 1E6;
+            recoveryTime[4] = (totalExploreTime - totalTaskPlacingTime - totalConstructGraphTime) / tthread / 1E6;
             recoveryTime[5] = (totalConstructTime - totalHistoryInspectionTime) / tthread / 1E6;
             recoveryTime[6] = totalUsefulTime / tthread / 1E6;
             recoveryTime[7] = totalAbortTime / tthread / 1E6;
             recoveryTime[9] = totalAbortPushTime / tthread / 1E6;
             recoveryTime[10] = totalHistoryInspectionTime / tthread / 1E6;
             recoveryTime[11] = totalTaskPlacingTime / tthread / 1E6;
+            recoveryTime[12] = totalConstructGraphTime / tthread / 1E6;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

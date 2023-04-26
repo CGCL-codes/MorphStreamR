@@ -339,6 +339,12 @@ public class Metrics {
     public static void COMPUTE_RECOVERY_TASK_PLACING(int thread_id) {
         RecoveryPerformance.TaskPlacing[thread_id] += System.nanoTime() - RecoveryPerformance.TaskPlacingStart[thread_id];
     }
+    public static void COMPUTE_RECOVERY_CONSTRUCT_GRAPH_START(int thread_id) {
+        RecoveryPerformance.ConstructGraphStart[thread_id] = System.nanoTime();
+    }
+    public static void COMPUTE_RECOVERY_CONSTRUCT_GRAPH(int thread_id) {
+        RecoveryPerformance.ConstructGraph[thread_id] += System.nanoTime() - RecoveryPerformance.ConstructGraphStart[thread_id];
+    }
 
     static class  TxnRuntime {
         public static long[] IndexStart = new long[kMaxThreadNum];
@@ -483,6 +489,7 @@ public class Metrics {
         public static long[] Construct = new long[kMaxThreadNum];
         public static long[] TrackingStart = new long[kMaxThreadNum];
         public static long[] Tracking = new long[kMaxThreadNum];
+        //Not used
         public static long[] NotifyStart = new long[kMaxThreadNum];
         public static long[] Notify = new long[kMaxThreadNum];
         public static long[] FirstExploreStart = new long[kMaxThreadNum];
@@ -672,6 +679,9 @@ public class Metrics {
         public static long[] HistoryInspection = new long[kMaxThreadNum];
         public static long[] TaskPlacingStart = new long[kMaxThreadNum];
         public static long[] TaskPlacing = new long[kMaxThreadNum];
+        //Only used for dependency logging
+        public static long[] ConstructGraphStart = new long[kMaxThreadNum];
+        public static long[] ConstructGraph = new long[kMaxThreadNum];
 
         public static void Initialize() {
             for (int i = 0; i < kMaxThreadNum; i++) {
@@ -706,6 +716,8 @@ public class Metrics {
                 HistoryInspection[i] = 0;
                 TaskPlacingStart[i] = 0;
                 TaskPlacing[i] = 0;
+                ConstructGraphStart[i] = 0;
+                ConstructGraph[i] = 0;
             }
         }
         public static void COMPUTE_RECOVERY_START(int thread_id) {

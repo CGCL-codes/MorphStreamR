@@ -14,7 +14,7 @@ function ResetParameters() {
     txn_length=1
     NUM_ACCESS=8
     key_skewness=75
-    overlap_ratio=50
+    overlap_ratio=80
     isCyclic=1
     isDynamic=1
     workloadType="default,Up_abort,unchanging,Down_abort"
@@ -129,7 +129,7 @@ function withoutRecovery() {
 function application_runner() {
  ResetParameters
  app=GrepSum
- for FTOption in 5 6
+ for FTOption in 3 4
  do
  #withoutRecovery
  withRecovery
