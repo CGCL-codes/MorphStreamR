@@ -112,7 +112,6 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
             commitLog(operation);
             return;
         }
-        int success;
         if (operation.accessType.equals(READ_WRITE_COND_READ)) {
             Transfer_Fun(operation, mark_ID, clean);
         } else if (operation.accessType.equals(READ_WRITE_COND)) {

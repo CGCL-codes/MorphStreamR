@@ -4,22 +4,23 @@ function ResetParameters() {
     app="GrepSum"
     checkpointInterval=20480
     tthread=24
-    scheduler="OP_BFS_A"
-    defaultScheduler="OP_BFS_A"
+    scheduler="OP_NS_A"
+    defaultScheduler="OP_NS_A"
     CCOption=3 #TSTREAM
-    complexity=0
-    NUM_ITEMS=491520
+    complexity=8000
+    NUM_ITEMS=245760
     abort_ratio=0
-    multiple_ratio=80
+    multiple_ratio=50
     txn_length=1
-    NUM_ACCESS=2
-    key_skewness=25
+    NUM_ACCESS=8
+    key_skewness=75
+    overlap_ratio=50
     isCyclic=1
     isDynamic=1
-    workloadType="default,Up_abort,Down_abort,unchanging"
+    workloadType="default,Up_abort,unchanging,Down_abort"
   # workloadType="default,unchanging,unchanging,unchanging,Up_abort,Down_abort,unchanging,unchanging"
   # workloadType="default,unchanging,unchanging,unchanging,Up_skew,Up_skew,Up_skew,Up_PD,Up_PD,Up_PD,Up_abort,Up_abort,Up_abort"
-    schedulerPool="OP_BFS_A,OP_BFS"
+    schedulerPool="OP_NS_A,OP_NS"
     rootFilePath="${RSTDIR}"
     shiftRate=1
     multicoreEvaluation=0
@@ -51,6 +52,7 @@ function runApplication() {
               --complexity $complexity \
               --abort_ratio $abort_ratio \
               --multiple_ratio $multiple_ratio \
+              --overlap_ratio $overlap_ratio \
               --txn_length $txn_length \
               --NUM_ACCESS $NUM_ACCESS \
               --key_skewness $key_skewness \
@@ -85,6 +87,7 @@ function runApplication() {
       --complexity $complexity \
       --abort_ratio $abort_ratio \
       --multiple_ratio $multiple_ratio \
+      --overlap_ratio $overlap_ratio \
       --txn_length $txn_length \
       --NUM_ACCESS $NUM_ACCESS \
       --key_skewness $key_skewness \
@@ -126,7 +129,7 @@ function withoutRecovery() {
 function application_runner() {
  ResetParameters
  app=GrepSum
- for FTOption in 3
+ for FTOption in 5 6
  do
  #withoutRecovery
  withRecovery

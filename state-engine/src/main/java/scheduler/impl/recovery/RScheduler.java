@@ -163,7 +163,7 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
                     oc.operations.pollFirst();
                 }
             } catch (NoSuchElementException e) {
-                System.out.println("No such element");
+                IOUtils.println("No such element");
             }
         }
     }
@@ -339,7 +339,7 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
     }
     private void inspectGSDependency(long groupId, OperationChain curOC, Operation op, String table_name,
                                    String key, String[] condition_sourceTable, String[] condition_source){
-        if (condition_source != null) {
+        if (condition_source != null && condition_source.length > 1) {
             int index = 1;
             Object history = this.loggingManager.inspectDependencyView(groupId, table_name, key, condition_source[index], op.bid);
             if (history != null) {

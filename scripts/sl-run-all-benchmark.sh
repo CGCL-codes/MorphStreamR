@@ -7,14 +7,14 @@ function ResetParameters() {
     scheduler="OP_BFS_A"
     defaultScheduler="OP_BFS_A"
     CCOption=3 #TSTREAM
-    complexity=0
+    complexity=8000
     NUM_ITEMS=491520
-    deposit_ratio=65
+    deposit_ratio=60
     abort_ratio=0
-    key_skewness=25
+    key_skewness=45
     isCyclic=1
     isDynamic=1
-    workloadType="default,Up_abort,Down_abort,unchanging"
+    workloadType="default,Up_abort,unchanging,Down_abort"
   # workloadType="default,unchanging,unchanging,unchanging,Up_abort,Down_abort,unchanging,unchanging"
   # workloadType="default,unchanging,unchanging,unchanging,Up_skew,Up_skew,Up_skew,Up_PD,Up_PD,Up_PD,Up_abort,Up_abort,Up_abort"
     schedulerPool="OP_BFS_A,OP_BFS"
@@ -120,10 +120,10 @@ function withoutRecovery() {
 function application_runner() {
  ResetParameters
  app=StreamLedger
- for FTOption in 3
+ for FTOption in 0 1 3 4 5 6
  do
- #withoutRecovery
- withRecovery
+ withoutRecovery
+ #withRecovery
  done
 }
 application_runner

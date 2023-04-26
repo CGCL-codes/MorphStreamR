@@ -138,7 +138,9 @@ public class DependencyLoggingManager implements LoggingManager {
        RESET(context);
     }
     private void INITIALIZE(CSContext context) {
+        MeasureTools.BEGIN_TPG_CONSTRUCTION_TIME_MEASURE(context.threadId);
         this.cpg.construct_graph(context);
+        MeasureTools.END_TPG_CONSTRUCTION_TIME_MEASURE(context.threadId);
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.threadId);
     }
     private void EXPLORE(CSContext context) {

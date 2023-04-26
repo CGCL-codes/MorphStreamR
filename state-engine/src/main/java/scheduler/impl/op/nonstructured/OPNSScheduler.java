@@ -119,7 +119,7 @@ public class OPNSScheduler<Context extends OPNSContext> extends OPScheduler<Cont
             Operation remove = context.batchedOperations.remove();
             MeasureTools.BEGIN_NOTIFY_TIME_MEASURE(threadId);
             if (remove.isFailed && !remove.getOperationState().equals(OperationStateType.ABORTED)) {
-                needAbortHandling = false;
+                needAbortHandling = true;
                 if (isLogging == LOGOption_path && remove.txnOpId == 0) {
                     MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(threadId);
                     this.tpg.threadToPathRecord.get(context.thisThreadId).addAbortBid(remove.bid);

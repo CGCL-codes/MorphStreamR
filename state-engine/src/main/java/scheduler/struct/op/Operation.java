@@ -45,7 +45,7 @@ public class Operation extends AbstractOperation implements Comparable<Operation
     // operation id under a transaction.
     // an operation id to indicate how many operations in front of this operation in the same transaction.
     public int txnOpId = 0;
-    public boolean isFailed;
+    public boolean isFailed = false;
     public String name;
 
     // operation group the operation belongs to, it can be used for communication of operation groups.

@@ -167,7 +167,7 @@ public abstract class Runner implements IRunner {
     public Integer Ratio_of_Multiple_State_Access = 100;
 
     @Parameter(names = {"--overlap_ratio"}, description = "Ratio of overlapped keys.")
-    public Integer Ratio_of_Overlapped_Keys = 10;
+    public Integer Ratio_of_Overlapped_Keys = 50;
 
     @Parameter(names = {"--abort_ratio"}, description = "Ratio of transaction aborts.")
     public Integer Ratio_of_Transaction_Aborts = 0;

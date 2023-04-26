@@ -58,7 +58,9 @@ public abstract class AbstractOperation {
         this.s_record = s_record;
         this.d_record = d_record;
         this.bid = bid;
-        if (loggingRecord_type == LOGOption_dependency) {
+        if (loggingRecord_type == LOGOption_path) {
+            isCommit = false;
+        } else if (loggingRecord_type == LOGOption_dependency) {
             String[] conditions;
             if (condition_records != null) {
                 conditions = new String[condition_records.length];
