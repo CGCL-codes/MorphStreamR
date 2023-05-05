@@ -10,6 +10,7 @@ function ResetParameters() {
     complexity=8000
     NUM_ITEMS=491520
     deposit_ratio=60
+    overlap_ratio=10
     abort_ratio=0
     key_skewness=45
     isCyclic=1
@@ -48,6 +49,7 @@ function runApplication() {
               --CCOption $CCOption \
               --complexity $complexity \
               --deposit_ratio $deposit_ratio \
+              --overlap_ratio $overlap_ratio \
               --abort_ratio $abort_ratio \
               --key_skewness $key_skewness \
               --isCyclic $isCyclic \
@@ -80,6 +82,7 @@ function runApplication() {
       --CCOption $CCOption \
       --complexity $complexity \
       --deposit_ratio $deposit_ratio \
+      --overlap_ratio $overlap_ratio \
       --abort_ratio $abort_ratio \
       --key_skewness $key_skewness \
       --isCyclic $isCyclic \
@@ -120,10 +123,10 @@ function withoutRecovery() {
 function application_runner() {
  ResetParameters
  app=StreamLedger
- for FTOption in 0 1 3 4 5 6
+ for FTOption in 5
  do
- withoutRecovery
- #withRecovery
+ #withoutRecovery
+ withRecovery
  done
 }
 application_runner

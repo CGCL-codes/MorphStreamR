@@ -351,11 +351,14 @@ public class GSInitializer extends TableInitilizer {
         db.createTable(s, "MicroTable", config.getInt("tthread"), config.getInt("NUM_ITEMS"));
         try {
             prepare_input_events(config.getInt("totalEvents"));
+            int delta = config.getInt("maxThreads") / config.getInt("tthread");
             if (getTranToDecisionConf() != null && getTranToDecisionConf().size() !=0){
                 StringBuilder stringBuilder = new StringBuilder();
-                for(String decision : getTranToDecisionConf()){
-                    stringBuilder.append(decision);
-                    stringBuilder.append(";");
+                for (String decision : getTranToDecisionConf()){
+                    for (int i = 0; i < delta; i++) {
+                        stringBuilder.append(decision);
+                        stringBuilder.append(";");
+                    }
                 }
                 stringBuilder.deleteCharAt(stringBuilder.length() - 1);
                 config.put("WorkloadConfig",stringBuilder.toString());

@@ -19,9 +19,9 @@ function ResetParameters() {
     schedulerPool="OG_NS_A,OG_NS"
     rootFilePath="${RSTDIR}"
     shiftRate=1
-    multicoreEvaluation=0
-    maxThreads=20
-    totalEvents=`expr $checkpointInterval \* $tthread \* 4 \* $shiftRate`
+    multicoreEvaluation=1
+    maxThreads=24
+    totalEvents=`expr $checkpointInterval \* $maxThreads \* 4 \* $shiftRate`
 
     snapshotInterval=4
     arrivalControl=1
@@ -29,7 +29,7 @@ function ResetParameters() {
     FTOption=0
     isRecovery=0
     isFailure=0
-    failureTime=25000
+    failureTime=2500000
     measureInterval=100
     compressionAlg="None"
     isSelective=0
@@ -109,9 +109,31 @@ function withRecovery() {
     isRecovery=1
     runApplication
 }
-function withoutRecovery() {
-  runApplication
+function multicoreEvaluation() {
+#   tthread=24
+#   snapshotInterval=4
+#   withRecovery
+#   sleep 2s
+
+  tthread=12
+  snapshotInterval=8
+  withRecovery
   sleep 2s
+
+#   tthread=8
+#   snapshotInterval=12
+#   withRecovery
+#   sleep 2s
+
+#   tthread=4
+#   snapshotInterval=24
+#   withRecovery
+#   sleep 2s
+
+#   tthread=1
+#   snapshotInterval=96
+#   withRecovery
+#   sleep 2s
 }
 
 function application_runner() {
@@ -119,8 +141,7 @@ function application_runner() {
  app=TollProcessing
  for FTOption in 4
  do
- #withoutRecovery
- withRecovery
+ multicoreEvaluation
  done
 }
 application_runner

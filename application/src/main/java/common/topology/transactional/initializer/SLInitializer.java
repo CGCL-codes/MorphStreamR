@@ -430,13 +430,16 @@ public class SLInitializer extends TableInitilizer {
         db.createTable(b, "bookEntries", config.getInt("tthread"), config.getInt("NUM_ITEMS"));
         try {
             prepare_input_events(config.getInt("totalEvents"));
-            if (getTranToDecisionConf() != null && getTranToDecisionConf().size() != 0){
+            int delta = config.getInt("maxThreads") / config.getInt("tthread");
+            if (getTranToDecisionConf() != null && getTranToDecisionConf().size() !=0){
                 StringBuilder stringBuilder = new StringBuilder();
-                for(String decision:getTranToDecisionConf()){
-                    stringBuilder.append(decision);
-                    stringBuilder.append(";");
+                for (String decision : getTranToDecisionConf()){
+                    for (int i = 0; i < delta; i++) {
+                        stringBuilder.append(decision);
+                        stringBuilder.append(";");
+                    }
                 }
-                stringBuilder.deleteCharAt(stringBuilder.length()-1);
+                stringBuilder.deleteCharAt(stringBuilder.length() - 1);
                 config.put("WorkloadConfig",stringBuilder.toString());
             }
         } catch (IOException e) {

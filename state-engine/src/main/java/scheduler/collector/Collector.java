@@ -70,7 +70,7 @@ public class Collector {
      * Load the workload config if not collecting information runtime
      */
     public void setWorkloadConfig(String config){
-        isRuntime=false;
+        isRuntime = false;
         String configs[] = config.split(";");
         for (String c:configs){
            workloadConfig.add(c.split(","));
@@ -137,12 +137,12 @@ public class Collector {
         if(isRuntime){
             //TODO:collect information runtime
             return false;
-        }else{
+        } else {
             int workloadId = this.currentWorkload.get(threadId);
-            if (workloadId % delta == 0 && workloadId / delta < workloadConfig.size() -1){
-                currentWorkload.put(threadId, workloadId + 1);
+            if (workloadId < workloadConfig.size() -1){
+                currentWorkload.put(threadId,workloadId+1);
                 return !getDecision(threadId).equals(currentScheduler);
-            } else {
+            }else {
                 return false;
             }
         }

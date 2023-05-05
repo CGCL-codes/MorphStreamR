@@ -46,7 +46,7 @@ _install/
 *.iml
 
 logs
-scripts/Draw/results*
+scripts/MorphStream/Draw/results*
 scripts/*.jar
 
 target/

@@ -46,31 +46,6 @@ public abstract class OGSScheduler<Context extends OGSContext> extends OGSchedul
         context.currentLevelIndex = 0;
     }
 
-//    @Override
-//    public void PROCESS(Context context, long mark_ID) {
-//        int threadId = context.thisThreadId;
-//        MeasureTools.BEGIN_SCHEDULE_NEXT_TIME_MEASURE(threadId);
-//        OperationChain next = next(context);
-//        MeasureTools.END_SCHEDULE_NEXT_TIME_MEASURE(threadId);
-//        if (next != null) {
-////            execute(context, next.getOperations(), mark_ID);
-//            if (executeWithBusyWait(context, next, mark_ID)) {
-//                MeasureTools.BEGIN_NOTIFY_TIME_MEASURE(threadId);
-//                NOTIFY(next, context);
-//                MeasureTools.END_NOTIFY_TIME_MEASURE(threadId);
-//            }
-//        } else {
-//            next = nextFromBusyWaitQueue(context);
-//            if (next != null) {
-//                if(executeWithBusyWait(context, next, mark_ID)) {
-//                    MeasureTools.BEGIN_NOTIFY_TIME_MEASURE(threadId);
-//                    NOTIFY(next, context);
-//                    MeasureTools.END_NOTIFY_TIME_MEASURE(threadId);
-//                }
-//            }
-//        }
-//    }
-
     @Override
     public void start_evaluation(Context context, long mark_ID, int num_events) {
         INITIALIZE(context);
@@ -102,7 +77,7 @@ public abstract class OGSScheduler<Context extends OGSContext> extends OGSchedul
         operation.stateTransition(MetaTypes.OperationStateType.ABORTED);
         if (isLogging == FaultToleranceConstants.LOGOption_path && operation.getTxnOpId() == 0) {
             MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(operation.context.thisThreadId);
-            this.tpg.threadToPathRecord.get(operationChain.context.thisThreadId).addAbortBid(operation.bid);
+            this.tpg.threadToPathRecord.get(operation.context.thisThreadId).addAbortBid(operation.bid);
             MeasureTools.END_SCHEDULE_TRACKING_TIME_MEASURE(operation.context.thisThreadId);
         }
         // save the abort information and redo the batch.

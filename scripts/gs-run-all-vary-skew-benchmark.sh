@@ -1,29 +1,29 @@
 #!/bin/bash
 source dir.sh || exit
 function ResetParameters() {
-    app="TollProcessing"
-    checkpointInterval=40960
+    app="GrepSum"
     tthread=24
-    scheduler="OG_NS_A"
-    defaultScheduler="OG_NS_A"
     CCOption=3 #TSTREAM
     complexity=8000
-    NUM_ITEMS=491520
-    abort_ratio=0
-    overlap_ratio=10
-    key_skewness=25
+    NUM_ITEMS=245760
+    checkpointInterval=81920
+    abort_ratio=3000
+    multiple_ratio=0
+    txn_length=1
+    NUM_ACCESS=8
+    overlap_ratio=0
+    isCyclic=1
     isDynamic=1
-    workloadType="default,Up_abort,unchanging,Down_abort"
+    workloadType="default"
   # workloadType="default,unchanging,unchanging,unchanging,Up_abort,Down_abort,unchanging,unchanging"
   # workloadType="default,unchanging,unchanging,unchanging,Up_skew,Up_skew,Up_skew,Up_PD,Up_PD,Up_PD,Up_abort,Up_abort,Up_abort"
-    schedulerPool="OG_NS_A,OG_NS"
     rootFilePath="${RSTDIR}"
     shiftRate=1
     multicoreEvaluation=0
-    maxThreads=20
-    totalEvents=`expr $checkpointInterval \* $tthread \* 4 \* $shiftRate`
+    maxThreads=24
+    totalEvents=`expr $checkpointInterval \* $tthread \* 1 \* $shiftRate`
 
-    snapshotInterval=4
+    snapshotInterval=1
     arrivalControl=1
     arrivalRate=300
     FTOption=0
@@ -47,8 +47,12 @@ function runApplication() {
               --CCOption $CCOption \
               --complexity $complexity \
               --abort_ratio $abort_ratio \
+              --multiple_ratio $multiple_ratio \
               --overlap_ratio $overlap_ratio \
+              --txn_length $txn_length \
+              --NUM_ACCESS $NUM_ACCESS \
               --key_skewness $key_skewness \
+              --isCyclic $isCyclic \
               --rootFilePath $rootFilePath \
               --isDynamic $isDynamic \
               --totalEvents $totalEvents \
@@ -78,8 +82,12 @@ function runApplication() {
       --CCOption $CCOption \
       --complexity $complexity \
       --abort_ratio $abort_ratio \
+      --multiple_ratio $multiple_ratio \
       --overlap_ratio $overlap_ratio \
+      --txn_length $txn_length \
+      --NUM_ACCESS $NUM_ACCESS \
       --key_skewness $key_skewness \
+      --isCyclic $isCyclic \
       --rootFilePath $rootFilePath \
       --isDynamic $isDynamic \
       --totalEvents $totalEvents \
@@ -113,14 +121,29 @@ function withoutRecovery() {
   runApplication
   sleep 2s
 }
+function varySkew() {
+  for key_skewness in 0 25 50
+  do
+  schedulerPool="OG_BFS"
+  scheduler="OG_BFS"
+  defaultScheduler="OG_BFS"
+  withRecovery
+  done
+  for key_skewness in 75 100
+  do
+  schedulerPool="OG_NS"
+  scheduler="OG_NS"
+  defaultScheduler="OG_NS"
+  withRecovery
+  done
+}
 
 function application_runner() {
  ResetParameters
- app=TollProcessing
- for FTOption in 4
+ app=GrepSum
+ for FTOption in 1 3 4 5 6
  do
- #withoutRecovery
- withRecovery
+ varySkew
  done
 }
 application_runner

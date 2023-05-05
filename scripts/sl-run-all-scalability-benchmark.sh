@@ -1,27 +1,29 @@
 #!/bin/bash
 source dir.sh || exit
 function ResetParameters() {
-    app="TollProcessing"
-    checkpointInterval=40960
+    app="StreamLedger"
+    checkpointInterval=20480
     tthread=24
-    scheduler="OG_NS_A"
-    defaultScheduler="OG_NS_A"
+    scheduler="OP_BFS_A"
+    defaultScheduler="OP_BFS_A"
     CCOption=3 #TSTREAM
     complexity=8000
     NUM_ITEMS=491520
-    abort_ratio=0
+    deposit_ratio=60
     overlap_ratio=10
-    key_skewness=25
+    abort_ratio=0
+    key_skewness=45
+    isCyclic=1
     isDynamic=1
     workloadType="default,Up_abort,unchanging,Down_abort"
   # workloadType="default,unchanging,unchanging,unchanging,Up_abort,Down_abort,unchanging,unchanging"
   # workloadType="default,unchanging,unchanging,unchanging,Up_skew,Up_skew,Up_skew,Up_PD,Up_PD,Up_PD,Up_abort,Up_abort,Up_abort"
-    schedulerPool="OG_NS_A,OG_NS"
+    schedulerPool="OP_BFS_A,OP_BFS"
     rootFilePath="${RSTDIR}"
     shiftRate=1
-    multicoreEvaluation=0
-    maxThreads=20
-    totalEvents=`expr $checkpointInterval \* $tthread \* 4 \* $shiftRate`
+    multicoreEvaluation=1
+    maxThreads=24
+    totalEvents=`expr $checkpointInterval \* $maxThreads \* 4 \* $shiftRate`
 
     snapshotInterval=4
     arrivalControl=1
@@ -29,7 +31,7 @@ function ResetParameters() {
     FTOption=0
     isRecovery=0
     isFailure=0
-    failureTime=25000
+    failureTime=250000
     measureInterval=100
     compressionAlg="None"
     isSelective=0
@@ -46,9 +48,11 @@ function runApplication() {
               --checkpoint_interval $checkpointInterval \
               --CCOption $CCOption \
               --complexity $complexity \
-              --abort_ratio $abort_ratio \
+              --deposit_ratio $deposit_ratio \
               --overlap_ratio $overlap_ratio \
+              --abort_ratio $abort_ratio \
               --key_skewness $key_skewness \
+              --isCyclic $isCyclic \
               --rootFilePath $rootFilePath \
               --isDynamic $isDynamic \
               --totalEvents $totalEvents \
@@ -77,9 +81,11 @@ function runApplication() {
       --checkpoint_interval $checkpointInterval \
       --CCOption $CCOption \
       --complexity $complexity \
-      --abort_ratio $abort_ratio \
+      --deposit_ratio $deposit_ratio \
       --overlap_ratio $overlap_ratio \
+      --abort_ratio $abort_ratio \
       --key_skewness $key_skewness \
+      --isCyclic $isCyclic \
       --rootFilePath $rootFilePath \
       --isDynamic $isDynamic \
       --totalEvents $totalEvents \
@@ -109,18 +115,39 @@ function withRecovery() {
     isRecovery=1
     runApplication
 }
-function withoutRecovery() {
-  runApplication
+function multicoreEvaluation() {
+  tthread=24
+  snapshotInterval=4
+  withRecovery
+  sleep 2s
+
+  tthread=12
+  snapshotInterval=8
+  withRecovery
+  sleep 2s
+
+  tthread=8
+  snapshotInterval=12
+  withRecovery
+  sleep 2s
+
+  tthread=4
+  snapshotInterval=24
+  withRecovery
+  sleep 2s
+
+  tthread=1
+  snapshotInterval=96
+  withRecovery
   sleep 2s
 }
 
 function application_runner() {
  ResetParameters
- app=TollProcessing
- for FTOption in 4
+ app=StreamLedger
+ for FTOption in 6
  do
- #withoutRecovery
- withRecovery
+ multicoreEvaluation
  done
 }
 application_runner

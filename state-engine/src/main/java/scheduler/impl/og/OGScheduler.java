@@ -155,7 +155,7 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
         if (operation.success[0] == success) {
             operation.isFailed = true;
         }
-        MeasureTools.END_SCHEDULE_TRACKING_TIME_MEASURE(operation.context.thisThreadId);
+        MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(operation.context.thisThreadId);
         if (!operation.isFailed) {
             if (isLogging == LOGOption_path && !operation.pKey.equals(preValues.GetPrimaryKey()) && !operation.isCommit) {
                 MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(operation.context.thisThreadId);

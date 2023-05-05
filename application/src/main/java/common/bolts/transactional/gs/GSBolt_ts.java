@@ -160,6 +160,13 @@ public class GSBolt_ts extends GSBolt {
                 microEvents.clear();
             }
             MeasureTools.END_TOTAL_TIME_MEASURE_TS(thread_Id, num_events);
+            if (this.sink.lastTask >= 0 && in.getMarker().getSnapshotId() * this.tthread >= this.sink.lastTask) {
+                if (!this.sink.stopRecovery) {
+                    this.sink.stopRecovery = true;
+                    MeasureTools.END_RECOVERY_TIME_MEASURE(this.thread_Id);
+                    MeasureTools.END_REPLAY_MEASURE(this.thread_Id);
+                }
+            }
             if (this.sink.stopRecovery) {
                 Metrics.RecoveryPerformance.stopRecovery[thread_Id] = true;//Change here is to measure time for entire epoch.
                 Metrics.RecoveryPerformance.recoveryItems[thread_Id] = this.sink.lastTask - this.sink.startRecovery;
