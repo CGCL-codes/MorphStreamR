@@ -7,7 +7,7 @@ function ResetParameters() {
     complexity=8000
     NUM_ITEMS=245760
     checkpointInterval=81920
-    abort_ratio=3000
+    abort_ratio=0
     multiple_ratio=0
     txn_length=1
     NUM_ACCESS=8
@@ -29,7 +29,7 @@ function ResetParameters() {
     FTOption=0
     isRecovery=0
     isFailure=0
-    failureTime=25000
+    failureTime=250000
     measureInterval=100
     compressionAlg="None"
     isSelective=0
@@ -141,7 +141,7 @@ function varySkew() {
 function application_runner() {
  ResetParameters
  app=GrepSum
- for FTOption in 1 3 4 5 6
+ for FTOption in 4
  do
  varySkew
  done

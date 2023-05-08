@@ -269,6 +269,14 @@ public class MeasureTools {
         if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
             COMPUTE_SCHEDULE_TRACKING(thread_id);
     }
+    public static void BEGIN_SCHEDULE_WAIT_TIME_MEASURE(int thread_id) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            COMPUTE_SCHEDULE_WAIT_START(thread_id);
+    }
+    public static void END_SCHEDULE_WAIT_TIME_MEASURE(int thread_id) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            COMPUTE_SCHEDULE_WAIT(thread_id);
+    }
     public static void BEGIN_RECOVERY_CONSTRUCT_GRAPH_MEASURE(int thread_id) {
         if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
             COMPUTE_RECOVERY_CONSTRUCT_GRAPH_START(thread_id);

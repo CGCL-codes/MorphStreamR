@@ -1,0 +1,7 @@
+package durability.struct;
+
+public class FaultToleranceRelax {
+    public static boolean isTaskPlacing = true;
+    public static boolean isAbortPushDown = true;
+    public static boolean isHistoryView = true;
+}

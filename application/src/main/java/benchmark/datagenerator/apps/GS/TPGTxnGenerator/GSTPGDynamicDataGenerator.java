@@ -30,6 +30,7 @@ public class GSTPGDynamicDataGenerator extends DynamicWorkloadGenerator {
     private int nKeyState;
     // control the number of txns overlap with each other.
     private ArrayList<Integer> generatedKeys = new ArrayList<>();
+    private HashMap<Integer, ArrayList<Integer>> generatedKeysByPartition = new HashMap<>();
     // independent transactions.
     private boolean isUnique = false;
     private FastZipfGenerator keyZipf;
@@ -39,6 +40,7 @@ public class GSTPGDynamicDataGenerator extends DynamicWorkloadGenerator {
 
     private Random random = new Random(0); // the transaction type decider
     public transient FastZipfGenerator p_generator; // partition generator
+    public transient FastZipfGenerator m_generator; // multiple partition generator
     private HashMap<Integer, Integer> nGeneratedIds = new HashMap<>();
     private ArrayList<Event> events;
     private int eventID = 0;
@@ -47,6 +49,10 @@ public class GSTPGDynamicDataGenerator extends DynamicWorkloadGenerator {
     public GSTPGDynamicDataGenerator(DynamicDataGeneratorConfig dynamicDataConfig) {
         super(dynamicDataConfig);
         events = new ArrayList<>(nTuples);
+        tthread = dynamicDataConfig.getTotalThreads();
+        for (int i = 0; i < tthread; i++) {
+            generatedKeysByPartition.put(i, new ArrayList<>());
+        }
     }
 
     @Override
@@ -101,6 +107,7 @@ public class GSTPGDynamicDataGenerator extends DynamicWorkloadGenerator {
                 keyZipf = new FastZipfGenerator(nKeyState, (double) State_Access_Skewness / 100, 0, 12345678);
                 configure_store(1, (double) State_Access_Skewness / 100, dynamicDataConfig.getTotalThreads(), nKeyState);
                 p_generator = new FastZipfGenerator(nKeyState, (double) State_Access_Skewness / 100, 0);
+                m_generator = new FastZipfGenerator(nKeyState, 0.75, 0);
             break;
             case "skew" :
                 keyZipf = new FastZipfGenerator(nKeyState, (double) State_Access_Skewness / 100, 0, 12345678);
@@ -162,31 +169,35 @@ public class GSTPGDynamicDataGenerator extends DynamicWorkloadGenerator {
     }
 
     private GSEvent randomEvent() {
-        int NUM_ACCESS;
+        int Transaction_Length;
         if (random.nextInt(100) < Ratio_of_Multiple_State_Access) {
-            NUM_ACCESS = this.NUM_ACCESS;
+            Transaction_Length = this.Transaction_Length;
         } else {
-            NUM_ACCESS = 1;
+            Transaction_Length = 1;
         }
-        int[] keys = new int[NUM_ACCESS * Transaction_Length];
+        int[] keys = new int[this.NUM_ACCESS * Transaction_Length];
         int writeLevel = -1;
         if (!isUnique) {
             if (enable_states_partition) {
                 for (int j = 0; j < Transaction_Length; j++) {
                     int firstKeyPartition = key_to_partition(p_generator.next());//The partition id of the first key
                     int key = getKey(partitionedKeyZipf[firstKeyPartition]);
-                    keys[j * NUM_ACCESS] = key; //First key is always write key
+                    keys[j * this.NUM_ACCESS] = key; //First key is always write key
+                    if (!generatedKeysByPartition.get(firstKeyPartition).contains(key)) {
+                        generatedKeysByPartition.get(firstKeyPartition).add(key);//Add the key to the generated keys (for the partition
+                    }
 
                     int readKeyPartition = key_to_partition(p_generator.next());//The partition ids of the read keys
                     while (readKeyPartition == firstKeyPartition) {
                         readKeyPartition = key_to_partition(p_generator.next());
                     }
-                    for (int i = 1; i < NUM_ACCESS; i ++) {
-                        int offset = j * NUM_ACCESS + i;
-                        while (keys[offset] == key) {
-                            key = getKey(partitionedKeyZipf[readKeyPartition]);
+                    for (int i = 1; i < this.NUM_ACCESS; i ++) {
+                        int offset = j * this.NUM_ACCESS + i;
+                        keys[offset] = getKey(partitionedKeyZipf[readKeyPartition], generatedKeysByPartition.get(readKeyPartition));
+                        readKeyPartition = key_to_partition(p_generator.next());
+                        while (readKeyPartition == firstKeyPartition) {
+                            readKeyPartition = key_to_partition(p_generator.next());
                         }
-                        keys[offset] = key;
                     }
                 }
             } else {//TODO: not fix this
@@ -220,17 +231,15 @@ public class GSTPGDynamicDataGenerator extends DynamicWorkloadGenerator {
 
         GSEvent t;
         if (random.nextInt(10000) < Ratio_of_Transaction_Aborts) {
-            t = new GSEvent(eventID, keys, true);
+            t = new GSEvent(eventID, keys, Transaction_Length, true);
             abort_num ++;
         } else {
-            t = new GSEvent(eventID, keys, false);
+            t = new GSEvent(eventID, keys, Transaction_Length, false);
         }
         // increase the timestamp i.e. transaction id
         eventID++;
         return t;
     }
-
-
 
     public int key_to_partition(int key) {
         return (int) Math.floor((double) key / floor_interval);
@@ -245,11 +254,8 @@ public class GSTPGDynamicDataGenerator extends DynamicWorkloadGenerator {
     private int getKey(FastZipfGenerator zipfGenerator, ArrayList<Integer> generatedKeys) {
         int srcKey;
         srcKey = zipfGenerator.next();
-        int next = random.nextInt(100);
-        if (next < Ratio_of_Overlapped_Keys) { // randomly select a key from existing keyset.
-            if (!generatedKeys.isEmpty()) {
-                srcKey = generatedKeys.get(zipfGenerator.next() % generatedKeys.size());
-            }
+        if (!generatedKeys.isEmpty()) {
+            srcKey = generatedKeys.get(zipfGenerator.next() % generatedKeys.size());
         }
         return srcKey;
     }

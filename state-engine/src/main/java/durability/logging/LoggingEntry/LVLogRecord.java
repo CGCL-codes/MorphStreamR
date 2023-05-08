@@ -29,7 +29,7 @@ public class LVLogRecord {
             int[] comparedLVs = elemWiseMax(tableRecord.content_.getReadLVs(), tableRecord.content_.getWriteLVs());
             LVs = elemWiseMax(LVs, comparedLVs);
             tableRecord.content_.updateWriteLv(allocatedLSN, partitionId);
-        } else if (log.accessType == AccessType.READ_WRITE_COND) {
+        } else if (log.accessType == AccessType.READ_WRITE_COND) {//Transaction event
             for (TableRecord conditionTableRecord : conditionTableRecords) {
                 if (conditionTableRecord.equals(tableRecord))
                     continue;
@@ -39,7 +39,7 @@ public class LVLogRecord {
             int[] comparedLVs = elemWiseMax(tableRecord.content_.getReadLVs(), tableRecord.content_.getWriteLVs());
             LVs = elemWiseMax(LVs, comparedLVs);
             tableRecord.content_.updateWriteLv(allocatedLSN, partitionId);
-        } else if (log.accessType == AccessType.READ_WRITE_COND_READN) {
+        } else if (log.accessType == AccessType.READ_WRITE_COND_READN) {//Grep&Sum event
             for (TableRecord conditionTableRecord : conditionTableRecords) {
                 if (conditionTableRecord.equals(tableRecord))
                     continue;

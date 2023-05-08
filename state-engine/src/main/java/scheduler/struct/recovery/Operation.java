@@ -3,6 +3,7 @@ package scheduler.struct.recovery;
 import content.common.CommonMetaTypes;
 import scheduler.context.recovery.RSContext;
 import scheduler.struct.AbstractOperation;
+import scheduler.struct.MetaTypes;
 import storage.SchemaRecordRef;
 import storage.TableRecord;
 import transaction.context.TxnContext;
@@ -18,6 +19,7 @@ public class Operation extends AbstractOperation implements Comparable<Operation
     public AtomicInteger pdCount = new AtomicInteger(0);// We only ensure pdCount, TD count can be ensured by skipList
     public int txnOpId = 0;
     public OperationChain dependentOC;
+    public MetaTypes.OperationStateType operationState = MetaTypes.OperationStateType.BLOCKED;
     public <Context extends RSContext> Operation(String pKey, Context context, String table_name, TxnContext txn_context, long bid,
                                                           CommonMetaTypes.AccessType accessType, TableRecord d_record, Function function, Condition condition, TableRecord[] condition_records, int[] success) {
         this(pKey, context, table_name, txn_context, bid, accessType, d_record, null, function, condition, condition_records, success);

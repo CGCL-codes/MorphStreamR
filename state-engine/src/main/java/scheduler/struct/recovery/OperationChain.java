@@ -8,6 +8,7 @@ public class OperationChain implements Comparable<OperationChain>{
     private final String tableName;
     private final String primaryKey;
     public final MyList<Operation> operations;
+    public int level = 0;
     private final Vector<OperationChain> dependentOCs = new Vector<>();
     public OperationChain(String tableName, String primaryKey) {
         this.tableName = tableName;
@@ -37,5 +38,9 @@ public class OperationChain implements Comparable<OperationChain>{
         if (this.dependentOCs.contains(ocs))
             return;
         this.dependentOCs.add(ocs);
+    }
+    public boolean isFinished() {
+        assert level <= operations.size();
+        return level == operations.size();
     }
 }

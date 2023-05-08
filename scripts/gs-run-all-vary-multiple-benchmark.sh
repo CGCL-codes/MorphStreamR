@@ -8,12 +8,12 @@ function ResetParameters() {
     CCOption=3 #TSTREAM
     complexity=8000
     NUM_ITEMS=245760
-    checkpointInterval=40960
-    abort_ratio=3000
-    key_skewness=75
+    checkpointInterval=81920
+    abort_ratio=0
+    key_skewness=25
     txn_length=1
-    NUM_ACCESS=8
-    overlap_ratio=50
+    NUM_ACCESS=2
+    overlap_ratio=0
     isCyclic=1
     isDynamic=1
     workloadType="default"
@@ -32,7 +32,7 @@ function ResetParameters() {
     FTOption=0
     isRecovery=0
     isFailure=0
-    failureTime=25000
+    failureTime=250000
     measureInterval=100
     compressionAlg="None"
     isSelective=0
@@ -125,8 +125,18 @@ function withoutRecovery() {
   sleep 2s
 }
 function varyMultiple() {
-  for multiple_ratio in 0 25 50 75 100
+  for multiple_ratio in 0 25 50
   do
+  schedulerPool="OG_BFS"
+  scheduler="OG_BFS"
+  defaultScheduler="OG_BFS"
+  withRecovery
+  done
+  for multiple_ratio in 75 100
+  do
+  schedulerPool="OP_BFS"
+  scheduler="OP_BFS"
+  defaultScheduler="OP_BFS"
   withRecovery
   done
 }
@@ -134,7 +144,7 @@ function varyMultiple() {
 function application_runner() {
  ResetParameters
  app=GrepSum
- for FTOption in 1 3 4 5 6
+ for FTOption in 4
  do
  varyMultiple
  done

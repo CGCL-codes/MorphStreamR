@@ -53,8 +53,6 @@ public class GSInitializer extends TableInitilizer {
     private DataGenerator dataGenerator;
     private final DataGeneratorConfig dataConfig;
     private final int partitionOffset;
-    private final int NUM_ACCESS;
-    private final int Transaction_Length;
 
 
     public GSInitializer(Database db, int numberOfStates, double theta, int tthread, Configuration config) {
@@ -62,8 +60,6 @@ public class GSInitializer extends TableInitilizer {
         floor_interval = (int) Math.floor(numberOfStates / (double) tthread);//NUM_ITEMS / tthread;
         this.dataRootPath = config.getString("rootFilePath")  + OsUtils.OS_wrapper("inputs");
         this.partitionOffset = numberOfStates / tthread;
-        this.NUM_ACCESS = config.getInt("NUM_ACCESS");
-        this.Transaction_Length = config.getInt("Transaction_Length");
         this.numberOfStates = numberOfStates;
         // set up generator
         configure_store(theta, tthread, numberOfStates);
@@ -117,10 +113,12 @@ public class GSInitializer extends TableInitilizer {
                             AppConfig.isCyclic)
                         .getBytes(StandardCharsets.UTF_8));
             else if (dataConfig instanceof DynamicDataGeneratorConfig)
-                bytes = digest.digest(String.format("%d_%d_%d_%d_%d_%d_%d_%s_%s",
+                bytes = digest.digest(String.format("%d_%d_%d_%d_%d_%d_%d_%d_%d_%s_%s",
                                 dataConfig.getTotalThreads(),
                                 dataConfig.getTotalEvents(),
                                 dataConfig.getnKeyStates(),
+                                ((DynamicDataGeneratorConfig) dataConfig).Transaction_Length,
+                                ((DynamicDataGeneratorConfig) dataConfig).NUM_ACCESS,
                                 ((DynamicDataGeneratorConfig) dataConfig).Ratio_of_Multiple_State_Access,
                                 ((DynamicDataGeneratorConfig) dataConfig).State_Access_Skewness,
                                 ((DynamicDataGeneratorConfig) dataConfig).Ratio_of_Overlapped_Keys,
@@ -248,7 +246,7 @@ public class GSInitializer extends TableInitilizer {
             String[] split = txn.split(",");
             int npid = (int) (Long.parseLong(split[1]) / partitionOffset);
             // construct bid array
-            int keyLength = split.length - 2;
+            int keyLength = split.length - 3;
             HashMap<Integer, Integer> pids = new HashMap<>();
             long[] keys = new long[keyLength];
             for (int i = 1; i < keyLength + 1; i++) {
@@ -258,15 +256,15 @@ public class GSInitializer extends TableInitilizer {
 
             // construct event
             MicroEvent event = new MicroEvent(
-                    Integer.parseInt(split[0]), //bid,
-                    npid, //pid
-                    Arrays.toString(p_bids), //bid_array
-                    Arrays.toString(pids.keySet().toArray(new Integer[0])), // partition_index
-                    pids.size(), // num_of_partition
-                    Arrays.toString(keys), // key_array
-                    keyLength,
-                    Transaction_Length,
-                    Boolean.parseBoolean(split[keyLength+1]));
+                    Integer.parseInt(split[0]), //0-Bid,
+                    npid, //1-Pid
+                    Arrays.toString(p_bids), //2-Bid_array
+                    Arrays.toString(pids.keySet().toArray(new Integer[0])), //3-Partition_index
+                    pids.size(), //4-Num_of_partition
+                    Arrays.toString(keys), //5-Key_array
+                    keyLength,//6-Total_num_access
+                    Integer.parseInt(split[keyLength + 1]), //7-Transaction_length
+                    Boolean.parseBoolean(split[keyLength + 2]));//8-IsAbort
             event.setTimestamp(event.getBid() * this.increaseTime);
             DataHolder.events.add(event);
             if (enable_log) LOG.debug(String.format("%d deposit read...", count));
@@ -292,43 +290,7 @@ public class GSInitializer extends TableInitilizer {
 
     @Override
     public void store(String file_name) throws IOException {
-        double ratio_of_multi_partition = config.getDouble("ratio_of_multi_partition", 1);
-        this.number_partitions = Math.min(tthread, config.getInt("number_partitions"));
-        double ratio_of_read = config.getDouble("ratio_of_read", 0.5);
-        String event_path = Event_Path
-                + OsUtils.OS_wrapper("enable_states_partition=" + enable_states_partition)
-                + OsUtils.OS_wrapper("NUM_EVENTS=" + config.getInt("totalEvents"))
-                + OsUtils.OS_wrapper("ratio_of_multi_partition=" + ratio_of_multi_partition)
-                + OsUtils.OS_wrapper("number_partitions=" + number_partitions)
-                + OsUtils.OS_wrapper("ratio_of_read=" + ratio_of_read)
-                + OsUtils.OS_wrapper("NUM_ACCESS=" + NUM_ACCESS)
-                + OsUtils.OS_wrapper("theta=" + theta)
-                + OsUtils.OS_wrapper("NUM_ITEMS=" + NUM_ITEMS);
-        File file = new File(event_path);
-        file.mkdirs(); // If the directory containing the file and/or its parent(s) does not exist
-        BufferedWriter w;
-        w = new BufferedWriter(new FileWriter(new File(event_path + OsUtils.OS_wrapper(file_name))));
-        for (Object event : db.getEventManager().input_events) {
-            MicroEvent microEvent = (MicroEvent) event;
-            String sb =
-                    microEvent.getBid() +//0 -- bid
-                            split_exp +
-                            microEvent.getPid() +//1
-                            split_exp +
-                            Arrays.toString(microEvent.getBid_array()) +//2
-                            split_exp +
-                            microEvent.num_p() +//3 num of p
-                            split_exp +
-                            "MicroEvent" +//4 input_event types.
-                            split_exp +
-                            Arrays.toString(microEvent.getKeys()) +//5 keys
-                            split_exp +
-                            microEvent.READ_EVENT()//6
-                    ;
-            w.write(sb
-                    + "\n");
-        }
-        w.close();
+        //Not Used
     }
 
     @Override

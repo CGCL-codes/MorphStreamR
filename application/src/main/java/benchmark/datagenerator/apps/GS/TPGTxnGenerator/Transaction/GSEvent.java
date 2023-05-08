@@ -8,11 +8,13 @@ public class GSEvent extends Event {
     private final int id;
     private final int[] keys;
     private final boolean isAbort;
+    private final int txn_length;
 
-    public GSEvent(int id, int[] keys, boolean isAbort) {
+    public GSEvent(int id, int[] keys, int txn_length, boolean isAbort) {
         this.id = id;
         this.keys = keys;
         this.isAbort = isAbort;
+        this.txn_length = txn_length;
     }
 
     @Override
@@ -21,6 +23,7 @@ public class GSEvent extends Event {
         for (int key : keys) {
             str.append(",").append(key);
         }
+        str.append(",").append(txn_length);
         str.append(",").append(isAbort);
 
         return str.toString();

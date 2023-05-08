@@ -9,6 +9,7 @@ import scheduler.Request;
 import scheduler.context.recovery.RSContext;
 import scheduler.impl.IScheduler;
 import scheduler.struct.AbstractOperation;
+import scheduler.struct.MetaTypes;
 import scheduler.struct.recovery.Operation;
 import scheduler.struct.recovery.OperationChain;
 import scheduler.struct.recovery.TaskPrecedenceGraph;
@@ -102,7 +103,6 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
                 default:
                     throw new UnsupportedOperationException();
             }
-            //TODO:pre-process dependency
             OperationChain curOC = tpg.addOperationToChain(set_op);
             set_op.setTxnOpId(txnOpId ++);
             if (request.condition_source != null) {
@@ -144,26 +144,25 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
     @Override
     public void PROCESS(Context context, long mark_ID) {
         OperationChain oc = context.ready_oc;
-        boolean continueFlag = true;
-        while (continueFlag && oc.operations.size() > 0){
-            try {
-                Operation op = oc.operations.first();
-                if (op.pKey.equals(oc.getPrimaryKey())) {
-                    if (op.pdCount.get() == 0) {
-                        MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(context.thisThreadId);
-                        execute(op, mark_ID, false);
-                        MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(context.thisThreadId);
-                        oc.operations.pollFirst();
-                    } else {
-                        continueFlag = false;
-                        context.wait_op = op;
-                    }
+        for (Operation op : oc.operations) {
+            if (op.pKey.equals(oc.getPrimaryKey())) {
+                if (op.operationState.equals(MetaTypes.OperationStateType.EXECUTED))
+                    continue;
+                if (op.pdCount.get() == 0) {
+                    MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(context.thisThreadId);
+                    execute(op, mark_ID, false);
+                    op.operationState = MetaTypes.OperationStateType.EXECUTED;
+                    oc.level = oc.level + 1;
+                    MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(context.thisThreadId);
                 } else {
-                    op.pdCount.decrementAndGet();
-                    oc.operations.pollFirst();
+                    context.wait_op = op;
                 }
-            } catch (NoSuchElementException e) {
-                IOUtils.println("No such element");
+            } else {
+                if (op.operationState.equals(MetaTypes.OperationStateType.READY))
+                    continue;
+                op.pdCount.decrementAndGet();
+                op.operationState = MetaTypes.OperationStateType.READY;
+                oc.level = oc.level + 1;
             }
         }
     }
@@ -182,6 +181,10 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
     public void RESET(Context context) {
         context.needCheckId = true;
         context.isFinished = false;
+        for (OperationChain oc : context.allocatedTasks) {
+            oc.level = 0;
+            oc.operations.clear();
+        }
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
     }
 

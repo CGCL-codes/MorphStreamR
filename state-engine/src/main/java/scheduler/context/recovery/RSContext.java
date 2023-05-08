@@ -32,7 +32,7 @@ public class RSContext implements SchedulerContext {
         requests.push(request);
     }
     public void next() {
-        if (ready_oc != null && ready_oc.operations.isEmpty()) {
+        if (ready_oc != null && ready_oc.isFinished()) {
             allocatedTasks.remove(ready_oc);
         }
         if (wait_op == null) {

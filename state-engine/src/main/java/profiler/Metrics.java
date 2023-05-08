@@ -266,6 +266,12 @@ public class Metrics {
     public static void COMPUTE_SCHEDULE_TRACKING(int thread_id) {
         Scheduler.Tracking[thread_id] += System.nanoTime() - Scheduler.TrackingStart[thread_id];
     }
+    public static void COMPUTE_SCHEDULE_WAIT_START(int thread_id) {
+        Scheduler.WaitStart[thread_id] = System.nanoTime();
+    }
+    public static void COMPUTE_SCHEDULE_WAIT(int thread_id) {
+        Scheduler.Wait[thread_id] += System.nanoTime() - Scheduler.WaitStart[thread_id];
+    }
 
     public static void COMPUTE_SCHEDULE_ABORT_START(int thread_id) {
         Scheduler.isAbort[thread_id] = true;
@@ -489,6 +495,8 @@ public class Metrics {
         public static long[] Construct = new long[kMaxThreadNum];
         public static long[] TrackingStart = new long[kMaxThreadNum];
         public static long[] Tracking = new long[kMaxThreadNum];
+        public static long[] WaitStart = new long[kMaxThreadNum];
+        public static long[] Wait = new long[kMaxThreadNum];
         //Not used
         public static long[] NotifyStart = new long[kMaxThreadNum];
         public static long[] Notify = new long[kMaxThreadNum];
@@ -515,6 +523,8 @@ public class Metrics {
                 Construct[i] = 0;
                 TrackingStart[i] = 0;
                 Tracking[i] = 0;
+                WaitStart[i] = 0;
+                Wait[i] = 0;
                 NotifyStart[i] = 0;
                 Notify[i] = 0;
                 FirstExploreStart[i] = 0;
@@ -542,6 +552,8 @@ public class Metrics {
             Construct[i] = 0;
             TrackingStart[i] = 0;
             Tracking[i] = 0;
+            WaitStart[i] = 0;
+            Wait[i] = 0;
             NotifyStart[i] = 0;
             Notify[i] = 0;
             FirstExploreStart[i] = 0;
@@ -557,13 +569,15 @@ public class Metrics {
     }
 
     static class Scheduler_Record {
-        public static DescriptiveStatistics[] Next = new DescriptiveStatistics[kMaxThreadNum];//Next time.
         public static DescriptiveStatistics[] Explore = new DescriptiveStatistics[kMaxThreadNum];//Explore time.
         public static DescriptiveStatistics[] Useful = new DescriptiveStatistics[kMaxThreadNum];//Useful_work time.
         public static DescriptiveStatistics[] Abort = new DescriptiveStatistics[kMaxThreadNum];//Abort time.
         public static DescriptiveStatistics[] Construct = new DescriptiveStatistics[kMaxThreadNum];//Construction time.
         public static DescriptiveStatistics[] Tracking = new DescriptiveStatistics[kMaxThreadNum];//Tracking time.
+        public static DescriptiveStatistics[] Wait = new DescriptiveStatistics[kMaxThreadNum];//Wait time.
         public static DescriptiveStatistics[] Notify = new DescriptiveStatistics[kMaxThreadNum];//Notify time.
+        public static DescriptiveStatistics[] Next = new DescriptiveStatistics[kMaxThreadNum];//Next time.
+
         public static DescriptiveStatistics[] FirstExplore = new DescriptiveStatistics[kMaxThreadNum];//First explore time.
         public static DescriptiveStatistics[] Caching = new DescriptiveStatistics[kMaxThreadNum];//Caching time.
         public static DescriptiveStatistics[] SchedulerSwitch = new DescriptiveStatistics[kMaxThreadNum];//Scheduler-switch time.
@@ -577,6 +591,7 @@ public class Metrics {
                 Abort[i] = new DescriptiveStatistics();
                 Construct[i] = new DescriptiveStatistics();
                 Tracking[i] = new DescriptiveStatistics();
+                Wait[i] = new DescriptiveStatistics();
                 Notify[i] = new DescriptiveStatistics();
                 FirstExplore[i] = new DescriptiveStatistics();
                 Caching[i] = new DescriptiveStatistics();
@@ -663,12 +678,13 @@ public class Metrics {
         public static long[] total_time = new long[kMaxThreadNum];
         public static long[] overhead_total = new long[kMaxThreadNum];
         //in ns.
-        public static long[] Next = new long[kMaxThreadNum];//Next.
         public static long[] Explore = new long[kMaxThreadNum];//Explore.
         public static long[] Useful = new long[kMaxThreadNum];//Useful_work.
         public static long[] Abort = new long[kMaxThreadNum];//Abort.
         public static long[] Construct = new long[kMaxThreadNum];//Construction.
+        public static long[] Wait = new long[kMaxThreadNum];//Wait.
         public static long[] Notify = new long[kMaxThreadNum];//Notify.
+        public static long[] Next = new long[kMaxThreadNum];//Next.
         public static long[] FirstExplore = new long[kMaxThreadNum];//First explore.
         public static long[] Caching = new long[kMaxThreadNum];//Caching.
         public static long[] SchedulerSwitch = new long[kMaxThreadNum];//Scheduler switch.
@@ -705,6 +721,7 @@ public class Metrics {
                 Useful[i] = 0;
                 Abort[i] = 0;
                 Construct[i] = 0;
+                Wait[i] = 0;
                 Notify[i] = 0;
                 FirstExplore[i] = 0;
                 Caching[i] = 0;

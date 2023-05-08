@@ -138,7 +138,6 @@ public class PathLoggingManager implements LoggingManager {
                     this.historyViews.addAbortId(threadId, Long.parseLong(abortId), redoLogResult.groupIds.get(i));
                 }
             }
-       //     IOUtils.println("Abort: " + abortIds.length);
             int size = 0;
             for (int j = 2; j < strings.length; j++) {//Dependency View
                 String[] dependency = strings[j].split(";");

@@ -192,7 +192,7 @@ public class SLTPGDynamicDataGenerator extends DynamicWorkloadGenerator {
                 srcAcc = accKeys[0];
                 dstAcc = accKeys[1];
                 int[] astKeys = getKeys(partitionedAssetZipf[(partitionId+1) % dynamicDataConfig.getTotalThreads()],
-                        partitionedAssetZipf[(partitionId+3) % dynamicDataConfig.getTotalThreads()],
+                        partitionedAssetZipf[(partitionId + 3) % dynamicDataConfig.getTotalThreads()],
                         (partitionId+1) % dynamicDataConfig.getTotalThreads(),
                         (partitionId+3) % dynamicDataConfig.getTotalThreads(),
                         generatedAst);

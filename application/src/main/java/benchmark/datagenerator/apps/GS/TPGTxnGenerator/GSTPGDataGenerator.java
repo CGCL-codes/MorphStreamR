@@ -179,9 +179,9 @@ public class GSTPGDataGenerator extends DataGenerator {
 
         GSEvent t;
         if (random.nextInt(10000) < Ratio_of_Transaction_Aborts) {
-            t = new GSEvent(eventID, keys, true);
+            t = new GSEvent(eventID, keys, this.Transaction_Length, true);
         } else {
-            t = new GSEvent(eventID, keys, false);
+            t = new GSEvent(eventID, keys, this.Transaction_Length, false);
         }
         // increase the timestamp i.e. transaction id
         eventID++;
