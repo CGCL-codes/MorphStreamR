@@ -13,6 +13,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
 import static common.CONTROL.enable_log;
@@ -169,34 +170,40 @@ public class GSTPGDynamicDataGenerator extends DynamicWorkloadGenerator {
     }
 
     private GSEvent randomEvent() {
-        int Transaction_Length;
-        if (random.nextInt(100) < Ratio_of_Multiple_State_Access) {
-            Transaction_Length = this.Transaction_Length;
-        } else {
-            Transaction_Length = 1;
-        }
-        int[] keys = new int[this.NUM_ACCESS * Transaction_Length];
+        int[] keys = new int[this.NUM_ACCESS * this.Transaction_Length];
         int writeLevel = -1;
         if (!isUnique) {
             if (enable_states_partition) {
-                for (int j = 0; j < Transaction_Length; j++) {
-                    int firstKeyPartition = key_to_partition(p_generator.next());//The partition id of the first key
-                    int key = getKey(partitionedKeyZipf[firstKeyPartition]);
-                    keys[j * this.NUM_ACCESS] = key; //First key is always write key
-                    if (!generatedKeysByPartition.get(firstKeyPartition).contains(key)) {
-                        generatedKeysByPartition.get(firstKeyPartition).add(key);//Add the key to the generated keys (for the partition
+                List<Integer> writeKeyPartitions = new ArrayList<>();
+                int firstKeyPartition = key_to_partition(p_generator.next());//The partition id of the first write key
+                if (random.nextInt(100) < Ratio_of_Multiple_State_Access) {//Need to access another partition
+                    for (int i = 0; i < this.Transaction_Length; i++) {
+                        while (writeKeyPartitions.contains(firstKeyPartition)) {
+                            firstKeyPartition = key_to_partition(m_generator.next());
+                        }
+                        writeKeyPartitions.add(firstKeyPartition);
                     }
+                    for (int j = 0; j < this.Transaction_Length; j++) {
+                        int key = getKey(partitionedKeyZipf[writeKeyPartitions.get(j)]);
+                        keys[j * this.NUM_ACCESS] = key; //First key is always write key
 
-                    int readKeyPartition = key_to_partition(p_generator.next());//The partition ids of the read keys
-                    while (readKeyPartition == firstKeyPartition) {
-                        readKeyPartition = key_to_partition(p_generator.next());
-                    }
-                    for (int i = 1; i < this.NUM_ACCESS; i ++) {
-                        int offset = j * this.NUM_ACCESS + i;
-                        keys[offset] = getKey(partitionedKeyZipf[readKeyPartition], generatedKeysByPartition.get(readKeyPartition));
-                        readKeyPartition = key_to_partition(p_generator.next());
-                        while (readKeyPartition == firstKeyPartition) {
+                        int readKeyPartition = key_to_partition(p_generator.next());//The partition ids of the read keys
+                        for (int i = 1; i < this.NUM_ACCESS; i ++) {
+                            int offset = j * this.NUM_ACCESS + i;
+                            keys[offset] = getKey(partitionedKeyZipf[readKeyPartition]);
                             readKeyPartition = key_to_partition(p_generator.next());
+                        }
+                    }
+                } else {
+                    for (int i = 0; i < this.Transaction_Length; i++) {
+                        writeKeyPartitions.add(firstKeyPartition);
+                    }
+                    for (int j = 0; j < this.Transaction_Length; j++) {
+                        int key = getKey(partitionedKeyZipf[writeKeyPartitions.get(j)]);
+                        keys[j * this.NUM_ACCESS] = key; //First key is always write key
+                        for (int i = 1; i < this.NUM_ACCESS; i ++) {
+                            int offset = j * this.NUM_ACCESS + i;
+                            keys[offset] = key;
                         }
                     }
                 }
@@ -231,10 +238,10 @@ public class GSTPGDynamicDataGenerator extends DynamicWorkloadGenerator {
 
         GSEvent t;
         if (random.nextInt(10000) < Ratio_of_Transaction_Aborts) {
-            t = new GSEvent(eventID, keys, Transaction_Length, true);
+            t = new GSEvent(eventID, keys, this.Transaction_Length, true);
             abort_num ++;
         } else {
-            t = new GSEvent(eventID, keys, Transaction_Length, false);
+            t = new GSEvent(eventID, keys, this.Transaction_Length, false);
         }
         // increase the timestamp i.e. transaction id
         eventID++;

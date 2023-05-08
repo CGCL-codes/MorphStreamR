@@ -226,12 +226,16 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
         }
         MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(operation.context.thisThreadId);
         if (!operation.isFailed) {
-            if (isLogging == LOGOption_path && keysLength > 1 && !operation.isCommit) {
-                MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(operation.context.thisThreadId);
-                int id = getTaskId(operation.pKey, delta);
-                this.tpg.threadToPathRecord.get(id).addDependencyEdge(operation.table_name, operation.pKey, operation.condition_records[1].record_.GetPrimaryKey(), operation.bid, sum);
-                operation.isCommit = true;
-                MeasureTools.END_SCHEDULE_TRACKING_TIME_MEASURE(operation.context.thisThreadId);
+            if (isLogging == LOGOption_path && !operation.isCommit) {
+                for (int i = 0; i < keysLength; i++) {
+                    if (!operation.pKey.equals(operation.condition_records[i].record_.GetPrimaryKey())) {
+                        MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(operation.context.thisThreadId);
+                        int id = getTaskId(operation.pKey, delta);
+                        this.tpg.threadToPathRecord.get(id).addDependencyEdge(operation.table_name, operation.pKey, operation.condition_records[i].record_.GetPrimaryKey(), operation.bid, sum);
+                        operation.isCommit = true;
+                        MeasureTools.END_SCHEDULE_TRACKING_TIME_MEASURE(operation.context.thisThreadId);
+                    }
+                }
             }
         }
     }

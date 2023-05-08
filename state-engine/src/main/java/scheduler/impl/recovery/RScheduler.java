@@ -342,19 +342,22 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
     }
     private void inspectGSDependency(long groupId, OperationChain curOC, Operation op, String table_name,
                                    String key, String[] condition_sourceTable, String[] condition_source){
-        if (condition_source != null && condition_source.length > 1) {
-            int index = 1;
-            Object history = this.loggingManager.inspectDependencyView(groupId, table_name, key, condition_source[index], op.bid);
-            if (history != null) {
-                op.historyView = history;
-            } else {
-                OperationChain OCFromConditionSource = tpg.getOC(condition_sourceTable[index], condition_source[index]);
-                //DFS-like
-                op.incrementPd(OCFromConditionSource);
-                //Add the proxy operations
-                OCFromConditionSource.addOperation(op);
-                //Add dependent Oc
-                OCFromConditionSource.addDependentOCs(curOC);
+        if (condition_source != null) {
+            for (int index = 0; index < condition_source.length; index++) {
+                if (table_name.equals(condition_sourceTable[index]) && key.equals(condition_source[index]))
+                    continue;
+                Object history = this.loggingManager.inspectDependencyView(groupId, table_name, key, condition_source[index], op.bid);
+                if (history != null) {
+                    op.historyView = history;
+                } else {
+                    OperationChain OCFromConditionSource = tpg.getOC(condition_sourceTable[index], condition_source[index]);
+                    //DFS-like
+                    op.incrementPd(OCFromConditionSource);
+                    //Add the proxy operations
+                    OCFromConditionSource.addOperation(op);
+                    //Add dependent Oc
+                    OCFromConditionSource.addDependentOCs(curOC);
+                }
             }
         }
     }
