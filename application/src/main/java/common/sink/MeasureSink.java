@@ -175,10 +175,10 @@ public class MeasureSink extends BaseSink {
                     tthread, totalEvents,
                     config.getInt("NUM_ITEMS"),
                     config.getInt("NUM_ACCESS"),
+                    config.getInt("Transaction_Length"),
+                    config.getInt("Ratio_of_Multiple_State_Access"),
                     config.getInt("State_Access_Skewness"),
                     config.getInt("Ratio_of_Transaction_Aborts"),
-                    config.getInt("Ratio_of_Multiple_State_Access"),
-                    config.getInt("Transaction_Length"),
                     AppConfig.isCyclic,
                     config.getString("compressionAlg"),
                     config.getInt("complexity"));
