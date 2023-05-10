@@ -17,6 +17,7 @@ import common.topology.transactional.TollProcessing;
 import components.Topology;
 import components.TopologyComponent;
 import components.exception.UnhandledCaseException;
+import durability.struct.FaultToleranceRelax;
 import execution.ExecutionNode;
 import execution.runtime.executorThread;
 import lock.SpinLock;
@@ -170,6 +171,9 @@ public class MorphStreamRunner extends Runner {
             }
 
             OperationChainCommon.cleanUp = config.getBoolean("cleanUp");
+            FaultToleranceRelax.isHistoryView = config.getBoolean("isHistoryView");
+            FaultToleranceRelax.isAbortPushDown = config.getBoolean("isAbortPushDown");
+            FaultToleranceRelax.isTaskPlacing = config.getBoolean("isTaskPlacing");
         } else {
             config.putAll(Configuration.fromStr(configStr));
         }

@@ -219,6 +219,15 @@ public abstract class Runner implements IRunner {
     @Parameter(names = {"--measureInterval"}, description = "Interval to compute throughput, default to be 100ms")
     public Double measureInterval = 100.0;
 
+    //Fault tolerance relax
+    @Parameter(names = {"--isHistoryView"}, description = "Whether to dependency inspection or not")
+    public Integer isHistoryView = 1;
+    @Parameter(names = {"--isAbortPushDown"}, description = "Whether to abort push down or not")
+    public Integer isAbortPushDown = 1;
+    @Parameter(names = {"--isTaskPlacing"}, description = "Whether to task placing or not")
+    public Integer isTaskPlacing = 1;
+
+
     public Runner() {
         CFG_PATH = "/config/%s.properties";
         if (enable_log) LOG.info(String.format("Metric folder path %s.", metric_path));
@@ -396,6 +405,22 @@ public abstract class Runner implements IRunner {
             config.put("isFailure", false);
         } else {
             config.put("isFailure", true);
+        }
+        /* Fault Tolerance Relax */
+        if (isHistoryView == 0) {
+            config.put("isHistoryView", false);
+        } else {
+            config.put("isHistoryView", true);
+        }
+        if (isAbortPushDown == 0) {
+            config.put("isAbortPushDown", false);
+        } else {
+            config.put("isAbortPushDown", true);
+        }
+        if (isTaskPlacing == 0) {
+            config.put("isTaskPlacing", false);
+        } else {
+            config.put("isTaskPlacing", true);
         }
 
         System.setProperty("my.log", metric_path);

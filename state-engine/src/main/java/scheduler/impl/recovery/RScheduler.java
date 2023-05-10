@@ -4,6 +4,7 @@ import common.util.io.IOUtils;
 import durability.logging.LoggingStrategy.ImplLoggingManager.PathLoggingManager;
 import durability.logging.LoggingStrategy.ImplLoggingManager.WALManager;
 import durability.logging.LoggingStrategy.LoggingManager;
+import durability.struct.FaultToleranceRelax;
 import profiler.MeasureTools;
 import scheduler.Request;
 import scheduler.context.recovery.RSContext;
@@ -12,6 +13,7 @@ import scheduler.struct.AbstractOperation;
 import scheduler.struct.MetaTypes;
 import scheduler.struct.recovery.Operation;
 import scheduler.struct.recovery.OperationChain;
+import scheduler.struct.recovery.TableOCs;
 import scheduler.struct.recovery.TaskPrecedenceGraph;
 import storage.SchemaRecord;
 import storage.datatype.DataBox;
@@ -122,23 +124,30 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
 
     @Override
     public void INITIALIZE(Context context) {
-        MeasureTools.BEGIN_RECOVERY_TASK_PLACING_MEASURE(context.thisThreadId);
-        HashMap<String, List<Integer>> plan;
-        if (!this.loggingManager.getHistoryViews().canInspectTaskPlacing(context.groupId)) {
-            this.graphConstruct(context);
-        }
-        plan = this.loggingManager.inspectTaskPlacing(context.groupId, context.thisThreadId);
-        for (Map.Entry<String, List<Integer>> entry : plan.entrySet()) {
-            String table = entry.getKey();
-            List<Integer> value = entry.getValue();
-            for (int key : value) {
-                int taskId = getTaskId(String.valueOf(key), delta);
-                OperationChain oc = tpg.getOperationChains().get(table).threadOCsMap.get(taskId).holder_v1.get(String.valueOf(key));
+        if (FaultToleranceRelax.isTaskPlacing) {
+            MeasureTools.BEGIN_RECOVERY_TASK_PLACING_MEASURE(context.thisThreadId);
+            HashMap<String, List<Integer>> plan;
+            if (!this.loggingManager.getHistoryViews().canInspectTaskPlacing(context.groupId)) {
+                this.graphConstruct(context);
+            }
+            plan = this.loggingManager.inspectTaskPlacing(context.groupId, context.thisThreadId);
+            for (Map.Entry<String, List<Integer>> entry : plan.entrySet()) {
+                String table = entry.getKey();
+                List<Integer> value = entry.getValue();
+                for (int key : value) {
+                    int taskId = getTaskId(String.valueOf(key), delta);
+                    OperationChain oc = tpg.getOperationChains().get(table).threadOCsMap.get(taskId).holder_v1.get(String.valueOf(key));
+                    context.allocatedTasks.add(oc);
+                    context.totalTasks = context.totalTasks + oc.operations.size();
+                }
+            }
+            MeasureTools.END_RECOVERY_TASK_PLACING_MEASURE(context.thisThreadId);
+        } else {
+            for (OperationChain oc : tpg.threadToOCs.get(context.thisThreadId)) {
                 context.allocatedTasks.add(oc);
                 context.totalTasks = context.totalTasks + oc.operations.size();
             }
         }
-        MeasureTools.END_RECOVERY_TASK_PLACING_MEASURE(context.thisThreadId);
     }
 
     @Override
@@ -325,7 +334,10 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
             for (int index = 0; index < condition_source.length; index++) {
                 if (table_name.equals(condition_sourceTable[index]) && key.equals(condition_source[index]))
                     continue;
-                Object history = this.loggingManager.inspectDependencyView(groupId, table_name, key, condition_source[index], op.bid);
+                Object history = null;
+                if (FaultToleranceRelax.isHistoryView) {
+                    history = this.loggingManager.inspectDependencyView(groupId, table_name, key, condition_source[index], op.bid);
+                }
                 if (history != null) {
                     op.historyView = history;
                 } else {
@@ -346,7 +358,10 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
             for (int index = 0; index < condition_source.length; index++) {
                 if (table_name.equals(condition_sourceTable[index]) && key.equals(condition_source[index]))
                     continue;
-                Object history = this.loggingManager.inspectDependencyView(groupId, table_name, key, condition_source[index], op.bid);
+                Object history = null;
+                if (FaultToleranceRelax.isHistoryView) {
+                    history = this.loggingManager.inspectDependencyView(groupId, table_name, key, condition_source[index], op.bid);
+                }
                 if (history != null) {
                     op.historyView = history;
                 } else {
