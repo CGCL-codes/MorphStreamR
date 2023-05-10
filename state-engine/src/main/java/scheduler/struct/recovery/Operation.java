@@ -19,6 +19,7 @@ public class Operation extends AbstractOperation implements Comparable<Operation
     public AtomicInteger pdCount = new AtomicInteger(0);// We only ensure pdCount, TD count can be ensured by skipList
     public int txnOpId = 0;
     public OperationChain dependentOC;
+    public boolean isFailed = false;
     public MetaTypes.OperationStateType operationState = MetaTypes.OperationStateType.BLOCKED;
     public <Context extends RSContext> Operation(String pKey, Context context, String table_name, TxnContext txn_context, long bid,
                                                           CommonMetaTypes.AccessType accessType, TableRecord d_record, Function function, Condition condition, TableRecord[] condition_records, int[] success) {

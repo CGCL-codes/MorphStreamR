@@ -5,6 +5,8 @@ import durability.logging.LoggingStrategy.ImplLoggingManager.PathLoggingManager;
 import durability.logging.LoggingStrategy.ImplLoggingManager.WALManager;
 import durability.logging.LoggingStrategy.LoggingManager;
 import durability.struct.FaultToleranceRelax;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import profiler.MeasureTools;
 import scheduler.Request;
 import scheduler.context.recovery.RSContext;
@@ -27,6 +29,7 @@ import utils.AppConfig;
 import utils.SOURCE_CONTROL;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static common.constants.TPConstants.Constant.MAX_INT;
 import static common.constants.TPConstants.Constant.MAX_SPEED;
@@ -34,8 +37,10 @@ import static content.common.CommonMetaTypes.AccessType.*;
 import static utils.FaultToleranceConstants.*;
 
 public class RScheduler<Context extends RSContext> implements IScheduler<Context> {
+    private static final Logger LOG = LoggerFactory.getLogger(RScheduler.class);
     public final int delta;
     public final TaskPrecedenceGraph<Context> tpg;
+    public AtomicBoolean abortHandling = new AtomicBoolean(false);
     public int isLogging;
     public LoggingManager loggingManager;
 
@@ -149,18 +154,22 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
             }
         }
     }
-
     @Override
     public void PROCESS(Context context, long mark_ID) {
         OperationChain oc = context.ready_oc;
         for (Operation op : oc.operations) {
             if (op.pKey.equals(oc.getPrimaryKey())) {
-                if (op.operationState.equals(MetaTypes.OperationStateType.EXECUTED))
+                if (op.operationState.equals(MetaTypes.OperationStateType.EXECUTED) || op.operationState.equals(MetaTypes.OperationStateType.ABORTED))
                     continue;
                 if (op.pdCount.get() == 0) {
                     MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(context.thisThreadId);
                     execute(op, mark_ID, false);
-                    op.operationState = MetaTypes.OperationStateType.EXECUTED;
+                    if (op.isFailed) {
+                        op.operationState = MetaTypes.OperationStateType.ABORTED;
+                        checkAbort();
+                    } else {
+                        op.operationState = MetaTypes.OperationStateType.EXECUTED;
+                    }
                     oc.level = oc.level + 1;
                     MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(context.thisThreadId);
                 } else {
@@ -190,11 +199,22 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
     public void RESET(Context context) {
         context.needCheckId = true;
         context.isFinished = false;
-        for (OperationChain oc : context.allocatedTasks) {
+        for (OperationChain oc : this.tpg.threadToOCs.get(context.thisThreadId)) {
             oc.level = 0;
             oc.operations.clear();
         }
+        this.abortHandling.compareAndSet(true,false);
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
+    }
+    private void checkAbort() {
+        this.abortHandling.compareAndSet(false, true);
+    }
+    private void REINITIALIZE(Context context) {
+        context.isFinished = false;
+        for (OperationChain oc : this.tpg.threadToOCs.get(context.thisThreadId)) {
+            oc.level = 0;
+        }
+        INITIALIZE(context);
     }
 
     @Override
@@ -204,6 +224,15 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
             EXPLORE(context);
             PROCESS(context, mark_ID);
         } while (!FINISHED(context));
+        SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
+        if (this.abortHandling.get()) {
+            LOG.info("Abort handling " + context.thisThreadId);
+            REINITIALIZE(context);
+            do {
+                EXPLORE(context);
+                PROCESS(context, mark_ID);
+            } while (!FINISHED(context));
+        }
         RESET(context);
     }
     public Context getTargetContext(String key) {
@@ -275,6 +304,8 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
             synchronized (operation.success) {
                 operation.success[0]++;
             }
+        } else {
+            op.isFailed = true;
         }
     }
     protected void Depo_Fun(AbstractOperation operation, long mark_ID, boolean clean) {
@@ -303,29 +334,42 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
         sum /= keysLength;
         SchemaRecord srcRecord = operation.s_record.content_.readPreValues(operation.bid);
         SchemaRecord tempo_record = new SchemaRecord(srcRecord);//tempo record
-        if (operation.function instanceof SUM) {
-            tempo_record.getValues().get(1).setLong(sum);//compute.
-        } else
-            throw new UnsupportedOperationException();
-        operation.d_record.content_.updateMultiValues(operation.bid, previous_mark_ID, clean, tempo_record);//it may reduce NUMA-traffic.
+        if (operation.function.delta_long != -1) {
+            if (operation.function instanceof SUM) {
+                tempo_record.getValues().get(1).setLong(sum);//compute.
+            } else
+                throw new UnsupportedOperationException();
+            operation.d_record.content_.updateMultiValues(operation.bid, previous_mark_ID, clean, tempo_record);//it may reduce NUMA-traffic.
+        } else {
+            operation.isFailed = true;
+        }
+
     }
     protected void TollProcess_Fun(Operation operation, long previous_mark_ID, boolean clean) {
         AppConfig.randomDelay();
         List<DataBox> srcRecord = operation.s_record.record_.getValues();
         if (operation.function instanceof AVG) {
-            double latestAvgSpeeds = srcRecord.get(1).getDouble();
-            double lav;
-            if (latestAvgSpeeds == 0) {//not initialized
-                lav = operation.function.delta_double;
-            } else
-                lav = (latestAvgSpeeds + operation.function.delta_double) / 2;
+            if (operation.function.delta_double < MAX_SPEED) {
+                double latestAvgSpeeds = srcRecord.get(1).getDouble();
+                double lav;
+                if (latestAvgSpeeds == 0) {//not initialized
+                    lav = operation.function.delta_double;
+                } else
+                    lav = (latestAvgSpeeds + operation.function.delta_double) / 2;
 
-            srcRecord.get(1).setDouble(lav);//write to state.
-            operation.record_ref.setRecord(new SchemaRecord(new DoubleDataBox(lav)));//return updated record.
+                srcRecord.get(1).setDouble(lav);//write to state.
+                operation.record_ref.setRecord(new SchemaRecord(new DoubleDataBox(lav)));//return updated record.
+            } else {
+                operation.isFailed = true;
+            }
         } else {
-            HashSet cnt_segment = srcRecord.get(1).getHashSet();
-            cnt_segment.add(operation.function.delta_int);//update hashset; updated state also. TODO: be careful of this.
-            operation.record_ref.setRecord(new SchemaRecord(new IntDataBox(cnt_segment.size())));//return updated record.
+            if (operation.function.delta_int < MAX_INT) {
+                HashSet cnt_segment = srcRecord.get(1).getHashSet();
+                cnt_segment.add(operation.function.delta_int);//update hashset; updated state also. TODO: be careful of this.
+                operation.record_ref.setRecord(new SchemaRecord(new IntDataBox(cnt_segment.size())));//return updated record.
+            } else {
+                operation.isFailed = true;
+            }
         }
     }
     private void inspectSLDependency(long groupId, OperationChain curOC, Operation op, String table_name,
@@ -341,13 +385,15 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
                 if (history != null) {
                     op.historyView = history;
                 } else {
-                    OperationChain OCFromConditionSource = tpg.getOC(condition_sourceTable[index], condition_source[index]);
-                    //DFS-like
-                    op.incrementPd(OCFromConditionSource);
-                    //Add the proxy operations
-                    OCFromConditionSource.addOperation(op);
-                    //Add dependent Oc
-                    OCFromConditionSource.addDependentOCs(curOC);
+                    if (FaultToleranceRelax.isAbortPushDown) {
+                        OperationChain OCFromConditionSource = tpg.getOC(condition_sourceTable[index], condition_source[index]);
+                        //DFS-like
+                        op.incrementPd(OCFromConditionSource);
+                        //Add the proxy operations
+                        OCFromConditionSource.addOperation(op);
+                        //Add dependent Oc
+                        OCFromConditionSource.addDependentOCs(curOC);
+                    }
                 }
             }
         }
@@ -365,13 +411,15 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
                 if (history != null) {
                     op.historyView = history;
                 } else {
-                    OperationChain OCFromConditionSource = tpg.getOC(condition_sourceTable[index], condition_source[index]);
-                    //DFS-like
-                    op.incrementPd(OCFromConditionSource);
-                    //Add the proxy operations
-                    OCFromConditionSource.addOperation(op);
-                    //Add dependent Oc
-                    OCFromConditionSource.addDependentOCs(curOC);
+                    if (FaultToleranceRelax.isAbortPushDown) {
+                        OperationChain OCFromConditionSource = tpg.getOC(condition_sourceTable[index], condition_source[index]);
+                        //DFS-like
+                        op.incrementPd(OCFromConditionSource);
+                        //Add the proxy operations
+                        OCFromConditionSource.addOperation(op);
+                        //Add dependent Oc
+                        OCFromConditionSource.addDependentOCs(curOC);
+                    }
                 }
             }
         }

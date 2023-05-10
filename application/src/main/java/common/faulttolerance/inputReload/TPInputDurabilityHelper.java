@@ -7,6 +7,7 @@ import common.param.TxnEvent;
 import common.param.lr.LREvent;
 import common.tools.randomNumberGenerator;
 import durability.inputStore.InputDurabilityHelper;
+import durability.struct.FaultToleranceRelax;
 import profiler.MeasureTools;
 import utils.FaultToleranceConstants;
 
@@ -98,9 +99,10 @@ public class TPInputDurabilityHelper extends InputDurabilityHelper {
     private TxnEvent getEventFromString(String txn, long groupId) {
         String[] split = txn.split(",");
         long bid = Long.parseLong(split[0]);
-        if (this.ftOption == 3 && historyViews.inspectAbortView(groupId, this.taskId, Integer.parseInt(split[0]))) {
-            return null;
-        }
+        if (FaultToleranceRelax.isAbortPushDown)
+            if (this.ftOption == 3 && historyViews.inspectAbortView(groupId, this.taskId, Integer.parseInt(split[0]))) {
+                return null;
+            }
         long timestamp = Long.parseLong(split[1]);
         PositionReport positionReport = new PositionReport((short) Integer.parseInt(split[2]),
                     Integer.parseInt(split[3]),

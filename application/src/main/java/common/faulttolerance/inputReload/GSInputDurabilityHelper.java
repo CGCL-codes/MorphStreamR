@@ -5,6 +5,7 @@ import common.collections.OsUtils;
 import common.param.TxnEvent;
 import common.param.mb.MicroEvent;
 import durability.inputStore.InputDurabilityHelper;
+import durability.struct.FaultToleranceRelax;
 import profiler.MeasureTools;
 import utils.FaultToleranceConstants;
 
@@ -95,9 +96,10 @@ public class GSInputDurabilityHelper extends InputDurabilityHelper {
     private TxnEvent getEventFromString(String txn, long groupId) {
         int[] p_bids = new int[tthread];
         String[] split = txn.split(",");
-        if (this.ftOption == 3 && historyViews.inspectAbortView(groupId, this.taskId, Integer.parseInt(split[0]))) {
-            return null;
-        }
+        if (FaultToleranceRelax.isAbortPushDown)
+            if (this.ftOption == 3 && historyViews.inspectAbortView(groupId, this.taskId, Integer.parseInt(split[0]))) {
+                return null;
+            }
         int npid = (int) (Long.parseLong(split[1]) / partitionOffset);
         int keyLength  = split.length - 4;
         long[] keys = new long[keyLength];
