@@ -110,30 +110,30 @@ function withRecovery() {
     runApplication
 }
 function multicoreEvaluation() {
-#   tthread=24
-#   snapshotInterval=4
-#   withRecovery
-#   sleep 2s
+   tthread=24
+   snapshotInterval=4
+   withRecovery
+   sleep 2s
 
   tthread=12
   snapshotInterval=8
   withRecovery
   sleep 2s
 
-#   tthread=8
-#   snapshotInterval=12
-#   withRecovery
-#   sleep 2s
+   tthread=8
+   snapshotInterval=12
+   withRecovery
+   sleep 2s
 
-#   tthread=4
-#   snapshotInterval=24
-#   withRecovery
-#   sleep 2s
+   tthread=4
+   snapshotInterval=24
+   withRecovery
+   sleep 2s
 
-#   tthread=1
-#   snapshotInterval=96
-#   withRecovery
-#   sleep 2s
+   tthread=1
+   snapshotInterval=96
+   withRecovery
+   sleep 2s
 }
 
 function application_runner() {

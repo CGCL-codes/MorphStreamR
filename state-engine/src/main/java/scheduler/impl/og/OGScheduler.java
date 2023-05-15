@@ -418,9 +418,9 @@ public abstract class OGScheduler<Context extends OGSchedulerContext> implements
 
     @Override
     public void RESET(Context context) {
-//        SOURCE_CONTROL.getInstance().oneThreadCompleted();
+        MeasureTools.BEGIN_SCHEDULE_WAIT_TIME_MEASURE(context.thisThreadId);
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
-//        SOURCE_CONTROL.getInstance().waitForOtherThreadsAbort();
+        MeasureTools.END_SCHEDULE_WAIT_TIME_MEASURE(context.thisThreadId);
         context.reset();
         tpg.reset(context);
     }

@@ -170,7 +170,7 @@ public class TPTPGDynamicDataGenerator extends DynamicWorkloadGenerator {
                 } else {
                     partitionId = key_to_partition(p_generator.next());
                 }
-                id = getKey(partitionedKeyZipf[partitionId],partitionId,generatedKeys);
+                id = getKey(partitionedKeyZipf[partitionId],partitionId, generatedKeys);
             } else {
                 id = getKey(keyZipf, generatedKeys);
             }

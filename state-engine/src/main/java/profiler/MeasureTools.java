@@ -611,7 +611,7 @@ public class MeasureTools {
             throw new RuntimeException(e);
         }
     }
-    public static void WriteRecoveryTime(int tthread) {
+    public static void WriteRecoveryTime(int tthread, int FTOption) {
         try {
             File file = new File(directory + fileNameSuffix + ".overall");
             BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
@@ -624,11 +624,67 @@ public class MeasureTools {
             }
             fileWriter.write("recoveryTime (ms) \t recoveryCount\t throughput (k/s) \n");
             fileWriter.write(totalRecoveryTime / tthread + "\t" + totalRecoveryItemsCount /tthread + "\t" + totalRecoveryItemsCount / totalRecoveryTime + "\n");
-            double[] recoveryTime = new double[13];
+            double[] recoveryTime = new double[14];
             WriteRecoveryTimeBreakDown(tthread, recoveryTime);
             WriteReplayTimeBreakDown(tthread, recoveryTime);
             WriteRecoverySchedulerTimeBreakdownReport(tthread, recoveryTime);
             fileWriter.write("OverallBreakDownReport (ms): " + "\n");
+            fileWriter.write("Reload\t Explore\t Execute\t Abort\t Construct\t Wait\n");
+            if (FTOption == FTOption_ISC) {
+                String output = String.format(
+                        "%-10.2f\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t"
+                        , recoveryTime[0] + recoveryTime[2], recoveryTime[4], recoveryTime[3] + recoveryTime[6], recoveryTime[7], recoveryTime[5], recoveryTime[8] + recoveryTime[9]);
+                fileWriter.write(output + "\n");
+            }
+            if (FTOption == FTOption_PATH) {
+                String output = String.format(
+                        "%-10.2f\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t"
+                        , recoveryTime[0] + recoveryTime[1] + recoveryTime[2] + recoveryTime[10], recoveryTime[4] + recoveryTime[12], recoveryTime[3] + recoveryTime[6], recoveryTime[7], recoveryTime[5] + recoveryTime[11], recoveryTime[8] + recoveryTime[9]);
+                fileWriter.write(output + "\n");
+            }
+            if (FTOption == FTOption_LV) {
+                String output = String.format(
+                        "%-10.2f\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t"
+                        , recoveryTime[0] + recoveryTime[2] + recoveryTime[5], recoveryTime[4], recoveryTime[6], recoveryTime[7], 0.0, recoveryTime[9] + recoveryTime[1] - recoveryTime[4] - recoveryTime[5] - recoveryTime[6]);
+                fileWriter.write(output + "\n");
+            }
+            if (FTOption == FTOption_Dependency) {
+                String output = String.format(
+                        "%-10.2f\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t"
+                        , recoveryTime[0] + recoveryTime[2] + recoveryTime[5], recoveryTime[4], recoveryTime[6], recoveryTime[7], recoveryTime[13], recoveryTime[9] + recoveryTime[1] - recoveryTime[4] - recoveryTime[5] - recoveryTime[6] - recoveryTime[13]);
+                fileWriter.write(output + "\n");
+            }
+            if (FTOption == FTOption_Command) {
+                String output = String.format(
+                        "%-10.2f\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t" +
+                                "%-10.2f\t"
+                        , recoveryTime[0] + recoveryTime[2] + recoveryTime[5], recoveryTime[4], recoveryTime[6], recoveryTime[7], 0.0, recoveryTime[9] + recoveryTime[1] - recoveryTime[4] - recoveryTime[5] - recoveryTime[6]);
+                fileWriter.write(output + "\n");
+            }
             fileWriter.write("reloadDatabaseTime\t redoWriteAheadLogTime\t reloadInputTime\t stream_process\t explore_time\t construct_time\t useful_time\t abort_time\t overheads\t abort_push_down\t history_inspect\t tasking_placing\t construct_graph\n");
             String output = String.format(
                     "%-10.2f\t" +
@@ -733,6 +789,7 @@ public class MeasureTools {
             double totalAbortTime = 0;
             double totalConstructTime = 0;
             double totalAbortPushTime = 0;
+            double totalWaitTime = 0;
             double totalHistoryInspectionTime = 0;
             double totalTaskPlacingTime = 0;
             double totalConstructGraphTime = 0;
@@ -745,8 +802,10 @@ public class MeasureTools {
                 totalUsefulTime = totalUsefulTime + RecoveryPerformance.Useful[threadId];
                 totalAbortTime = totalAbortTime + RecoveryPerformance.Abort[threadId];
                 totalConstructTime = totalConstructTime + RecoveryPerformance.Construct[threadId];
+                totalWaitTime = totalWaitTime + RecoveryPerformance.Wait[threadId];
             }
             String output = String.format(
+                            "%-10.2f\t" +
                             "%-10.2f\t" +
                             "%-10.2f\t" +
                             "%-10.2f\t" +
@@ -763,6 +822,7 @@ public class MeasureTools {
                     , totalHistoryInspectionTime / tthread / 1E6
                     , totalTaskPlacingTime / tthread / 1E6
                     , totalConstructGraphTime / tthread / 1E6
+                    , totalWaitTime / tthread / 1E6
             );
             fileWriter.write(output + "\n");
             fileWriter.close();
@@ -770,10 +830,11 @@ public class MeasureTools {
             recoveryTime[5] = (totalConstructTime - totalHistoryInspectionTime) / tthread / 1E6;
             recoveryTime[6] = totalUsefulTime / tthread / 1E6;
             recoveryTime[7] = totalAbortTime / tthread / 1E6;
-            recoveryTime[9] = totalAbortPushTime / tthread / 1E6;
-            recoveryTime[10] = totalHistoryInspectionTime / tthread / 1E6;
-            recoveryTime[11] = totalTaskPlacingTime / tthread / 1E6;
-            recoveryTime[12] = totalConstructGraphTime / tthread / 1E6;
+            recoveryTime[9] = totalWaitTime / tthread / 1E6;
+            recoveryTime[10] = totalAbortPushTime / tthread / 1E6;
+            recoveryTime[11] = totalHistoryInspectionTime / tthread / 1E6;
+            recoveryTime[12] = totalTaskPlacingTime / tthread / 1E6;
+            recoveryTime[13] = totalConstructGraphTime / tthread / 1E6;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -990,7 +1051,7 @@ public class MeasureTools {
         WritePersistFileSize(FTOption, tthread);
         //WriteThroughputPerPhase(tthread, phase, shiftRate);
         if (fileNameSuffix.equals("_recovery")) {
-            WriteRecoveryTime(tthread);
+            WriteRecoveryTime(tthread, FTOption);
         }
         if (ccOption == CCOption_MorphStream) {//extra info
             SchedulerTimeBreakdownReport(tthread);

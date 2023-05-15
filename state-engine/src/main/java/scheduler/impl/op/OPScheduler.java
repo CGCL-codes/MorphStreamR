@@ -300,8 +300,9 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
 
     @Override
     public void RESET(Context context) {
-        //SOURCE_CONTROL.getInstance().oneThreadCompleted(context.thisThreadId);
+        MeasureTools.BEGIN_SCHEDULE_WAIT_TIME_MEASURE(context.thisThreadId);
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
+        MeasureTools.END_SCHEDULE_WAIT_TIME_MEASURE(context.thisThreadId);
         context.reset();
         tpg.reset(context);
     }

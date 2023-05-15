@@ -35,21 +35,24 @@ public class Metrics {
 
     public static void RECORD_SCHEDULE_TIME(int thread_id, int num_events) {
         if (!RecoveryPerformance.stopRecovery[thread_id]) {
-            RecoveryPerformance.Explore[thread_id] = RecoveryPerformance.Explore[thread_id] + Scheduler.Explore[thread_id] - Scheduler.Useful[thread_id] - Scheduler.Abort[thread_id];
+            RecoveryPerformance.Explore[thread_id] = RecoveryPerformance.Explore[thread_id] + Scheduler.Explore[thread_id] - Scheduler.Useful[thread_id] - Scheduler.Abort[thread_id] - Scheduler.Wait[thread_id];
             RecoveryPerformance.Useful[thread_id] = RecoveryPerformance.Useful[thread_id] + (Scheduler.Useful[thread_id] * (Scheduler.UsefulCount[thread_id] - Scheduler.RedoCount[thread_id]) / Scheduler.UsefulCount[thread_id]);
             RecoveryPerformance.Abort[thread_id] = RecoveryPerformance.Abort[thread_id] + (Scheduler.Abort[thread_id] + Scheduler.Useful[thread_id] * Scheduler.RedoCount[thread_id] / Scheduler.UsefulCount[thread_id]);
             RecoveryPerformance.Construct[thread_id] = RecoveryPerformance.Construct[thread_id] + Scheduler.Construct[thread_id];
+            RecoveryPerformance.Wait[thread_id] = RecoveryPerformance.Wait[thread_id] + Scheduler.Wait[thread_id];
         } else {
-            double explore_time = (Scheduler.Explore[thread_id] - Scheduler.Useful[thread_id] - Scheduler.Abort[thread_id] - Scheduler.Tracking[thread_id]) / (double) num_events;
+            double explore_time = (Scheduler.Explore[thread_id] - Scheduler.Useful[thread_id] - Scheduler.Abort[thread_id] - Scheduler.Tracking[thread_id] - Scheduler.Wait[thread_id]) / (double) num_events;
             double useful_time = (Scheduler.Useful[thread_id] * (Scheduler.UsefulCount[thread_id] - Scheduler.RedoCount[thread_id]) / (double) Scheduler.UsefulCount[thread_id]) / (double) num_events;
             double abort_time = (Scheduler.Abort[thread_id] + Scheduler.Useful[thread_id] * Scheduler.RedoCount[thread_id] / (double) Scheduler.UsefulCount[thread_id]) / (double) num_events;
             double construct_time = Scheduler.Construct[thread_id] / (double) num_events;
             double tracking_time = Scheduler.Tracking[thread_id] / (double) num_events;
+            double wait_time = Scheduler.Wait[thread_id] / (double) num_events;
             Scheduler_Record.Explore[thread_id].addValue(explore_time);
             Scheduler_Record.Useful[thread_id].addValue(useful_time);
             Scheduler_Record.Abort[thread_id].addValue(abort_time);
             Scheduler_Record.Construct[thread_id].addValue(construct_time);
             Scheduler_Record.Tracking[thread_id].addValue(tracking_time);
+            Scheduler_Record.Wait[thread_id].addValue(wait_time);
         }
         Scheduler.Initialize(thread_id);
     }

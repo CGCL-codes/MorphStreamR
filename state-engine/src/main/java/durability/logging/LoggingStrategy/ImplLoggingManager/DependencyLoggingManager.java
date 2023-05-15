@@ -170,7 +170,9 @@ public class DependencyLoggingManager implements LoggingManager {
         MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(context.threadId);
     }
     private void RESET(CSContext context) {
+        MeasureTools.BEGIN_SCHEDULE_WAIT_TIME_MEASURE(context.threadId);
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.threadId);
+        MeasureTools.END_SCHEDULE_WAIT_TIME_MEASURE(context.threadId);
         context.reset();
         this.cpg.reset(context);
     }

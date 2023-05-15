@@ -2,25 +2,25 @@
 source dir.sh || exit
 function ResetParameters() {
     app="GrepSum"
-    checkpointInterval=20480
+    checkpointInterval=40960
     tthread=24
-    scheduler="OP_NS_A"
-    defaultScheduler="OP_NS_A"
+    scheduler="OG_NS_A"
+    defaultScheduler="OG_NS_A"
     CCOption=3 #TSTREAM
     complexity=8000
     NUM_ITEMS=245760
     abort_ratio=0
-    multiple_ratio=50
+    multiple_ratio=0
     txn_length=1
-    NUM_ACCESS=8
+    NUM_ACCESS=1
     key_skewness=75
-    overlap_ratio=80
-    isCyclic=1
+    overlap_ratio=0
+    isCyclic=0
     isDynamic=1
-    workloadType="default,Up_abort,unchanging,Down_abort"
+    workloadType="default,unchanging,unchanging,unchanging"
   # workloadType="default,unchanging,unchanging,unchanging,Up_abort,Down_abort,unchanging,unchanging"
   # workloadType="default,unchanging,unchanging,unchanging,Up_skew,Up_skew,Up_skew,Up_PD,Up_PD,Up_PD,Up_abort,Up_abort,Up_abort"
-    schedulerPool="OP_NS_A,OP_NS"
+    schedulerPool="OG_NS_A"
     rootFilePath="${RSTDIR}"
     shiftRate=1
     multicoreEvaluation=0
@@ -129,10 +129,10 @@ function withoutRecovery() {
 function application_runner() {
  ResetParameters
  app=GrepSum
- for FTOption in 3 4
+ for FTOption in 0
  do
- #withoutRecovery
- withRecovery
+ withoutRecovery
+ #withRecovery
  done
 }
 application_runner

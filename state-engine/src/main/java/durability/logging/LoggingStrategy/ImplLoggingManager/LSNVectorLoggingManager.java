@@ -177,7 +177,9 @@ public class LSNVectorLoggingManager implements LoggingManager {
         this.cpg.updateGlobalLV(context);
     }
     private void RESET(CSContext context) {
+        MeasureTools.BEGIN_SCHEDULE_WAIT_TIME_MEASURE(context.threadId);
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.threadId);
+        MeasureTools.END_SCHEDULE_WAIT_TIME_MEASURE(context.threadId);
         this.cpg.reset(context);
     }
     private void SLExecute(LVCLog task) {

@@ -318,7 +318,7 @@ public abstract class Runner implements IRunner {
                 break;
             case "GrepSum" :
                 //bottomLine = "500,5000,6500,3000,0.2,0.2";//TD,LD,PD,SUM,VDD,R_of_A
-                bottomLine =  2 * checkpoint_interval + "," + 2 * checkpoint_interval + "," + checkpoint_interval + "," + 4 * checkpoint_interval + "," + "0.5,0.2";//TD,LD,PD,SUM,VDD,R_of_A
+                bottomLine =  checkpoint_interval + "," + 2 * checkpoint_interval + "," + checkpoint_interval + "," + 2 * checkpoint_interval + "," + "0.5,0.2";//TD,LD,PD,SUM,VDD,R_of_A
                 phaseNum = shiftRate * phaseType.length;
                 break;
             case "TollProcessing" :

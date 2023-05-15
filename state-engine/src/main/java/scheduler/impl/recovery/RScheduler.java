@@ -159,8 +159,9 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
         OperationChain oc = context.ready_oc;
         for (Operation op : oc.operations) {
             if (op.pKey.equals(oc.getPrimaryKey())) {
-                if (op.operationState.equals(MetaTypes.OperationStateType.EXECUTED) || op.operationState.equals(MetaTypes.OperationStateType.ABORTED))
+                if (op.operationState.equals(MetaTypes.OperationStateType.EXECUTED) || op.operationState.equals(MetaTypes.OperationStateType.ABORTED)) {
                     continue;
+                }
                 if (op.pdCount.get() == 0) {
                     MeasureTools.BEGIN_SCHEDULE_USEFUL_TIME_MEASURE(context.thisThreadId);
                     execute(op, mark_ID, false);
@@ -204,7 +205,9 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
             oc.operations.clear();
         }
         this.abortHandling.compareAndSet(true,false);
+        MeasureTools.BEGIN_SCHEDULE_WAIT_TIME_MEASURE(context.thisThreadId);
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
+        MeasureTools.END_SCHEDULE_WAIT_TIME_MEASURE(context.thisThreadId);
     }
     private void checkAbort() {
         this.abortHandling.compareAndSet(false, true);
@@ -213,8 +216,20 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
         context.isFinished = false;
         for (OperationChain oc : this.tpg.threadToOCs.get(context.thisThreadId)) {
             oc.level = 0;
+            resetOp(oc);
         }
+        context.scheduledTasks = 0;
+        context.totalTasks = 0;
         INITIALIZE(context);
+    }
+    private void resetOp(OperationChain oc) {
+        for (Operation op : oc.operations) {
+            if (op.operationState.equals(MetaTypes.OperationStateType.ABORTED)) {
+                oc.level = oc.level + 1;
+            } else {
+                op.operationState = MetaTypes.OperationStateType.BLOCKED;
+            }
+        }
     }
 
     @Override

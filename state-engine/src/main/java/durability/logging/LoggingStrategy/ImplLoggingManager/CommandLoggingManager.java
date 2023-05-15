@@ -121,8 +121,10 @@ public class CommandLoggingManager implements LoggingManager {
                 LOG.info("Total tasks: " + this.cpg.tasks.size());
                 start_evaluate();
             }
-            SOURCE_CONTROL.getInstance().waitForOtherThreads(redoLogResult.threadId);
             MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(redoLogResult.threadId);
+            MeasureTools.BEGIN_SCHEDULE_WAIT_TIME_MEASURE(redoLogResult.threadId);
+            SOURCE_CONTROL.getInstance().waitForOtherThreads(redoLogResult.threadId);
+            MeasureTools.END_SCHEDULE_WAIT_TIME_MEASURE(redoLogResult.threadId);
             MeasureTools.END_SCHEDULE_EXPLORE_TIME_MEASURE(redoLogResult.threadId);
             MeasureTools.SCHEDULE_TIME_RECORD(redoLogResult.threadId, 0);
         }
