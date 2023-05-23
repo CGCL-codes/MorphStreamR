@@ -1,7 +1,7 @@
 #!/bin/bash
 source dir.sh || exit
 function ResetParameters() {
-     app="TollProcessing"
+    app="TollProcessing"
     checkpointInterval=40960
     tthread=24
     scheduler="OG_NS_A"
@@ -11,7 +11,7 @@ function ResetParameters() {
     NUM_ITEMS=491520
     abort_ratio=3000
     overlap_ratio=10
-    key_skewness=25
+    key_skewness=30
     isDynamic=1
     workloadType="default,unchanging,unchanging,unchanging"
   # workloadType="default,unchanging,unchanging,unchanging,Up_abort,Down_abort,unchanging,unchanging"
@@ -29,7 +29,7 @@ function ResetParameters() {
     FTOption=0
     isRecovery=0
     isFailure=0
-    failureTime=25000
+    failureTime=250000
     measureInterval=100
     compressionAlg="None"
     isSelective=0
@@ -117,10 +117,10 @@ function withoutRecovery() {
 function application_runner() {
  ResetParameters
  app=TollProcessing
- for FTOption in 0
+ for FTOption in 5 6
  do
- withoutRecovery
- #withRecovery
+ #withoutRecovery
+ withRecovery
  done
 }
 application_runner

@@ -33,7 +33,7 @@ function ResetParameters() {
     FTOption=0
     isRecovery=0
     isFailure=0
-    failureTime=25000
+    failureTime=250000
     measureInterval=100
     compressionAlg="None"
     isSelective=0
@@ -129,10 +129,10 @@ function withoutRecovery() {
 function application_runner() {
  ResetParameters
  app=GrepSum
- for FTOption in 0
+ for FTOption in 4 5 6
  do
- withoutRecovery
- #withRecovery
+ #withoutRecovery
+ withRecovery
  done
 }
 application_runner

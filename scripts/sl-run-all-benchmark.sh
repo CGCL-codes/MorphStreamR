@@ -15,7 +15,7 @@ function ResetParameters() {
     key_skewness=45
     isCyclic=1
     isDynamic=1
-    workloadType="default,unchanging,unchanging,unchanging"
+    workloadType="default,unchanging,unchanging,Up_abort"
   # workloadType="default,unchanging,unchanging,unchanging,Up_abort,Down_abort,unchanging,unchanging"
   # workloadType="default,unchanging,unchanging,unchanging,Up_skew,Up_skew,Up_skew,Up_PD,Up_PD,Up_PD,Up_abort,Up_abort,Up_abort"
     schedulerPool="OP_BFS_A,OP_BFS"
@@ -31,7 +31,7 @@ function ResetParameters() {
     FTOption=0
     isRecovery=0
     isFailure=0
-    failureTime=25000
+    failureTime=250000
     measureInterval=100
     compressionAlg="None"
     isSelective=0
@@ -72,7 +72,7 @@ function runApplication() {
               --compressionAlg $compressionAlg \
               --isSelective $isSelective \
               --maxItr $maxItr"
-    java -Xms300g -Xmx300g -Xss100M -XX:+PrintGCDetails -Xmn200g -XX:+UseG1GC -jar -d64 $JAR \
+    java -Xms400g -Xmx400g -Xss100M -XX:+PrintGCDetails -Xmn300g -XX:+UseG1GC -jar -d64 $JAR \
       --app $app \
       --NUM_ITEMS $NUM_ITEMS \
       --tthread $tthread \
@@ -123,10 +123,10 @@ function withoutRecovery() {
 function application_runner() {
  ResetParameters
  app=StreamLedger
- for FTOption in 0
+ for FTOption in 4 5 6
  do
- withoutRecovery
- #withRecovery
+ #withoutRecovery
+ withRecovery
  done
 }
 application_runner

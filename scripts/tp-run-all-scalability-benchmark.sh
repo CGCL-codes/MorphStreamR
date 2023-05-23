@@ -9,11 +9,11 @@ function ResetParameters() {
     CCOption=3 #TSTREAM
     complexity=8000
     NUM_ITEMS=491520
-    abort_ratio=0
+    abort_ratio=3000
     overlap_ratio=10
-    key_skewness=25
+    key_skewness=30
     isDynamic=1
-    workloadType="default,Up_abort,unchanging,Down_abort"
+    workloadType="default,unchanging,unchanging,unchanging"
   # workloadType="default,unchanging,unchanging,unchanging,Up_abort,Down_abort,unchanging,unchanging"
   # workloadType="default,unchanging,unchanging,unchanging,Up_skew,Up_skew,Up_skew,Up_PD,Up_PD,Up_PD,Up_abort,Up_abort,Up_abort"
     schedulerPool="OG_NS_A,OG_NS"
@@ -110,15 +110,15 @@ function withRecovery() {
     runApplication
 }
 function multicoreEvaluation() {
-   tthread=24
-   snapshotInterval=4
+  #  tthread=24
+  #  snapshotInterval=4
+  #  withRecovery
+  #  sleep 2s
+
+   tthread=12
+   snapshotInterval=8
    withRecovery
    sleep 2s
-
-  tthread=12
-  snapshotInterval=8
-  withRecovery
-  sleep 2s
 
    tthread=8
    snapshotInterval=12
@@ -139,7 +139,7 @@ function multicoreEvaluation() {
 function application_runner() {
  ResetParameters
  app=TollProcessing
- for FTOption in 4
+ for FTOption in 1 5 6
  do
  multicoreEvaluation
  done

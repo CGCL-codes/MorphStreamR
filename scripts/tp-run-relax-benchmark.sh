@@ -11,7 +11,7 @@ function ResetParameters() {
     NUM_ITEMS=491520
     abort_ratio=3000
     overlap_ratio=10
-    key_skewness=25
+    key_skewness=30
     isDynamic=1
     workloadType="default,unchanging,unchanging,unchanging"
   # workloadType="default,unchanging,unchanging,unchanging,Up_abort,Down_abort,unchanging,unchanging"
@@ -126,30 +126,30 @@ function withoutRecovery() {
 
 function application_runner() {
  ResetParameters
- app=TollProcessing
- for FTOption in 1
- do
- #withoutRecovery
- withRecovery
- done
+#  app=TollProcessing
+#  for FTOption in 1
+#  do
+#  #withoutRecovery
+#  withRecovery
+#  done
 
- for FTOption in 3
- do
- isHistoryView=1
- isAbortPushDown=0
- isTaskPlacing=0
- #withoutRecovery
- withRecovery
- done
+#  for FTOption in 3
+#  do
+#  isHistoryView=1
+#  isAbortPushDown=0
+#  isTaskPlacing=0
+#  #withoutRecovery
+#  withRecovery
+#  done
 
- for FTOption in 3
- do
- isHistoryView=1
- isAbortPushDown=1
- isTaskPlacing=0
- #withoutRecovery
- withRecovery
- done
+#  for FTOption in 3
+#  do
+#  isHistoryView=1
+#  isAbortPushDown=1
+#  isTaskPlacing=0
+#  #withoutRecovery
+#  withRecovery
+#  done
 
  for FTOption in 3
  do

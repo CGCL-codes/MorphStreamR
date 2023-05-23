@@ -630,6 +630,7 @@ public class MeasureTools {
             WriteRecoverySchedulerTimeBreakdownReport(tthread, recoveryTime);
             fileWriter.write("OverallBreakDownReport (ms): " + "\n");
             fileWriter.write("Reload\t Explore\t Execute\t Abort\t Construct\t Wait\n");
+            recoveryTime[0] = 0;
             if (FTOption == FTOption_ISC) {
                 String output = String.format(
                         "%-10.2f\t" +
@@ -660,7 +661,7 @@ public class MeasureTools {
                                 "%-10.2f\t" +
                                 "%-10.2f\t" +
                                 "%-10.2f\t"
-                        , recoveryTime[0] + recoveryTime[2] + recoveryTime[5], recoveryTime[4], recoveryTime[6], recoveryTime[7], 0.0, recoveryTime[9] + recoveryTime[1] - recoveryTime[4] - recoveryTime[5] - recoveryTime[6]);
+                        , recoveryTime[0] + recoveryTime[2] + recoveryTime[5], recoveryTime[4], recoveryTime[6], recoveryTime[7], 0.0, recoveryTime[1] - recoveryTime[4] - recoveryTime[5] - recoveryTime[6]);
                 fileWriter.write(output + "\n");
             }
             if (FTOption == FTOption_Dependency) {
@@ -671,7 +672,7 @@ public class MeasureTools {
                                 "%-10.2f\t" +
                                 "%-10.2f\t" +
                                 "%-10.2f\t"
-                        , recoveryTime[0] + recoveryTime[2] + recoveryTime[5], recoveryTime[4], recoveryTime[6], recoveryTime[7], recoveryTime[13], recoveryTime[9] + recoveryTime[1] - recoveryTime[4] - recoveryTime[5] - recoveryTime[6] - recoveryTime[13]);
+                        , recoveryTime[0] + recoveryTime[2] + recoveryTime[5], recoveryTime[4], recoveryTime[6], recoveryTime[7], recoveryTime[13], recoveryTime[1] - recoveryTime[4] - recoveryTime[5] - recoveryTime[6] - recoveryTime[13]);
                 fileWriter.write(output + "\n");
             }
             if (FTOption == FTOption_Command) {
@@ -682,7 +683,7 @@ public class MeasureTools {
                                 "%-10.2f\t" +
                                 "%-10.2f\t" +
                                 "%-10.2f\t"
-                        , recoveryTime[0] + recoveryTime[2] + recoveryTime[5], recoveryTime[4], recoveryTime[6], recoveryTime[7], 0.0, recoveryTime[9] + recoveryTime[1] - recoveryTime[4] - recoveryTime[5] - recoveryTime[6]);
+                        , recoveryTime[0] + recoveryTime[2] + recoveryTime[5], recoveryTime[4], recoveryTime[6], recoveryTime[7], 0.0, recoveryTime[1] - recoveryTime[4] - recoveryTime[5] - recoveryTime[6]);
                 fileWriter.write(output + "\n");
             }
             fileWriter.write("reloadDatabaseTime\t redoWriteAheadLogTime\t reloadInputTime\t stream_process\t explore_time\t construct_time\t useful_time\t abort_time\t overheads\t abort_push_down\t history_inspect\t tasking_placing\t construct_graph\n");

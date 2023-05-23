@@ -15,7 +15,7 @@ function ResetParameters() {
     key_skewness=45
     isCyclic=1
     isDynamic=1
-    workloadType="default,unchanging,unchanging,unchanging"
+    workloadType="default,unchanging,unchanging,Up_abort"
   # workloadType="default,unchanging,unchanging,unchanging,Up_abort,Down_abort,unchanging,unchanging"
   # workloadType="default,unchanging,unchanging,unchanging,Up_skew,Up_skew,Up_skew,Up_PD,Up_PD,Up_PD,Up_abort,Up_abort,Up_abort"
     schedulerPool="OP_BFS_A,OP_BFS"
