@@ -5,7 +5,6 @@ import common.collections.OsUtils;
 import common.io.ByteIO.DataInputView;
 import common.io.ByteIO.InputWithDecompression.NativeDataInputView;
 import common.io.ByteIO.InputWithDecompression.SnappyDataInputView;
-import common.util.io.IOUtils;
 import durability.ftmanager.FTManager;
 import durability.logging.LoggingResource.ImplLoggingResources.CommandLoggingResources;
 import durability.logging.LoggingResult.Attachment;
@@ -16,7 +15,6 @@ import durability.recovery.RedoLogResult;
 import durability.recovery.command.CommandPrecedenceGraph;
 import durability.recovery.histroyviews.HistoryViews;
 import durability.snapshot.LoggingOptions;
-import durability.struct.Logging.CommandLog;
 import durability.struct.Logging.LoggingEntry;
 import durability.struct.Logging.NativeCommandLog;
 import org.slf4j.Logger;
@@ -182,6 +180,12 @@ public class CommandLoggingManager implements LoggingManager {
     public HistoryViews getHistoryViews() {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public void selectiveLoggingPartition(int partitionId) {
+        throw  new UnsupportedOperationException();
+    }
+
     private void SLExecute(NativeCommandLog task) {
         if (task == null) return;
         String table = task.tableName;

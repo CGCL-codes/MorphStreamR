@@ -154,6 +154,11 @@ public class WALManager implements LoggingManager {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public void selectiveLoggingPartition(int partitionId) {
+        throw new UnsupportedOperationException();
+    }
+
     public static class WriteAheadLogTableInfo implements Serializable {
         public final String tableName;
         public final RecordSchema recordSchema;

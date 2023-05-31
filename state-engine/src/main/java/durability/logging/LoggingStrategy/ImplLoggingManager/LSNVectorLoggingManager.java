@@ -5,7 +5,6 @@ import common.collections.OsUtils;
 import common.io.ByteIO.DataInputView;
 import common.io.ByteIO.InputWithDecompression.NativeDataInputView;
 import common.io.ByteIO.InputWithDecompression.SnappyDataInputView;
-import common.util.io.IOUtils;
 import durability.ftmanager.FTManager;
 import durability.logging.LoggingEntry.LVLogRecord;
 import durability.logging.LoggingResource.ImplLoggingResources.LSNVectorLoggingResources;
@@ -283,5 +282,10 @@ public class LSNVectorLoggingManager implements LoggingManager {
     @Override
     public HistoryViews getHistoryViews() {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void selectiveLoggingPartition(int partitionId) {
+        throw  new UnsupportedOperationException();
     }
 }

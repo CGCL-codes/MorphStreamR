@@ -1,5 +1,6 @@
 package scheduler.context.recovery;
 
+import common.util.io.IOUtils;
 import scheduler.Request;
 import scheduler.context.SchedulerContext;
 import scheduler.struct.recovery.Operation;
@@ -43,6 +44,9 @@ public class RSContext implements SchedulerContext {
             }
         } else {
             ready_oc = wait_op.dependentOC;
+            if (!allocatedTasks.contains(ready_oc)) {
+                IOUtils.println("Error");
+            }
             wait_op = null;
         }
     }

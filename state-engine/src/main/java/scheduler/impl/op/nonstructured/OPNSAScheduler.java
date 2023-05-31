@@ -1,5 +1,6 @@
 package scheduler.impl.op.nonstructured;
 
+import durability.struct.FaultToleranceRelax;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import profiler.MeasureTools;
@@ -22,6 +23,9 @@ public class OPNSAScheduler<Context extends OPNSAContext> extends OPNSScheduler<
     @Override
     public void INITIALIZE(Context context) {
         tpg.firstTimeExploreTPG(context);
+        if (tpg.isLogging == LOGOption_path && FaultToleranceRelax.isSelectiveLogging) {
+            this.loggingManager.selectiveLoggingPartition(context.thisThreadId);
+        }
         context.partitionStateManager.initialize(executableTaskListener);
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
     }

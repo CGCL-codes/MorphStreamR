@@ -146,7 +146,7 @@ public class MeasureSink extends BaseSink {
                 + OsUtils.osWrapperPostFix("FTOption = %d")
                 + OsUtils.osWrapperPostFix("threads = %d")
                 + OsUtils.osWrapperPostFix("totalEvents = %d")
-                + ("%d_%d_%d_%d_%d_%d_%s_%s_%d_%s_%s_%s");
+                + ("%d_%d_%d_%d_%d_%d_%s_%s_%d_%s_%s_%s_%d");
 
         String scheduler = config.getString("scheduler");
         if (config.getInt("CCOption") == CCOption_SStore) {
@@ -170,7 +170,8 @@ public class MeasureSink extends BaseSink {
                     config.getInt("complexity"),
                     config.getBoolean("isHistoryView"),
                     config.getBoolean("isAbortPushDown"),
-                    config.getBoolean("isTaskPlacing"));
+                    config.getBoolean("isTaskPlacing"),
+                    config.getInt("checkpoint"));
         } else if (config.getString("common").equals("GrepSum")) {
             directory = String.format(statsFolderPattern,
                     config.getString("common"), scheduler,
@@ -187,7 +188,8 @@ public class MeasureSink extends BaseSink {
                     config.getInt("complexity"),
                     config.getBoolean("isHistoryView"),
                     config.getBoolean("isAbortPushDown"),
-                    config.getBoolean("isTaskPlacing"));
+                    config.getBoolean("isTaskPlacing"),
+                    config.getInt("checkpoint"));
         } else if (config.getString("common").equals("OnlineBiding")){
             directory = String.format(statsFolderPattern,
                     config.getString("common"), scheduler,
@@ -204,7 +206,8 @@ public class MeasureSink extends BaseSink {
                     config.getInt("complexity"),
                     config.getBoolean("isHistoryView"),
                     config.getBoolean("isAbortPushDown"),
-                    config.getBoolean("isTaskPlacing"));
+                    config.getBoolean("isTaskPlacing"),
+                    config.getInt("checkpoint"));
         } else if (config.getString("common").equals("TollProcessing")){
             directory = String.format(statsFolderPattern,
                     config.getString("common"), scheduler,
@@ -221,7 +224,8 @@ public class MeasureSink extends BaseSink {
                     config.getInt("complexity"),
                     config.getBoolean("isHistoryView"),
                     config.getBoolean("isAbortPushDown"),
-                    config.getBoolean("isTaskPlacing"));
+                    config.getBoolean("isTaskPlacing"),
+                    config.getInt("checkpoint"));
         } else {
             throw new UnsupportedOperationException();
         }

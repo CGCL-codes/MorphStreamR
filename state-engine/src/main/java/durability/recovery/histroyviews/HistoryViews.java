@@ -61,4 +61,7 @@ public class HistoryViews {
         this.allocationPlans.putIfAbsent(groupId, new AllocationPlan());
         this.allocationPlans.get(groupId).addPlan(table, threadId, plan);
     }
+    public boolean checkWhetherDifferentPartition(long groupId, String table, String from, String to) {
+        return this.allocationPlans.get(groupId).checkWhetherDifferentPartition(table, Integer.parseInt(from), Integer.parseInt(to));
+    }
 }

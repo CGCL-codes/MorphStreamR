@@ -1,5 +1,6 @@
 package scheduler.impl.og.nonstructured;
 
+import durability.struct.FaultToleranceRelax;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import profiler.MeasureTools;
@@ -15,6 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static common.CONTROL.enable_log;
 import static profiler.MeasureTools.BEGIN_SCHEDULE_ABORT_TIME_MEASURE;
 import static profiler.MeasureTools.END_SCHEDULE_ABORT_TIME_MEASURE;
+import static utils.FaultToleranceConstants.LOGOption_path;
 
 public class OGNSScheduler extends AbstractOGNSScheduler<OGNSContext> {
     private static final Logger log = LoggerFactory.getLogger(OGNSScheduler.class);
@@ -31,6 +33,9 @@ public class OGNSScheduler extends AbstractOGNSScheduler<OGNSContext> {
     public void INITIALIZE(OGNSContext context) {
         needAbortHandling.compareAndSet(true, false);
         tpg.firstTimeExploreTPG(context);
+        if (tpg.isLogging == LOGOption_path && FaultToleranceRelax.isSelectiveLogging) {
+            this.loggingManager.selectiveLoggingPartition(context.thisThreadId);
+        }
         context.partitionStateManager.initialize(executableTaskListener);
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
     }

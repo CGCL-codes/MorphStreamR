@@ -1,5 +1,6 @@
 package scheduler.impl.og.structured;
 
+import durability.struct.FaultToleranceRelax;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import profiler.MeasureTools;
@@ -18,6 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static common.CONTROL.enable_log;
 import static profiler.MeasureTools.BEGIN_SCHEDULE_ABORT_TIME_MEASURE;
 import static profiler.MeasureTools.END_SCHEDULE_ABORT_TIME_MEASURE;
+import static utils.FaultToleranceConstants.LOGOption_path;
 
 public abstract class OGSScheduler<Context extends OGSContext> extends OGScheduler<Context> {
     private static final Logger log = LoggerFactory.getLogger(OGSScheduler.class);
@@ -32,6 +34,9 @@ public abstract class OGSScheduler<Context extends OGSContext> extends OGSchedul
         needAbortHandling = false;
         int threadId = context.thisThreadId;
         tpg.firstTimeExploreTPG(context);
+        if (tpg.isLogging == LOGOption_path && FaultToleranceRelax.isSelectiveLogging) {
+            this.loggingManager.selectiveLoggingPartition(context.thisThreadId);
+        }
         SOURCE_CONTROL.getInstance().exploreTPGBarrier(threadId);//sync for all threads to come to this line to ensure chains are constructed for the current batch.
     }
 

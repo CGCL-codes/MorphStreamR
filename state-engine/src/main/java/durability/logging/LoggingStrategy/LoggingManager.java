@@ -21,4 +21,5 @@ public interface LoggingManager {
     Object inspectDependencyView(long groupId, String table, String from, String to, long bid);
     HashMap<String, List<Integer>> inspectTaskPlacing(long groupId, int threadId);
     HistoryViews getHistoryViews();
+    void selectiveLoggingPartition(int partitionId);
 }

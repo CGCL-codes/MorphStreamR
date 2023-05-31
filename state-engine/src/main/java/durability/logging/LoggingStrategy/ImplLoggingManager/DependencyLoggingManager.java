@@ -5,7 +5,6 @@ import common.collections.OsUtils;
 import common.io.ByteIO.DataInputView;
 import common.io.ByteIO.InputWithDecompression.NativeDataInputView;
 import common.io.ByteIO.InputWithDecompression.SnappyDataInputView;
-import common.util.io.IOUtils;
 import profiler.MeasureTools;
 import storage.TableRecord;
 import storage.datatype.DataBox;
@@ -228,6 +227,12 @@ public class DependencyLoggingManager implements LoggingManager {
     public HistoryViews getHistoryViews() {
         throw new UnsupportedOperationException("DependencyLoggingManager does not support getHistoryViews");
     }
+
+    @Override
+    public void selectiveLoggingPartition(int partitionId) {
+        throw  new UnsupportedOperationException();
+    }
+
     public int getPartitionId(String primary_key) {
         int key = Integer.parseInt(primary_key);
         return key / delta;

@@ -17,6 +17,7 @@ import durability.logging.LoggingStream.ImplLoggingStreamFactory.NIOPathStreamFa
 import durability.recovery.RedoLogResult;
 import durability.recovery.histroyviews.HistoryViews;
 import durability.snapshot.LoggingOptions;
+import durability.struct.Logging.HistoryLog;
 import durability.struct.Logging.LoggingEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,13 +54,13 @@ public class PathLoggingManager implements LoggingManager {
     public PathLoggingManager(Configuration configuration) {
         loggingPath = configuration.getString("rootFilePath") + OsUtils.OS_wrapper("logging");
         parallelNum = configuration.getInt("parallelNum");
-        loggingOptions = new LoggingOptions(parallelNum, configuration.getString("compressionAlg"), configuration.getBoolean("isSelective"), configuration.getInt("maxItr"));
+        loggingOptions = new LoggingOptions(parallelNum, configuration.getString("compressionAlg"), configuration.getBoolean("isSelectiveLogging"), configuration.getInt("maxItr"));
         for (int i = 0; i < parallelNum; i ++) {
             this.threadToPathRecord.put(i, new PathRecord());
         }
         int app = configuration.getInt("app");
         if (app == 0) {//GS
-            graphs.put("MicroTable", new Graph(configuration.getInt("NUM_ITEMS"),parallelNum));
+            graphs.put("MicroTable", new Graph(configuration.getInt("NUM_ITEMS"), parallelNum));
         } else if (app == 1) {//SL
             graphs.put("accounts", new Graph(configuration.getInt("NUM_ITEMS"), parallelNum));
             graphs.put("bookEntries", new Graph(configuration.getInt("NUM_ITEMS"), parallelNum));
@@ -81,15 +82,20 @@ public class PathLoggingManager implements LoggingManager {
 
     @Override
     public void addLogRecord(LoggingEntry logRecord) {
-        throw new UnsupportedOperationException("Not supported yet");
+        HistoryLog historyLog =  (HistoryLog) logRecord;
+        if (graphs.get(historyLog.table).isDifferentPartition(Integer.parseInt(historyLog.from), Integer.parseInt(historyLog.to))) {
+            this.threadToPathRecord.get(historyLog.id).addDependencyEdge(historyLog.table, historyLog.from, historyLog.to, historyLog.bid, historyLog.value);
+        }
     }
 
     @Override
     public void commitLog(long groupId, int partitionId, FTManager ftManager) throws IOException {
         if (this.loggingOptions.isSelectiveLog()) {
-            graphPartition(partitionId, loggingOptions.getMax_itr());
             for (String table : this.graphs.keySet()) {
                 this.threadToPathRecord.get(partitionId).tableToPlacing.put(table, this.graphs.get(table).getPartitions().get(partitionId));
+                if (partitionId == 0) {
+                    this.graphs.get(table).clean();
+                }
             }
         }
         NIOPathStreamFactory nioPathStreamFactory = new NIOPathStreamFactory(this.loggingPath);
@@ -195,7 +201,6 @@ public class PathLoggingManager implements LoggingManager {
             return result;
         }
     }
-
     @Override
     public HistoryViews getHistoryViews() {
         return this.historyViews;
@@ -216,5 +221,9 @@ public class PathLoggingManager implements LoggingManager {
             }
         }
         SOURCE_CONTROL.getInstance().waitForOtherThreads(partitionId);
+    }
+    @Override
+    public void selectiveLoggingPartition(int partitionId) {
+       graphPartition(partitionId, loggingOptions.getMax_itr());
     }
 }

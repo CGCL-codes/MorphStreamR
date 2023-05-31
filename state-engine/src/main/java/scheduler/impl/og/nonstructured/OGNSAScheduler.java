@@ -1,5 +1,6 @@
 package scheduler.impl.og.nonstructured;
 
+import durability.struct.FaultToleranceRelax;
 import scheduler.context.og.OGNSAContext;
 import scheduler.struct.MetaTypes;
 import scheduler.struct.og.Operation;
@@ -20,6 +21,9 @@ public class OGNSAScheduler extends AbstractOGNSScheduler<OGNSAContext> {
     @Override
     public void INITIALIZE(OGNSAContext context) {
         tpg.firstTimeExploreTPG(context);
+        if (tpg.isLogging == LOGOption_path && FaultToleranceRelax.isSelectiveLogging) {
+            this.loggingManager.selectiveLoggingPartition(context.thisThreadId);
+        }
         context.partitionStateManager.initialize(executableTaskListener);
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
     }

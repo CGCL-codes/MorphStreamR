@@ -5,6 +5,7 @@ import durability.logging.LoggingEntry.LogRecord;
 import durability.logging.LoggingStrategy.ImplLoggingManager.*;
 import durability.logging.LoggingStrategy.LoggingManager;
 import durability.struct.Logging.DependencyLog;
+import durability.struct.Logging.HistoryLog;
 import durability.struct.Logging.LVCLog;
 import durability.struct.Logging.NativeCommandLog;
 import org.slf4j.Logger;
@@ -13,7 +14,6 @@ import profiler.MeasureTools;
 import scheduler.Request;
 import scheduler.impl.IScheduler;
 import scheduler.context.op.OPSchedulerContext;
-import scheduler.struct.AbstractOperation;
 import scheduler.struct.MetaTypes;
 import scheduler.struct.op.Operation;
 import scheduler.struct.op.TaskPrecedenceGraph;
@@ -174,7 +174,7 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
             if (isLogging == LOGOption_path && !operation.pKey.equals(preValues.GetPrimaryKey()) && !operation.isCommit) {
                 MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(operation.context.thisThreadId);
                 int id = getTaskId(operation.pKey, delta);
-                this.tpg.threadToPathRecord.get(id).addDependencyEdge(operation.table_name, operation.pKey, preValues.GetPrimaryKey(), operation.bid, sourceAccountBalance);
+                this.loggingManager.addLogRecord(new HistoryLog(id, operation.table_name, operation.pKey, preValues.GetPrimaryKey(), operation.bid, sourceAccountBalance));
                 operation.isCommit = true;
                 MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(operation.context.thisThreadId);
             }
@@ -231,7 +231,7 @@ public abstract class OPScheduler<Context extends OPSchedulerContext, Task> impl
                     if (!operation.pKey.equals(operation.condition_records[i].record_.GetPrimaryKey())) {
                         MeasureTools.BEGIN_SCHEDULE_TRACKING_TIME_MEASURE(operation.context.thisThreadId);
                         int id = getTaskId(operation.pKey, delta);
-                        this.tpg.threadToPathRecord.get(id).addDependencyEdge(operation.table_name, operation.pKey, operation.condition_records[i].record_.GetPrimaryKey(), operation.bid, sum);
+                        this.loggingManager.addLogRecord(new HistoryLog(id, operation.table_name, operation.pKey, operation.condition_records[i].record_.GetPrimaryKey(), operation.bid, sum));
                         operation.isCommit = true;
                         MeasureTools.END_SCHEDULE_TRACKING_TIME_MEASURE(operation.context.thisThreadId);
                     }

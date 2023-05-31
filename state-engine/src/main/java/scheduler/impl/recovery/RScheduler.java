@@ -175,13 +175,14 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
                     MeasureTools.END_SCHEDULE_USEFUL_TIME_MEASURE(context.thisThreadId);
                 } else {
                     context.wait_op = op;
+                    break;
                 }
             } else {
-                if (op.operationState.equals(MetaTypes.OperationStateType.READY))
-                    continue;
-                op.pdCount.decrementAndGet();
-                op.operationState = MetaTypes.OperationStateType.READY;
-                oc.level = oc.level + 1;
+                if (op.operationState.equals(MetaTypes.OperationStateType.BLOCKED)) {
+                    op.pdCount.decrementAndGet();
+                    op.operationState = MetaTypes.OperationStateType.READY;
+                    oc.level = oc.level + 1;
+                }
             }
         }
     }
@@ -402,12 +403,10 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
                 } else {
                     if (FaultToleranceRelax.isAbortPushDown) {
                         OperationChain OCFromConditionSource = tpg.getOC(condition_sourceTable[index], condition_source[index]);
-                        //DFS-like
-                        op.incrementPd(OCFromConditionSource);
-                        //Add the proxy operations
-                        OCFromConditionSource.addOperation(op);
                         //Add dependent Oc
-                        OCFromConditionSource.addDependentOCs(curOC);
+                        op.incrementPd(OCFromConditionSource);
+                        //Add the shadow operations
+                        OCFromConditionSource.addOperation(op);
                     }
                 }
             }
@@ -428,12 +427,10 @@ public class RScheduler<Context extends RSContext> implements IScheduler<Context
                 } else {
                     if (FaultToleranceRelax.isAbortPushDown) {
                         OperationChain OCFromConditionSource = tpg.getOC(condition_sourceTable[index], condition_source[index]);
-                        //DFS-like
-                        op.incrementPd(OCFromConditionSource);
-                        //Add the proxy operations
-                        OCFromConditionSource.addOperation(op);
                         //Add dependent Oc
-                        OCFromConditionSource.addDependentOCs(curOC);
+                        op.incrementPd(OCFromConditionSource);
+                        //Add the shadow operations
+                        OCFromConditionSource.addOperation(op);
                     }
                 }
             }

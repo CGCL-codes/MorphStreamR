@@ -6,6 +6,8 @@ import scheduler.struct.og.Operation;
 import scheduler.struct.og.OperationChain;
 import transaction.impl.ordered.MyList;
 
+import static utils.FaultToleranceConstants.LOGOption_path;
+
 public abstract class AbstractOGNSScheduler<Context extends AbstractOGNSContext>
         extends OGScheduler<Context> {
 
@@ -16,6 +18,9 @@ public abstract class AbstractOGNSScheduler<Context extends AbstractOGNSContext>
     @Override
     public void INITIALIZE(Context context) {
         tpg.firstTimeExploreTPG(context);
+        if (tpg.isLogging == LOGOption_path) {
+            this.loggingManager.selectiveLoggingPartition(context.thisThreadId);
+        }
     }
 
     /**

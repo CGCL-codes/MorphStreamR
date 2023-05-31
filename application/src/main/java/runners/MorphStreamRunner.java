@@ -174,6 +174,7 @@ public class MorphStreamRunner extends Runner {
             FaultToleranceRelax.isHistoryView = config.getBoolean("isHistoryView");
             FaultToleranceRelax.isAbortPushDown = config.getBoolean("isAbortPushDown");
             FaultToleranceRelax.isTaskPlacing = config.getBoolean("isTaskPlacing");
+            FaultToleranceRelax.isSelectiveLogging = config.getBoolean("isSelectiveLogging");
         } else {
             config.putAll(Configuration.fromStr(configStr));
         }

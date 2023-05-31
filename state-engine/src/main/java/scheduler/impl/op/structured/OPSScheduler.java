@@ -1,5 +1,6 @@
 package scheduler.impl.op.structured;
 
+import durability.struct.FaultToleranceRelax;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import profiler.MeasureTools;
@@ -26,6 +27,9 @@ public class OPSScheduler<Context extends OPSContext> extends OPScheduler<Contex
     public void INITIALIZE(Context context) {
         needAbortHandling = false;
         tpg.firstTimeExploreTPG(context);
+        if (tpg.isLogging == LOGOption_path && FaultToleranceRelax.isSelectiveLogging) {
+            this.loggingManager.selectiveLoggingPartition(context.thisThreadId);
+        }
         SOURCE_CONTROL.getInstance().waitForOtherThreads(context.thisThreadId);
     }
 

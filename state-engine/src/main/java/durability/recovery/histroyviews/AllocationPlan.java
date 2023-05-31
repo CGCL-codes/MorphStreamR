@@ -18,4 +18,14 @@ public class AllocationPlan {
         tableToPlan.putIfAbsent(table, new ConcurrentHashMap<>());
         tableToPlan.get(table).put(threadId, plan);
     }
+    public boolean checkWhetherDifferentPartition(String table, int from, int to) {
+        ConcurrentHashMap<Integer, List<Integer>> plans = tableToPlan.get(table);
+        for (int threadId : plans.keySet()) {
+            List<Integer> plan = plans.get(threadId);
+            if (plan.contains(from) && plan.contains(to)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

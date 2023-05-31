@@ -200,10 +200,6 @@ public abstract class Runner implements IRunner {
     public Integer FTOption = 0;
     @Parameter(names = {"--compressionAlg"}, description = "compression Alg: ")
     public String  compressionAlg = "None";
-    @Parameter(names = {"--isSelective"}, description = "isSelective: ")
-    public int  isSelective = 0;
-    @Parameter(names = {"--maxItr"}, description = "Max itr for graph partition alg: ")
-    public int  maxItr = 0;
     @Parameter(names = {"--snapshotInterval"}, description = "Snapshot interval ")
     public Integer snapshotInterval = 0;
     @Parameter(names = {"--arrivalRate"}, description = "Arrival rate of event, 200k/s ")
@@ -226,7 +222,10 @@ public abstract class Runner implements IRunner {
     public Integer isAbortPushDown = 1;
     @Parameter(names = {"--isTaskPlacing"}, description = "Whether to task placing or not")
     public Integer isTaskPlacing = 1;
-
+    @Parameter(names = {"--isSelectiveLogging"}, description = "Whether to selective logging or not")
+    public Integer isSelectiveLogging = 0;
+    @Parameter(names = {"--maxItr"}, description = "Max itr for graph partition alg: ")
+    public int  maxItr = 10;
 
     public Runner() {
         CFG_PATH = "/config/%s.properties";
@@ -385,11 +384,6 @@ public abstract class Runner implements IRunner {
         config.put("arrivalRate", arrivalRate);
         config.put("failureTime", failureTime);
         config.put("measureInterval", measureInterval);
-        if (isSelective == 0) {
-            config.put("isSelective", false);
-        } else {
-            config.put("isSelective", true);
-        }
         config.put("maxItr",maxItr);
         if (arrivalControl == 0) {
             config.put("arrivalControl", false);
@@ -421,6 +415,11 @@ public abstract class Runner implements IRunner {
             config.put("isTaskPlacing", false);
         } else {
             config.put("isTaskPlacing", true);
+        }
+        if (isSelectiveLogging == 0) {
+            config.put("isSelectiveLogging", false);
+        } else {
+            config.put("isSelectiveLogging", true);
         }
 
         System.setProperty("my.log", metric_path);
