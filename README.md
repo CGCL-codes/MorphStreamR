@@ -28,20 +28,41 @@ bash scripts/tp-run-relax-benchmark.sh.
 
 ```
 ### Run breakdown analysis in section 6.3
-> bash scripts/gs-run-all-benchmark.sh
-> bash scripts/sl-run-all-benchmark.sh
-> bash scripts/tp-run-all-benchmark.sh
+```
+bash scripts/gs-run-all-benchmark.sh. 
+
+bash scripts/sl-run-all-benchmark.sh. 
+
+bash scripts/tp-run-all-benchmark.sh. 
+
+```
 ### Run scalability study in section 6.4
-> bash scripts/gs-run-all-scalability-benchmark.sh
-> bash scripts/sl-run-all-scalability-benchmark.sh
-> bash scripts/tp-run-all-scalability-benchmark.sh
+```
+bash scripts/gs-run-all-scalability-benchmark.sh. 
+
+bash scripts/sl-run-all-scalability-benchmark.sh. 
+
+bash scripts/tp-run-all-scalability-benchmark.sh. 
+
+```
 ### Run workload sensitivity study in section 6.5
-> bash scripts/gs-run-all-vary-abort-benchmark.sh
-> bash scripts/gs-run-all-vary-multiple-benchmark.sh
-> bash scripts/gs-run-all-vary-skew-benchmark.sh
+```
+bash scripts/gs-run-all-vary-abort-benchmark.sh. 
+
+bash scripts/gs-run-all-vary-multiple-benchmark.sh. 
+
+bash scripts/gs-run-all-vary-skew-benchmark.sh. 
+
+```
 ### Run overhead analysis in section 6.5
-> bash scripts/sl-run-all-benchmark.sh
-> bash scripts/sl-run-selective-logging-benchmark.sh
+```
+bash scripts/sl-run-all-benchmark.sh. 
+
+bash scripts/sl-run-selective-logging-benchmark.sh.  
+
+```
 ### Run other experiment
-> bash scripts/sl-run-vary-epoch-benchmark.sh
+```
+bash scripts/sl-run-vary-epoch-benchmark.sh
+```
 
