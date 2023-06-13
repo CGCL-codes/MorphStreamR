@@ -9,7 +9,7 @@
 - All experiments scripts are in scripts/
 - You can modify the result_dir and jar_dir in dir.sh
 ### Compile 
-> bash compile.sh
+<code> bash compile.sh </code>
 ### Run overall experiment in section 6.2
 > bash scripts/gs-run-all-benchmark.sh
 > bash scripts/sl-run-all-benchmark.sh
