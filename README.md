@@ -13,12 +13,20 @@
 bash compile.sh
 ```
 ### Run overall experiment in section 6.2
-> bash scripts/gs-run-all-benchmark.sh
-> bash scripts/sl-run-all-benchmark.sh
-> bash scripts/tp-run-all-benchmark.sh
-> bash scripts/gs-run-relax-benchmark.sh
-> bash scripts/sl-run-relax-benchmark.sh
-> bash scripts/tp-run-relax-benchmark.sh
+```
+bash scripts/gs-run-all-benchmark.sh. 
+
+bash scripts/sl-run-all-benchmark.sh. 
+
+bash scripts/tp-run-all-benchmark.sh. 
+
+bash scripts/gs-run-relax-benchmark.sh. 
+
+bash scripts/sl-run-relax-benchmark.sh. 
+
+bash scripts/tp-run-relax-benchmark.sh. 
+
+```
 ### Run breakdown analysis in section 6.3
 > bash scripts/gs-run-all-benchmark.sh
 > bash scripts/sl-run-all-benchmark.sh
