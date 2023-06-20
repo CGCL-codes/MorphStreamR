@@ -50,7 +50,7 @@ bash scripts/gs-run-all-vary-multiple-benchmark.sh.
 
 bash scripts/gs-run-all-vary-skew-benchmark.sh
 ```
-### Run overhead analysis in section 6.5
+### Run overhead analysis in section 6.6
 ```
 bash scripts/sl-run-all-benchmark.sh. 
 
