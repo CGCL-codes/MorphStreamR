@@ -85,7 +85,6 @@ public class PartitionStateManagerWithAbort implements Runnable, OperationChainS
         }
     }
     public void handleStateTransitionsWithAbortTracking(PathRecord pathRecord) {
-        //TODO: how to measure abort time
         OperationChainSignal ocSignal = ocSignalQueue.poll();
         while (ocSignal != null) {
             OperationChain operationChain = ocSignal.getTargetOperationChain();

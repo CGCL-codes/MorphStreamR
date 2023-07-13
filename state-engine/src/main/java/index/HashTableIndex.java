@@ -44,7 +44,6 @@ public class HashTableIndex extends BaseUnorderedIndex {
 
     @Override
     public Iterator<TableRecord> iterator() {
-        //
         HashMap<String, TableRecord> temp = new HashMap<>();
         for (int i = 0; i < this.partition_num; i ++) {
             temp.putAll(hash_index_by_partition.get(i));

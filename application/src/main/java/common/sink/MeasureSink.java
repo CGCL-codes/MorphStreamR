@@ -146,7 +146,7 @@ public class MeasureSink extends BaseSink {
                 + OsUtils.osWrapperPostFix("FTOption = %d")
                 + OsUtils.osWrapperPostFix("threads = %d")
                 + OsUtils.osWrapperPostFix("totalEvents = %d")
-                + ("%d_%d_%d_%d_%d_%d_%s_%s_%d_%s_%s_%s_%d");
+                + ("%d_%d_%d_%d_%d_%d_%s_%s_%d_%s_%s_%s_%s_%d");
 
         String scheduler = config.getString("scheduler");
         if (config.getInt("CCOption") == CCOption_SStore) {
@@ -171,6 +171,7 @@ public class MeasureSink extends BaseSink {
                     config.getBoolean("isHistoryView"),
                     config.getBoolean("isAbortPushDown"),
                     config.getBoolean("isTaskPlacing"),
+                    config.getBoolean("isSelectiveLogging"),
                     config.getInt("checkpoint"));
         } else if (config.getString("common").equals("GrepSum")) {
             directory = String.format(statsFolderPattern,
@@ -189,6 +190,7 @@ public class MeasureSink extends BaseSink {
                     config.getBoolean("isHistoryView"),
                     config.getBoolean("isAbortPushDown"),
                     config.getBoolean("isTaskPlacing"),
+                    config.getBoolean("isSelectiveLogging"),
                     config.getInt("checkpoint"));
         } else if (config.getString("common").equals("OnlineBiding")){
             directory = String.format(statsFolderPattern,
@@ -207,6 +209,7 @@ public class MeasureSink extends BaseSink {
                     config.getBoolean("isHistoryView"),
                     config.getBoolean("isAbortPushDown"),
                     config.getBoolean("isTaskPlacing"),
+                    config.getBoolean("isSelectiveLogging"),
                     config.getInt("checkpoint"));
         } else if (config.getString("common").equals("TollProcessing")){
             directory = String.format(statsFolderPattern,
@@ -225,6 +228,7 @@ public class MeasureSink extends BaseSink {
                     config.getBoolean("isHistoryView"),
                     config.getBoolean("isAbortPushDown"),
                     config.getBoolean("isTaskPlacing"),
+                    config.getBoolean("isSelectiveLogging"),
                     config.getInt("checkpoint"));
         } else {
             throw new UnsupportedOperationException();

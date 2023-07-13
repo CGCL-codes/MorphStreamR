@@ -96,7 +96,6 @@ public class Operation extends AbstractOperation implements Comparable<Operation
         fd_parents.add(parent);
     }
     public void addFDChild(Operation child) {
-//        assert condition_source_to_index.containsKey(pKey);
         fd_children.add(child);
     }
 
