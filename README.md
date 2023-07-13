@@ -1,36 +1,63 @@
 <meta name="robots" content="noindex">
 
-# MorphStreamDR
-
-- "R" stands for fast durability and recovery (R)
-- "D" stands for distributed (D) transactional stream processing engine
-
-This project aims at 
-(i) design fast durability and recovery mechanism for MorphStream,
-(ii)building a distributed (D) transactional (T) stream processing engine with CXL-enabled reliable storage backend.
-Compute Express Link (CXL) which is an industry-supported cache-coherent interconnect for processors, memory expansion and
-accelerators. CXL enables cacheable load/store (ld/st) accesses to memory on Intel, AMD, and ARM processors at nanosecond-
-scale latency. CXL access via loads/stores is a game changer to design systems with pooling and sharing memory.
-
-
-## How to Cite MorphStream
-
-If you use MorphStream in your paper, please cite our work.
-
-* **[ICDE]** Shuhao Zhang, Bingsheng He, Daniel Dahlmeier, Amelie Chi Zhou, Thomas Heinze. Revisiting the design of data stream processing systems on multi-core processors, ICDE, 2017 (code: https://github.com/ShuhaoZhangTony/ProfilingStudy)
-* **[SIGMOD]** Shuhao Zhang, Jiong He, Chi Zhou (Amelie), Bingsheng He. BriskStream: Scaling Stream Processing on Multicore Architectures, SIGMOD, 2019 (code: https://github.com/Xtra-Computing/briskstream)
-* **[ICDE]** Shuhao Zhang, Yingjun Wu, Feng Zhang, Bingsheng He. Towards Concurrent Stateful Stream Processing on Multicore Processors, ICDE, 2020
-* **[xxx]** We have an anonymized submission under review. Stay tuned.
+# Roronoa
+## Introduction
+- This project aim at building a TSPE, which enables rapid recovery with minimal runtime overhead.
+- Central to Roronoa is the principle of maintaining a selective historical view of resolved transaction dependencies over streams during runtime, thus enabling efficient parallel recovery.
+- We evaluate Roronoa on varying workloads
+## Running Roronoa
+- All experiments scripts are in scripts/
+- You can modify the result_dir and jar_dir in dir.sh
+### Compile 
 ```
-@INPROCEEDINGS{9101749,  
-author={Zhang, Shuhao and Wu, Yingjun and Zhang, Feng and He, Bingsheng},  
-booktitle={2020 IEEE 36th International Conference on Data Engineering (ICDE)},   
-title={Towards Concurrent Stateful Stream Processing on Multicore Processors},   
-year={2020},  
-volume={},  
-number={},  
-pages={1537-1548},  
-doi={10.1109/ICDE48307.2020.00136}
-}
-
+bash compile.sh
 ```
+### Run overall experiment in section 6.2
+```
+bash scripts/gs-run-all-benchmark.sh. 
+
+bash scripts/sl-run-all-benchmark.sh. 
+
+bash scripts/tp-run-all-benchmark.sh. 
+
+bash scripts/gs-run-relax-benchmark.sh. 
+
+bash scripts/sl-run-relax-benchmark.sh. 
+
+bash scripts/tp-run-relax-benchmark.sh
+```
+### Run breakdown analysis in section 6.3
+```
+bash scripts/gs-run-all-benchmark.sh. 
+
+bash scripts/sl-run-all-benchmark.sh. 
+
+bash scripts/tp-run-all-benchmark.sh
+```
+### Run scalability study in section 6.4
+```
+bash scripts/gs-run-all-scalability-benchmark.sh. 
+
+bash scripts/sl-run-all-scalability-benchmark.sh. 
+
+bash scripts/tp-run-all-scalability-benchmark.sh
+```
+### Run workload sensitivity study in section 6.5
+```
+bash scripts/gs-run-all-vary-abort-benchmark.sh. 
+
+bash scripts/gs-run-all-vary-multiple-benchmark.sh. 
+
+bash scripts/gs-run-all-vary-skew-benchmark.sh
+```
+### Run overhead analysis in section 6.6
+```
+bash scripts/sl-run-all-benchmark.sh. 
+
+bash scripts/sl-run-selective-logging-benchmark.sh
+```
+### Run other experiment
+```
+bash scripts/sl-run-vary-epoch-benchmark.sh
+```
+
