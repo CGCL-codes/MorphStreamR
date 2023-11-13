@@ -28,36 +28,40 @@ bash compile.sh
 ### 4.2 Recovery performance evaluation
 - Execute the following command to evaluation the recovery performance and time breakdown for the corresponding application (application can be "gs", "tp", and "sl").
 ```
-bash scripts/application-run-all-benchmark.sh
+bash scripts/recovery/application-recovery-benchmark.sh
 ```
 - Execute the following command to run factor analysis for corresponding application (application can be "gs", "tp", and "sl").
 ```
-bash scripts/application-relax-benchmark.sh 
+bash scripts/recovery/application-relax-benchmark.sh 
 ```
 ### 4.3 Runtime performance evaluation
 - Execute the following command to evaluate runtime performance and system overhead for the corresponding application. (application can be "gs", "tp", and "sl").
 ```
-bash scripts/application-run-all-benchmark.sh
+bash scripts/runtime/application-runtime-benchmark.sh
 ```
 - Execute the following command to evaluate the effectiveness of selective logging.
 ```
-bash scripts/sl-run-selective-logging-benchmark.sh 
+bash scripts/runtime/sl-run-selective-logging-benchmark.sh 
+```
+- Execute the following command to evaluate the effectiveness of workload-aware logging epoch.
+```
+bash scripts/runtime/sl-run-vary-epoch-benchmark.sh 
 ```
 ### 4.4 Scalability study
 - Execute the following command to run the scalability experiment for the corresponding application. (application can be "gs", "tp", and "sl").
 ```
-bash scripts/application-run-all-scalability-benchmark.sh
+bash scripts/scalability/application-run-all-scalability-benchmark.sh
 ```
 ### 4.5 Workload sensitivity study
 - Execute the following command to evaluate the impact of multi-partition state transaction.
 ```
-bash scripts/gs-run-all-vary-multiple-benchmark.sh
+bash scripts/sensitivity/gs-run-all-vary-multiple-benchmark.sh
 ```
 - Execute the following command to evaluate the impact of state access skewness.
 ```
-bash scripts/gs-run-all-vary-skew-benchmark.sh
+bash scripts/sensitivity/gs-run-all-vary-skew-benchmark.sh
 ```
 - Execute the following command to evaluate the impact of aborting transactions.
 ```
-bash scripts/gs-run-all-vary-abort-benchmark.sh
+bash scripts/sensitivity/gs-run-all-vary-abort-benchmark.sh
 ```
