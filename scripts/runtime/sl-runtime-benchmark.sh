@@ -1,30 +1,31 @@
 #!/bin/bash
-source dir.sh || exit
+source ../dir.sh || exit
 function ResetParameters() {
     app="StreamLedger"
-    checkpointInterval=163840
+    checkpointInterval=40960
     tthread=24
-    scheduler="OP_BFS"
-    defaultScheduler="OP_BFS"
+    scheduler="OP_BFS_A"
+    defaultScheduler="OP_BFS_A"
     CCOption=3 #TSTREAM
     complexity=8000
     NUM_ITEMS=491520
+    deposit_ratio=50
     overlap_ratio=10
     abort_ratio=0
-    key_skewness=25
+    key_skewness=45
     isCyclic=1
     isDynamic=1
-    workloadType="default"
+    workloadType="default,unchanging,unchanging,Up_abort"
   # workloadType="default,unchanging,unchanging,unchanging,Up_abort,Down_abort,unchanging,unchanging"
   # workloadType="default,unchanging,unchanging,unchanging,Up_skew,Up_skew,Up_skew,Up_PD,Up_PD,Up_PD,Up_abort,Up_abort,Up_abort"
-    schedulerPool="OP_BFS"
+    schedulerPool="OP_BFS_A,OP_BFS"
     rootFilePath="${RSTDIR}"
     shiftRate=1
     multicoreEvaluation=0
     maxThreads=20
-    totalEvents=`expr $checkpointInterval \* $tthread \* 1 \* $shiftRate`
+    totalEvents=`expr $checkpointInterval \* $tthread \* 4 \* $shiftRate`
 
-    snapshotInterval=1
+    snapshotInterval=4
     arrivalControl=1
     arrivalRate=300
     FTOption=0
@@ -105,33 +106,17 @@ function runApplication() {
       --isSelective $isSelective \
       --maxItr $maxItr
 }
-function withRecovery() {
-    isFailure=1
-    isRecovery=0
-    runApplication
-    sleep 2s
-    isFailure=0
-    isRecovery=1
-    runApplication
-}
 function withoutRecovery() {
-  runApplication
-  sleep 2s
+   runApplication
+   sleep 2s
 }
 
 function application_runner() {
- for FTOption in 1 3
+ ResetParameters
+ app=StreamLedger
+ for FTOption in 4 5 6
  do
- #withoutRecovery
- withRecovery
+ withoutRecovery
  done
 }
-function varyingMulti() {
-    ResetParameters
-    app=StreamLedger
-    for deposit_ratio in 90 70 50 30 10 0
-    do
-    application_runner
-    done
-}
-varyingMulti
+application_runner

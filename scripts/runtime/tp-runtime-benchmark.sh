@@ -1,5 +1,5 @@
 #!/bin/bash
-source dir.sh || exit
+source ../dir.sh || exit
 function ResetParameters() {
     app="TollProcessing"
     checkpointInterval=40960
@@ -100,15 +100,7 @@ function runApplication() {
       --isSelective $isSelective \
       --maxItr $maxItr
 }
-function withRecovery() {
-    isFailure=1
-    isRecovery=0
-    runApplication
-    sleep 2s
-    isFailure=0
-    isRecovery=1
-    runApplication
-}
+
 function withoutRecovery() {
   runApplication
   sleep 2s
@@ -119,8 +111,7 @@ function application_runner() {
  app=TollProcessing
  for FTOption in 5 6
  do
- #withoutRecovery
- withRecovery
+ withoutRecovery
  done
 }
 application_runner

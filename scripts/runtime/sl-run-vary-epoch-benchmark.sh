@@ -1,29 +1,28 @@
 #!/bin/bash
-source dir.sh || exit
+source ../dir.sh || exit
 function ResetParameters() {
-    app="GrepSum"
+    app="StreamLedger"
     tthread=24
+    scheduler="OP_BFS"
+    defaultScheduler="OP_BFS"
     CCOption=3 #TSTREAM
     complexity=8000
-    NUM_ITEMS=245760
-    checkpointInterval=81920
+    NUM_ITEMS=491520
+    overlap_ratio=10
     abort_ratio=0
-    multiple_ratio=0
-    txn_length=1
-    NUM_ACCESS=8
-    overlap_ratio=0
+    deposit_ratio=0
+    key_skewness=0
     isCyclic=1
     isDynamic=1
     workloadType="default"
   # workloadType="default,unchanging,unchanging,unchanging,Up_abort,Down_abort,unchanging,unchanging"
   # workloadType="default,unchanging,unchanging,unchanging,Up_skew,Up_skew,Up_skew,Up_PD,Up_PD,Up_PD,Up_abort,Up_abort,Up_abort"
+    schedulerPool="OP_BFS"
     rootFilePath="${RSTDIR}"
     shiftRate=1
     multicoreEvaluation=0
-    maxThreads=24
-    totalEvents=`expr $checkpointInterval \* $tthread \* 1 \* $shiftRate`
+    maxThreads=20
 
-    snapshotInterval=1
     arrivalControl=1
     arrivalRate=300
     FTOption=0
@@ -46,11 +45,9 @@ function runApplication() {
               --checkpoint_interval $checkpointInterval \
               --CCOption $CCOption \
               --complexity $complexity \
-              --abort_ratio $abort_ratio \
-              --multiple_ratio $multiple_ratio \
+              --deposit_ratio $deposit_ratio \
               --overlap_ratio $overlap_ratio \
-              --txn_length $txn_length \
-              --NUM_ACCESS $NUM_ACCESS \
+              --abort_ratio $abort_ratio \
               --key_skewness $key_skewness \
               --isCyclic $isCyclic \
               --rootFilePath $rootFilePath \
@@ -72,7 +69,7 @@ function runApplication() {
               --compressionAlg $compressionAlg \
               --isSelective $isSelective \
               --maxItr $maxItr"
-    java -Xms300g -Xmx300g -Xss100M -XX:+PrintGCDetails -Xmn200g -XX:+UseG1GC -jar -d64 $JAR \
+    java -Xms400g -Xmx400g -Xss100M -XX:+PrintGCDetails -Xmn300g -XX:+UseG1GC -jar -d64 $JAR \
       --app $app \
       --NUM_ITEMS $NUM_ITEMS \
       --tthread $tthread \
@@ -81,11 +78,9 @@ function runApplication() {
       --checkpoint_interval $checkpointInterval \
       --CCOption $CCOption \
       --complexity $complexity \
-      --abort_ratio $abort_ratio \
-      --multiple_ratio $multiple_ratio \
+      --deposit_ratio $deposit_ratio \
       --overlap_ratio $overlap_ratio \
-      --txn_length $txn_length \
-      --NUM_ACCESS $NUM_ACCESS \
+      --abort_ratio $abort_ratio \
       --key_skewness $key_skewness \
       --isCyclic $isCyclic \
       --rootFilePath $rootFilePath \
@@ -121,29 +116,23 @@ function withoutRecovery() {
   runApplication
   sleep 2s
 }
-function varySkew() {
-  for key_skewness in 0 25 50
-  do
-  schedulerPool="OG_BFS"
-  scheduler="OG_BFS"
-  defaultScheduler="OG_BFS"
-  withRecovery
-  done
-  for key_skewness in 75 100
-  do
-  schedulerPool="OG_NS"
-  scheduler="OG_NS"
-  defaultScheduler="OG_NS"
-  withRecovery
-  done
-}
 
 function application_runner() {
- ResetParameters
- app=GrepSum
- for FTOption in 4
+ for FTOption in 3
  do
- varySkew
+ withoutRecovery
+ #withRecovery
  done
 }
-application_runner
+function varyingEpoch() {
+    ResetParameters
+    app=StreamLedger
+    for phase in 1 2 4 8 16
+    do
+    checkpointInterval=`expr 163840 / $phase` 
+    snapshotInterval=$phase
+    totalEvents=`expr $checkpointInterval \* $tthread \* $phase \* $shiftRate`
+    application_runner
+    done
+}
+varyingEpoch

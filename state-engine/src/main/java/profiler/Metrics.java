@@ -81,10 +81,13 @@ public class Metrics {
             double persist_total = Runtime.Persist[thread_id] / (double) number_events;
             double logging_total = Runtime.Logging[thread_id] / (double) number_events;
             double snapshot_total = Runtime.Snapshot[thread_id] / (double) number_events;
+            double graph_partition = Runtime.GraphPartition[thread_id] / (double) number_events;
+            double graph_data_construction = Runtime.GraphDataConstruct[thread_id] / (double) number_events;
             Total_Record.compression_total[thread_id].addValue(compression_total);
             Total_Record.persist_total[thread_id].addValue(persist_total);
             Total_Record.serialization_total[thread_id].addValue(logging_total);
             Total_Record.snapshot_serialization_total[thread_id].addValue(snapshot_total);
+            Total_Record.graph_partition_total[thread_id].addValue(graph_partition + graph_data_construction);
             logging_total = logging_total + snapshot_total;
             Runtime.Snapshot[thread_id] = 0;//Need to reset it to 0
             //Process
@@ -220,6 +223,18 @@ public class Metrics {
     }
     public static void COMPUTE_LOGGING_TIME(int thread_id) {
         Runtime.Logging[thread_id] = System.nanoTime() - Runtime.LoggingStart[thread_id];
+    }
+    public static void COMPUTE_GRAPH_PARTITION_START_TIME(int thread_id) {
+        Runtime.GraphPartitionStart[thread_id] = System.nanoTime();
+    }
+    public static void COMPUTE_GRAPH_PARTITION_TIME(int thread_id) {
+        Runtime.GraphPartition[thread_id] = System.nanoTime() - Runtime.GraphPartitionStart[thread_id];
+    }
+    public static void COMPUTE_GRAPH_DATA_CONSTRUCTION_START_TIME(int thread_id) {
+        Runtime.GraphDataConstructStart[thread_id] = System.nanoTime();
+    }
+    public static void COMPUTE_GRAPH_DATA_CONSTRUCTION_TIME(int thread_id) {
+        Runtime.GraphDataConstruct[thread_id] = System.nanoTime() - Runtime.GraphDataConstructStart[thread_id];
     }
 
     public static void RECORD_TXN_BREAKDOWN_RATIO(int thread_id) {
@@ -418,7 +433,10 @@ public class Metrics {
         public static long[] Snapshot = new long[kMaxThreadNum];
         public static long[] LoggingStart = new long[kMaxThreadNum];
         public static long[] Logging = new long[kMaxThreadNum];
-
+        public static long[] GraphPartitionStart = new long[kMaxThreadNum];
+        public static long[] GraphPartition = new long[kMaxThreadNum];
+        public static long[] GraphDataConstructStart = new long[kMaxThreadNum];
+        public static long[] GraphDataConstruct = new long[kMaxThreadNum];
         public static void Initialize() {
             for (int i = 0; i < kMaxThreadNum; i++) {
                 Start[i] = 0;
@@ -438,6 +456,10 @@ public class Metrics {
                 Snapshot[i] = 0;
                 LoggingStart[i] = 0;
                 Logging[i] = 0;
+                GraphPartitionStart[i] = 0;
+                GraphPartition[i] = 0;
+                GraphDataConstructStart[i] = 0;
+                GraphDataConstruct[i] = 0;
                 ThroughputPerPhase.put(i, new ArrayList<>());
             }
         }
@@ -450,6 +472,7 @@ public class Metrics {
         public static DescriptiveStatistics[] txn_total = new DescriptiveStatistics[kMaxThreadNum];//total time spend in txn.
         public static DescriptiveStatistics[] stream_total = new DescriptiveStatistics[kMaxThreadNum];//total time spend in stream processing.
         public static DescriptiveStatistics[] overhead_total = new DescriptiveStatistics[kMaxThreadNum];//other overheads.
+        public static DescriptiveStatistics[] graph_partition_total = new DescriptiveStatistics[kMaxThreadNum];
         public static DescriptiveStatistics[] serialization_total = new DescriptiveStatistics[kMaxThreadNum];//serialization time.
         public static DescriptiveStatistics[] snapshot_serialization_total = new DescriptiveStatistics[kMaxThreadNum];//snapshot_serialization time.
 
@@ -463,6 +486,7 @@ public class Metrics {
                 overhead_total[i] = new DescriptiveStatistics();
                 serialization_total[i] = new DescriptiveStatistics();
                 snapshot_serialization_total[i] = new DescriptiveStatistics();
+                graph_partition_total[i] = new DescriptiveStatistics();
             }
         }
     }

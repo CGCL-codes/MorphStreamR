@@ -1,26 +1,24 @@
 #!/bin/bash
-source dir.sh || exit
+source ../dir.sh || exit
 function ResetParameters() {
-    app="GrepSum"
+    app="StreamLedger"
     checkpointInterval=40960
     tthread=24
-    scheduler="OG_NS_A"
-    defaultScheduler="OG_NS_A"
+    scheduler="OP_BFS_A"
+    defaultScheduler="OP_BFS_A"
     CCOption=3 #TSTREAM
     complexity=8000
-    NUM_ITEMS=245760
+    NUM_ITEMS=491520
+    deposit_ratio=50
+    overlap_ratio=10
     abort_ratio=0
-    multiple_ratio=0
-    txn_length=1
-    NUM_ACCESS=1
-    key_skewness=75
-    overlap_ratio=0
-    isCyclic=0
+    key_skewness=45
+    isCyclic=1
     isDynamic=1
-    workloadType="default,unchanging,unchanging,unchanging"
+    workloadType="default,unchanging,unchanging,Up_abort"
   # workloadType="default,unchanging,unchanging,unchanging,Up_abort,Down_abort,unchanging,unchanging"
   # workloadType="default,unchanging,unchanging,unchanging,Up_skew,Up_skew,Up_skew,Up_PD,Up_PD,Up_PD,Up_abort,Up_abort,Up_abort"
-    schedulerPool="OG_NS_A"
+    schedulerPool="OP_BFS_A,OP_BFS"
     rootFilePath="${RSTDIR}"
     shiftRate=1
     multicoreEvaluation=0
@@ -38,6 +36,10 @@ function ResetParameters() {
     compressionAlg="None"
     isSelective=0
     maxItr=0
+
+    isHistoryView=1
+    isAbortPushDown=1
+    isTaskPlacing=1
 }
 
 function runApplication() {
@@ -50,11 +52,9 @@ function runApplication() {
               --checkpoint_interval $checkpointInterval \
               --CCOption $CCOption \
               --complexity $complexity \
-              --abort_ratio $abort_ratio \
-              --multiple_ratio $multiple_ratio \
+              --deposit_ratio $deposit_ratio \
               --overlap_ratio $overlap_ratio \
-              --txn_length $txn_length \
-              --NUM_ACCESS $NUM_ACCESS \
+              --abort_ratio $abort_ratio \
               --key_skewness $key_skewness \
               --isCyclic $isCyclic \
               --rootFilePath $rootFilePath \
@@ -75,7 +75,10 @@ function runApplication() {
               --measureInterval $measureInterval \
               --compressionAlg $compressionAlg \
               --isSelective $isSelective \
-              --maxItr $maxItr"
+              --maxItr $maxItr \
+              --isHistoryView $isHistoryView \
+              --isAbortPushDown $isAbortPushDown \
+              --isTaskPlacing $isTaskPlacing"
     java -Xms300g -Xmx300g -Xss100M -XX:+PrintGCDetails -Xmn200g -XX:+UseG1GC -jar -d64 $JAR \
       --app $app \
       --NUM_ITEMS $NUM_ITEMS \
@@ -85,11 +88,9 @@ function runApplication() {
       --checkpoint_interval $checkpointInterval \
       --CCOption $CCOption \
       --complexity $complexity \
-      --abort_ratio $abort_ratio \
-      --multiple_ratio $multiple_ratio \
+      --deposit_ratio $deposit_ratio \
       --overlap_ratio $overlap_ratio \
-      --txn_length $txn_length \
-      --NUM_ACCESS $NUM_ACCESS \
+      --abort_ratio $abort_ratio \
       --key_skewness $key_skewness \
       --isCyclic $isCyclic \
       --rootFilePath $rootFilePath \
@@ -110,7 +111,10 @@ function runApplication() {
       --measureInterval $measureInterval \
       --compressionAlg $compressionAlg \
       --isSelective $isSelective \
-      --maxItr $maxItr
+      --maxItr $maxItr \
+      --isHistoryView $isHistoryView \
+      --isAbortPushDown $isAbortPushDown \
+      --isTaskPlacing $isTaskPlacing
 }
 function withRecovery() {
     isFailure=1
@@ -128,9 +132,36 @@ function withoutRecovery() {
 
 function application_runner() {
  ResetParameters
- app=GrepSum
- for FTOption in 4 5 6
+ app=StreamLedger
+ for FTOption in 1
  do
+ #withoutRecovery
+ withRecovery
+ done
+
+ for FTOption in 3
+ do
+ isHistoryView=1
+ isAbortPushDown=0
+ isTaskPlacing=0
+ #withoutRecovery
+ withRecovery
+ done
+
+ for FTOption in 3
+ do
+ isHistoryView=1
+ isAbortPushDown=1
+ isTaskPlacing=0
+ #withoutRecovery
+ withRecovery
+ done
+
+ for FTOption in 3
+ do
+ isHistoryView=1
+ isAbortPushDown=1
+ isTaskPlacing=1
  #withoutRecovery
  withRecovery
  done

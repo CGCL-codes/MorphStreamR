@@ -2,7 +2,6 @@ package profiler;
 
 import common.CONTROL;
 import common.collections.OsUtils;
-import common.io.LocalFS.LocalDataOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -228,6 +227,22 @@ public class MeasureTools {
     public static void END_LOGGING_TIME_MEASURE(int thread_id) {
         if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
             COMPUTE_LOGGING_TIME(thread_id);
+    }
+    public static void BEGIN_GRAPH_PARTITION_TIME_MEASURE(int thread_id) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            COMPUTE_GRAPH_PARTITION_START_TIME(thread_id);
+    }
+    public static void END_GRAPH_PARTITION_TIME_MEASURE(int thread_id) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            COMPUTE_GRAPH_PARTITION_TIME(thread_id);
+    }
+    public static void BEGIN_GRAPH_DATA_CONSTRUCTION_TIME_MEASURE(int thread_id) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            COMPUTE_GRAPH_DATA_CONSTRUCTION_START_TIME(thread_id);
+    }
+    public static void END_GRAPH_DATA_CONSTRUCTION_TIME_MEASURE(int thread_id) {
+        if (CONTROL.enable_profile && !Thread.currentThread().isInterrupted())
+            COMPUTE_GRAPH_DATA_CONSTRUCTION_TIME(thread_id);
     }
 
     // OGScheduler Specific.
@@ -466,14 +481,15 @@ public class MeasureTools {
             BufferedWriter fileWriter = Files.newBufferedWriter(Paths.get(file.getPath()), APPEND);
             fileWriter.write("AverageTotalTimeBreakdownReport\n");
             if (enable_log) log.info("===Average Total Time Breakdown Report===");
-            fileWriter.write("total_time\t serialize_time\t persist_time\t stream_process\t txn_process\t overheads\n");
-            if (enable_log) log.info("total_time\t serialize_time\t persist_time\t stream_process\t txn_process\t overheads");
+            fileWriter.write("total_time\t serialize_time\t persist_time\t stream_process\t txn_process\t graph_partition\t overheads\n");
+            if (enable_log) log.info("total_time\t serialize_time\t persist_time\t stream_process\t txn_process\t graph_partition\t overheads\n");
             double totalProcessTime = 0;
             double totalSerializeTime = 0;
             double totalPersistTime = 0;
             double totalStreamProcessTime = 0;
             double totalTxnProcessTime = 0;
             double totalOverheads = 0;
+            double totalGraphPartitionTime = 0;
             for (int threadId = 0; threadId < tthread; threadId++) {
                 totalProcessTime += Total_Record.totalProcessTimePerEvent[threadId].getMean();
                 if (snapshotInterval != 0) {
@@ -482,9 +498,11 @@ public class MeasureTools {
                 totalPersistTime += Total_Record.persist_total[threadId].getMean();
                 totalStreamProcessTime += Total_Record.stream_total[threadId].getMean();
                 totalTxnProcessTime += Total_Record.txn_total[threadId].getMean();
+                totalGraphPartitionTime += Total_Record.graph_partition_total[threadId].getMean();
                 totalOverheads += Total_Record.overhead_total[threadId].getMean();
             }
             String output = String.format(
+                    "%-10.2f\t" +
                             "%-10.2f\t" +
                             "%-10.2f\t" +
                             "%-10.2f\t" +
@@ -496,6 +514,7 @@ public class MeasureTools {
                     , totalPersistTime / tthread
                     , totalStreamProcessTime / tthread
                     , totalTxnProcessTime / tthread
+                    , totalGraphPartitionTime / tthread
                     , totalOverheads / tthread
             );
             fileWriter.write(output + "\n");
@@ -727,7 +746,7 @@ public class MeasureTools {
                 totalReplayTime = totalReplayTime + RecoveryPerformance.ReplayTime[threadId].getMean();
             }
             String output = String.format(
-                            "%-10.2f\t" +
+                    "%-10.2f\t" +
                             "%-10.2f\t" +
                             "%-10.2f\t" +
                             "%-10.2f\t"
@@ -762,7 +781,7 @@ public class MeasureTools {
                 totalOverheads = totalOverheads + RecoveryPerformance.overhead_total[threadId];
             }
             String output = String.format(
-                            "%-10.2f\t" +
+                    "%-10.2f\t" +
                             "%-10.2f\t" +
                             "%-10.2f\t" +
                             "%-10.2f\t"
@@ -806,7 +825,7 @@ public class MeasureTools {
                 totalWaitTime = totalWaitTime + RecoveryPerformance.Wait[threadId];
             }
             String output = String.format(
-                            "%-10.2f\t" +
+                    "%-10.2f\t" +
                             "%-10.2f\t" +
                             "%-10.2f\t" +
                             "%-10.2f\t" +
@@ -863,7 +882,7 @@ public class MeasureTools {
                 tracking_time += Scheduler_Record.Tracking[threadId].getMean();
             }
             String output = String.format(
-                            "%-10.2f\t" +
+                    "%-10.2f\t" +
                             "%-10.2f\t" +
                             "%-10.2f\t" +
                             "%-10.2f\t" +

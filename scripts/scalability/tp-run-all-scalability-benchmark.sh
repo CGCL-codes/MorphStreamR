@@ -1,29 +1,27 @@
 #!/bin/bash
-source dir.sh || exit
+source ../dir.sh || exit
 function ResetParameters() {
-    app="StreamLedger"
+    app="TollProcessing"
     checkpointInterval=40960
     tthread=24
-    scheduler="OP_BFS_A"
-    defaultScheduler="OP_BFS_A"
+    scheduler="OG_NS_A"
+    defaultScheduler="OG_NS_A"
     CCOption=3 #TSTREAM
     complexity=8000
     NUM_ITEMS=491520
-    deposit_ratio=50
+    abort_ratio=3000
     overlap_ratio=10
-    abort_ratio=0
-    key_skewness=45
-    isCyclic=1
+    key_skewness=30
     isDynamic=1
-    workloadType="default,unchanging,unchanging,Up_abort"
+    workloadType="default,unchanging,unchanging,unchanging"
   # workloadType="default,unchanging,unchanging,unchanging,Up_abort,Down_abort,unchanging,unchanging"
   # workloadType="default,unchanging,unchanging,unchanging,Up_skew,Up_skew,Up_skew,Up_PD,Up_PD,Up_PD,Up_abort,Up_abort,Up_abort"
-    schedulerPool="OP_BFS_A,OP_BFS"
+    schedulerPool="OG_NS_A,OG_NS"
     rootFilePath="${RSTDIR}"
     shiftRate=1
-    multicoreEvaluation=0
-    maxThreads=20
-    totalEvents=`expr $checkpointInterval \* $tthread \* 4 \* $shiftRate`
+    multicoreEvaluation=1
+    maxThreads=24
+    totalEvents=`expr $checkpointInterval \* $maxThreads \* 4 \* $shiftRate`
 
     snapshotInterval=4
     arrivalControl=1
@@ -31,7 +29,7 @@ function ResetParameters() {
     FTOption=0
     isRecovery=0
     isFailure=0
-    failureTime=250000
+    failureTime=2500000
     measureInterval=100
     compressionAlg="None"
     isSelective=0
@@ -48,11 +46,9 @@ function runApplication() {
               --checkpoint_interval $checkpointInterval \
               --CCOption $CCOption \
               --complexity $complexity \
-              --deposit_ratio $deposit_ratio \
-              --overlap_ratio $overlap_ratio \
               --abort_ratio $abort_ratio \
+              --overlap_ratio $overlap_ratio \
               --key_skewness $key_skewness \
-              --isCyclic $isCyclic \
               --rootFilePath $rootFilePath \
               --isDynamic $isDynamic \
               --totalEvents $totalEvents \
@@ -72,7 +68,7 @@ function runApplication() {
               --compressionAlg $compressionAlg \
               --isSelective $isSelective \
               --maxItr $maxItr"
-    java -Xms400g -Xmx400g -Xss100M -XX:+PrintGCDetails -Xmn300g -XX:+UseG1GC -jar -d64 $JAR \
+    java -Xms300g -Xmx300g -Xss100M -XX:+PrintGCDetails -Xmn200g -XX:+UseG1GC -jar -d64 $JAR \
       --app $app \
       --NUM_ITEMS $NUM_ITEMS \
       --tthread $tthread \
@@ -81,11 +77,9 @@ function runApplication() {
       --checkpoint_interval $checkpointInterval \
       --CCOption $CCOption \
       --complexity $complexity \
-      --deposit_ratio $deposit_ratio \
-      --overlap_ratio $overlap_ratio \
       --abort_ratio $abort_ratio \
+      --overlap_ratio $overlap_ratio \
       --key_skewness $key_skewness \
-      --isCyclic $isCyclic \
       --rootFilePath $rootFilePath \
       --isDynamic $isDynamic \
       --totalEvents $totalEvents \
@@ -115,18 +109,39 @@ function withRecovery() {
     isRecovery=1
     runApplication
 }
-function withoutRecovery() {
-  runApplication
-  sleep 2s
+function multicoreEvaluation() {
+  #  tthread=24
+  #  snapshotInterval=4
+  #  withRecovery
+  #  sleep 2s
+
+   tthread=12
+   snapshotInterval=8
+   withRecovery
+   sleep 2s
+
+   tthread=8
+   snapshotInterval=12
+   withRecovery
+   sleep 2s
+
+   tthread=4
+   snapshotInterval=24
+   withRecovery
+   sleep 2s
+
+   tthread=1
+   snapshotInterval=96
+   withRecovery
+   sleep 2s
 }
 
 function application_runner() {
  ResetParameters
- app=StreamLedger
- for FTOption in 4 5 6
+ app=TollProcessing
+ for FTOption in 1 5 6
  do
- #withoutRecovery
- withRecovery
+ multicoreEvaluation
  done
 }
 application_runner

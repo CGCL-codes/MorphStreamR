@@ -211,19 +211,23 @@ public class PathLoggingManager implements LoggingManager {
     }
 
     private void graphPartition(int partitionId, int max_itr) {
+        MeasureTools.BEGIN_GRAPH_DATA_CONSTRUCTION_TIME_MEASURE(partitionId);
         for (Map.Entry<String, Graph> entry : graphs.entrySet()) {
             this.threadToPathRecord.get(partitionId).dependencyToGraph(entry.getValue(), entry.getKey());
         }
+        MeasureTools.END_GRAPH_DATA_CONSTRUCTION_TIME_MEASURE(partitionId);
         SOURCE_CONTROL.getInstance().waitForOtherThreads(partitionId);
+        MeasureTools.BEGIN_GRAPH_PARTITION_TIME_MEASURE(partitionId);
         if (partitionId == 0) {
             for (Graph graph : graphs.values()) {
                 graph.partition(max_itr);
             }
         }
         SOURCE_CONTROL.getInstance().waitForOtherThreads(partitionId);
+        MeasureTools.END_GRAPH_PARTITION_TIME_MEASURE(partitionId);
     }
     @Override
     public void selectiveLoggingPartition(int partitionId) {
-       graphPartition(partitionId, loggingOptions.getMax_itr());
+        graphPartition(partitionId, loggingOptions.getMax_itr());
     }
 }
