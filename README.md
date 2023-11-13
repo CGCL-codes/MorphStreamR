@@ -23,7 +23,7 @@ bash compile.sh
 RSTDIR="/home/username/Benchmark/projectName"
 ```
 ```
- JAR="/home/username/project/projectName/application/target/application-0.0.2-jar-with-dependencies.jar"
+JAR="/home/username/project/projectName/application/target/application-0.0.2-jar-with-dependencies.jar"
 ```
 ### 4.2 Recovery performance evaluation
 - Execute the following command to evaluation the recovery performance and time breakdown for the corresponding application (application can be "gs", "tp", and "sl").
