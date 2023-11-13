@@ -11,7 +11,7 @@
 - This configuration should be sufficient to run the Roronoa artifact effectively.
 ## 3 Software Dependencies 
 - To ensure successful compilation, we recommend using a machine with Ubuntu 20.04 with JDK 1.8.0_301 and Mavean 3.8.1.
-- Additionally, we set -Xmx and -Xms to be 300GB and use G!GC as the garbage collector arcoss all the experiments.
+- Additionally, we set -Xmx and -Xms to be 300GB and use G1GC as the garbage collector arcoss all the experiments.
 ## 4 Experiment Workflow
 ### 4.1 Installation
 - Once downloaded, you can use the provided scripts to compile the source code and install the JAR artifact by running the following command.
