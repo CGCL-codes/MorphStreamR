@@ -5,9 +5,10 @@
 - This project aim at building a TSPE, which enables rapid recovery with minimal runtime overhead.
 - Central to Roronoa is the principle of maintaining a selective historical view of resolved transaction dependencies over streams during runtime, thus enabling efficient parallel recovery.
 - We evaluate Roronoa on varying workloads
-## Running Roronoa
-- All experiments scripts are in scripts/
-- You can modify the result_dir and jar_dir in dir.sh
+## Hardware Dependencies
+- Roronoa is designed to run on a general-purpose multi-core CPE and does not require any special hardware.
+- For optimal performance, we recommend using a machine with at least 24 cores and 300Gb of memory.
+- This configuration should be sufficient to run the Roronoa artifact effectively.
 ### Compile 
 ```
 bash compile.sh
