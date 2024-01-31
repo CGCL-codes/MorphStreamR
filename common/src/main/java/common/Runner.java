@@ -222,8 +222,8 @@ public abstract class Runner implements IRunner {
     public Integer isAbortPushDown = 1;
     @Parameter(names = {"--isTaskPlacing"}, description = "Whether to task placing or not")
     public Integer isTaskPlacing = 1;
-    @Parameter(names = {"--isSelectiveLogging"}, description = "Whether to selective logging or not")
-    public Integer isSelectiveLogging = 0;
+    @Parameter(names = {"--isSelective"}, description = "Whether to selective logging or not")
+    public Integer isSelective = 0;
     @Parameter(names = {"--maxItr"}, description = "Max itr for graph partition alg: ")
     public int  maxItr = 10;
 
@@ -416,7 +416,7 @@ public abstract class Runner implements IRunner {
         } else {
             config.put("isTaskPlacing", true);
         }
-        if (isSelectiveLogging == 0) {
+        if (isSelective == 0) {
             config.put("isSelectiveLogging", false);
         } else {
             config.put("isSelectiveLogging", true);
