@@ -2,7 +2,7 @@
 
 # Roronoa
 ## 1 Introduction
-- This project aim at building a TSPE, which enables rapid recovery with minimal runtime overhead.
+- This project aim at building a TSPE, which enables rapid recovery with acceptable performance overhead at runtime.
 - Central to Roronoa is the principle of maintaining a selective historical view of resolved transaction dependencies over streams during runtime, thus enabling efficient parallel recovery.
 - We evaluate Roronoa on varying workloads
 ## 2 Hardware Dependencies
