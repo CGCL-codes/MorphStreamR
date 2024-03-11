@@ -1,14 +1,14 @@
 <meta name="robots" content="noindex">
 
-# Roronoa
+# MorphStreamR
 ## 1 Introduction
 - This project aim at building a TSPE, which enables rapid recovery with acceptable performance overhead at runtime.
-- Central to Roronoa is the principle of maintaining a selective historical view of resolved transaction dependencies over streams during runtime, thus enabling efficient parallel recovery.
-- We evaluate Roronoa on varying workloads
+- Central to MorphStreamR is the principle of maintaining a selective historical view of resolved transaction dependencies over streams during runtime, thus enabling efficient parallel recovery.
+- We evaluate MorphStreamR on varying workloads
 ## 2 Hardware Dependencies
-- Roronoa is designed to run on a general-purpose multi-core CPE and does not require any special hardware.
+- MorphStreamR is designed to run on a general-purpose multi-core CPE and does not require any special hardware.
 - For optimal performance, we recommend using a machine with at least 24 cores and 300GB of memory.
-- This configuration should be sufficient to run the Roronoa artifact effectively.
+- This configuration should be sufficient to run the MorphStreamR artifact effectively.
 ## 3 Software Dependencies 
 - To ensure successful compilation, we recommend using a machine with Ubuntu 20.04 with JDK 1.8.0_301 and Mavean 3.8.1.
 - Additionally, we set -Xmx and -Xms to be 300GB and use G1GC as the garbage collector arcoss all the experiments.
